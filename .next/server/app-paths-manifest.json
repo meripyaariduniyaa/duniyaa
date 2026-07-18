@@ -1,0 +1,6 @@
+{
+  "/api/razorpay/mock-pay/route": "app/api/razorpay/mock-pay/route.js",
+  "/page": "app/page.js",
+  "/preview/page": "app/preview/page.js",
+  "/sorry/[token]/page": "app/sorry/[token]/page.js"
+}
