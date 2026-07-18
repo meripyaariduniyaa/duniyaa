@@ -1,9 +1,118 @@
 'use client';
 
-import { useEffect, useState } from 'react'; import { useSearchParams, useRouter } from 'next/navigation'; import { doc, onSnapshot } from 'firebase/firestore'; import { db } from '@/lib/firebase'; import { useAuth } from '@/components/AuthProvider'; import PayButton from '@/components/PayButton';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/components/AuthProvider';
+import PayButton from '@/components/PayButton';
 
-export default function PreviewPage() { const params = useSearchParams(); const id = params.get('id'); const router = useRouter(); const { user, loading } = useAuth(); const [apology, setApology] = useState(null); const [paid, setPaid] = useState(false);
-  useEffect(() => { if (!id || !user) return; return onSnapshot(doc(db, 'apologies', id), (snap) => { if (snap.exists()) { setApology({ id: snap.id, ...snap.data() }); setPaid(snap.data().is_paid); } }); }, [id, user]);
-  if (loading || !apology) return <main className="center-screen"><div className="spinner" /><p>Preparing your private preview…</p></main>;
-  return <main className="preview-shell"><nav className="topbar"><span className="logo">sorry, sincerely<span className="dot">.</span></span><button className="text-button" onClick={() => router.push('/')}>Start over</button></nav><div className="preview-layout"><div><p className="eyebrow">YOUR PRIVATE PREVIEW</p><h1>It feels like you.</h1><p className="hero-subtitle">Take a look, then unlock a shareable link when it feels right.</p><div className="recipient-card"><p className="card-kicker">DEAR {apology.recipient_name?.toUpperCase()}</p><p className="preview-message">{apology.custom_message}</p>{apology.image_urls?.length > 0 && <div className="preview-images">{apology.image_urls.map((url) => <img key={url} src={url} alt="Memory" />)}</div>}<p className="signature">— from someone who means it</p></div></div><aside className="pay-card">{paid ? <><p className="success-mark">✓</p><h2>Your link is ready.</h2><p>Send this private link to {apology.recipient_name}. It will be available for 15 days.</p><div className="link-box">{typeof window !== 'undefined' ? `${window.location.origin}/sorry/${apology.id}` : `/sorry/${apology.id}`}</div><button className="primary-button full" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/sorry/${apology.id}`)}>Copy link</button></> : <><p className="card-kicker">READY TO SEND?</p><h2>Give it a little courage.</h2><p>Your page stays private until you pay. Once unlocked, you’ll get a link that expires in 15 days.</p><PayButton apologyId={apology.id} onPaid={() => setPaid(true)} /><p className="fine-print">Secure payment via Razorpay · one-time payment</p></>}</aside></div></main>;
+export default function PreviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="center-screen">
+          <div className="spinner" />
+          <p>Preparing your private preview…</p>
+        </main>
+      }
+    >
+      <PreviewContent />
+    </Suspense>
+  );
+}
+
+function PreviewContent() {
+  const params = useSearchParams();
+  const id = params.get('id');
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [apology, setApology] = useState(null);
+  const [paid, setPaid] = useState(false);
+
+  useEffect(() => {
+    if (!id || !user) return;
+
+    return onSnapshot(doc(db, 'apologies', id), (snap) => {
+      if (snap.exists()) {
+        setApology({ id: snap.id, ...snap.data() });
+        setPaid(snap.data().is_paid);
+      }
+    });
+  }, [id, user]);
+
+  if (loading || !apology) {
+    return (
+      <main className="center-screen">
+        <div className="spinner" />
+        <p>Preparing your private preview…</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="preview-shell">
+      <nav className="topbar">
+        <span className="logo">
+          sorry, sincerely<span className="dot">.</span>
+        </span>
+        <button className="text-button" onClick={() => router.push('/')}>
+          Start over
+        </button>
+      </nav>
+      <div className="preview-layout">
+        <div>
+          <p className="eyebrow">YOUR PRIVATE PREVIEW</p>
+          <h1>It feels like you.</h1>
+          <p className="hero-subtitle">
+            Take a look, then unlock a shareable link when it feels right.
+          </p>
+          <div className="recipient-card">
+            <p className="card-kicker">DEAR {apology.recipient_name?.toUpperCase()}</p>
+            <p className="preview-message">{apology.custom_message}</p>
+            {apology.image_urls?.length > 0 && (
+              <div className="preview-images">
+                {apology.image_urls.map((url) => (
+                  <img key={url} src={url} alt="Memory" />
+                ))}
+              </div>
+            )}
+            <p className="signature">— from someone who means it</p>
+          </div>
+        </div>
+        <aside className="pay-card">
+          {paid ? (
+            <>
+              <p className="success-mark">✓</p>
+              <h2>Your link is ready.</h2>
+              <p>
+                Send this private link to {apology.recipient_name}. It will be available for 15 days.
+              </p>
+              <div className="link-box">
+                {typeof window !== 'undefined'
+                  ? `${window.location.origin}/sorry/${apology.id}`
+                  : `/sorry/${apology.id}`}
+              </div>
+              <button
+                className="primary-button full"
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/sorry/${apology.id}`)}
+              >
+                Copy link
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="card-kicker">READY TO SEND?</p>
+              <h2>Give it a little courage.</h2>
+              <p>
+                Your page stays private until you pay. Once unlocked, you’ll get a link that expires in 15 days.
+              </p>
+              <PayButton apologyId={apology.id} onPaid={() => setPaid(true)} />
+              <p className="fine-print">Secure payment via Razorpay · one-time payment</p>
+            </>
+          )}
+        </aside>
+      </div>
+    </main>
+  );
 }

@@ -1,30 +1,74 @@
 {
   "pages": {
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
+    "/_not-found/page": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/app/_not-found/page-207865b2cabb46d3.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/preview/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/preview/page.js"
+    "/api/razorpay/create-order/route": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/app/api/razorpay/create-order/route-40114654d1e7ce57.js"
     ],
     "/api/razorpay/mock-pay/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/razorpay/mock-pay/route.js"
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/app/api/razorpay/mock-pay/route-40114654d1e7ce57.js"
+    ],
+    "/api/razorpay/verify/route": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/app/api/razorpay/verify/route-40114654d1e7ce57.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/css/980f2ddcb4ea2164.css",
+      "static/chunks/cc44e60b-757a18680f35dc0f.js",
+      "static/chunks/a36bde72-5de6f80e1f2a62aa.js",
+      "static/chunks/1770a7a7-379ab39d6942fe08.js",
+      "static/chunks/320-8cd33dd309421970.js",
+      "static/chunks/app/layout-96b48c075220e095.js"
+    ],
+    "/preview/page": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/cc44e60b-757a18680f35dc0f.js",
+      "static/chunks/a36bde72-5de6f80e1f2a62aa.js",
+      "static/chunks/1770a7a7-379ab39d6942fe08.js",
+      "static/chunks/320-8cd33dd309421970.js",
+      "static/chunks/app/preview/page-7fbb00622240d9a3.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/cc44e60b-757a18680f35dc0f.js",
+      "static/chunks/a36bde72-5de6f80e1f2a62aa.js",
+      "static/chunks/1770a7a7-379ab39d6942fe08.js",
+      "static/chunks/320-8cd33dd309421970.js",
+      "static/chunks/925-0e53870b4c2125ed.js",
+      "static/chunks/app/page-ae6a5e914edf7826.js"
     ],
     "/sorry/[token]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/sorry/[token]/page.js"
+      "static/chunks/webpack-1017649d66d1259f.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-aac83266c0f99843.js",
+      "static/chunks/app/sorry/[token]/page-40114654d1e7ce57.js"
     ]
   }
 }

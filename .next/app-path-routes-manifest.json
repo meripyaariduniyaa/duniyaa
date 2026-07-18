@@ -1,0 +1,9 @@
+{
+  "/api/razorpay/create-order/route": "/api/razorpay/create-order",
+  "/api/razorpay/mock-pay/route": "/api/razorpay/mock-pay",
+  "/api/razorpay/verify/route": "/api/razorpay/verify",
+  "/_not-found/page": "/_not-found",
+  "/preview/page": "/preview",
+  "/page": "/",
+  "/sorry/[token]/page": "/sorry/[token]"
+}
