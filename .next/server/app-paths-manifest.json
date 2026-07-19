@@ -1,7 +1,8 @@
 {
   "/api/razorpay/create-order/route": "app/api/razorpay/create-order/route.js",
-  "/api/razorpay/verify/route": "app/api/razorpay/verify/route.js",
   "/page": "app/page.js",
   "/preview/page": "app/preview/page.js",
-  "/sorry/[token]/page": "app/sorry/[token]/page.js"
+  "/sorry/[token]/page": "app/sorry/[token]/page.js",
+  "/create/page": "app/create/page.js",
+  "/profile/page": "app/profile/page.js"
 }

@@ -1,21 +1,23 @@
 import './globals.css';
-import { Fredoka, Inter } from 'next/font/google';
+import { Fredoka, Caveat } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
+import Script from 'next/script';
 
-const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-fredoka', display: 'swap' });
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter', display: 'swap' });
+const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
+const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
 
 export const metadata = {
-  title: 'Note Retro — A little space to say it right',
-  description: 'Create a thoughtful, private apology page. Add your words, photos, and memories — share a link that disappears after 15 days.',
-  keywords: 'apology, sorry, private message, note, retro, heartfelt letter',
+  title: 'Note Retro — A beautiful space for your thoughts',
+  description: 'Create thoughtful, private pages. Add your words and photos, then share a beautiful link.',
+  keywords: 'notes, private message, Note Retro, beautiful letter',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${fredoka.variable} ${inter.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${caveat.variable}`}>
       <body>
         <AuthProvider>{children}</AuthProvider>
+        <Script src="/oneko/oneko.js" strategy="lazyOnload" />
       </body>
     </html>
   );
