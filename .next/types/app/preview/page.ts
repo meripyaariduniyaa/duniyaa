@@ -1,4 +1,4 @@
-// File: C:\Users\Anchan\Pictures\data\duniyaa\app\preview\page.js
+// File: C:\Users\Anchan\Pictures\data\retronote\app\preview\page.js
 import * as entry from '../../../../app/preview/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -1,4 +1,4 @@
-// File: C:\Users\Anchan\Pictures\data\duniyaa\app\sorry\[token]\page.js
+// File: C:\Users\Anchan\Pictures\data\retronote\app\sorry\[token]\page.js
 import * as entry from '../../../../../app/sorry/[token]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

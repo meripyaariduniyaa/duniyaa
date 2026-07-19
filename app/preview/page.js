@@ -51,24 +51,37 @@ function PreviewContent() {
   }
 
   return (
-    <main className="preview-shell">
+    <main className="preview-shell shell">
+      <div className="bg-dots" style={{ position: 'absolute', inset: 0, opacity: 0.4, pointerEvents: 'none' }} aria-hidden="true" />
+      <div className="bg-blob bg-blob--pink" aria-hidden="true" style={{ top: '-10%', right: '10%', left: 'auto' }} />
+      <div className="bg-blob bg-blob--amber" aria-hidden="true" style={{ bottom: '-10%', left: '-5%', top: 'auto' }} />
+
       <nav className="topbar">
-        <span className="logo">
-          sorry, sincerely<span className="dot">.</span>
-        </span>
-        <button className="text-button" onClick={() => router.push('/')}>
-          Start over
-        </button>
+        <div className="topbar-inner">
+          <span className="logo">
+            <span className="logo__icon">📝</span>
+            Note<span className="logo__accent">Retro</span>
+          </span>
+          <div className="nav-links">
+            <button className="nav-link" onClick={() => router.push('/')}>
+              Start over
+            </button>
+          </div>
+        </div>
       </nav>
-      <div className="preview-layout">
+
+      <div className="shell__content preview-layout">
         <div>
-          <p className="eyebrow">YOUR PRIVATE PREVIEW</p>
-          <h1>It feels like you.</h1>
-          <p className="hero-subtitle">
-            Take a look, then unlock a shareable link when it feels right.
-          </p>
-          <div className="recipient-card">
-            <p className="card-kicker">DEAR {apology.recipient_name?.toUpperCase()}</p>
+          <div className="preview-header">
+            <p className="hero__eyebrow">✦ YOUR PRIVATE PREVIEW</p>
+            <h1 className="hero__title">It feels like you.</h1>
+            <p className="hero__subtitle">
+              Take a look, then unlock a shareable link when it feels right.
+            </p>
+          </div>
+          
+          <div className="cartoon-card preview-card">
+            <p className="preview-card__kicker">DEAR {apology.recipient_name?.toUpperCase()}</p>
             <p className="preview-message">{apology.custom_message}</p>
             {apology.image_urls?.length > 0 && (
               <div className="preview-images">
@@ -77,15 +90,16 @@ function PreviewContent() {
                 ))}
               </div>
             )}
-            <p className="signature">— from someone who means it</p>
+            <p className="preview-signature">— from someone who cares</p>
           </div>
         </div>
-        <aside className="pay-card">
+
+        <aside className="cartoon-card pay-card">
           {paid ? (
             <>
-              <p className="success-mark">✓</p>
-              <h2>Your link is ready.</h2>
-              <p>
+              <div className="success-icon">✓</div>
+              <h2 className="pay-card__title">Your link is ready.</h2>
+              <p className="pay-card__desc">
                 Send this private link to {apology.recipient_name}. It will be available for 15 days.
               </p>
               <div className="link-box">
@@ -94,21 +108,24 @@ function PreviewContent() {
                   : `/sorry/${apology.id}`}
               </div>
               <button
-                className="primary-button full"
+                className="btn-primary full"
                 onClick={() => navigator.clipboard.writeText(`${window.location.origin}/sorry/${apology.id}`)}
               >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 Copy link
               </button>
             </>
           ) : (
             <>
-              <p className="card-kicker">READY TO SEND?</p>
-              <h2>Give it a little courage.</h2>
-              <p>
-                Your page stays private until you pay. Once unlocked, you’ll get a link that expires in 15 days.
+              <p className="pay-card__kicker">READY TO SEND?</p>
+              <h2 className="pay-card__title">Give it a little courage.</h2>
+              <p className="pay-card__desc">
+                Your page stays private until you pay. Once unlocked, you’ll get a link that expires safely in 15 days.
               </p>
               <PayButton apologyId={apology.id} onPaid={() => setPaid(true)} />
-              <p className="fine-print">Secure payment via Razorpay · one-time payment</p>
+              <p className="fine-print" style={{ marginTop: '20px' }}>
+                Secure payment via Razorpay · one-time payment
+              </p>
             </>
           )}
         </aside>
