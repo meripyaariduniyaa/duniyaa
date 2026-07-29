@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { doc, onSnapshot } from 'firebase/firestore';
+import QRCode from 'qrcode';
 import { db } from '@/lib/firebase';
 import PayButton from '@/components/PayButton';
 import Link from 'next/link';
@@ -29,18 +30,34 @@ function PreviewContent() {
   const [apology, setApology] = useState(null);
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [downloadingQr, setDownloadingQr] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
     return onSnapshot(doc(db, 'apologies', id), (snap) => {
       if (snap.exists()) {
-        setApology({ id: snap.id, ...snap.data() });
+        const data = { id: snap.id, ...snap.data() };
+        setApology(data);
         setPaid(snap.data().is_paid);
       }
       setLoading(false);
     });
   }, [id]);
+
+  useEffect(() => {
+    if (!apology) return;
+
+    const shareUrl = getShareUrl(apology);
+    QRCode.toDataURL(shareUrl, {
+      width: 220,
+      margin: 1,
+      color: { dark: '#111827', light: '#ffffff' }
+    })
+      .then((url) => setQrCodeUrl(url))
+      .catch(() => setQrCodeUrl(''));
+  }, [apology]);
 
   if (loading || !apology) {
     return (
@@ -53,12 +70,27 @@ function PreviewContent() {
 
   // Determine the share URL: use custom slug if available, fallback to ID
   const shareSlug = apology.custom_slug || apology.id;
-  const getShareUrl = () => {
+  const getShareUrl = (note = apology) => {
+    const slug = note?.custom_slug || note?.id;
     if (typeof window !== 'undefined') {
-      return `${window.location.origin}/p/${shareSlug}`;
+      return `${window.location.origin}/p/${slug}`;
     }
-    return `/p/${shareSlug}`;
+    return `/p/${slug}`;
   };
+
+  async function downloadQrCode() {
+    if (!qrCodeUrl) return;
+    setDownloadingQr(true);
+
+    try {
+      const link = document.createElement('a');
+      link.href = qrCodeUrl;
+      link.download = `note-link-${shareSlug}.png`;
+      link.click();
+    } finally {
+      setDownloadingQr(false);
+    }
+  }
 
   return (
     <main className="shell">
@@ -78,7 +110,7 @@ function PreviewContent() {
             </div>
             
             <div className="glass-card" style={{ padding: '2rem', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--gold-gradient)' }}></div>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gradient)' }}></div>
               <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>DEAR {apology.recipient_name}</p>
               
               <p style={{ fontSize: '1.05rem', whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
@@ -113,12 +145,26 @@ function PreviewContent() {
                   <div style={{ background: '#f1f5f9', padding: '1rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.5rem', border: '3px solid #1a202c', fontSize: '0.85rem', boxShadow: 'inset 2px 2px 0px rgba(0,0,0,0.05)' }}>
                     {getShareUrl()}
                   </div>
+
+                  {qrCodeUrl && (
+                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                      <img src={qrCodeUrl} alt="QR code for note link" style={{ width: '180px', height: '180px', borderRadius: '12px', border: '3px solid #3d1118', background: 'white', padding: '0.5rem', boxShadow: '4px 4px 0px #3d1118' }} />
+                    </div>
+                  )}
                   
                   <button
                     className="btn-primary w-full"
                     onClick={() => navigator.clipboard.writeText(getShareUrl())}
                   >
                     Copy secure link
+                  </button>
+                  <button
+                    className="btn-secondary w-full"
+                    onClick={downloadQrCode}
+                    disabled={downloadingQr || !qrCodeUrl}
+                    style={{ marginTop: '0.75rem' }}
+                  >
+                    {downloadingQr ? 'Preparing image…' : 'Download QR image'}
                   </button>
                   <p className="text-muted" style={{ fontSize: '0.875rem', marginTop: '1.5rem' }}>
                     You can also view this later by going to your <Link href="/profile" style={{ textDecoration: 'underline' }}>Dashboard</Link>.

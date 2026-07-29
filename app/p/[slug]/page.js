@@ -100,7 +100,7 @@ export default async function CustomLinkPage({ params }) {
 
       <div className="main-content center-screen" style={{ padding: '4rem 1rem' }}>
         <div className="glass-card" style={{ maxWidth: '700px', width: '100%', padding: 'clamp(2rem, 5vw, 4rem)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--gold-gradient)' }}></div>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gradient)' }}></div>
           
           <div className="logo" style={{ justifyContent: 'center', marginBottom: '3rem', opacity: 0.5, textAlign: 'center' }}>
             Note<span>Retro</span>

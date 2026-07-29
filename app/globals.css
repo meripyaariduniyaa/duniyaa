@@ -1,19 +1,19 @@
 :root {
-  /* Cartoonish + Premium Gold Palette */
-  --bg-base: #fdfaf6;
-  --bg-card: #ffffff;
+  /* Romantic Valentine-inspired palette */
+  --bg-base: #fff7f8;
+  --bg-card: #fffdfb;
   
-  --gold-primary: #FFD700;
-  --gold-secondary: #FF8C00;
-  --gold-gradient: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-  --gold-glow: rgba(255, 215, 0, 0.4);
+  --accent-primary: #ff4d6d;
+  --accent-secondary: #c96b5c;
+  --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  --accent-glow: rgba(255, 77, 109, 0.25);
   
-  --text-dark: #2d3748;
-  --text-muted: #718096;
+  --text-dark: #4a1f24;
+  --text-muted: #8a4f5c;
   
-  --border-thick: 4px solid #1a202c;
-  --shadow-cartoon: 6px 6px 0px #1a202c;
-  --shadow-cartoon-hover: 2px 2px 0px #1a202c;
+  --border-thick: 4px solid #3d1118;
+  --shadow-cartoon: 6px 6px 0px #3d1118;
+  --shadow-cartoon-hover: 2px 2px 0px #3d1118;
   
   --font-bold: var(--font-bold), 'Comic Sans MS', sans-serif;
   --font-cursive: var(--font-cursive), cursive;
@@ -36,7 +36,7 @@ html, body, * {
 
 body {
   background-color: var(--bg-base);
-  background-image: radial-gradient(#FFD700 2px, transparent 2px);
+  background-image: radial-gradient(#ffd6e0 2px, transparent 2px);
   background-size: 40px 40px;
   color: var(--text-dark);
   font-family: var(--font-bold);
@@ -65,8 +65,8 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-cursive);
   text-transform: none;
   -webkit-text-stroke: 0;
-  color: var(--gold-secondary);
-  text-shadow: 1px 1px 0px #1a202c;
+  color: var(--accent-secondary);
+  text-shadow: 1px 1px 0px #3d1118;
   font-size: 1.5em;
 }
 
@@ -93,9 +93,9 @@ a {
   justify-content: space-between;
   align-items: center;
   z-index: 100;
-  background: var(--gold-gradient);
+  background: var(--accent-gradient);
   border-bottom: var(--border-thick);
-  box-shadow: 0 4px 0px #1a202c;
+  box-shadow: 0 4px 0px #3d1118;
 }
 
 .logo {
@@ -103,15 +103,15 @@ a {
   font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
-  -webkit-text-stroke: 1px #1a202c;
-  text-shadow: 2px 2px 0px #1a202c;
+  -webkit-text-stroke: 1px #3d1118;
+  text-shadow: 2px 2px 0px #3d1118;
   text-transform: uppercase;
 }
 
 .logo span {
   font-family: var(--font-cursive);
   text-transform: none;
-  color: #1a202c;
+  color: #3d1118;
   -webkit-text-stroke: 0;
   text-shadow: none;
   margin-left: 5px;
@@ -125,13 +125,13 @@ a {
 }
 
 .nav-link {
-  color: #1a202c;
+  color: #3d1118;
   font-weight: 700;
   background: #fff;
-  border: 2px solid #1a202c;
+  border: 2px solid #3d1118;
   padding: 0.4rem 0.75rem;
   border-radius: 12px;
-  box-shadow: 2px 2px 0px #1a202c;
+  box-shadow: 2px 2px 0px #3d1118;
   transition: all 0.2s;
   cursor: pointer;
   font-family: inherit;
@@ -141,7 +141,7 @@ a {
 
 .nav-link:hover {
   transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px #1a202c;
+  box-shadow: 0px 0px 0px #3d1118;
 }
 
 /* Cartoon Card */
@@ -172,8 +172,8 @@ a {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--gold-gradient);
-  color: #1a202c;
+  background: var(--accent-gradient);
+  color: #fff;
   padding: 0.85rem 1.5rem;
   border-radius: 16px;
   font-weight: 700;
@@ -204,7 +204,7 @@ a {
   justify-content: center;
   gap: 0.5rem;
   background: #fff;
-  color: #1a202c;
+  color: #3d1118;
   padding: 0.85rem 1.5rem;
   border-radius: 16px;
   font-weight: 700;
@@ -250,8 +250,8 @@ a {
 
 .form-input:focus, .form-textarea:focus {
   outline: none;
-  background: #fff9e6;
-  box-shadow: inset 4px 4px 0px rgba(0,0,0,0.05), 0 0 0 4px var(--gold-glow);
+  background: #fff3f5;
+  box-shadow: inset 4px 4px 0px rgba(0,0,0,0.05), 0 0 0 4px var(--accent-glow);
 }
 
 /* Utilities */
