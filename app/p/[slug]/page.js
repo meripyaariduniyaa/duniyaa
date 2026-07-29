@@ -119,7 +119,7 @@ export default async function CustomLinkPage({ params }) {
           {apology.image_urls?.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '2rem', marginBottom: '3rem' }}>
               {apology.image_urls.map((url) => (
-                <img key={url} src={url} alt="A shared memory" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #1a202c', boxShadow: '2px 2px 0px #1a202c' }} />
+                <img key={url} src={url} alt="A shared memory" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }} />
               ))}
             </div>
           )}
@@ -129,7 +129,7 @@ export default async function CustomLinkPage({ params }) {
             someone who cares
           </div>
           
-          <div style={{ borderTop: '2px dashed #e2e8f0', marginTop: '4rem', paddingTop: '2rem', textAlign: 'center' }}>
+          <div style={{ borderTop: '2px dashed rgba(216, 30, 91, 0.25)', marginTop: '4rem', paddingTop: '2rem', textAlign: 'center' }}>
             <p className="text-muted" style={{ fontSize: '0.8rem' }}>
               This little page is a moment in time. It disappears soon.
             </p>

@@ -120,7 +120,7 @@ function PreviewContent() {
               {apology.image_urls?.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginTop: '2rem' }}>
                   {apology.image_urls.map((url) => (
-                    <img key={url} src={url} alt="Memory" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #1a202c', boxShadow: '2px 2px 0px #1a202c' }} />
+                    <img key={url} src={url} alt="Memory" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }} />
                   ))}
                 </div>
               )}
@@ -136,19 +136,19 @@ function PreviewContent() {
             <aside className="glass-card" style={{ position: 'sticky', top: '120px' }}>
               {paid ? (
                 <div className="text-center">
-                  <div style={{ width: '48px', height: '48px', background: '#22c55e', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 1.5rem', border: '3px solid #1a202c', boxShadow: '2px 2px 0px #1a202c' }}>✓</div>
+                  <div style={{ width: '48px', height: '48px', background: '#d81e5b', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 1.5rem', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }}>✓</div>
                   <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your link is ready.</h2>
                   <p className="text-muted" style={{ marginBottom: '2rem' }}>
                     Send this private link to {apology.recipient_name}. It will expire safely in 15 days.
                   </p>
                   
-                  <div style={{ background: '#f1f5f9', padding: '1rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.5rem', border: '3px solid #1a202c', fontSize: '0.85rem', boxShadow: 'inset 2px 2px 0px rgba(0,0,0,0.05)' }}>
+                  <div style={{ background: '#fff4f8', padding: '1rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.5rem', border: '3px solid rgba(59, 15, 27, 0.25)', fontSize: '0.85rem', boxShadow: 'inset 2px 2px 0px rgba(255, 77, 109, 0.12)' }}>
                     {getShareUrl()}
                   </div>
 
                   {qrCodeUrl && (
                     <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                      <img src={qrCodeUrl} alt="QR code for note link" style={{ width: '180px', height: '180px', borderRadius: '12px', border: '3px solid #3d1118', background: 'white', padding: '0.5rem', boxShadow: '4px 4px 0px #3d1118' }} />
+                      <img src={qrCodeUrl} alt="QR code for note link" style={{ width: '180px', height: '180px', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', background: 'white', padding: '0.5rem', boxShadow: '4px 4px 0px rgba(59, 15, 27, 0.9)' }} />
                     </div>
                   )}
                   
@@ -180,7 +180,7 @@ function PreviewContent() {
                   
                   <PayButton apologyId={apology.id} onPaid={() => setPaid(true)} />
                   
-                  <div style={{ marginTop: '1.5rem', borderTop: '2px dashed #e2e8f0', paddingTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                  <div style={{ marginTop: '1.5rem', borderTop: '2px dashed rgba(216, 30, 91, 0.25)', paddingTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
                     <span style={{ fontSize: '1.2rem' }}>🔒</span>
                     <span className="text-muted" style={{ fontSize: '0.875rem' }}>Secure payment via Razorpay</span>
                   </div>
