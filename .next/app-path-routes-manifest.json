@@ -1,0 +1,15 @@
+{
+  "/api/claim-notes/route": "/api/claim-notes",
+  "/api/razorpay/create-order/route": "/api/razorpay/create-order",
+  "/api/razorpay/verify/route": "/api/razorpay/verify",
+  "/_not-found/page": "/_not-found",
+  "/robots.txt/route": "/robots.txt",
+  "/sitemap.xml/route": "/sitemap.xml",
+  "/page": "/",
+  "/create/page": "/create",
+  "/profile/page": "/profile",
+  "/preview/page": "/preview",
+  "/sorry/[token]/page": "/sorry/[token]",
+  "/p/[slug]/page": "/p/[slug]",
+  "/opengraph-image/route": "/opengraph-image"
+}

@@ -3,6 +3,57 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://noteretro.vercel.app';
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const canonicalUrl = `${siteUrl}/p/${slug}`;
+  let apology = null;
+
+  try {
+    const snap = await getAdminDb().collection('apologies').doc(slug).get();
+    if (snap.exists) apology = snap.data();
+  } catch {}
+
+  const expires = apology?.expires_at?.toDate?.() || (apology?.expires_at ? new Date(apology.expires_at) : null);
+  const valid = apology?.is_paid === true && expires && expires.getTime() > Date.now();
+
+  if (!valid || !apology) {
+    return {
+      title: 'Private note unavailable | NoteRetro',
+      description: 'This note link has expired, is not yet unlocked, or is no longer available.',
+      alternates: { canonical: canonicalUrl },
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const recipientName = apology.recipient_name || 'someone special';
+
+  return {
+    title: `A heartfelt note for ${recipientName} | NoteRetro`,
+    description: `A private, beautiful note for ${recipientName}. Unlock the message and share it securely.`,
+    alternates: { canonical: canonicalUrl },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    openGraph: {
+      title: `A heartfelt note for ${recipientName}`,
+      description: `A private, beautiful note for ${recipientName}.`,
+      url: canonicalUrl,
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `A heartfelt note for ${recipientName}`,
+      description: `A private, beautiful note for ${recipientName}.`,
+    },
+  };
+}
+
 export default async function CustomLinkPage({ params }) {
   const { slug } = await params;
   let apology = null;
