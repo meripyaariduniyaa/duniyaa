@@ -11,26 +11,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/preview/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/preview/page.js"
-    ],
-    "/api/razorpay/create-order/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/razorpay/create-order/route.js"
-    ],
-    "/api/razorpay/verify/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/razorpay/verify/route.js"
-    ],
-    "/sorry/[token]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/sorry/[token]/page.js"
-    ],
     "/create/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -40,11 +20,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/profile/page.js"
-    ],
-    "/api/claim-notes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/claim-notes/route.js"
     ]
   }
 }

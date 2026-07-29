@@ -1,6 +1,8 @@
 import './globals.css';
 import { Fredoka, Caveat } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import Script from 'next/script';
 
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
@@ -16,7 +18,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${fredoka.variable} ${caveat.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Header />
+          <div className="page-content">{children}</div>
+          <Footer />
+        </AuthProvider>
         <Script src="/oneko/oneko.js" strategy="lazyOnload" />
       </body>
     </html>
