@@ -1,5 +1,5 @@
 import './globals.css';
-import { Fredoka, Caveat } from 'next/font/google';
+import { Fredoka, Caveat, Dancing_Script } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,6 +7,7 @@ import Script from 'next/script';
 
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
 const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
+const dancing = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-dancing', display: 'swap' });
 
 const siteName = 'NoteRetro';
 const siteDescription = 'Create heartfelt, private notes that feel personal, beautiful, and unforgettable.';
@@ -66,7 +67,7 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en" className={`${fredoka.variable} ${caveat.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${caveat.variable} ${dancing.variable}`}>
       <body>
         <AuthProvider>
           <Header />

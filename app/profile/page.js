@@ -50,7 +50,7 @@ export default function ProfilePage() {
     setFetching(true);
     try {
       const q = query(
-        collection(db, 'apologies'),
+        collection(db, 'notes'),
         where('creator_uid', '==', user.uid)
       );
       

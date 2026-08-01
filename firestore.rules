@@ -1,7 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /apologies/{token} {
+    match /notes/{token} {
       allow list: if request.auth != null && resource.data.creator_uid == request.auth.uid;
       allow create: if request.resource.data.creator_uid != null;
       allow get: if true;

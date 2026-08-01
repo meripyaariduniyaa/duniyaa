@@ -12,8 +12,8 @@ export async function POST(request) {
     const adminDb = getAdminDb();
     const { apologyId, couponCode } = await request.json();
 
-    const snap = await adminDb.collection('apologies').doc(apologyId).get();
-    if (!snap.exists) return NextResponse.json({ error: 'Apology not found.' }, { status: 404 });
+    const snap = await adminDb.collection('notes').doc(apologyId).get();
+    if (!snap.exists) return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
 
     const normalizedCode = (couponCode || '').trim();
     const selectedCoupon = normalizedCode ? couponRules[normalizedCode] : null;

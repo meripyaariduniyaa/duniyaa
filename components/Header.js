@@ -8,7 +8,7 @@ export default function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (pathname?.startsWith('/p/')) {
+  if (pathname?.startsWith('/p/') || pathname?.startsWith('/sorry/')) {
     return null;
   }
 

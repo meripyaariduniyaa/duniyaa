@@ -15,7 +15,7 @@ export async function POST(request) {
     const adminDb = getAdminDb();
     
     // Find all apologies created by this deviceId
-    const snapshot = await adminDb.collection('apologies').where('creator_uid', '==', deviceId).get();
+    const snapshot = await adminDb.collection('notes').where('creator_uid', '==', deviceId).get();
     
     if (snapshot.empty) {
       return NextResponse.json({ ok: true, message: 'No notes to claim' });

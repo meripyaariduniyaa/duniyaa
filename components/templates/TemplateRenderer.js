@@ -8,6 +8,10 @@ export default function TemplateRenderer({ note, isPreview = false }) {
   const templateId = note.template || 'default';
 
   switch (templateId) {
+    case 'sorry':
+    case 'apology':
+    case 'cute-apology':
+      return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
     case 'memoryverse':
       return <MemoryverseTemplate note={note} isPreview={isPreview} />;
     case 'birthday-surprise':
@@ -37,8 +41,279 @@ export default function TemplateRenderer({ note, isPreview = false }) {
     case 'personalized-ai-image':
       return <PersonalizedAiImageTemplate note={note} isPreview={isPreview} />;
     default:
-      return <DefaultNoteTemplate note={note} isPreview={isPreview} />;
+      return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }
+}
+
+/* ==========================================================================
+   0. MULTI-STEP ROMANTIC INTERACTIVE APOLOGY FLOW TEMPLATE
+   ========================================================================== */
+function InteractiveApologyFlowTemplate({ note }) {
+  const [step, setStep] = useState(1);
+
+  // Step 2: Cuteness Meter State
+  const [cutenessCount, setCutenessCount] = useState(0);
+
+  // Step 3: Tap Cards state
+  const [revealedCards, setRevealedCards] = useState([false, false, false]);
+
+  // Step 4: Polaroid Stack State
+  const [topIndex, setTopIndex] = useState(0);
+
+  // Step 5: Typewriter State
+  const [typedText, setTypedText] = useState('');
+  const [forgiven, setForgiven] = useState(false);
+
+  // Audio Music state
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = React.useRef(null);
+
+  const recipient = note?.recipient_name || 'cutiepie';
+  const defaultApologyMessage = "Sorry bcha 🥺 I know mene gusse me jyada boldiyaa me galat tha. Please baat krlo I am sorry baby. Please forgive me if I hurt you or wasted even a little of your precious time. I promise I will do better. ❤️";
+  const fullMessage = note?.custom_message || defaultApologyMessage;
+
+  const defaultPhotos = [
+    { url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop', caption: "I'm sorry 🥺" },
+    { url: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop', caption: "Please forgive me 💕" },
+    { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800&auto=format&fit=crop', caption: "You mean everything 💖" }
+  ];
+
+  const photos = (note?.image_urls && note.image_urls.length > 0)
+    ? note.image_urls.map((u, i) => ({
+        url: u,
+        caption: i === 0 ? "I'm sorry 🥺" : i === 1 ? "Please forgive me 💕" : "You mean everything 💖"
+      }))
+    : defaultPhotos;
+
+  // Cuteness meter timer in Step 2
+  useEffect(() => {
+    if (step === 2) {
+      setCutenessCount(0);
+      const timer = setInterval(() => {
+        setCutenessCount((prev) => {
+          if (prev >= 120) {
+            clearInterval(timer);
+            return 120;
+          }
+          return prev + 2;
+        });
+      }, 35);
+      return () => clearInterval(timer);
+    }
+  }, [step]);
+
+  // Typewriter effect in Step 5
+  useEffect(() => {
+    if (step === 5) {
+      setTypedText('');
+      let index = 0;
+      const typeTimer = setInterval(() => {
+        if (index < fullMessage.length) {
+          setTypedText((prev) => prev + fullMessage.charAt(index));
+          index++;
+        } else {
+          clearInterval(typeTimer);
+        }
+      }, 35);
+      return () => clearInterval(typeTimer);
+    }
+  }, [step, fullMessage]);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlayingAudio) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlayingAudio(true)).catch(() => {});
+    }
+  };
+
+  const toggleRevealCard = (idx) => {
+    setRevealedCards((prev) => {
+      const next = [...prev];
+      next[idx] = true;
+      return next;
+    });
+  };
+
+  const nextPolaroid = () => {
+    setTopIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  return (
+    <div className="sorry-flow-container">
+      <div className="sorry-flow-sparkles" />
+
+      {/* Floating Audio Toggle */}
+      <button className="sorry-flow-music-toggle" onClick={toggleMusic}>
+        {isPlayingAudio ? '🎵 Music: ON 🔊' : '🎵 Music: OFF 🔇'}
+      </button>
+      <audio
+        ref={audioRef}
+        loop
+        src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-113264.mp3"
+      />
+
+      {/* STEP 1: Landing Greeting */}
+      {step === 1 && (
+        <div className="sorry-flow-step">
+          <div className="sorry-flow-sticker">
+            <svg viewBox="0 0 120 120" width="110" height="110">
+              <path d="M60 100 C20 80 10 50 25 30 C40 10 55 25 60 35 C65 25 80 10 95 30 C110 50 100 80 60 100 Z" fill="#ff4b8b" />
+              <circle cx="45" cy="45" r="5" fill="#fff" />
+              <circle cx="75" cy="45" r="5" fill="#fff" />
+              <path d="M52 58 Q60 66 68 58" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h1 className="sorry-flow-title">Hey {recipient}, cutiepie</h1>
+          <p className="sorry-flow-subtitle">Do you even know how cute you are?</p>
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(2)}>
+            let&apos;s check 😜💖
+          </button>
+        </div>
+      )}
+
+      {/* STEP 2: Cuteness Meter */}
+      {step === 2 && (
+        <div className="sorry-flow-step">
+          <h2 style={{ fontSize: '1.4rem', color: '#fbcfe8', fontWeight: 600 }}>
+            Measuring your cuteness... ⏳
+          </h2>
+          <div className="meter-box">
+            <div className="meter-counter">{cutenessCount}%</div>
+            <div className="meter-bar-track">
+              <div className="meter-bar-fill" style={{ width: `${Math.min(cutenessCount, 100)}%` }} />
+            </div>
+            {cutenessCount >= 120 && (
+              <div className="cuteness-warning-badge">
+                ⚠️ WARNING: TOO CUTE TO HANDLE
+              </div>
+            )}
+          </div>
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(3)}>
+            Continue ➔
+          </button>
+        </div>
+      )}
+
+      {/* STEP 3: Tap-to-Reveal Cards */}
+      {step === 3 && (
+        <div className="sorry-flow-step">
+          <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, marginBottom: '0.25rem' }}>
+            Tap each one to reveal 💖
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#fbcfe8', marginBottom: '1.25rem' }}>
+            Tap all 3 cards to unlock my promises to you
+          </p>
+
+          <div className="tap-cards-grid">
+            {[
+              "I messed up... and I'm really sorry for that.",
+              "I promise I'll be better for you.",
+              "You mean the world to me and I hate making you sad."
+            ].map((text, idx) => (
+              <button
+                key={idx}
+                className={`tap-card-btn ${revealedCards[idx] ? 'revealed' : ''}`}
+                onClick={() => toggleRevealCard(idx)}
+              >
+                <div className="tap-card-icon">
+                  {revealedCards[idx] ? '💖' : '🔒'}
+                </div>
+                <div className="tap-card-text">
+                  {revealedCards[idx] ? text : `Tap to reveal promise #${idx + 1}`}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(4)}>
+            See more ➔
+          </button>
+        </div>
+      )}
+
+      {/* STEP 4: Photo Memory Deck / Swiper */}
+      {step === 4 && (
+        <div className="sorry-flow-step">
+          <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, margin: 0 }}>
+            Some Sweet Moments
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#fbcfe8', margin: '0.25rem 0 1rem' }}>
+            (Swipe or tap to switch cards)
+          </p>
+
+          <div className="polaroid-deck-container" onClick={nextPolaroid}>
+            {photos.map((item, idx) => {
+              const offset = (idx - topIndex + photos.length) % photos.length;
+              const isTop = offset === 0;
+              const rotDeg = isTop ? 0 : offset % 2 === 0 ? 6 : -6;
+              const scaleVal = 1 - offset * 0.05;
+              const translateYVal = offset * 10;
+
+              return (
+                <div
+                  key={idx}
+                  className="polaroid-card"
+                  style={{
+                    zIndex: photos.length - offset,
+                    transform: `translateY(${translateYVal}px) rotate(${rotDeg}deg) scale(${scaleVal})`,
+                    opacity: offset > 2 ? 0 : 1,
+                    pointerEvents: isTop ? 'auto' : 'none'
+                  }}
+                >
+                  <img src={item.url} alt={`Memory ${idx + 1}`} />
+                  <div className="polaroid-caption">{item.caption}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(5)}>
+            Continue ➔
+          </button>
+        </div>
+      )}
+
+      {/* STEP 5: Typed Apology Note */}
+      {step === 5 && (
+        <div className="sorry-flow-step">
+          <div className="sorry-flow-sticker" style={{ width: '90px', height: '90px', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '3.5rem' }}>💌</span>
+          </div>
+          <h2 className="sorry-flow-title" style={{ fontSize: '2.2rem' }}>
+            A little note for you ✨
+          </h2>
+
+          <div className="typewriter-card-box">
+            <div className="typewriter-content">
+              {typedText}
+              <span className="blinking-cursor" />
+            </div>
+          </div>
+
+          {!forgiven ? (
+            <button
+              className="sorry-flow-btn-glowing forgive-confetti-btn"
+              onClick={() => setForgiven(true)}
+            >
+              Forgive Me 💕
+            </button>
+          ) : (
+            <div style={{ animation: 'sorryStepFadeIn 0.5s ease-out' }}>
+              <p style={{ fontSize: '1.5rem', color: '#34d399', fontWeight: 800, textShadow: '0 0 15px rgba(52, 211, 153, 0.8)' }}>
+                Thank you baby! I love you so much ❤️🥰
+              </p>
+              <p style={{ fontSize: '0.9rem', color: '#fbcfe8', marginTop: '0.5rem' }}>
+                Promise kept forever. ✨
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ==========================================================================

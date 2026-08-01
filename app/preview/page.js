@@ -37,11 +37,21 @@ function PreviewContent() {
   useEffect(() => {
     if (!id) return;
 
-    return onSnapshot(doc(db, 'apologies', id), (snap) => {
+    return onSnapshot(doc(db, 'notes', id), (snap) => {
       if (snap.exists()) {
-        const data = { id: snap.id, ...snap.data() };
+        const raw = snap.data();
+        // Only pick plain serializable fields — strip Firestore Timestamps
+        const data = {
+          id: snap.id,
+          recipient_name: raw.recipient_name || '',
+          custom_message: raw.custom_message || '',
+          image_urls: Array.isArray(raw.image_urls) ? raw.image_urls : [],
+          template: raw.template || 'default',
+          custom_slug: raw.custom_slug || null,
+          is_paid: raw.is_paid || false,
+        };
         setApology(data);
-        setPaid(snap.data().is_paid);
+        setPaid(raw.is_paid || false);
       }
       setLoading(false);
     });

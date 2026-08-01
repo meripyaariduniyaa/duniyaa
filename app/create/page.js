@@ -76,7 +76,7 @@ function CreateNoteContent() {
     }
     setSlugStatus('checking');
     try {
-      const snap = await getDoc(doc(db, 'apologies', slug));
+      const snap = await getDoc(doc(db, 'notes', slug));
       setSlugStatus(snap.exists() ? 'taken' : 'available');
     } catch {
       setSlugStatus('');
@@ -106,7 +106,7 @@ function CreateNoteContent() {
       let docId;
       if (customSlug && customSlug.length >= 3) {
         // Check availability one final time
-        const snap = await getDoc(doc(db, 'apologies', customSlug));
+        const snap = await getDoc(doc(db, 'notes', customSlug));
         if (snap.exists()) {
           throw new Error('That custom link is already taken. Please choose another.');
         }
@@ -117,7 +117,7 @@ function CreateNoteContent() {
       
       const deviceId = getDeviceId();
       
-      await setDoc(doc(db, 'apologies', docId), {
+      await setDoc(doc(db, 'notes', docId), {
         creator_uid: deviceId,
         recipient_name: recipientName.trim(),
         custom_message: message.trim(),

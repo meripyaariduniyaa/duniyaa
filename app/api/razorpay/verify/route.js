@@ -8,11 +8,11 @@ export async function POST(request) {
     const adminDb = getAdminDb();
     const { apologyId, razorpay_order_id, razorpay_payment_id, razorpay_signature, couponCode, discountPercent, amountPaid, free } = await request.json();
 
-    const ref = adminDb.collection('apologies').doc(apologyId);
+    const ref = adminDb.collection('notes').doc(apologyId);
     const snap = await ref.get();
 
     if (!snap.exists) {
-      return NextResponse.json({ error: 'Apology not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
     }
 
     const created = snap.data().created_at?.toDate?.() || new Date();

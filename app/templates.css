@@ -678,3 +678,339 @@
 .filter-sketch {
   filter: grayscale(1) contrast(2);
 }
+
+/* ==========================================================================
+   16. MULTI-STEP ROMANTIC INTERACTIVE APOLOGY FLOW TEMPLATE
+   ========================================================================== */
+.sorry-flow-container {
+  background: linear-gradient(135deg, #1a0826 0%, #2d0b38 50%, #170421 100%);
+  color: #fdf2f8;
+  border-radius: 28px;
+  padding: 2.5rem 1.75rem;
+  border: 2px solid rgba(244, 114, 182, 0.3);
+  box-shadow: 0 0 40px rgba(236, 72, 153, 0.25), inset 0 0 30px rgba(168, 85, 247, 0.15);
+  position: relative;
+  overflow: hidden;
+  min-height: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+}
+
+.sorry-flow-sparkles {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 30px 40px, #f472b6, rgba(0, 0, 0, 0)),
+    radial-gradient(3px 3px at 80px 140px, #fb7185, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 150px 60px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 220px 200px, #f472b6, rgba(0, 0, 0, 0)),
+    radial-gradient(3px 3px at 280px 90px, #c084fc, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 340px 250px, #ffffff, rgba(0, 0, 0, 0));
+  background-repeat: repeat;
+  background-size: 320px 320px;
+  opacity: 0.7;
+  animation: floatSparkles 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes floatSparkles {
+  0% { transform: translateY(0px) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-15px) scale(1.05); opacity: 0.95; }
+}
+
+.sorry-flow-music-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(244, 114, 182, 0.5);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+}
+
+.sorry-flow-music-toggle:hover {
+  background: rgba(236, 72, 153, 0.3);
+  transform: scale(1.05);
+}
+
+.sorry-flow-step {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  animation: sorryStepFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sorryStepFadeIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sorry-flow-sticker {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 10px 15px rgba(236, 72, 153, 0.4));
+  animation: cuteBounce 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes cuteBounce {
+  0% { transform: translateY(0) rotate(-3deg); }
+  100% { transform: translateY(-10px) rotate(3deg); }
+}
+
+.sorry-flow-title {
+  font-family: var(--font-dancing), 'Dancing Script', 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(244, 114, 182, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.sorry-flow-subtitle {
+  color: #fbcfe8;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.sorry-flow-btn-glowing {
+  background: linear-gradient(135deg, #ff4b8b 0%, #d92662 100%);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 2.25rem;
+  border-radius: 9999px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(255, 75, 139, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sorry-flow-btn-glowing:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 0 30px rgba(255, 75, 139, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.sorry-flow-btn-glowing:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Step 2: Cuteness Meter */
+.meter-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(244, 114, 182, 0.3);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 2rem;
+  margin: 1.5rem 0 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.meter-counter {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #ff75ac;
+  text-shadow: 0 0 25px rgba(255, 117, 172, 0.8);
+  margin: 1rem 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.meter-bar-track {
+  width: 100%;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 999px;
+  overflow: hidden;
+  padding: 3px;
+  border: 1px solid rgba(244, 114, 182, 0.4);
+}
+
+.meter-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ec4899, #f43f5e, #fbbf24);
+  border-radius: 999px;
+  transition: width 0.1s ease-out;
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.8);
+}
+
+.cuteness-warning-badge {
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  display: inline-block;
+  margin-top: 1.25rem;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+  animation: warningPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes warningPulse {
+  0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+  100% { transform: scale(1.05); box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+}
+
+/* Step 3: Tap-to-Reveal Cards */
+.tap-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.75rem 0 2rem;
+}
+
+.tap-card-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(244, 114, 182, 0.35);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.tap-card-btn:hover {
+  background: rgba(236, 72, 153, 0.18);
+  border-color: rgba(244, 114, 182, 0.7);
+  transform: translateY(-2px);
+}
+
+.tap-card-btn.revealed {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(168, 85, 247, 0.25));
+  border-color: #ec4899;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+}
+
+.tap-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(236, 72, 153, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+}
+
+.tap-card-text {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #fce7f3;
+}
+
+/* Step 4: Photo Swiper / Deck */
+.polaroid-deck-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 360px;
+  margin: 1.5rem auto 2.5rem;
+}
+
+.polaroid-card {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 14px 20px 14px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(236, 72, 153, 0.2);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.polaroid-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.polaroid-caption {
+  color: #1f2937;
+  font-family: 'Dancing Script', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+/* Step 5: Typewriter Note */
+.typewriter-card-box {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1.5px solid rgba(244, 114, 182, 0.4);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 2rem 1.75rem;
+  text-align: left;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  margin: 1.5rem 0 2rem;
+  position: relative;
+}
+
+.typewriter-content {
+  font-size: 1.15rem;
+  line-height: 1.85;
+  color: #fdf2f8;
+  white-space: pre-wrap;
+  min-height: 120px;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.2em;
+  background: #ec4899;
+  margin-left: 3px;
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.forgive-confetti-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+.forgive-confetti-btn:hover {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.9);
+}
