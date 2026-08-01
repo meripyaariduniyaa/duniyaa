@@ -1,13 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import Link from 'next/link';
 import { templates } from '@/lib/templates';
 
+const shuffleArray = (array) => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
+  const [displayTemplates, setDisplayTemplates] = useState(templates);
+
+  useEffect(() => {
+    setDisplayTemplates(shuffleArray(templates));
+  }, []);
 
   return (
     <main className="shell">
@@ -69,7 +84,7 @@ export default function Home() {
           </p>
 
           <div className="templates-grid">
-            {templates.map((t) => (
+            {displayTemplates.map((t) => (
               <Link
                 key={t.id}
                 href={`/create?template=${t.id}`}

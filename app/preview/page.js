@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import { db } from '@/lib/firebase';
 import PayButton from '@/components/PayButton';
 import Link from 'next/link';
+import TemplateRenderer from '@/components/templates/TemplateRenderer';
 
 export default function PreviewPage() {
   return (
@@ -109,26 +110,7 @@ function PreviewContent() {
               </p>
             </div>
             
-            <div className="glass-card" style={{ padding: '2rem', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gradient)' }}></div>
-              <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>DEAR {apology.recipient_name}</p>
-              
-              <p style={{ fontSize: '1.05rem', whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
-                {apology.custom_message}
-              </p>
-              
-              {apology.image_urls?.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginTop: '2rem' }}>
-                  {apology.image_urls.map((url) => (
-                    <img key={url} src={url} alt="Memory" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }} />
-                  ))}
-                </div>
-              )}
-              
-              <p className="cursive" style={{ marginTop: '3rem', textAlign: 'left', fontSize: '2rem' }}>
-                — from someone who cares
-              </p>
-            </div>
+            <TemplateRenderer note={apology} isPreview={true} />
           </div>
 
           {/* Right Column: Payment & Link */}

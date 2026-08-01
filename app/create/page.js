@@ -7,7 +7,6 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { templates } from '@/lib/templates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
-import Link from 'next/link';
 
 export default function CreateNote() {
   return (
@@ -27,8 +26,17 @@ export default function CreateNote() {
 function CreateNoteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const templateId = searchParams.get('template');
-  const selectedTemplate = templates.find((t) => t.id === templateId) || null;
+  const templateIdParam = searchParams.get('template');
+  
+  const [selectedTemplateId, setSelectedTemplateId] = useState(templateIdParam || 'memoryverse');
+
+  useEffect(() => {
+    if (templateIdParam) {
+      setSelectedTemplateId(templateIdParam);
+    }
+  }, [templateIdParam]);
+
+  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0];
 
   const [recipientName, setRecipientName] = useState('');
   const [message, setMessage] = useState('');
@@ -115,7 +123,7 @@ function CreateNoteContent() {
         custom_message: message.trim(),
         image_urls: images,
         is_paid: false,
-        template: templateId || 'default',
+        template: selectedTemplateId || 'default',
         custom_slug: customSlug || null,
         created_at: serverTimestamp(),
         expires_at: null,
@@ -140,21 +148,29 @@ function CreateNoteContent() {
       <div className="main-content center-screen">
         <div className="glass-card" style={{ maxWidth: '600px', width: '100%' }}>
           <div className="text-center mb-8">
-            {selectedTemplate ? (
-              <>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{selectedTemplate.icon}</div>
-                <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{selectedTemplate.title}</h1>
-                <p className="text-muted" style={{ fontSize: '0.85rem' }}>{selectedTemplate.description}</p>
-              </>
-            ) : (
-              <>
-                <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Start writing</h1>
-                <p className="text-muted">A note for someone special.</p>
-              </>
-            )}
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{selectedTemplate?.icon || '✨'}</div>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{selectedTemplate?.title || 'Start writing'}</h1>
+            <p className="text-muted" style={{ fontSize: '0.85rem' }}>{selectedTemplate?.description}</p>
           </div>
 
           <form onSubmit={submit}>
+            {/* Format Selection Dropdown */}
+            <div className="form-group">
+              <label className="form-label">Template Format</label>
+              <select
+                className="form-input"
+                value={selectedTemplateId}
+                onChange={(e) => setSelectedTemplateId(e.target.value)}
+                style={{ cursor: 'pointer', appearance: 'auto' }}
+              >
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.icon} {t.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Custom Link */}
             <div className="form-group">
               <label className="form-label">Custom Link (Optional)</label>

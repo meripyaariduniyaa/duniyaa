@@ -1,3 +1,5 @@
+@import './templates.css';
+
 :root {
   /* Extreme rose/red Valentine palette */
   --bg-base: #fff1f5;

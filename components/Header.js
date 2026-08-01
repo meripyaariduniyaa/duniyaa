@@ -1,10 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function Header() {
+  const pathname = usePathname();
   const { user } = useAuth();
+
+  if (pathname?.startsWith('/p/')) {
+    return null;
+  }
 
   return (
     <nav className="topbar" id="site-header">
