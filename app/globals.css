@@ -120,6 +120,23 @@ a {
   font-size: 1.8rem;
 }
 
+.site-logo {
+  max-height: 52px;
+  width: auto;
+  display: block;
+}
+
+.footer-logo {
+  max-height: 70px;
+  width: auto;
+  display: block;
+}
+
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+}
+
 .nav-links {
   display: flex;
   gap: 0.5rem;
