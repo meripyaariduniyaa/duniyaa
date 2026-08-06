@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function TemplateRenderer({ note, isPreview = false }) {
   if (!note) return null;
@@ -12,8 +12,6 @@ export default function TemplateRenderer({ note, isPreview = false }) {
     case 'apology':
     case 'cute-apology':
       return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
-    case 'memoryverse':
-      return <MemoryverseTemplate note={note} isPreview={isPreview} />;
     case 'birthday-surprise':
       return <BirthdaySurpriseTemplate note={note} isPreview={isPreview} />;
     case 'love-letter':
@@ -34,50 +32,103 @@ export default function TemplateRenderer({ note, isPreview = false }) {
 }
 
 /* ==========================================================================
-   0. MULTI-STEP ROMANTIC INTERACTIVE APOLOGY FLOW TEMPLATE
+   CONFETTI CANNON PARTICLE COMPONENT
+   ========================================================================== */
+function ConfettiCannon({ active = false, duration = 3500, heartOnly = false }) {
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    if (active) {
+      const colors = ['#ff4b8b', '#ffd700', '#38bdf8', '#a855f7', '#34d399', '#ff758c', '#fb923c'];
+      const shapes = heartOnly ? ['💖', '💕', '❤️', '🌸', '✨'] : ['🎉', '✨', '💖', '⭐', '🎈', '🍬'];
+      const newParticles = Array.from({ length: 45 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        animDuration: 2 + Math.random() * 2,
+        delay: Math.random() * 0.5,
+        size: 14 + Math.random() * 16,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        rotate: Math.random() * 360,
+      }));
+      setParticles(newParticles);
+
+      const timer = setTimeout(() => {
+        setParticles([]);
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [active, duration, heartOnly]);
+
+  if (!particles.length) return null;
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            top: '-20px',
+            left: `${p.left}%`,
+            fontSize: `${p.size}px`,
+            color: p.color,
+            animation: `confettiFall ${p.animDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${p.delay}s forwards`,
+            transform: `rotate(${p.rotate}deg)`,
+          }}
+        >
+          {p.shape}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   1. INTERACTIVE ROMANTIC APOLOGY TEMPLATE (ID: sorry)
    ========================================================================== */
 function InteractiveApologyFlowTemplate({ note }) {
   const [step, setStep] = useState(1);
-
-  // Step 2: Cuteness Meter State
+  const [vibe, setVibe] = useState('cute'); // 'cute', 'romantic', 'sincere'
   const [cutenessCount, setCutenessCount] = useState(0);
-
-  // Step 3: Tap Cards state
   const [revealedCards, setRevealedCards] = useState([false, false, false]);
-
-  // Step 4: Polaroid Stack State
   const [topIndex, setTopIndex] = useState(0);
-
-  // Step 5: Typewriter State
   const [typedText, setTypedText] = useState('');
   const [forgiven, setForgiven] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Audio Music state
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const audioRef = React.useRef(null);
+  const audioRef = useRef(null);
 
-  const recipient = note?.recipient_name || 'cutiepie';
-  const defaultApologyMessage = "Sorry bcha 🥺 I know mene gusse me jyada boldiyaa me galat tha. Please baat krlo I am sorry baby. Please forgive me if I hurt you or wasted even a little of your precious time. I promise I will do better. ❤️";
-  const fullMessage = note?.custom_message || defaultApologyMessage;
+  const recipient = note?.recipient_name || 'Cutie';
+  const defaultApologyMessage = note?.custom_message || "I know I messed up and said things out of anger. I am truly sorry from the bottom of my heart. You mean everything to me, and I promise to do so much better for us. Please forgive me? 💕";
 
   const defaultPhotos = [
-    { url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop', caption: "I'm sorry 🥺" },
+    { url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop', caption: "I'm so sorry 🥺" },
     { url: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop', caption: "Please forgive me 💕" },
-    { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800&auto=format&fit=crop', caption: "You mean everything 💖" }
+    { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800&auto=format&fit=crop', caption: "You mean the world 💖" }
   ];
 
   const photos = (note?.image_urls && note.image_urls.length > 0)
     ? note.image_urls.map((u, i) => ({
         url: u,
-        caption: i === 0 ? "I'm sorry 🥺" : i === 1 ? "Please forgive me 💕" : "You mean everything 💖"
+        caption: i === 0 ? "I'm so sorry 🥺" : i === 1 ? "Please forgive me 💕" : "Our sweet moment 💖"
       }))
     : defaultPhotos;
 
-  // Cuteness meter timer in Step 2
+  const promiseList = [
+    "I promise to always listen and never let anger win.",
+    "I promise to give you extra hugs and make your smile my #1 priority.",
+    "I promise to cherish you every single day and never take you for granted."
+  ];
+
+  // Auto fill cuteness meter in Step 2
   useEffect(() => {
+    let timer;
     if (step === 2) {
-      setCutenessCount(0);
-      const timer = setInterval(() => {
+      setCutenessCount(20);
+      timer = setInterval(() => {
         setCutenessCount((prev) => {
           if (prev >= 120) {
             clearInterval(timer);
@@ -85,9 +136,9 @@ function InteractiveApologyFlowTemplate({ note }) {
           }
           return prev + 2;
         });
-      }, 35);
-      return () => clearInterval(timer);
+      }, 40);
     }
+    return () => clearInterval(timer);
   }, [step]);
 
   // Typewriter effect in Step 5
@@ -96,8 +147,8 @@ function InteractiveApologyFlowTemplate({ note }) {
       setTypedText('');
       let index = 0;
       const typeTimer = setInterval(() => {
-        if (index < fullMessage.length) {
-          setTypedText((prev) => prev + fullMessage.charAt(index));
+        if (index < defaultApologyMessage.length) {
+          setTypedText((prev) => prev + defaultApologyMessage.charAt(index));
           index++;
         } else {
           clearInterval(typeTimer);
@@ -105,7 +156,7 @@ function InteractiveApologyFlowTemplate({ note }) {
       }, 35);
       return () => clearInterval(typeTimer);
     }
-  }, [step, fullMessage]);
+  }, [step, defaultApologyMessage]);
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -125,12 +176,14 @@ function InteractiveApologyFlowTemplate({ note }) {
     });
   };
 
-  const nextPolaroid = () => {
-    setTopIndex((prev) => (prev + 1) % photos.length);
+  const triggerForgive = () => {
+    setForgiven(true);
+    setShowConfetti(true);
   };
 
   return (
-    <div className="sorry-flow-container">
+    <div className={`sorry-flow-container vibe-${vibe}`}>
+      <ConfettiCannon active={showConfetti} heartOnly={true} />
       <div className="sorry-flow-sparkles" />
 
       {/* Floating Audio Toggle */}
@@ -143,64 +196,108 @@ function InteractiveApologyFlowTemplate({ note }) {
         src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-113264.mp3"
       />
 
-      {/* STEP 1: Landing Greeting */}
+      {/* Step Progress Dots */}
+      <div className="step-progress-dots">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <span key={s} className={`dot ${step === s ? 'active' : step > s ? 'completed' : ''}`}>
+            {s === 1 ? '👋' : s === 2 ? '❤️' : s === 3 ? '📜' : s === 4 ? '📸' : '💌'}
+          </span>
+        ))}
+      </div>
+
+      {/* STEP 1: Landing & Vibe Selector */}
       {step === 1 && (
         <div className="sorry-flow-step">
           <div className="sorry-flow-sticker">
-            <svg viewBox="0 0 120 120" width="110" height="110">
-              <path d="M60 100 C20 80 10 50 25 30 C40 10 55 25 60 35 C65 25 80 10 95 30 C110 50 100 80 60 100 Z" fill="#ff4b8b" />
-              <circle cx="45" cy="45" r="5" fill="#fff" />
-              <circle cx="75" cy="45" r="5" fill="#fff" />
-              <path d="M52 58 Q60 66 68 58" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-            </svg>
+            <span style={{ fontSize: '4.5rem' }}>🥺</span>
           </div>
-          <h1 className="sorry-flow-title">Hey {recipient}, cutiepie</h1>
-          <p className="sorry-flow-subtitle">Do you even know how cute you are?</p>
-          <button className="sorry-flow-btn-glowing" onClick={() => setStep(2)}>
-            let&apos;s check 😜💖
+          <h1 className="sorry-flow-title">Hey {recipient}, my love</h1>
+          <p className="sorry-flow-subtitle">I built a 5-step interactive apology journey just for you.</p>
+
+          <div className="vibe-selector-group">
+            <p style={{ fontSize: '0.8rem', color: '#fbcfe8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Choose Apology Vibe:
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+              {[
+                { id: 'cute', label: '😜 Cute & Playful' },
+                { id: 'romantic', label: '🌹 Deep Romantic' },
+                { id: 'sincere', label: '🕊️ Pure & Sincere' }
+              ].map((v) => (
+                <button
+                  key={v.id}
+                  className={`vibe-chip ${vibe === v.id ? 'active' : ''}`}
+                  onClick={() => setVibe(v.id)}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(2)} style={{ marginTop: '1.5rem' }}>
+            Start Apology Journey ➔
           </button>
         </div>
       )}
 
-      {/* STEP 2: Cuteness Meter */}
+      {/* STEP 2: Cuteness & Sincerity Gauge */}
       {step === 2 && (
         <div className="sorry-flow-step">
-          <h2 style={{ fontSize: '1.4rem', color: '#fbcfe8', fontWeight: 600 }}>
-            Measuring your cuteness... ⏳
+          <h2 style={{ fontSize: '1.5rem', color: '#fbcfe8', fontWeight: 700 }}>
+            Measuring Your Cuteness & My Sincerity 💖
           </h2>
-          <div className="meter-box">
-            <div className="meter-counter">{cutenessCount}%</div>
-            <div className="meter-bar-track">
-              <div className="meter-bar-fill" style={{ width: `${Math.min(cutenessCount, 100)}%` }} />
+          <p style={{ fontSize: '0.85rem', color: '#ffd1dc', margin: '0.5rem 0 1rem' }}>
+            Tap the heart gauge to boost sincerity meter!
+          </p>
+
+          <div className="heart-gauge-box" onClick={() => setCutenessCount((c) => Math.min(120, c + 15))}>
+            <div className="heart-gauge-svg-wrapper">
+              <svg viewBox="0 0 100 100" width="120" height="120">
+                <path d="M50 88 C20 65 5 40 18 20 C30 5 45 15 50 25 C55 15 70 5 82 20 C95 40 80 65 50 88 Z" fill="rgba(255, 255, 255, 0.15)" stroke="#ff4b8b" strokeWidth="4" />
+                <path
+                  d="M50 88 C20 65 5 40 18 20 C30 5 45 15 50 25 C55 15 70 5 82 20 C95 40 80 65 50 88 Z"
+                  fill="url(#heartGradient)"
+                  style={{
+                    clipPath: `polygon(0 ${100 - Math.min(100, cutenessCount)}%, 100% ${100 - Math.min(100, cutenessCount)}%, 100% 100%, 0 100%)`,
+                    transition: 'clip-path 0.3s ease'
+                  }}
+                />
+                <defs>
+                  <linearGradient id="heartGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#ff4b8b" />
+                    <stop offset="100%" stopColor="#ff758c" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="heart-gauge-percent">{cutenessCount}%</div>
             </div>
-            {cutenessCount >= 120 && (
-              <div className="cuteness-warning-badge">
-                ⚠️ WARNING: TOO CUTE TO HANDLE
+
+            {cutenessCount >= 100 && (
+              <div className="cuteness-warning-badge pulse-anim">
+                🚨 1000% SINCERE & OVERFLOWING WITH LOVE
               </div>
             )}
           </div>
+
           <button className="sorry-flow-btn-glowing" onClick={() => setStep(3)}>
-            Continue ➔
+            Unlock Promise Cards ➔
           </button>
         </div>
       )}
 
-      {/* STEP 3: Tap-to-Reveal Cards */}
+      {/* STEP 3: Tap-to-Reveal Promise Cards */}
       {step === 3 && (
         <div className="sorry-flow-step">
           <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, marginBottom: '0.25rem' }}>
-            Tap each one to reveal 💖
+            My Promises to You 📜
           </h2>
           <p style={{ fontSize: '0.85rem', color: '#fbcfe8', marginBottom: '1.25rem' }}>
-            Tap all 3 cards to unlock my promises to you
+            Tap each card to reveal my heartfelt vows
           </p>
 
           <div className="tap-cards-grid">
-            {[
-              "I messed up... and I'm really sorry for that.",
-              "I promise I'll be better for you.",
-              "You mean the world to me and I hate making you sad."
-            ].map((text, idx) => (
+            {promiseList.map((text, idx) => (
               <button
                 key={idx}
                 className={`tap-card-btn ${revealedCards[idx] ? 'revealed' : ''}`}
@@ -210,35 +307,35 @@ function InteractiveApologyFlowTemplate({ note }) {
                   {revealedCards[idx] ? '💖' : '🔒'}
                 </div>
                 <div className="tap-card-text">
-                  {revealedCards[idx] ? text : `Tap to reveal promise #${idx + 1}`}
+                  {revealedCards[idx] ? text : `Tap to reveal Promise #${idx + 1}`}
                 </div>
               </button>
             ))}
           </div>
 
-          <button className="sorry-flow-btn-glowing" onClick={() => setStep(4)}>
-            See more ➔
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(4)} style={{ marginTop: '1rem' }}>
+            Swipe Our Memories ➔
           </button>
         </div>
       )}
 
-      {/* STEP 4: Photo Memory Deck / Swiper */}
+      {/* STEP 4: Photo Memory Stack Reel */}
       {step === 4 && (
         <div className="sorry-flow-step">
           <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, margin: 0 }}>
-            Some Sweet Moments
+            Our Cherished Moments 📸
           </h2>
           <p style={{ fontSize: '0.85rem', color: '#fbcfe8', margin: '0.25rem 0 1rem' }}>
-            (Swipe or tap to switch cards)
+            (Tap card stack to flip through memories)
           </p>
 
-          <div className="polaroid-deck-container" onClick={nextPolaroid}>
+          <div className="polaroid-deck-container" onClick={() => setTopIndex((prev) => (prev + 1) % photos.length)}>
             {photos.map((item, idx) => {
               const offset = (idx - topIndex + photos.length) % photos.length;
               const isTop = offset === 0;
               const rotDeg = isTop ? 0 : offset % 2 === 0 ? 6 : -6;
               const scaleVal = 1 - offset * 0.05;
-              const translateYVal = offset * 10;
+              const translateYVal = offset * 12;
 
               return (
                 <div
@@ -258,20 +355,20 @@ function InteractiveApologyFlowTemplate({ note }) {
             })}
           </div>
 
-          <button className="sorry-flow-btn-glowing" onClick={() => setStep(5)}>
-            Continue ➔
+          <button className="sorry-flow-btn-glowing" onClick={() => setStep(5)} style={{ marginTop: '1.5rem' }}>
+            Read Final Apology Note ➔
           </button>
         </div>
       )}
 
-      {/* STEP 5: Typed Apology Note */}
+      {/* STEP 5: Self-Typing Typewriter Note */}
       {step === 5 && (
         <div className="sorry-flow-step">
-          <div className="sorry-flow-sticker" style={{ width: '90px', height: '90px', marginBottom: '0.5rem' }}>
+          <div className="sorry-flow-sticker" style={{ width: '80px', height: '80px', marginBottom: '0.5rem' }}>
             <span style={{ fontSize: '3.5rem' }}>💌</span>
           </div>
-          <h2 className="sorry-flow-title" style={{ fontSize: '2.2rem' }}>
-            A little note for you ✨
+          <h2 className="sorry-flow-title" style={{ fontSize: '1.8rem' }}>
+            From My Heart To Yours ✨
           </h2>
 
           <div className="typewriter-card-box">
@@ -284,17 +381,18 @@ function InteractiveApologyFlowTemplate({ note }) {
           {!forgiven ? (
             <button
               className="sorry-flow-btn-glowing forgive-confetti-btn"
-              onClick={() => setForgiven(true)}
+              onClick={triggerForgive}
+              style={{ marginTop: '1.5rem' }}
             >
               Forgive Me 💕
             </button>
           ) : (
-            <div style={{ animation: 'sorryStepFadeIn 0.5s ease-out' }}>
+            <div style={{ animation: 'sorryStepFadeIn 0.5s ease-out', marginTop: '1.5rem' }}>
               <p style={{ fontSize: '1.5rem', color: '#34d399', fontWeight: 800, textShadow: '0 0 15px rgba(52, 211, 153, 0.8)' }}>
-                Thank you baby! I love you so much ❤️🥰
+                Thank you so much baby! I love you! ❤️🥰
               </p>
               <p style={{ fontSize: '0.9rem', color: '#fbcfe8', marginTop: '0.5rem' }}>
-                Promise kept forever. ✨
+                Forever & always yours. ✨
               </p>
             </div>
           )}
@@ -305,128 +403,86 @@ function InteractiveApologyFlowTemplate({ note }) {
 }
 
 /* ==========================================================================
-   1. MEMORYVERSE TEMPLATE
-   ========================================================================== */
-function MemoryverseTemplate({ note }) {
-  const [activeMemory, setActiveMemory] = useState(null);
-  const [unlocked, setUnlocked] = useState(false);
-  const images = note.image_urls || [];
-
-  return (
-    <div className="memoryverse-container">
-      <div className="memoryverse-stars" />
-      <div className="text-center" style={{ position: 'relative', zIndex: 2 }}>
-        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>✨</div>
-        <p style={{ color: '#c084fc', letterSpacing: '0.15em', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>
-          WELCOME TO THE MEMORYVERSE
-        </p>
-        <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0' }}>
-          For {note.recipient_name}
-        </h1>
-        <p style={{ color: '#ddd6fe', fontSize: '0.9rem', maxWidth: '500px', margin: '0 auto 1.5rem' }}>
-          A private galaxy of our moments and a secret reveal waiting for you.
-        </p>
-
-        {/* Orbiting Memory Nodes */}
-        {images.length > 0 && (
-          <div>
-            <p style={{ fontSize: '0.8rem', color: '#a78bfa', marginBottom: '0.75rem' }}>
-              ✦ Tap memory orbits to explore ✦
-            </p>
-            <div className="memoryverse-nodes">
-              {images.map((url, idx) => (
-                <button
-                  key={idx}
-                  className={`memoryverse-node ${activeMemory === idx ? 'active' : ''}`}
-                  onClick={() => setActiveMemory(activeMemory === idx ? null : idx)}
-                >
-                  📸 Memory #{idx + 1}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Active Selected Memory View */}
-        {activeMemory !== null && images[activeMemory] && (
-          <div style={{ background: 'rgba(30, 16, 45, 0.9)', border: '2px solid #a855f7', padding: '1rem', borderRadius: '16px', margin: '1.5rem auto', maxWidth: '400px', boxShadow: '0 0 25px rgba(168, 85, 247, 0.4)' }}>
-            <img src={images[activeMemory]} alt={`Memory ${activeMemory + 1}`} style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '12px', marginBottom: '0.75rem' }} />
-            <p style={{ fontSize: '0.85rem', color: '#e9d5ff' }}>Captured Moment #{activeMemory + 1} with {note.recipient_name}</p>
-          </div>
-        )}
-
-        {/* Reveal Central Core */}
-        {!unlocked ? (
-          <button
-            onClick={() => setUnlocked(true)}
-            style={{
-              background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-              color: '#fff',
-              border: 'none',
-              padding: '1rem 2rem',
-              borderRadius: '999px',
-              fontWeight: 800,
-              fontSize: '1rem',
-              cursor: 'pointer',
-              marginTop: '1.5rem',
-              boxShadow: '0 0 25px rgba(236, 72, 153, 0.6)',
-              transition: 'transform 0.2s',
-            }}
-          >
-            🌌 Unlock Heartfelt Message
-          </button>
-        ) : (
-          <div style={{ background: 'rgba(15, 7, 26, 0.95)', border: '2px solid #f0abfc', borderRadius: '20px', padding: '2rem', marginTop: '2rem', textAlign: 'left', boxShadow: '0 0 35px rgba(240, 171, 252, 0.4)' }}>
-            <h3 style={{ color: '#f472b6', fontSize: '1.25rem', marginBottom: '1rem' }}>Dear {note.recipient_name},</h3>
-            <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#f3e8ff', whiteSpace: 'pre-wrap' }}>
-              {note.custom_message}
-            </p>
-            <div className="cursive" style={{ marginTop: '2rem', color: '#f472b6', fontSize: '1.8rem' }}>
-              ✦ In every universe, with love ✦
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   2. BIRTHDAY SURPRISE TEMPLATE
+   2. CINEMATIC BIRTHDAY SURPRISE TEMPLATE (ID: birthday-surprise)
    ========================================================================== */
 function BirthdaySurpriseTemplate({ note }) {
+  const [theme, setTheme] = useState('royal'); // 'royal', 'rainbow', 'bollywood'
   const [curtainsOpen, setCurtainsOpen] = useState(false);
   const [candlesBlown, setCandlesBlown] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'Birthday Star';
+  const customMsg = note?.custom_message || "Wishing you a year filled with endless laughter, boundless happiness, and all your heart's desires. Happy Birthday!";
+
+  const handleBlowCandles = () => {
+    setCandlesBlown(true);
+    setShowConfetti(true);
+  };
 
   return (
-    <div className="birthday-stage">
-      <div style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.5rem', color: '#ffe4e6' }}>
-        🎂 BIRTHDAY MAGIC SURPRISE
+    <div className={`birthday-stage theme-${theme}`}>
+      <ConfettiCannon active={showConfetti} duration={4000} />
+
+      <div style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffe4e6' }}>
+        🎂 CINEMATIC BIRTHDAY SURPRISE
       </div>
-      <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.75rem)', color: '#fff', margin: '0.5rem 0 1.5rem' }}>
-        Happy Birthday {note.recipient_name}! 🎉
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', color: '#fff', margin: '0.5rem 0 1rem' }}>
+        Happy Birthday {recipient}! 🎉
       </h1>
 
-      {/* Theatrical Curtain Box */}
+      {/* Theme Picker */}
+      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+        {[
+          { id: 'royal', label: '👑 Royal Red' },
+          { id: 'rainbow', label: '🌈 Rainbow Party' },
+          { id: 'bollywood', label: '🎬 Bollywood Marquee' }
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTheme(t.id)}
+            style={{
+              padding: '0.4rem 0.8rem',
+              borderRadius: '999px',
+              border: '2px solid #ffd700',
+              background: theme === t.id ? '#ffd700' : 'rgba(0,0,0,0.4)',
+              color: theme === t.id ? '#3b0f1b' : '#fff',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Theatrical Curtain Stage */}
       <div className={`curtain-wrapper ${curtainsOpen ? 'curtain-open' : ''}`}>
         <div className="curtain-left">🎭</div>
         <div className="curtain-right">✨</div>
 
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <div style={{ padding: '2rem 1rem', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           {!candlesBlown ? (
             <div>
-              <div className="birthday-cake" onClick={() => setCandlesBlown(true)} title="Tap to blow out candles!">
-                🎂🕯️
+              <div className="birthday-cake-container" onClick={handleBlowCandles} title="Tap cake to blow out candles!">
+                <div className="candle-flames">
+                  <span className="flame pulse-flame">🔥</span>
+                  <span className="flame pulse-flame" style={{ animationDelay: '0.2s' }}>🔥</span>
+                  <span className="flame pulse-flame" style={{ animationDelay: '0.4s' }}>🔥</span>
+                </div>
+                <div className="cake-3d-model">🎂</div>
               </div>
-              <p style={{ color: '#ffd700', fontWeight: 700, marginTop: '1rem', fontSize: '0.9rem' }}>
-                👇 Tap the cake to blow out your birthday candles!
+              <p className="tap-cake-prompt">
+                ✨ Tap the cake to blow out your birthday candles & make a wish! ✨
               </p>
             </div>
           ) : (
-            <div>
+            <div style={{ animation: 'zoomIn 0.5s ease' }}>
               <div style={{ fontSize: '4.5rem', animation: 'spin 1s ease' }}>🥳🎈🎉</div>
-              <h2 style={{ color: '#ffd700', fontSize: '1.5rem', marginTop: '0.5rem' }}>Make a wish!</h2>
-              <p style={{ color: '#fff', fontSize: '0.9rem' }}>Your wish is sealed with love.</p>
+              <h2 style={{ color: '#ffd700', fontSize: '1.75rem', marginTop: '0.5rem', textShadow: '0 0 10px rgba(255, 215, 0, 0.8)' }}>
+                Wish Granted! 🎉
+              </h2>
+              <p style={{ color: '#fff', fontSize: '0.95rem' }}>Your year ahead is blessed with magical moments.</p>
             </div>
           )}
         </div>
@@ -436,27 +492,34 @@ function BirthdaySurpriseTemplate({ note }) {
         <button
           onClick={() => setCurtainsOpen(true)}
           className="btn-primary"
-          style={{ background: '#ffd700', color: '#3b0f1b', border: '3px solid #3b0f1b', fontWeight: 800 }}
+          style={{ background: '#ffd700', color: '#3b0f1b', border: '3px solid #3b0f1b', fontWeight: 800, fontSize: '1.05rem', padding: '0.85rem 2rem', cursor: 'pointer' }}
         >
-          🎪 Open Curtains & Read Card
+          🎪 Tap to Rise Curtains & Read Card
         </button>
       ) : (
-        <div style={{ background: '#fff', color: '#3b0f1b', padding: '2rem', borderRadius: '20px', border: '4px solid #3b0f1b', boxShadow: '4px 4px 0px #3b0f1b', textAlign: 'left', marginTop: '1rem' }}>
-          <h3 style={{ color: '#ff4b2b', fontSize: '1.25rem', marginBottom: '1rem' }}>Dearest {note.recipient_name},</h3>
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-            {note.custom_message}
+        <div className="birthday-card-reveal">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🎈</span>
+            <h3 style={{ color: '#ff4b2b', fontSize: '1.3rem', margin: 0 }}>Dearest {recipient},</h3>
+            <span style={{ fontSize: '1.5rem' }}>⭐</span>
+          </div>
+
+          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, whiteSpace: 'pre-wrap', color: '#2c0c14' }}>
+            {customMsg}
           </p>
 
           {note.image_urls?.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
               {note.image_urls.map((url, i) => (
-                <img key={i} src={url} alt="Birthday Memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #3b0f1b' }} />
+                <div key={i} className="birthday-photo-frame">
+                  <img src={url} alt="Birthday Memory" />
+                </div>
               ))}
             </div>
           )}
 
           <div className="cursive" style={{ marginTop: '2rem', textAlign: 'right', fontSize: '2rem', color: '#ff416c' }}>
-            Sending endless hugs & sweetness ❤️
+            Sending grand hugs & sweetness ❤️
           </div>
         </div>
       )}
@@ -465,55 +528,123 @@ function BirthdaySurpriseTemplate({ note }) {
 }
 
 /* ==========================================================================
-   3. LOVE LETTER TEMPLATE
+   3. HANDWRITTEN LOVE LETTER TEMPLATE (ID: love-letter)
    ========================================================================== */
 function LoveLetterTemplate({ note }) {
-  const [sealed, setSealed] = useState(true);
+  const [stationery, setStationery] = useState('classic'); // 'classic', 'floral', 'midnight', 'vintage'
+  const [unsealed, setUnsealed] = useState(false);
+  const [typedLines, setTypedLines] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'My Love';
+  const customMsg = note?.custom_message || "I cherish every single moment with you. You bring warmth, beauty, and joy to my world. Thank you for being you.";
+
+  // Pen-on-paper typing effect
+  useEffect(() => {
+    if (unsealed) {
+      setTypedLines('');
+      let index = 0;
+      const typeTimer = setInterval(() => {
+        if (index < customMsg.length) {
+          setTypedLines((prev) => prev + customMsg.charAt(index));
+          index++;
+        } else {
+          clearInterval(typeTimer);
+        }
+      }, 40);
+      return () => clearInterval(typeTimer);
+    }
+  }, [unsealed, customMsg]);
+
+  const handleUnseal = () => {
+    setUnsealed(true);
+    setShowConfetti(true);
+  };
 
   return (
-    <div className="love-letter-paper">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px dashed #d4af37', paddingBottom: '0.75rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', color: '#8b5e34', textTransform: 'uppercase' }}>
-          💌 CONFIDENTIAL LOVE LETTER
-        </span>
-        <span style={{ fontSize: '1.2rem' }}>🌹</span>
+    <div className={`love-letter-paper style-${stationery}`}>
+      <ConfettiCannon active={showConfetti} heartOnly={true} />
+
+      {/* Floating Petals background effect */}
+      <div className="floating-petals-container">
+        <span className="petal p1">🌸</span>
+        <span className="petal p2">🌺</span>
+        <span className="petal p3">🌸</span>
+        <span className="petal p4">✨</span>
       </div>
 
-      {sealed ? (
-        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-          <h2 style={{ color: '#5c3a21', fontSize: '1.5rem', marginBottom: '1rem' }}>
-            A letter written for {note.recipient_name}
+      {/* Stationery Theme Switcher */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px dashed currentColor', paddingBottom: '0.75rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          💌 CONFIDENTIAL LOVE LETTER
+        </span>
+        <div style={{ display: 'flex', gap: '0.35rem' }}>
+          {[
+            { id: 'classic', label: '📜 Classic' },
+            { id: 'floral', label: '🌸 Floral' },
+            { id: 'midnight', label: '🌙 Midnight' },
+            { id: 'vintage', label: '🕯️ Vintage' }
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setStationery(s.id)}
+              className={`stationery-chip ${stationery === s.id ? 'active' : ''}`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {!unsealed ? (
+        <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+          <div className="envelope-graphic">
+            <div className="envelope-flap" />
+            <div className="envelope-body">
+              <p style={{ margin: '0.5rem 0 0', fontWeight: 700, fontSize: '1.1rem' }}>To {recipient}</p>
+            </div>
+          </div>
+
+          <h2 style={{ fontSize: '1.5rem', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+            A letter written for {recipient}
           </h2>
-          <p style={{ color: '#7f5539', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            This letter is sealed with crimson wax. Tap below to break the seal.
+          <p style={{ fontSize: '0.95rem', marginBottom: '1.5rem', opacity: 0.85 }}>
+            Sealed with custom crimson wax. Tap below to unseal & open.
           </p>
-          <button className="wax-seal-btn" onClick={() => setSealed(false)} title="Break Wax Seal">
+
+          <button className="wax-seal-btn" onClick={handleUnseal} title="Tap Wax Seal to Unseal">
             💌
           </button>
-          <p style={{ fontSize: '0.75rem', color: '#9c6644', marginTop: '1rem', fontWeight: 600 }}>
+          <p style={{ fontSize: '0.75rem', marginTop: '0.75rem', fontWeight: 700, letterSpacing: '0.1em' }}>
             TAP WAX SEAL TO UNSEAL
           </p>
         </div>
       ) : (
         <div style={{ animation: 'fadeIn 0.6s ease' }}>
-          <h2 style={{ color: '#5c3a21', fontSize: '1.75rem', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>
-            My dearest {note.recipient_name},
+          <h2 className="letter-header-name">
+            Dearest {recipient},
           </h2>
-          <p style={{ fontSize: '1.1rem', lineHeight: 2, color: '#3d2616', whiteSpace: 'pre-wrap', fontFamily: 'Georgia, serif' }}>
-            {note.custom_message}
-          </p>
+
+          <div className="typewriter-handwriting-body">
+            {typedLines}
+            <span className="blinking-pen-cursor">🖋️</span>
+          </div>
 
           {note.image_urls?.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginTop: '2rem' }}>
               {note.image_urls.map((url, i) => (
-                <img key={i} src={url} alt="Cherished moment" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #d4af37', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+                <div key={i} className="letter-photo-polaroid">
+                  <img src={url} alt="Cherished moment" />
+                </div>
               ))}
             </div>
           )}
 
-          <div style={{ marginTop: '3rem', textAlign: 'right', fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#8b5e34', fontSize: '1.25rem' }}>
+          <div className="letter-signature">
             Yours always,<br />
-            <span className="cursive" style={{ fontSize: '2rem', color: '#b01432' }}>with all my heart</span>
+            <span className="cursive" style={{ fontSize: '2.2rem', color: '#b01432' }}>
+              with all my heart ❤️
+            </span>
           </div>
         </div>
       )}
@@ -522,32 +653,51 @@ function LoveLetterTemplate({ note }) {
 }
 
 /* ==========================================================================
-   4. LETTER FOR MOM TEMPLATE
+   4. A LETTER FOR MOM TEMPLATE (ID: letter-for-mom)
    ========================================================================== */
 function LetterForMomTemplate({ note }) {
+  const [secretRevealed, setSecretRevealed] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'Mom';
+  const customMsg = note?.custom_message || "Thank you for every meal, every warm cuddle, every sacrifice, and endless love. You are the strongest, sweetest person in my life.";
+
+  const handleRevealSecret = () => {
+    setSecretRevealed(true);
+    setShowConfetti(true);
+  };
+
   return (
     <div className="mom-card">
+      <ConfettiCannon active={showConfetti} heartOnly={true} />
+
       <div className="floral-corner floral-top-left">🌸</div>
       <div className="floral-corner floral-bottom-right">🌺</div>
 
-      <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <span style={{ background: '#fbcfe8', color: '#be185d', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          💐 FOR THE WORLD&apos;S BEST MOM
+      <div className="text-center" style={{ marginBottom: '1.5rem' }}>
+        <span style={{ background: '#fbcfe8', color: '#be185d', padding: '0.4rem 1.2rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          💐 TRIBUTE TO THE WORLD&apos;S BEST MOM
         </span>
-        <h1 style={{ color: '#831843', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', marginTop: '1rem' }}>
-          Dearest Mom, {note.recipient_name}
+        <h1 style={{ color: '#831843', fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', marginTop: '1rem' }}>
+          Dearest Mom, {recipient}
         </h1>
       </div>
 
-      <div style={{ background: '#fff', padding: '2rem', borderRadius: '20px', border: '2px solid #f472b6', boxShadow: ' inset 0 0 10px rgba(244, 114, 182, 0.1)' }}>
-        <p style={{ fontSize: '1.05rem', lineHeight: 1.9, color: '#4c0519', whiteSpace: 'pre-wrap' }}>
-          {note.custom_message}
-        </p>
+      <div className="mom-content-box">
+        {/* Memory & Gratitude */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: '0.8rem', color: '#be185d', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>
+            🌸 Childhood Memory & Gratitude:
+          </p>
+          <p style={{ fontSize: '1.05rem', lineHeight: 1.9, color: '#4c0519', whiteSpace: 'pre-wrap' }}>
+            {customMsg}
+          </p>
+        </div>
 
         {note.image_urls?.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#be185d', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
-              📸 Memories We Treasure:
+          <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '0.8rem', fontWeight: 800, color: '#be185d', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              📸 Moments With Mom:
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
               {note.image_urls.map((url, i) => (
@@ -556,22 +706,47 @@ function LetterForMomTemplate({ note }) {
             </div>
           </div>
         )}
+
+        {/* Secret Note with Blooming Flower Animation */}
+        <div className="secret-mom-note-box">
+          {!secretRevealed ? (
+            <button className="mom-secret-btn" onClick={handleRevealSecret}>
+              🌸 Tap to reveal a secret note I never told you...
+            </button>
+          ) : (
+            <div className="blooming-flower-reveal">
+              <div className="flower-bloom-svg-anim">
+                <svg viewBox="0 0 100 100" width="70" height="70">
+                  <path d="M50 20 C40 5 20 20 35 35 C20 40 5 60 25 70 C30 85 50 90 50 75 C50 90 70 85 75 70 C95 60 80 40 65 35 C80 20 60 5 50 20 Z" fill="#f472b6" />
+                  <circle cx="50" cy="50" r="12" fill="#ffd700" />
+                </svg>
+              </div>
+              <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#be185d', marginTop: '0.5rem' }}>
+                &ldquo;You are my hero, Ma. No matter where I go, your love is my anchor. Thank you for everything!&rdquo; ❤️
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="cursive" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '2.2rem', color: '#be185d' }}>
-        Thank you for everything, Mom! ❤️
+      <div className="cursive" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '2.4rem', color: '#be185d' }}>
+        Thank you, Ma! ❤️
       </div>
     </div>
   );
 }
 
 /* ==========================================================================
-   5. BE MY VALENTINE TEMPLATE
+   5. WILL YOU BE MY VALENTINE TEMPLATE (ID: be-my-valentine)
    ========================================================================== */
 function BeMyValentineTemplate({ note }) {
   const [accepted, setAccepted] = useState(false);
   const [noPosition, setNoPosition] = useState({ top: '0px', left: '0px' });
   const [noCount, setNoCount] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'Cutie';
+  const customMsg = note?.custom_message || "You bring magic and joy into my life. I want to celebrate love with you today and every day!";
 
   const noPhrases = [
     'No 💔',
@@ -584,30 +759,37 @@ function BeMyValentineTemplate({ note }) {
   ];
 
   const dodgeNoButton = () => {
-    const randomTop = Math.floor(Math.random() * 120 - 60) + 'px';
-    const randomLeft = Math.floor(Math.random() * 160 - 80) + 'px';
+    const randomTop = Math.floor(Math.random() * 140 - 70) + 'px';
+    const randomLeft = Math.floor(Math.random() * 180 - 90) + 'px';
     setNoPosition({ top: randomTop, left: randomLeft });
     setNoCount((prev) => prev + 1);
   };
 
+  const handleYes = () => {
+    setAccepted(true);
+    setShowConfetti(true);
+  };
+
   return (
     <div className="valentine-card">
+      <ConfettiCannon active={showConfetti} heartOnly={true} duration={5000} />
+
       <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>💖</div>
       <p style={{ color: '#e11d48', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-        VALENTINE CONFESSION
+        VALENTINE PROPOSAL
       </p>
 
       {!accepted ? (
         <div>
           <h1 style={{ color: '#881337', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '1rem 0' }}>
-            {note.recipient_name}, Will You Be My Valentine? 🌹
+            {recipient}, Will You Be My Valentine? 🌹
           </h1>
-          <p style={{ color: '#9f1239', fontSize: '0.95rem' }}>
-            Choose wisely below! (Hint: There is only one right answer 😉)
+          <p style={{ color: '#9f1239', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+            Choose wisely below! (Hint: The &apos;No&apos; button is shy 😉)
           </p>
 
           <div className="runaway-container">
-            <button className="btn-yes-val" onClick={() => setAccepted(true)}>
+            <button className="btn-yes-val" onClick={handleYes}>
               YES! Absolutely 💕
             </button>
 
@@ -624,18 +806,18 @@ function BeMyValentineTemplate({ note }) {
         </div>
       ) : (
         <div style={{ animation: 'fadeIn 0.5s ease' }}>
-          <div style={{ fontSize: '4rem' }}>🎉🥰💘</div>
-          <h1 style={{ color: '#e11d48', fontSize: '2rem', margin: '0.5rem 0' }}>
+          <div style={{ fontSize: '4.5rem' }}>🎉🥰💘</div>
+          <h1 style={{ color: '#e11d48', fontSize: '2.2rem', margin: '0.5rem 0' }}>
             YAY! Best Decision Ever! ❤️
           </h1>
-          <p style={{ color: '#9f1239', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            You just made someone the happiest person on earth.
+          <p style={{ color: '#9f1239', fontSize: '1rem', marginBottom: '2rem' }}>
+            You just made me the happiest person in the universe!
           </p>
 
           <div style={{ background: '#fff', padding: '2rem', borderRadius: '20px', border: '3px solid #e11d48', textAlign: 'left', boxShadow: '4px 4px 0px #881337' }}>
-            <h3 style={{ color: '#e11d48', fontSize: '1.2rem', marginBottom: '1rem' }}>For My Valentine {note.recipient_name}:</h3>
+            <h3 style={{ color: '#e11d48', fontSize: '1.2rem', marginBottom: '1rem' }}>For My Valentine {recipient}:</h3>
             <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#4c0519', whiteSpace: 'pre-wrap' }}>
-              {note.custom_message}
+              {customMsg}
             </p>
 
             {note.image_urls?.length > 0 && (
@@ -653,35 +835,58 @@ function BeMyValentineTemplate({ note }) {
 }
 
 /* ==========================================================================
-   6. WEDDING INVITATION TEMPLATE
+   6. ROYAL WEDDING INVITATION TEMPLATE (ID: wedding-invitation)
    ========================================================================== */
 function WeddingInvitationTemplate({ note }) {
   const [rsvp, setRsvp] = useState(null);
+  const [timeLeft, setTimeLeft] = useState({ days: 14, hours: 8, mins: 45, secs: 12 });
+
+  const recipient = note?.recipient_name || 'Esteemed Guest';
+  const customMsg = note?.custom_message || "We request the honor of your presence to celebrate love, laughter, and togetherness as we begin our new journey.";
+
+  // Real-time live countdown timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.secs > 0) return { ...prev, secs: prev.secs - 1 };
+        if (prev.mins > 0) return { ...prev, mins: 59, secs: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, mins: 59, secs: 59 };
+        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, mins: 59, secs: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="wedding-card">
+      <div className="wedding-mandala-top">🪔</div>
+
       <div style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', color: '#fbbf24', textTransform: 'uppercase' }}>
-        💒 DIGITAL SAVE THE DATE
+        💒 SHUBH VIVAH & SAVE THE DATE
       </div>
-      <h1 style={{ color: '#fef3c7', fontSize: 'clamp(1.75rem, 5vw, 3rem)', margin: '1rem 0 0.5rem', fontFamily: 'Georgia, serif' }}>
-        Celebration for {note.recipient_name}
+      <h1 style={{ color: '#fef3c7', fontSize: 'clamp(1.75rem, 5vw, 3rem)', margin: '0.75rem 0 0.5rem', fontFamily: 'Georgia, serif' }}>
+        Wedding Invitation for {recipient}
       </h1>
-      <p style={{ color: '#fde68a', fontSize: '0.95rem', fontStyle: 'italic' }}>
-        Together with their families, invite you to share in their special moment.
+      <p style={{ color: '#fde68a', fontSize: '0.95rem', fontStyle: 'italic', maxWidth: '550px', margin: '0 auto 1.5rem' }}>
+        Together with their families, we cordially invite you to share in our sacred auspicious union.
       </p>
 
-      {/* Countdown timer mockup */}
+      {/* Real-time Live Countdown Timer */}
       <div className="wedding-timer">
-        <div className="timer-box"><div className="timer-num">14</div><div className="timer-label">Days</div></div>
-        <div className="timer-box"><div className="timer-num">08</div><div className="timer-label">Hours</div></div>
-        <div className="timer-box"><div className="timer-num">45</div><div className="timer-label">Mins</div></div>
-        <div className="timer-box"><div className="timer-num">12</div><div className="timer-label">Secs</div></div>
+        <div className="timer-box"><div className="timer-num">{String(timeLeft.days).padStart(2, '0')}</div><div className="timer-label">Days</div></div>
+        <div className="timer-box"><div className="timer-num">{String(timeLeft.hours).padStart(2, '0')}</div><div className="timer-label">Hours</div></div>
+        <div className="timer-box"><div className="timer-num">{String(timeLeft.mins).padStart(2, '0')}</div><div className="timer-label">Mins</div></div>
+        <div className="timer-box"><div className="timer-num">{String(timeLeft.secs).padStart(2, '0')}</div><div className="timer-label">Secs</div></div>
       </div>
 
+      {/* Invitation Message Card */}
       <div style={{ background: 'rgba(255, 255, 255, 0.08)', border: '2px solid #fbbf24', padding: '2rem', borderRadius: '16px', margin: '2rem 0', textAlign: 'left' }}>
-        <h3 style={{ color: '#fbbf24', fontSize: '1.25rem', marginBottom: '1rem', textTransform: 'uppercase' }}>Special Invitation Message</h3>
+        <h3 style={{ color: '#fbbf24', fontSize: '1.2rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          ✨ Special Invitation Message
+        </h3>
         <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#fff', whiteSpace: 'pre-wrap' }}>
-          {note.custom_message}
+          {customMsg}
         </p>
 
         {note.image_urls?.length > 0 && (
@@ -693,23 +898,79 @@ function WeddingInvitationTemplate({ note }) {
         )}
       </div>
 
-      {/* Interactive RSVP */}
-      <div>
-        <p style={{ fontSize: '0.85rem', color: '#fde68a', marginBottom: '1rem', fontWeight: 700 }}>
-          PLEASE RESPOND (RSVP)
+      {/* Schedule of Events Timeline */}
+      <div className="wedding-events-timeline">
+        <h3 style={{ color: '#fbbf24', fontSize: '1.25rem', marginBottom: '1rem', textTransform: 'uppercase' }}>
+          📅 Schedule of Events (उत्सव प्रसंग)
+        </h3>
+        <div className="events-grid">
+          <div className="event-card">
+            <div className="event-icon">💛</div>
+            <h4>Mehndi Ki Raat</h4>
+            <p className="event-time">4:00 PM onwards</p>
+          </div>
+          <div className="event-card">
+            <div className="event-icon">💃</div>
+            <h4>Sangeet Sandhya</h4>
+            <p className="event-time">7:30 PM onwards</p>
+          </div>
+          <div className="event-card">
+            <div className="event-icon">🪔</div>
+            <h4>Shubh Vivah</h4>
+            <p className="event-time">10:00 AM auspicious muhurat</p>
+          </div>
+          <div className="event-card">
+            <div className="event-icon">🎉</div>
+            <h4>Grand Reception</h4>
+            <p className="event-time">7:00 PM onwards</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Map Location Link Button */}
+      <div style={{ margin: '1.5rem 0' }}>
+        <a
+          href="https://maps.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: '#fbbf24',
+            color: '#4c0519',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '999px',
+            fontWeight: 800,
+            fontSize: '0.95rem'
+          }}
+        >
+          📍 Open Venue Location on Google Maps ➔
+        </a>
+      </div>
+
+      {/* Interactive RSVP Form */}
+      <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid #fbbf24', padding: '1.5rem', borderRadius: '16px', marginTop: '2rem' }}>
+        <p style={{ fontSize: '0.9rem', color: '#fde68a', marginBottom: '1rem', fontWeight: 800, letterSpacing: '0.1em' }}>
+          KINDLY RESPOND (RSVP)
         </p>
+
         {!rsvp ? (
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => setRsvp('attending')} style={{ background: '#fbbf24', color: '#4c0519', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '999px', fontWeight: 800, cursor: 'pointer' }}>
-              ✨ Joyfully Attending
-            </button>
-            <button onClick={() => setRsvp('regrets')} style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid #fbbf24', padding: '0.75rem 1.5rem', borderRadius: '999px', fontWeight: 700, cursor: 'pointer' }}>
-              ❤️ Sending Love From Afar
-            </button>
+          <div>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <button onClick={() => setRsvp('attending')} style={{ background: '#fbbf24', color: '#4c0519', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '999px', fontWeight: 800, cursor: 'pointer' }}>
+                ✨ Joyfully Attending
+              </button>
+              <button onClick={() => setRsvp('regrets')} style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid #fbbf24', padding: '0.75rem 1.5rem', borderRadius: '999px', fontWeight: 700, cursor: 'pointer' }}>
+                ❤️ Sending Blessings From Afar
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ background: 'rgba(251, 191, 36, 0.2)', padding: '1rem', borderRadius: '12px', color: '#fbbf24', fontWeight: 700 }}>
-            {rsvp === 'attending' ? '✓ Thank you! Your attendance has been recorded ✨' : '✓ Thank you for sending your heartfelt blessings ❤️'}
+            {rsvp === 'attending'
+              ? '✓ Thank you! Your attendance has been recorded. We look forward to celebrating with you! ✨'
+              : '✓ Thank you for sending your warm wishes and blessings ❤️'}
           </div>
         )}
       </div>
@@ -718,520 +979,207 @@ function WeddingInvitationTemplate({ note }) {
 }
 
 /* ==========================================================================
-   7. MEMORY TIME CAPSULE TEMPLATE
+   7. SURPRISE REVEAL BOX TEMPLATE (ID: surprise-reveal-box)
    ========================================================================== */
-function MemoryTimeCapsuleTemplate({ note }) {
-  const [unlocked, setUnlocked] = useState(false);
+function SurpriseRevealBoxTemplate({ note }) {
+  const [step, setStep] = useState(0); // 0: wrapped ribbon, 1: lid open, 2: surprise layer 1, 3: layer 2, 4: final reveal
+  const [boxTheme, setBoxTheme] = useState('ruby'); // 'ruby', 'gold', 'purple'
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'Special Someone';
+  const customMsg = note?.custom_message || "Behind every bow and ribbon lies a heart full of love for you. Here is your special surprise!";
+
+  const handleNextStep = () => {
+    const nextStep = step + 1;
+    setStep(nextStep);
+    if (nextStep === 2 || nextStep === 4) {
+      setShowConfetti(true);
+    }
+  };
 
   return (
-    <div className="capsule-card">
-      <div style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', color: '#38bdf8', textTransform: 'uppercase' }}>
-        ⏳ DIGITAL TIME CAPSULE
-      </div>
-      <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.75rem 0' }}>
-        Capsule for {note.recipient_name}
-      </h1>
-      <p style={{ color: '#93c5fd', fontSize: '0.9rem' }}>
-        A vault of photos, voice memories, and words sealed for the future.
+    <div className={`surprise-box-container theme-${boxTheme}`}>
+      <ConfettiCannon active={showConfetti} duration={3500} />
+
+      <p style={{ color: '#d81e5b', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        🎁 MULTI-LAYER UNBOXING EXPERIENCE
       </p>
+      <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0 1rem' }}>
+        Surprise Box for {recipient}
+      </h1>
 
-      {!unlocked ? (
-        <div>
-          <div className="capsule-lock" onClick={() => setUnlocked(true)} title="Tap to unlock vault">
-            🔒
-          </div>
-          <p style={{ color: '#38bdf8', fontWeight: 700, fontSize: '0.85rem' }}>
-            👇 TAP LOCK TO UNSEAL TIME CAPSULE
-          </p>
-        </div>
-      ) : (
-        <div style={{ animation: 'fadeIn 0.6s ease', marginTop: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🔓✨</div>
-          <h2 style={{ color: '#38bdf8', fontSize: '1.5rem', marginBottom: '1.5rem' }}>Time Capsule Unlocked!</h2>
-
-          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '2px solid #38bdf8', padding: '2rem', borderRadius: '16px', textAlign: 'left' }}>
-            <h3 style={{ color: '#7dd3fc', fontSize: '1.1rem', marginBottom: '1rem' }}>Sealed Message:</h3>
-            <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#f0f9ff', whiteSpace: 'pre-wrap' }}>
-              {note.custom_message}
-            </p>
-
-            {note.image_urls?.length > 0 && (
-              <div style={{ marginTop: '1.5rem' }}>
-                <p style={{ fontSize: '0.8rem', color: '#7dd3fc', fontWeight: 700, marginBottom: '0.5rem' }}>UNSEALED MEMORIES:</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                  {note.image_urls.map((url, i) => (
-                    <img key={i} src={url} alt="Capsule Memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '10px', border: '2px solid #38bdf8' }} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ==========================================================================
-   8. OPEN WHEN LETTERS TEMPLATE
-   ========================================================================== */
-function OpenWhenLettersTemplate({ note }) {
-  const [activeEnvelope, setActiveEnvelope] = useState(null);
-  const images = note.image_urls || [];
-
-  const envelopes = [
-    { id: 1, title: 'Open Right Now! 📩', icon: '✉️', hint: 'Start here first' },
-    { id: 2, title: `Open when you miss me... 🥺`, icon: '💌', hint: 'For lonely moments' },
-    { id: 3, title: `Open when you need to smile 😁`, icon: '💖', hint: 'Instant happiness' },
-    { id: 4, title: `Open when you have a hard day 🫂`, icon: '🧸', hint: 'A warm virtual hug' },
-  ];
-
-  return (
-    <div>
-      <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <p style={{ color: '#d81e5b', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-          📩 MOOD-BASED ENVELOPE BUNDLE
-        </p>
-        <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0' }}>
-          Open When... Letters for {note.recipient_name}
-        </h1>
-        <p className="text-muted" style={{ fontSize: '0.9rem' }}>
-          Tap an envelope whenever the moment feels right.
-        </p>
-      </div>
-
-      <div className="open-when-grid">
-        {envelopes.map((env) => (
-          <div
-            key={env.id}
-            className={`envelope-card ${activeEnvelope === env.id ? 'opened' : ''}`}
-            onClick={() => setActiveEnvelope(activeEnvelope === env.id ? null : env.id)}
+      {/* Gift Wrap Selector */}
+      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+        {[
+          { id: 'ruby', label: '🎀 Ruby Velvet' },
+          { id: 'gold', label: '👑 Royal Gold' },
+          { id: 'purple', label: '✨ Sparkle Violet' }
+        ].map((w) => (
+          <button
+            key={w.id}
+            onClick={() => setBoxTheme(w.id)}
+            style={{
+              padding: '0.4rem 0.8rem',
+              borderRadius: '999px',
+              border: '2px solid #d81e5b',
+              background: boxTheme === w.id ? '#d81e5b' : 'rgba(255,255,255,0.2)',
+              color: boxTheme === w.id ? '#fff' : '#3b0f1b',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
           >
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{env.icon}</div>
-            <h3 style={{ fontSize: '1rem', color: '#3b0f1b', marginBottom: '0.25rem' }}>{env.title}</h3>
-            <p style={{ fontSize: '0.75rem', color: '#8e3249' }}>{env.hint}</p>
-          </div>
+            {w.label}
+          </button>
         ))}
       </div>
 
-      {/* Active Opened Letter View */}
-      {activeEnvelope !== null && (
-        <div style={{ background: '#fff', border: '4px solid #3b0f1b', borderRadius: '24px', padding: '2rem', marginTop: '2rem', boxShadow: '6px 6px 0px #3b0f1b', animation: 'fadeIn 0.4s ease' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ color: '#d81e5b', fontSize: '1.2rem' }}>
-              {envelopes.find((e) => e.id === activeEnvelope)?.title}
-            </h3>
-            <button onClick={() => setActiveEnvelope(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✖</button>
-          </div>
-
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#3b0f1b', whiteSpace: 'pre-wrap' }}>
-            {note.custom_message}
-          </p>
-
-          {images.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
-              {images.map((url, i) => (
-                <img key={i} src={url} alt="Envelope memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #3b0f1b' }} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ==========================================================================
-   9. DIGITAL SCRAPBOOK TEMPLATE
-   ========================================================================== */
-function DigitalScrapbookTemplate({ note }) {
-  const [page, setPage] = useState(1);
-  const images = note.image_urls || [];
-
-  return (
-    <div className="scrapbook-desk">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #78350f', paddingBottom: '0.75rem' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fde68a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          📔 MEMORY KEEPSAKE SCRAPBOOK
-        </span>
-        <span style={{ fontSize: '0.8rem', color: '#fef3c7' }}>Page {page} of 3</span>
-      </div>
-
-      {page === 1 && (
-        <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-          <h1 style={{ color: '#fde68a', fontSize: 'clamp(1.75rem, 5vw, 2.75rem)', textAlign: 'center', margin: '1rem 0' }}>
-            {note.recipient_name}&apos;s Memory Album
-          </h1>
-          <p style={{ textAlign: 'center', color: '#fef3c7', fontSize: '1rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
-            A flipbook of polaroids, written stories, and unforgettable moments bound into one gift.
-          </p>
-
-          {images[0] && (
-            <div className="polaroid-frame" style={{ maxWidth: '280px', margin: '0 auto 2rem' }}>
-              <div className="tape-strip" />
-              <img src={images[0]} alt="Cover Polaroid" style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '2px' }} />
-              <p style={{ marginTop: '0.5rem', fontWeight: 700, fontSize: '0.9rem' }}>Cover Photo ✨</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {page === 2 && (
-        <div>
-          <h2 style={{ color: '#fde68a', fontSize: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-            📸 Cherished Polaroids
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
-            {images.length > 0 ? (
-              images.map((url, idx) => (
-                <div key={idx} className="polaroid-frame">
-                  <div className="tape-strip" />
-                  <img src={url} alt={`Scrapbook memory ${idx + 1}`} style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
-                  <p style={{ marginTop: '0.5rem', fontWeight: 700, fontSize: '0.85rem' }}>Moment #{idx + 1}</p>
-                </div>
-              ))
-            ) : (
-              <p style={{ textAlign: 'center', color: '#fef3c7' }}>No photos added yet.</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {page === 3 && (
-        <div style={{ background: '#fff', color: '#1e293b', padding: '2rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
-          <h2 style={{ color: '#78350f', fontSize: '1.5rem', marginBottom: '1rem' }}>Dear {note.recipient_name},</h2>
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-            {note.custom_message}
-          </p>
-          <div className="cursive" style={{ marginTop: '2rem', textAlign: 'right', fontSize: '2rem', color: '#78350f' }}>
-            Always in my thoughts ❤️
-          </div>
-        </div>
-      )}
-
-      {/* Page Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          style={{ background: '#fde68a', color: '#78350f', border: 'none', padding: '0.6rem 1.25rem', borderRadius: '12px', fontWeight: 800, cursor: page === 1 ? 'not-allowed' : 'pointer', opacity: page === 1 ? 0.5 : 1 }}
-        >
-          ← Prev Page
-        </button>
-        <button
-          disabled={page === 3}
-          onClick={() => setPage((p) => Math.min(3, p + 1))}
-          style={{ background: '#fde68a', color: '#78350f', border: 'none', padding: '0.6rem 1.25rem', borderRadius: '12px', fontWeight: 800, cursor: page === 3 ? 'not-allowed' : 'pointer', opacity: page === 3 ? 0.5 : 1 }}
-        >
-          Next Page →
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   10. SURPRISE REVEAL BOX TEMPLATE
-   ========================================================================== */
-function SurpriseRevealBoxTemplate({ note }) {
-  const [step, setStep] = useState(0); // 0: ribbon tied, 1: lid opened, 2: content revealed
-
-  return (
-    <div className="text-center">
-      <p style={{ color: '#d81e5b', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-        🎁 THEATRICAL SURPRISE REVEAL
-      </p>
-      <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0 1.5rem' }}>
-        A Gift Box for {note.recipient_name}
-      </h1>
-
       {step < 2 ? (
         <div className="gift-box-wrapper">
-          <div className="gift-box-3d" onClick={() => setStep((s) => s + 1)}>
+          <div className={`gift-box-3d ${step === 1 ? 'lid-popped' : ''}`} onClick={handleNextStep}>
             <div className="gift-ribbon-v" />
             <div className="gift-ribbon-h" />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>
+            <div className="gift-box-center-icon">
               {step === 0 ? '🎀' : '✨'}
             </div>
           </div>
 
-          <p style={{ color: '#d81e5b', fontWeight: 800, marginTop: '1.5rem', fontSize: '0.95rem' }}>
-            {step === 0 ? '👇 Tap the gift box to untie ribbon!' : '👇 Tap box once more to pop open!'}
+          <p className="box-tap-hint">
+            {step === 0 ? '👇 Tap the gift box to untie satin ribbon!' : '👇 Tap box lid to pop open with confetti!'}
           </p>
         </div>
       ) : (
-        <div style={{ animation: 'fadeIn 0.5s ease', background: '#fff', border: '4px solid #3b0f1b', borderRadius: '24px', padding: '2.5rem', boxShadow: '6px 6px 0px #3b0f1b', textAlign: 'left' }}>
-          <div style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '1rem' }}>🎉🎁✨</div>
-          <h2 style={{ color: '#d81e5b', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-            Surprise Unfolded for {note.recipient_name}!
-          </h2>
+        <div style={{ animation: 'fadeIn 0.5s ease' }}>
+          {/* Layer Progress Dots */}
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <span className={`layer-badge ${step >= 2 ? 'active' : ''}`}>Layer 1: Note 📜</span>
+            {note.image_urls?.length > 0 && <span className={`layer-badge ${step >= 3 ? 'active' : ''}`}>Layer 2: Memories 📸</span>}
+            <span className={`layer-badge ${step >= 4 ? 'active' : ''}`}>Layer 3: Grand Reveal ✨</span>
+          </div>
 
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#3b0f1b', whiteSpace: 'pre-wrap' }}>
-            {note.custom_message}
+          {step === 2 && (
+            <div className="surprise-layer-card">
+              <div style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '0.5rem' }}>📜✨</div>
+              <h2 style={{ color: '#d81e5b', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
+                Personal Message for {recipient}
+              </h2>
+              <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#3b0f1b', whiteSpace: 'pre-wrap' }}>
+                {customMsg}
+              </p>
+
+              <button className="btn-primary w-full mt-4" onClick={handleNextStep}>
+                Next Surprise Layer ➔
+              </button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="surprise-layer-card">
+              <div style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '0.5rem' }}>📸💖</div>
+              <h2 style={{ color: '#d81e5b', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
+                Memory Gallery
+              </h2>
+
+              {note.image_urls?.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                  {note.image_urls.map((url, i) => (
+                    <img key={i} src={url} alt="Gift Memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #3b0f1b' }} />
+                  ))}
+                </div>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#8e3249' }}>A treasure box full of unspoken affection.</p>
+              )}
+
+              <button className="btn-primary w-full mt-4" onClick={handleNextStep}>
+                Final Surprise Reveal ➔
+              </button>
+            </div>
+          )}
+
+          {step >= 4 && (
+            <div className="surprise-layer-card final-reveal-glow">
+              <div style={{ fontSize: '4rem', textAlign: 'center', animation: 'heartPulse 1.5s infinite' }}>💖🎁🎉</div>
+              <h2 style={{ color: '#d81e5b', fontSize: '1.8rem', textAlign: 'center', margin: '0.5rem 0' }}>
+                You Are My Greatest Surprise!
+              </h2>
+              <p style={{ textAlign: 'center', fontSize: '1rem', color: '#8e3249' }}>
+                Every layer opened, forever sealed with infinite love. ❤️
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   8. CINEMATIC VIRTUAL ROSE BLOOM TEMPLATE (ID: a-rose-for-someone-special)
+   ========================================================================== */
+function RoseSpecialTemplate({ note }) {
+  const [bloomed, setBloomed] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const recipient = note?.recipient_name || 'Beloved';
+  const customMsg = note?.custom_message || "Like a rose that blooms under the moonlight, my feelings for you grow deeper with every passing moment.";
+
+  const handleBloom = () => {
+    setBloomed(true);
+    setShowConfetti(true);
+  };
+
+  return (
+    <div className="rose-special-container">
+      <ConfettiCannon active={showConfetti} heartOnly={true} duration={4000} />
+
+      <div className="dark-candlelight-glow" />
+
+      <div style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', color: '#ff4d7f', textTransform: 'uppercase' }}>
+        🌹 CINEMATIC VIRTUAL ROSE BLOOM
+      </div>
+
+      {/* Interactive Blooming Rose SVG */}
+      <div className="blooming-rose-stage" onClick={handleBloom} title="Tap rose to bloom!">
+        <div className={`rose-flower-graphic ${bloomed ? 'bloomed' : 'bud'}`}>
+          <svg viewBox="0 0 100 100" width="140" height="140">
+            {/* Outer Petals */}
+            <path className="petal-outer p-left" d="M50 40 C30 20 10 40 30 65 C45 80 50 85 50 85 Z" fill="#b91c1c" />
+            <path className="petal-outer p-right" d="M50 40 C70 20 90 40 70 65 C55 80 50 85 50 85 Z" fill="#dc2626" />
+            {/* Inner Petals */}
+            <path className="petal-inner p-center" d="M50 30 C38 15 25 35 40 55 C48 65 50 70 50 70 Z" fill="#ef4444" />
+            <path className="petal-inner p-center2" d="M50 30 C62 15 75 35 60 55 C52 65 50 70 50 70 Z" fill="#f87171" />
+            {/* Rose Core Heart */}
+            <circle cx="50" cy="42" r="10" fill="#f43f5e" />
+          </svg>
+        </div>
+      </div>
+
+      <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '1rem 0 0.5rem' }}>
+        A Rose for {recipient}
+      </h1>
+
+      {!bloomed ? (
+        <p className="tap-bloom-hint" onClick={handleBloom}>
+          ✨ Tap the rosebud to make it bloom & reveal your dedicated message ✨
+        </p>
+      ) : (
+        <div className="rose-message-card">
+          <p style={{ fontSize: '0.8rem', color: '#fecdd3', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
+            🌹 Dedicated Message:
+          </p>
+          <p style={{ fontSize: '1.05rem', lineHeight: 1.9, color: '#ffe4e6', whiteSpace: 'pre-wrap' }}>
+            {customMsg}
           </p>
 
           {note.image_urls?.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
               {note.image_urls.map((url, i) => (
-                <img key={i} src={url} alt="Gift Memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #3b0f1b' }} />
+                <img key={i} src={url} alt="Rose memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '2px solid #e11d48' }} />
               ))}
             </div>
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-/* ==========================================================================
-   11. ROSE SPECIAL TEMPLATE
-   ========================================================================== */
-function RoseSpecialTemplate({ note }) {
-  const [bloomed, setBloomed] = useState(false);
-
-  return (
-    <div className="rose-special-container">
-      <div style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', color: '#ff4d7f', textTransform: 'uppercase' }}>
-        🌹 CINEMATIC ROSE PRESENTATION
-      </div>
-
-      <div className="blooming-rose-icon" onClick={() => setBloomed(!bloomed)} title="Tap to bloom rose">
-        🌹
-      </div>
-
-      <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '1rem 0 0.5rem' }}>
-        A Rose for {note.recipient_name}
-      </h1>
-      <p style={{ color: '#fecdd3', fontSize: '0.9rem', marginBottom: '2rem' }}>
-        A petal that never fades, crafted with honest words.
-      </p>
-
-      <div style={{ background: 'rgba(13, 0, 4, 0.85)', border: '2px solid #e11d48', padding: '2rem', borderRadius: '20px', textAlign: 'left', boxShadow: '0 0 25px rgba(225, 29, 72, 0.4)' }}>
-        <p style={{ fontSize: '1.05rem', lineHeight: 1.9, color: '#ffe4e6', whiteSpace: 'pre-wrap' }}>
-          {note.custom_message}
-        </p>
-
-        {note.image_urls?.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
-            {note.image_urls.map((url, i) => (
-              <img key={i} src={url} alt="Rose memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '2px solid #e11d48' }} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   12. FLOWERS GIFT TEMPLATE
-   ========================================================================== */
-function GiftFlowersTemplate({ note }) {
-  const [pickedFlowers, setPickedFlowers] = useState([]);
-
-  const flowers = [
-    { id: 'rose', name: 'Red Rose 🌹' },
-    { id: 'sunflower', name: 'Sunflower 🌻' },
-    { id: 'tulip', name: 'Pink Tulip 🌷' },
-    { id: 'daisy', name: 'Daisy 🌼' },
-    { id: 'cherry', name: 'Cherry Blossom 🌸' },
-  ];
-
-  const toggleFlower = (id) => {
-    if (pickedFlowers.includes(id)) {
-      setPickedFlowers(pickedFlowers.filter((f) => f !== id));
-    } else {
-      setPickedFlowers([...pickedFlowers, id]);
-    }
-  };
-
-  return (
-    <div className="flowers-wrapper">
-      <div className="text-center" style={{ marginBottom: '1.5rem' }}>
-        <p style={{ color: '#15803d', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-          💐 DIGITAL FLOWER BOUQUET
-        </p>
-        <h1 style={{ color: '#14532d', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0' }}>
-          Bouquet for {note.recipient_name}
-        </h1>
-        <p style={{ color: '#166534', fontSize: '0.9rem' }}>
-          Tap flowers below to assemble a personal bouquet!
-        </p>
-
-        <div className="flower-picker">
-          {flowers.map((f) => (
-            <button
-              key={f.id}
-              className={`flower-chip ${pickedFlowers.includes(f.id) ? 'picked' : ''}`}
-              onClick={() => toggleFlower(f.id)}
-            >
-              {f.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ background: '#fff', border: '3px solid #15803d', borderRadius: '20px', padding: '2rem', boxShadow: '4px 4px 0px #14532d' }}>
-        <h3 style={{ color: '#15803d', fontSize: '1.25rem', marginBottom: '1rem' }}>
-          Message with {pickedFlowers.length > 0 ? `${pickedFlowers.length} Flower(s)` : 'Your Bouquet'}:
-        </h3>
-        <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#14532d', whiteSpace: 'pre-wrap' }}>
-          {note.custom_message}
-        </p>
-
-        {note.image_urls?.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
-            {note.image_urls.map((url, i) => (
-              <img key={i} src={url} alt="Floral memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '2px solid #16a34a' }} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   13. PERSONALIZED SONG TEMPLATE
-   ========================================================================== */
-function PersonalizedSongTemplate({ note }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const coverImage = note.image_urls?.[0] || '🎵';
-
-  return (
-    <div className="song-player-card">
-      <div className="text-center">
-        <p style={{ color: '#e11d48', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-          🎵 RETRO MUSIC PLAYER
-        </p>
-        <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', margin: '0.5rem 0' }}>
-          A Song Dedicated to {note.recipient_name}
-        </h1>
-
-        {/* Spinning Vinyl Record */}
-        <div className={`vinyl-disk ${isPlaying ? 'spinning' : ''}`}>
-          {typeof coverImage === 'string' && coverImage.startsWith('http') ? (
-            <img src={coverImage} alt="Album Cover" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff' }} />
-          ) : (
-            <div className="vinyl-center">🎵</div>
-          )}
-        </div>
-
-        {/* Animated Equalizer */}
-        <div className="waveform-bar-container">
-          <div className="bar" style={{ animationPlayState: isPlaying ? 'running' : 'paused' }} />
-          <div className="bar" style={{ animationPlayState: isPlaying ? 'running' : 'paused', animationDelay: '0.2s' }} />
-          <div className="bar" style={{ animationPlayState: isPlaying ? 'running' : 'paused', animationDelay: '0.4s' }} />
-          <div className="bar" style={{ animationPlayState: isPlaying ? 'running' : 'paused', animationDelay: '0.1s' }} />
-          <div className="bar" style={{ animationPlayState: isPlaying ? 'running' : 'paused', animationDelay: '0.3s' }} />
-        </div>
-
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          style={{ background: '#e11d48', color: '#fff', border: 'none', padding: '0.85rem 2rem', borderRadius: '999px', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 0 20px rgba(225,29,72,0.5)', marginBottom: '2rem' }}
-        >
-          {isPlaying ? '⏸ Pause Track' : '▶ Play Dedicated Song'}
-        </button>
-
-        {/* Lyrics & Message Display */}
-        <div style={{ background: '#18181b', border: '2px solid #27272a', borderRadius: '20px', padding: '2rem', textAlign: 'left' }}>
-          <p style={{ color: '#e11d48', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.1em' }}>
-            📜 SONG LYRICS / DEDICATION:
-          </p>
-          <p style={{ fontSize: '1.1rem', lineHeight: 2, color: '#f4f4f5', whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
-            &ldquo;{note.custom_message}&rdquo;
-          </p>
-
-          {note.image_urls?.length > 1 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
-              {note.image_urls.slice(1).map((url, i) => (
-                <img key={i} src={url} alt="Song photo" style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '8px' }} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   14. PERSONALIZED AI IMAGE TEMPLATE
-   ========================================================================== */
-function PersonalizedAiImageTemplate({ note }) {
-  const [activeFilter, setActiveFilter] = useState('oil');
-  const images = note.image_urls || [];
-
-  return (
-    <div className="art-gallery-card">
-      <div className="text-center">
-        <p style={{ color: '#f59e0b', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-          🎨 ART GALLERY EXHIBITION
-        </p>
-        <h1 style={{ color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: '0.5rem 0 1.5rem' }}>
-          Art Collection for {note.recipient_name}
-        </h1>
-
-        {/* Style Filters */}
-        <div className="filter-btn-group">
-          <button className={`filter-btn ${activeFilter === 'oil' ? 'active' : ''}`} onClick={() => setActiveFilter('oil')}>🎨 Oil Paint</button>
-          <button className={`filter-btn ${activeFilter === 'anime' ? 'active' : ''}`} onClick={() => setActiveFilter('anime')}>🌸 Anime</button>
-          <button className={`filter-btn ${activeFilter === 'watercolor' ? 'active' : ''}`} onClick={() => setActiveFilter('watercolor')}>🖌️ Watercolor</button>
-          <button className={`filter-btn ${activeFilter === 'vintage' ? 'active' : ''}`} onClick={() => setActiveFilter('vintage')}>🌆 Vintage</button>
-          <button className={`filter-btn ${activeFilter === 'sketch' ? 'active' : ''}`} onClick={() => setActiveFilter('sketch')}>✏️ Charcoal</button>
-        </div>
-
-        {/* Gallery Frame */}
-        {images.length > 0 ? (
-          <div className={`gallery-frame filter-${activeFilter}`}>
-            <img src={images[0]} alt="Art portrait" style={{ width: '100%', height: '260px', objectFit: 'cover', borderRadius: '4px' }} />
-          </div>
-        ) : (
-          <div className="gallery-frame" style={{ background: '#374151', color: '#9ca3af', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p>Upload a memory photo to see artwork style previews!</p>
-          </div>
-        )}
-
-        {/* Museum Plaque */}
-        <div style={{ background: '#1f2937', border: '2px solid #f59e0b', borderRadius: '16px', padding: '1.5rem', marginTop: '1.5rem', textAlign: 'left' }}>
-          <p style={{ color: '#f59e0b', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            PLAQUE DEDICATION:
-          </p>
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#f3f4f6', whiteSpace: 'pre-wrap' }}>
-            {note.custom_message}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   15. DEFAULT NOTE TEMPLATE
-   ========================================================================== */
-function DefaultNoteTemplate({ note }) {
-  return (
-    <div className="glass-card" style={{ padding: '2.5rem', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gradient)' }} />
-      <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
-        DEAR {note.recipient_name}
-      </p>
-
-      <p style={{ fontSize: '1.05rem', whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
-        {note.custom_message}
-      </p>
-
-      {note.image_urls?.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '2rem' }}>
-          {note.image_urls.map((url, i) => (
-            <img key={i} src={url} alt="Shared memory" style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }} />
-          ))}
-        </div>
-      )}
-
-      <p className="cursive" style={{ marginTop: '3rem', textAlign: 'left', fontSize: '2rem' }}>
-        — from someone who cares
-      </p>
     </div>
   );
 }
