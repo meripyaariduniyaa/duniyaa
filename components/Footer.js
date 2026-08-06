@@ -15,8 +15,8 @@ export default function Footer() {
       <div className="footer-inner">
         {/* Brand Column */}
         <div className="footer-brand">
-          <div className="logo-image-wrapper" style={{ marginBottom: '1rem' }}>
-            <img src="/lovelycrafts-logo.png" alt="Lovely Crafts" className="footer-logo" />
+          <div className="logo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+            Lovely<span>Crafts</span>
           </div>
           <p className="footer-desc">
             Create romantic and personalized digital gifts in minutes for birthdays, anniversaries, long-distance surprises, and special moments across the globe.
