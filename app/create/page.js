@@ -62,6 +62,68 @@ function CreateNoteContent() {
     'a-rose-for-someone-special': "Like a rose that blooms under the moonlight, my feelings for you grow deeper with every passing moment. Dedicated to you with all my affection. 🌹✨"
   };
 
+  // AI Magic Assistant State
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiTone, setAiTone] = useState('romantic');
+  const [aiKeywords, setAiKeywords] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiOptions, setAiOptions] = useState([]);
+  const [aiError, setAiError] = useState('');
+
+  const generateAiMessages = async () => {
+    setAiBusy(true);
+    setAiError('');
+    try {
+      const res = await fetch('/api/ai-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: selectedTemplateId,
+          recipientName: recipientName.trim(),
+          tone: aiTone,
+          keywords: aiKeywords.trim(),
+          mode: 'generate',
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate AI options.');
+      setAiOptions(data.options || []);
+    } catch (e) {
+      setAiError(e.message || 'Could not connect to AI service.');
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
+  const polishMessageWithAi = async () => {
+    if (!message.trim()) return;
+    setAiBusy(true);
+    setAiError('');
+    try {
+      const res = await fetch('/api/ai-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: selectedTemplateId,
+          recipientName: recipientName.trim(),
+          tone: aiTone,
+          keywords: aiKeywords.trim(),
+          mode: 'enhance',
+          currentMessage: message.trim()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to polish message.');
+      if (data.options && data.options[0]) {
+        setMessage(data.options[0]);
+      }
+    } catch (e) {
+      setAiError(e.message || 'Could not enhance message.');
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   const handleAutofillSample = () => {
     const sample = sampleMessages[selectedTemplateId] || sampleMessages['sorry'];
     setMessage(sample);
@@ -230,6 +292,64 @@ function CreateNoteContent() {
             </div>
 
             <form onSubmit={submit}>
+              {/* TEMPLATE REQUIREMENTS & PHOTO GUIDELINES BANNER */}
+              {selectedTemplate && (
+                <div
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(253, 230, 238, 0.95))',
+                    border: '1.5px solid #f472b6',
+                    borderRadius: '16px',
+                    padding: '1.25rem',
+                    marginBottom: '1.75rem',
+                    boxShadow: '0 4px 14px rgba(216, 30, 91, 0.08)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>{selectedTemplate.icon}</span>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#881337', fontWeight: 800 }}>
+                        Requirements for {selectedTemplate.title}
+                      </h4>
+                      <span style={{ fontSize: '0.75rem', color: '#be185d', fontWeight: 600 }}>
+                        {selectedTemplate.time} completion • {selectedTemplate.photoRequirement?.recommended || 3} photos recommended
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Photo Requirement Tip */}
+                  {selectedTemplate.photoRequirement && (
+                    <div style={{ background: '#fff', padding: '0.65rem 0.9rem', borderRadius: '10px', borderLeft: '4px solid #ec4899', marginBottom: '0.75rem' }}>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#4c0519', fontWeight: 700 }}>
+                        📸 <strong>Photo Recommendation:</strong> {selectedTemplate.photoRequirement.tip}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Key Details Checklist */}
+                  {selectedTemplate.detailsNeeded && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#9f1239', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Key Details to Include:
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.35rem' }}>
+                        {selectedTemplate.detailsNeeded.map((detail, idx) => (
+                          <span key={idx} style={{ background: '#ffe4e6', color: '#9f1239', padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                            ✓ {detail}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pro Tip */}
+                  {selectedTemplate.tips && (
+                    <p style={{ margin: 0, marginTop: '0.5rem', fontSize: '0.78rem', color: '#881337', fontStyle: 'italic' }}>
+                      💡 <strong>Creator Tip:</strong> {selectedTemplate.tips}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Their Name */}
               <div className="form-group">
                 <label className="form-label">Their Name / Nickname</label>
@@ -243,32 +363,210 @@ function CreateNoteContent() {
                 />
               </div>
 
-              {/* Message with Autofill Helper */}
+              {/* Message with AI Assistant & Helper Actions */}
               <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <label className="form-label" style={{ margin: 0 }}>What do you want to say?</label>
-                  <button
-                    type="button"
-                    onClick={handleAutofillSample}
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAiModal((prev) => !prev)}
+                      style={{
+                        background: 'linear-gradient(135deg, #ec4899, #be185d)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '999px',
+                        padding: '0.25rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(190, 24, 93, 0.25)'
+                      }}
+                    >
+                      🤖 AI Writer {showAiModal ? '▲' : '▼'}
+                    </button>
+
+                    {message.trim() && (
+                      <button
+                        type="button"
+                        onClick={polishMessageWithAi}
+                        disabled={aiBusy}
+                        style={{
+                          background: '#fce7f3',
+                          color: '#be185d',
+                          border: '1px solid #f472b6',
+                          borderRadius: '999px',
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🪄 Polish AI
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleAutofillSample}
+                      style={{
+                        background: '#fbcfe8',
+                        color: '#be185d',
+                        border: '1px solid #f472b6',
+                        borderRadius: '999px',
+                        padding: '0.25rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ✨ Sample
+                    </button>
+                  </div>
+                </div>
+
+                {/* AI MAGIC ASSISTANT CARD PANEL */}
+                {showAiModal && (
+                  <div
                     style={{
-                      background: '#fbcfe8',
-                      color: '#be185d',
-                      border: '1px solid #f472b6',
-                      borderRadius: '999px',
-                      padding: '0.25rem 0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
+                      background: 'linear-gradient(135deg, #fff5f8, #fef2f2)',
+                      border: '2px solid #f472b6',
+                      borderRadius: '14px',
+                      padding: '1rem',
+                      marginBottom: '1rem',
+                      boxShadow: '0 4px 16px rgba(216, 30, 91, 0.1)'
                     }}
                   >
-                    ✨ Autofill Idea
-                  </button>
-                </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#881337', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        ✨ AI Magic Message Generator
+                      </span>
+                      <span style={{ fontSize: '0.7rem', background: '#ffe4e6', color: '#be185d', padding: '0.15rem 0.5rem', borderRadius: '999px', fontWeight: 700 }}>
+                        HuggingFace AI Powered
+                      </span>
+                    </div>
+
+                    {/* Tone Selection */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9f1239', display: 'block', marginBottom: '0.35rem' }}>
+                        1. Pick Emotional Tone:
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                        {[
+                          { id: 'romantic', label: '💖 Romantic & Sweet' },
+                          { id: 'funny', label: '😂 Funny & Playful' },
+                          { id: 'sincere', label: '🥺 Deep & Sincere' },
+                          { id: 'poetic', label: '🌹 Poetic & Soft' }
+                        ].map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setAiTone(t.id)}
+                            style={{
+                              background: aiTone === t.id ? '#be185d' : '#fff',
+                              color: aiTone === t.id ? '#fff' : '#881337',
+                              border: '1px solid #f472b6',
+                              borderRadius: '999px',
+                              padding: '0.25rem 0.65rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Keywords / Memories */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9f1239', display: 'block', marginBottom: '0.35rem' }}>
+                        2. Key Memories / Details (Optional):
+                      </span>
+                      <input
+                        className="form-input"
+                        value={aiKeywords}
+                        onChange={(e) => setAiKeywords(e.target.value)}
+                        placeholder="e.g. 2nd anniversary, late night pizza, stolen hoodies, coffee date"
+                        style={{ fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={generateAiMessages}
+                      disabled={aiBusy}
+                      style={{
+                        width: '100%',
+                        background: 'linear-gradient(135deg, #d81e5b, #be185d)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.5rem',
+                        fontSize: '0.85rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        marginBottom: '0.75rem'
+                      }}
+                    >
+                      {aiBusy ? '🤖 AI is writing message options…' : '✨ Generate 3 AI Messages'}
+                    </button>
+
+                    {aiError && <p style={{ color: '#e11d48', fontSize: '0.75rem', fontWeight: 700, margin: '0.35rem 0' }}>{aiError}</p>}
+
+                    {/* AI Generated Options Cards */}
+                    {aiOptions.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#be185d' }}>
+                          Select an option to use:
+                        </span>
+                        {aiOptions.map((optText, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              background: '#fff',
+                              border: '1px solid #fbcfe8',
+                              borderRadius: '10px',
+                              padding: '0.75rem',
+                              fontSize: '0.8rem',
+                              color: '#3b0f1b',
+                              lineHeight: 1.5,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                            }}
+                          >
+                            <p style={{ margin: 0, marginBottom: '0.5rem' }}>{optText}</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMessage(optText);
+                                setShowAiModal(false);
+                              }}
+                              style={{
+                                background: '#fbcfe8',
+                                color: '#be185d',
+                                border: 'none',
+                                borderRadius: '999px',
+                                padding: '0.2rem 0.65rem',
+                                fontSize: '0.7rem',
+                                fontWeight: 800,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ✨ Use This Message
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <textarea
                   className="form-textarea"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your heartfelt message here..."
+                  placeholder="Write your heartfelt message here or click AI Writer..."
                   rows={6}
                   maxLength={1200}
                   required
@@ -277,15 +575,64 @@ function CreateNoteContent() {
                   <span>Tip: Keep it genuine and personal.</span>
                   <span>{message.length} / 1200</span>
                 </div>
+
+                {/* Template Specific Interactive Prompts */}
+                {selectedTemplate?.prompts && selectedTemplate.prompts.length > 0 && (
+                  <div style={{ marginTop: '0.85rem', background: 'rgba(255, 255, 255, 0.85)', padding: '0.75rem 0.9rem', borderRadius: '12px', border: '1px dashed #f472b6' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#be185d', display: 'block', marginBottom: '0.5rem' }}>
+                      💡 Inspiration prompts for "{selectedTemplate.title}" (click to insert):
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      {selectedTemplate.prompts.map((promptText, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setMessage((prev) => (prev ? `${prev}\n\n${promptText}` : promptText))}
+                          style={{
+                            textAlign: 'left',
+                            background: '#fff',
+                            border: '1px solid #fbcfe8',
+                            borderRadius: '8px',
+                            padding: '0.45rem 0.75rem',
+                            fontSize: '0.75rem',
+                            color: '#881337',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          ✨ "+ {promptText}"
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Photos */}
               <div className="form-group">
-                <label className="form-label">Add Cherished Memory Photos (Optional)</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="form-label" style={{ margin: 0 }}>Add Cherished Memory Photos</label>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: images.length >= (selectedTemplate?.photoRequirement?.recommended || 3) ? '#15803d' : '#be185d',
+                      background: images.length >= (selectedTemplate?.photoRequirement?.recommended || 3) ? '#dcfce7' : '#ffe4e6',
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: '999px'
+                    }}
+                  >
+                    📸 {images.length} / {selectedTemplate?.photoRequirement?.recommended || 3} recommended photos
+                  </span>
+                </div>
+                <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.25rem', marginBottom: '0.5rem' }}>
+                  {selectedTemplate?.photoRequirement?.tip || 'Upload photos to display in the animated cards and photo memory reel.'}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <CloudinaryUpload onUpload={(url) => setImages((current) => [...current, url])} />
                   <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-                    {images.length ? `${images.length} photo(s) added` : 'Up to 6 photos'}
+                    {images.length ? `${images.length} photo(s) added` : 'Up to 6 photos max'}
                   </span>
                 </div>
 
@@ -344,8 +691,8 @@ function CreateNoteContent() {
                 {slugStatus === 'taken' && (
                   <p className="slug-status slug-status--taken">✗ Link is already taken, try another.</p>
                 )}
-                <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                  Custom links cost ₹29 extra, charged only if entered.
+                <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#15803d', fontWeight: 600 }}>
+                  ✨ Custom links are 100% FREE! Included with your note.
                 </p>
               </div>
 

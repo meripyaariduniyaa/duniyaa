@@ -179,22 +179,22 @@ function PreviewContent() {
                     <p style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>Order summary</p>
                     <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.95rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Note price</span>
+                        <span>Interactive Greeting Note</span>
                         <span>₹{basePrice}</span>
                       </div>
                       {hasCustomSlug && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span>Custom link fee</span>
-                          <span>₹{customLinkFee}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#15803d', fontWeight: 600 }}>
+                          <span>Custom Link ({apology.custom_slug})</span>
+                          <span>FREE (₹0)</span>
                         </div>
                       )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: '0.5rem' }}>
-                        <span>Total before coupon</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: '0.5rem', borderTop: '1px dashed #fdba74', paddingTop: '0.5rem' }}>
+                        <span>Total amount</span>
                         <span>₹{totalBeforeCoupon}</span>
                       </div>
                     </div>
                     <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.9rem' }}>
-                      Apply a coupon after the total amount is shown to reduce your payment.
+                      Apply coupon code below to discount your total amount.
                     </p>
                   </div>
 
