@@ -4,7 +4,7 @@ import TemplateRenderer from '@/components/templates/TemplateRenderer';
 
 export const dynamic = 'force-dynamic';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://noteretro.vercel.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
 
   if (!valid || !apology) {
     return {
-      title: 'Private note unavailable | NoteRetro',
+      title: 'Private note unavailable | Lovely Crafts',
       description: 'This note link has expired, is not yet unlocked, or is no longer available.',
       alternates: { canonical: canonicalUrl },
       robots: {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }) {
   const recipientName = apology.recipient_name || 'someone special';
 
   return {
-    title: `A heartfelt note for ${recipientName} | NoteRetro`,
+    title: `A heartfelt note for ${recipientName} | Lovely Crafts`,
     description: `A private, beautiful note for ${recipientName}. Unlock the message and share it securely.`,
     alternates: { canonical: canonicalUrl },
     robots: {

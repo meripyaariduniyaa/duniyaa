@@ -175,7 +175,7 @@ function CreateNoteContent() {
             <div className="form-group">
               <label className="form-label">Custom Link (Optional)</label>
               <div className="slug-input-wrapper">
-                <span className="slug-prefix">noteretro.com/p/</span>
+                <span className="slug-prefix">lovelycrafts.in/p/</span>
                 <input
                   className="slug-input"
                   value={customSlug}

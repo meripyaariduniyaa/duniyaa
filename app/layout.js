@@ -9,9 +9,9 @@ const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], var
 const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
 const dancing = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-dancing', display: 'swap' });
 
-const siteName = 'NoteRetro';
+const siteName = 'Lovely Crafts';
 const siteDescription = 'Create heartfelt, private notes that feel personal, beautiful, and unforgettable.';
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://noteretro.vercel.app';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
 export const metadata = {
   metadataBase: new URL(baseUrl),

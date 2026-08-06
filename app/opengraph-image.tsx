@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'NoteRetro — create private, heartfelt notes';
+export const alt = 'Lovely Crafts — create private, heartfelt notes';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -22,7 +22,7 @@ export default function Image() {
         }}
       >
         <div style={{ fontSize: 64, fontWeight: 700, color: '#111827', marginBottom: 20 }}>
-          NoteRetro
+          Lovely Crafts
         </div>
         <div style={{ fontSize: 34, color: '#374151', textAlign: 'center' }}>
           Create private, beautiful notes for someone special

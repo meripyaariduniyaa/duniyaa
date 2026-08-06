@@ -15,7 +15,7 @@ export default function Header() {
   return (
     <nav className="topbar" id="site-header">
       <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-        Note<span>Retro</span>
+        Lovely<span>Crafts</span>
       </Link>
       <div className="nav-links">
         <Link href="/create" className="nav-link">Create</Link>

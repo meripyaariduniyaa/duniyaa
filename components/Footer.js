@@ -16,7 +16,7 @@ export default function Footer() {
         {/* Brand Column */}
         <div className="footer-brand">
           <div className="logo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
-            Note<span>Retro</span>
+            Lovely<span>Crafts</span>
           </div>
           <p className="footer-desc">
             Create romantic and personalized digital gifts in minutes for birthdays, anniversaries, long-distance surprises, and special moments across the globe.
@@ -70,7 +70,7 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} NoteRetro. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Lovely Crafts. All rights reserved.</p>
         <p>Made with 💛 for the people you love.</p>
       </div>
     </footer>

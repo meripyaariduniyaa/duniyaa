@@ -49,7 +49,7 @@ export default function PayButton({ apologyId, onPaid }) {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: 'Note Retro',
+        name: 'Lovely Crafts',
         description: 'A private link',
         order_id: order.orderId,
         handler: async (response) => {
