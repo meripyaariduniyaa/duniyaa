@@ -69,6 +69,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${fredoka.variable} ${caveat.variable} ${dancing.variable}`}>
       <body>
+        <div style={{ background: '#fff7ed', color: '#9a2c00', borderBottom: '1px solid #fdba74', padding: '0.8rem 1rem', textAlign: 'center', fontSize: '0.95rem', fontWeight: 700 }}>
+          Special launch offer: 50% off till 30 Sep 2026 • Coupon code <strong>new2026</strong>
+        </div>
         <AuthProvider>
           <Header />
           <div className="page-content">{children}</div>

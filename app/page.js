@@ -80,7 +80,7 @@ export default function Home() {
           <p className="templates-section-label">THE TEMPLATES</p>
           <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>A gift tuned for every kind of moment.</h2>
           <p className="templates-subtitle">
-            A wide lineup of digital gift formats, two cinematic premium experiences, and personalized content. Tap a card to start.
+            Everything is now priced at ₹149, with a special launch offer of 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
           </p>
 
           <div className="templates-grid">

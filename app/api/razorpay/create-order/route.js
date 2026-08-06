@@ -3,8 +3,13 @@ import Razorpay from 'razorpay';
 import { getAdminDb } from '@/lib/firebase-admin';
 
 const couponRules = {
-  [process.env.COUPON_FULL_DISCOUNT || '']: { percent: 100, label: 'Full discount' },
-  [process.env.COUPON_HALF_DISCOUNT || '']: { percent: 50, label: '50% discount' }
+  ...(process.env.COUPON_FULL_DISCOUNT
+    ? { [String(process.env.COUPON_FULL_DISCOUNT).trim().toLowerCase()]: { percent: 100, label: 'Full discount' } }
+    : {}),
+  ...(process.env.COUPON_HALF_DISCOUNT
+    ? { [String(process.env.COUPON_HALF_DISCOUNT).trim().toLowerCase()]: { percent: 50, label: '50% discount' } }
+    : {}),
+  new2026: { percent: 50, label: 'Launch 50% off' }
 };
 
 export async function POST(request) {
@@ -15,9 +20,9 @@ export async function POST(request) {
     const snap = await adminDb.collection('notes').doc(apologyId).get();
     if (!snap.exists) return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
 
-    const normalizedCode = (couponCode || '').trim();
+    const normalizedCode = (couponCode || '').trim().toLowerCase();
     const selectedCoupon = normalizedCode ? couponRules[normalizedCode] : null;
-    const baseAmount = 9900;
+    const baseAmount = 14900;
 
     if (selectedCoupon?.percent === 100) {
       return NextResponse.json({
@@ -47,7 +52,7 @@ export async function POST(request) {
         keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         couponApplied: true,
         discountPercent: 50,
-        message: '50% coupon applied.'
+        message: '50% launch offer applied. You save ₹74.50.'
       });
     }
 

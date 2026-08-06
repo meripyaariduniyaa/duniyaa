@@ -24,22 +24,10 @@ export default function TemplateRenderer({ note, isPreview = false }) {
       return <BeMyValentineTemplate note={note} isPreview={isPreview} />;
     case 'wedding-invitation':
       return <WeddingInvitationTemplate note={note} isPreview={isPreview} />;
-    case 'memory-time-capsule':
-      return <MemoryTimeCapsuleTemplate note={note} isPreview={isPreview} />;
-    case 'open-when-letters':
-      return <OpenWhenLettersTemplate note={note} isPreview={isPreview} />;
-    case 'digital-scrapbook':
-      return <DigitalScrapbookTemplate note={note} isPreview={isPreview} />;
     case 'surprise-reveal-box':
       return <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} />;
     case 'a-rose-for-someone-special':
       return <RoseSpecialTemplate note={note} isPreview={isPreview} />;
-    case 'a-gift-for-you-flowers':
-      return <GiftFlowersTemplate note={note} isPreview={isPreview} />;
-    case 'personalized-song':
-      return <PersonalizedSongTemplate note={note} isPreview={isPreview} />;
-    case 'personalized-ai-image':
-      return <PersonalizedAiImageTemplate note={note} isPreview={isPreview} />;
     default:
       return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }

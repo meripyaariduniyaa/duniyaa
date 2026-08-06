@@ -49,7 +49,6 @@ export default function Footer() {
             <li><Link href="/create?template=love-letter">Gifts for Boyfriend</Link></li>
             <li><Link href="/create?template=letter-for-mom">Gifts for Mom</Link></li>
             <li><Link href="/create?template=a-rose-for-someone-special">Romantic Gifts</Link></li>
-            <li><Link href="/create?template=open-when-letters">Personalized Emotional Gifts</Link></li>
           </ul>
         </div>
 

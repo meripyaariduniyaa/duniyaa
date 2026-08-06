@@ -94,8 +94,11 @@ export default function PayButton({ apologyId, onPaid }) {
           placeholder="Enter coupon code"
           style={{ fontSize: '0.95rem' }}
         />
+        <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: '12px', padding: '0.75rem', color: '#9a2c00', fontSize: '0.9rem' }}>
+          Special launch offer: 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
+        </div>
         <button className="btn-primary w-full" onClick={pay} disabled={busy}>
-          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : 'Pay ₹99 & unlock link'}
+          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : 'Pay ₹149 & unlock link'}
         </button>
       </div>
       {feedback && <p style={{ color: '#166534', marginTop: '0.75rem', fontSize: '0.875rem' }}>{feedback}</p>}
