@@ -32,16 +32,49 @@ export default function Home() {
 
       <div className="main-content">
         {/* Hero Section */}
-        <section className="text-center mt-8 mb-8" style={{ maxWidth: '800px', margin: '2rem auto 0' }}>
-          <h1 style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', lineHeight: '1.1', marginBottom: '1.5rem' }}>
+        <section className="hero-section text-center mt-8 mb-8">
+          <div className="hero-sale-banner">🎉 Launch celebration: 50% OFF everything — premium notes now ₹149</div>
+          <h1>
             Some moments deserve <br/>
-            <span className="text-gradient cursive" style={{ fontSize: '1.5em' }}>more than a text.</span>
+            <span className="text-gradient cursive">more than a text.</span>
           </h1>
-          <p className="text-muted" style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)', marginBottom: '2.5rem', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
+          <p className="hero-copy text-muted">
             Create a beautiful, private space for the person you want to reach — photos, words, and memories.
-            It disappears safely after 15 days.
+            It disappears safely after 15 days, with secure sharing, animated templates, and easy mobile access.
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+          <div className="hero-feature-list">
+            <div className="hero-feature">
+              <div className="hero-feature-icon">🔒</div>
+              <div>
+                <strong>Privacy first</strong>
+                <p>Secure notes with no public indexing and one-time links for every message.</p>
+              </div>
+            </div>
+            <div className="hero-feature">
+              <div className="hero-feature-icon">⏳</div>
+              <div>
+                <strong>Auto-expire</strong>
+                <p>Notes disappear after 15 days, so memories stay special and private.</p>
+              </div>
+            </div>
+            <div className="hero-feature">
+              <div className="hero-feature-icon">🎨</div>
+              <div>
+                <strong>Animated templates</strong>
+                <p>Choose from beautiful, motion-ready cards designed to feel alive.</p>
+              </div>
+            </div>
+            <div className="hero-feature">
+              <div className="hero-feature-icon">📱</div>
+              <div>
+                <strong>Easy sharing</strong>
+                <p>Send links instantly via WhatsApp, SMS, or email — no app needed.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-actions">
             <Link href="/create" className="btn-primary">
               ✨ Create a Note
             </Link>
