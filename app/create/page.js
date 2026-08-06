@@ -196,6 +196,9 @@ function CreateNoteContent() {
               {!slugStatus && customSlug.length > 0 && customSlug.length < 3 && (
                 <p className="slug-status slug-status--checking">Min 3 characters</p>
               )}
+              <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.75rem' }}>
+                Custom links cost an extra ₹29, charged only if you enter a custom slug.
+              </p>
             </div>
 
             <div className="form-group">

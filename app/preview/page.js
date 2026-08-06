@@ -70,6 +70,11 @@ function PreviewContent() {
       .catch(() => setQrCodeUrl(''));
   }, [apology]);
 
+  const hasCustomSlug = Boolean(apology?.custom_slug);
+  const basePrice = 149;
+  const customLinkFee = hasCustomSlug ? 29 : 0;
+  const totalBeforeCoupon = basePrice + customLinkFee;
+
   if (loading || !apology) {
     return (
       <main className="center-screen">
@@ -169,8 +174,31 @@ function PreviewContent() {
                   <p className="text-muted" style={{ marginBottom: '2rem' }}>
                     Your page stays private until you unlock it. Once unlocked, you&apos;ll get a shareable link that expires safely in 15 days.
                   </p>
-                  
-                  <PayButton apologyId={apology.id} onPaid={() => setPaid(true)} />
+
+                  <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: '14px', padding: '1rem', marginBottom: '1.25rem' }}>
+                    <p style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>Order summary</p>
+                    <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.95rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Note price</span>
+                        <span>₹{basePrice}</span>
+                      </div>
+                      {hasCustomSlug && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Custom link fee</span>
+                          <span>₹{customLinkFee}</span>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: '0.5rem' }}>
+                        <span>Total before coupon</span>
+                        <span>₹{totalBeforeCoupon}</span>
+                      </div>
+                    </div>
+                    <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.9rem' }}>
+                      Apply a coupon after the total amount is shown to reduce your payment.
+                    </p>
+                  </div>
+
+                  <PayButton apologyId={apology.id} onPaid={() => setPaid(true)} displayAmount={totalBeforeCoupon} />
                   
                   <div style={{ marginTop: '1.5rem', borderTop: '2px dashed rgba(216, 30, 91, 0.25)', paddingTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
                     <span style={{ fontSize: '1.2rem' }}>🔒</span>

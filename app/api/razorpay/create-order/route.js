@@ -20,29 +20,53 @@ export async function POST(request) {
     const snap = await adminDb.collection('notes').doc(apologyId).get();
     if (!snap.exists) return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
 
+    const raw = snap.data();
     const normalizedCode = (couponCode || '').trim().toLowerCase();
     const selectedCoupon = normalizedCode ? couponRules[normalizedCode] : null;
+    const customLinkSurcharge = raw.custom_slug ? 2900 : 0;
     const baseAmount = 14900;
+    const totalAmount = baseAmount + customLinkSurcharge;
 
     if (selectedCoupon?.percent === 100) {
-      return NextResponse.json({
-        free: true,
-        amount: 0,
+      const finalAmount = customLinkSurcharge;
+      if (finalAmount === 0) {
+        return NextResponse.json({
+          free: true,
+          amount: 0,
+          currency: 'INR',
+          couponApplied: true,
+          discountPercent: 100,
+          message: 'Coupon applied. Your note is unlocked for free.'
+        });
+      }
+
+      const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+      const order = await razorpay.orders.create({
+        amount: finalAmount,
         currency: 'INR',
+        receipt: apologyId,
+        notes: { apologyId, uid: raw.creator_uid, couponCode: normalizedCode, customLinkSurcharge }
+      });
+
+      return NextResponse.json({
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         couponApplied: true,
         discountPercent: 100,
-        message: 'Coupon applied. Your note is unlocked for free.'
+        message: `Coupon applied. Custom link fee of ₹${customLinkSurcharge / 100} still applies.`
       });
     }
 
     if (selectedCoupon?.percent === 50) {
-      const discountedAmount = Math.round(baseAmount * 0.5);
+      const discountedAmount = Math.round(baseAmount * 0.5) + customLinkSurcharge;
       const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
       const order = await razorpay.orders.create({
         amount: discountedAmount,
         currency: 'INR',
         receipt: apologyId,
-        notes: { apologyId, uid: snap.data().creator_uid, couponCode: normalizedCode }
+        notes: { apologyId, uid: raw.creator_uid, couponCode: normalizedCode, customLinkSurcharge }
       });
 
       return NextResponse.json({
@@ -52,7 +76,7 @@ export async function POST(request) {
         keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         couponApplied: true,
         discountPercent: 50,
-        message: '50% launch offer applied. You save ₹74.50.'
+        message: `50% launch offer applied. You save ₹74.50. + custom link fee ₹${customLinkSurcharge / 100}`
       });
     }
 
@@ -62,10 +86,10 @@ export async function POST(request) {
 
     const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
     const order = await razorpay.orders.create({
-      amount: baseAmount,
+      amount: totalAmount,
       currency: 'INR',
       receipt: apologyId,
-      notes: { apologyId, uid: snap.data().creator_uid }
+      notes: { apologyId, uid: raw.creator_uid, customLinkSurcharge }
     });
 
     return NextResponse.json({

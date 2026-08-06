@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useState } from 'react';
 
-export default function PayButton({ apologyId, onPaid }) {
+export default function PayButton({ apologyId, onPaid, displayAmount }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [couponCode, setCouponCode] = useState('');
@@ -98,7 +98,7 @@ export default function PayButton({ apologyId, onPaid }) {
           Special launch offer: 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
         </div>
         <button className="btn-primary w-full" onClick={pay} disabled={busy}>
-          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : 'Pay ₹149 & unlock link'}
+          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : `Pay ₹${displayAmount || 149} & unlock link`}
         </button>
       </div>
       {feedback && <p style={{ color: '#166534', marginTop: '0.75rem', fontSize: '0.875rem' }}>{feedback}</p>}
