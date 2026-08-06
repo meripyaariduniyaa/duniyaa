@@ -84,30 +84,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="grid-2 mt-8" style={{ marginTop: '4rem' }}>
-          <div className="glass-card">
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Private by design</h3>
-            <p className="text-muted">Your notes stay strictly between you and the recipient. No indexing, no public access.</p>
-          </div>
-          <div className="glass-card">
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Expires Safely</h3>
-            <p className="text-muted">The link automatically expires after 15 days. It&apos;s a moment in time, not a permanent record.</p>
-          </div>
-          <div className="glass-card">
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📸</div>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Add Memories</h3>
-            <p className="text-muted">Upload photos that capture your shared moments to make your note truly personal.</p>
-          </div>
-          <div className="glass-card">
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📱</div>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Opens Anywhere</h3>
-            <p className="text-muted">No app required. Just send the secure link via WhatsApp, SMS, or email.</p>
-          </div>
-        </section>
-
         {/* Templates Section */}
         <section className="templates-section" id="templates">
           <p className="templates-section-label">THE TEMPLATES</p>
