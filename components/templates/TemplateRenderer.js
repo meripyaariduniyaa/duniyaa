@@ -87,7 +87,7 @@ function ConfettiCannon({ active = false, duration = 3500, heartOnly = false }) 
 /* ==========================================================================
    1. INTERACTIVE ROMANTIC APOLOGY TEMPLATE (ID: sorry)
    ========================================================================== */
-function InteractiveApologyFlowTemplate({ note }) {
+function InteractiveApologyFlowTemplate({ note, isPreview = false }) {
   const [step, setStep] = useState(1);
   const [vibe, setVibe] = useState('cute'); // 'cute', 'romantic', 'sincere'
   const [cutenessCount, setCutenessCount] = useState(0);
@@ -398,6 +398,7 @@ function InteractiveApologyFlowTemplate({ note }) {
           )}
         </div>
       )}
+      <ReplayAndMarketingFooter onReplay={() => { setStep(1); setForgiven(false); setShowConfetti(false); setVibe('cute'); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -405,7 +406,7 @@ function InteractiveApologyFlowTemplate({ note }) {
 /* ==========================================================================
    2. CINEMATIC BIRTHDAY SURPRISE TEMPLATE (ID: birthday-surprise)
    ========================================================================== */
-function BirthdaySurpriseTemplate({ note }) {
+function BirthdaySurpriseTemplate({ note, isPreview = false }) {
   const [theme, setTheme] = useState('royal'); // 'royal', 'rainbow', 'bollywood'
   const [curtainsOpen, setCurtainsOpen] = useState(false);
   const [candlesBlown, setCandlesBlown] = useState(false);
@@ -523,6 +524,7 @@ function BirthdaySurpriseTemplate({ note }) {
           </div>
         </div>
       )}
+      <ReplayAndMarketingFooter onReplay={() => { setCurtainsOpen(false); setCandlesBlown(false); setShowConfetti(false); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -530,7 +532,7 @@ function BirthdaySurpriseTemplate({ note }) {
 /* ==========================================================================
    3. HANDWRITTEN LOVE LETTER TEMPLATE (ID: love-letter)
    ========================================================================== */
-function LoveLetterTemplate({ note }) {
+function LoveLetterTemplate({ note, isPreview = false }) {
   const [stationery, setStationery] = useState('classic'); // 'classic', 'floral', 'midnight', 'vintage'
   const [unsealed, setUnsealed] = useState(false);
   const [typedLines, setTypedLines] = useState('');
@@ -648,6 +650,7 @@ function LoveLetterTemplate({ note }) {
           </div>
         </div>
       )}
+      <ReplayAndMarketingFooter onReplay={() => { setUnsealed(false); setTypedText(''); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -655,7 +658,7 @@ function LoveLetterTemplate({ note }) {
 /* ==========================================================================
    4. A LETTER FOR MOM TEMPLATE (ID: letter-for-mom)
    ========================================================================== */
-function LetterForMomTemplate({ note }) {
+function LetterForMomTemplate({ note, isPreview = false }) {
   const [secretRevealed, setSecretRevealed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -732,6 +735,7 @@ function LetterForMomTemplate({ note }) {
       <div className="cursive" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '2.4rem', color: '#be185d' }}>
         Thank you, Ma! ❤️
       </div>
+      <ReplayAndMarketingFooter onReplay={() => { setSecretRevealed(false); setShowConfetti(false); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -739,7 +743,7 @@ function LetterForMomTemplate({ note }) {
 /* ==========================================================================
    5. WILL YOU BE MY VALENTINE TEMPLATE (ID: be-my-valentine)
    ========================================================================== */
-function BeMyValentineTemplate({ note }) {
+function BeMyValentineTemplate({ note, isPreview = false }) {
   const [accepted, setAccepted] = useState(false);
   const [noPosition, setNoPosition] = useState({ top: '0px', left: '0px' });
   const [noCount, setNoCount] = useState(0);
@@ -830,6 +834,7 @@ function BeMyValentineTemplate({ note }) {
           </div>
         </div>
       )}
+      <ReplayAndMarketingFooter onReplay={() => { setAccepted(false); setNoCount(0); setShowConfetti(false); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -837,7 +842,7 @@ function BeMyValentineTemplate({ note }) {
 /* ==========================================================================
    6. ROYAL WEDDING INVITATION TEMPLATE (ID: wedding-invitation)
    ========================================================================== */
-function WeddingInvitationTemplate({ note }) {
+function WeddingInvitationTemplate({ note, isPreview = false }) {
   const [rsvp, setRsvp] = useState(null);
   const [timeLeft, setTimeLeft] = useState({ days: 14, hours: 8, mins: 45, secs: 12 });
 
@@ -974,6 +979,7 @@ function WeddingInvitationTemplate({ note }) {
           </div>
         )}
       </div>
+      <ReplayAndMarketingFooter onReplay={() => { setRsvp(null); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -981,7 +987,7 @@ function WeddingInvitationTemplate({ note }) {
 /* ==========================================================================
    7. SURPRISE REVEAL BOX TEMPLATE (ID: surprise-reveal-box)
    ========================================================================== */
-function SurpriseRevealBoxTemplate({ note }) {
+function SurpriseRevealBoxTemplate({ note, isPreview = false }) {
   const [step, setStep] = useState(0); // 0: wrapped ribbon, 1: lid open, 2: surprise layer 1, 3: layer 2, 4: final reveal
   const [boxTheme, setBoxTheme] = useState('ruby'); // 'ruby', 'gold', 'purple'
   const [showConfetti, setShowConfetti] = useState(false);
@@ -1109,6 +1115,7 @@ function SurpriseRevealBoxTemplate({ note }) {
           )}
         </div>
       )}
+      <ReplayAndMarketingFooter onReplay={() => { setStep(0); setShowConfetti(false); }} isPreview={isPreview} />
     </div>
   );
 }
@@ -1116,7 +1123,7 @@ function SurpriseRevealBoxTemplate({ note }) {
 /* ==========================================================================
    8. CINEMATIC VIRTUAL ROSE BLOOM TEMPLATE (ID: a-rose-for-someone-special)
    ========================================================================== */
-function RoseSpecialTemplate({ note }) {
+function RoseSpecialTemplate({ note, isPreview = false }) {
   const [bloomed, setBloomed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -1178,6 +1185,87 @@ function RoseSpecialTemplate({ note }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+      <ReplayAndMarketingFooter onReplay={() => { setBloomed(false); setShowConfetti(false); }} isPreview={isPreview} />
+    </div>
+  );
+}
+
+/* ==========================================================================
+   REPLAY ANIMATION & MARKETING CTA FOOTER
+   ========================================================================== */
+function ReplayAndMarketingFooter({ onReplay, isPreview = false }) {
+  return (
+    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '2px dashed rgba(216, 30, 91, 0.25)', textAlign: 'center', width: '100%' }}>
+      {/* 1. Replay Animation Button */}
+      {onReplay && (
+        <button
+          type="button"
+          onClick={onReplay}
+          style={{
+            background: 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
+            color: '#be185d',
+            border: '2px solid #f472b6',
+            borderRadius: '999px',
+            padding: '0.6rem 1.4rem',
+            fontSize: '0.85rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            marginBottom: isPreview ? '0' : '1.75rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 4px 14px rgba(216, 30, 91, 0.15)',
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          🔄 Replay Surprise Animation
+        </button>
+      )}
+
+      {/* 2. Retronote Marketing & Create CTA */}
+      {!isPreview && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(255, 241, 242, 0.95), rgba(253, 230, 238, 0.95))',
+            border: '2px solid #f472b6',
+            borderRadius: '20px',
+            padding: '1.5rem 1.25rem',
+            maxWidth: '520px',
+            margin: '0 auto',
+            boxShadow: '0 8px 24px rgba(216, 30, 91, 0.12)',
+            backdropFilter: 'blur(8px)'
+          }}
+        >
+          <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.4rem', animation: 'heartPulse 2s infinite' }}>🎁✨</span>
+          <h3 style={{ margin: '0 0 0.4rem 0', color: '#881337', fontSize: '1.15rem', fontWeight: 800 }}>
+            Loved this surprise message?
+          </h3>
+          <p style={{ margin: '0 0 1.25rem 0', color: '#9f1239', fontSize: '0.875rem', lineHeight: 1.5 }}>
+            Surprise your partner, best friend, or family with a custom interactive greeting card — complete with music, candles, rose blooms, & memory swiper!
+          </p>
+          <a
+            href="/create"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg, #d81e5b, #be185d)',
+              color: '#ffffff',
+              padding: '0.75rem 1.6rem',
+              borderRadius: '999px',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              textDecoration: 'none',
+              boxShadow: '0 4px 16px rgba(216, 30, 91, 0.35)',
+              letterSpacing: '0.02em'
+            }}
+          >
+            ✨ Craft a Surprise Note Now →
+          </a>
         </div>
       )}
     </div>

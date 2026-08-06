@@ -183,9 +183,9 @@ function PreviewContent() {
                         <span>₹{basePrice}</span>
                       </div>
                       {hasCustomSlug && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#15803d', fontWeight: 600 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span>Custom Link ({apology.custom_slug})</span>
-                          <span>FREE (₹0)</span>
+                          <span>+₹{customLinkFee}</span>
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: '0.5rem', borderTop: '1px dashed #fdba74', paddingTop: '0.5rem' }}>
@@ -194,7 +194,7 @@ function PreviewContent() {
                       </div>
                     </div>
                     <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.9rem' }}>
-                      Apply coupon code below to discount your total amount.
+                      ✨ Coupons apply to the entire total amount (including custom link)!
                     </p>
                   </div>
 

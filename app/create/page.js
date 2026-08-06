@@ -691,8 +691,8 @@ function CreateNoteContent() {
                 {slugStatus === 'taken' && (
                   <p className="slug-status slug-status--taken">✗ Link is already taken, try another.</p>
                 )}
-                <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#15803d', fontWeight: 600 }}>
-                  ✨ Custom links are 100% FREE! Included with your note.
+                <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#be185d' }}>
+                  Custom links are ₹29 extra. 💡 <em>Note: Coupons apply to your total amount at checkout!</em>
                 </p>
               </div>
 
