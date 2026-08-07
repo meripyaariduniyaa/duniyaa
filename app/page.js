@@ -84,7 +84,7 @@ export default function Home() {
               View Profile
             </Link>
           </div>
-
+        </section>
 
         {/* Templates Section */}
         <section className="templates-section" id="templates">
