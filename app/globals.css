@@ -543,17 +543,9 @@ a {
 }
 
 .templates-grid {
-  display: flex;
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1.25rem;
-  padding-bottom: 1.5rem;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.templates-grid > * {
-  flex: 0 0 85%;
-  scroll-snap-align: start;
 }
 
 /* Template Card */
@@ -892,8 +884,8 @@ a {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 
-  .templates-grid > * {
-    flex: 0 0 45%;
+  .templates-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .templates-section h2 {
@@ -919,7 +911,7 @@ a {
 
 /* ========== RESPONSIVE: DESKTOP (1024px) ========== */
 @media (min-width: 1024px) {
-  .templates-grid > * {
-    flex: 0 0 30%;
+  .templates-grid {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }

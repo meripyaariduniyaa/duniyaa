@@ -43,34 +43,36 @@ export default function Home() {
             It disappears safely after 15 days, with secure sharing, animated templates, and easy mobile access.
           </p>
 
-          <div className="hero-feature-list">
-            <div className="hero-feature">
-              <div className="hero-feature-icon">🔒</div>
-              <div>
-                <strong>Privacy first</strong>
-                <p>Secure notes with no public indexing and one-time links for every message.</p>
-              </div>
-            </div>
-            <div className="hero-feature">
-              <div className="hero-feature-icon">⏳</div>
-              <div>
-                <strong>Auto-expire</strong>
-                <p>Notes disappear after 15 days, so memories stay special and private.</p>
-              </div>
-            </div>
-            <div className="hero-feature">
-              <div className="hero-feature-icon">🎨</div>
-              <div>
-                <strong>Animated templates</strong>
-                <p>Choose from beautiful, motion-ready cards designed to feel alive.</p>
-              </div>
-            </div>
-            <div className="hero-feature">
-              <div className="hero-feature-icon">📱</div>
-              <div>
-                <strong>Easy sharing</strong>
-                <p>Send links instantly via WhatsApp, SMS, or email — no app needed.</p>
-              </div>
+          <div style={{ marginTop: '3rem', textAlign: 'left' }}>
+            <p className="templates-section-label">ONGOING EVENTS</p>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', textAlign: 'left' }}>Celebrate Special Moments 🪢</h2>
+            <p className="templates-subtitle" style={{ textAlign: 'left', marginBottom: '1rem' }}>
+              Special interactive cards and limited time offers for upcoming festivals!
+            </p>
+            
+            <div className="events-carousel">
+            {displayTemplates.filter(t => t.isNew || t.id === 'rakshabandhan' || t.id === 'birthday-surprise').map((t) => (
+              <Link
+                key={t.id}
+                href={`/create?template=${t.id}`}
+                style={{ textDecoration: 'none', color: 'inherit', flex: '0 0 auto', width: '85%', maxWidth: '350px' }}
+              >
+                <div className="template-card event-card-featured">
+                  <div className="template-badge template-badge--premium" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                    🔥 Trending Now
+                  </div>
+                  <div className="template-icon" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>{t.icon}</div>
+                  <h3>{t.title}</h3>
+                  <p className="template-desc">{t.description}</p>
+                  <div className="template-meta">
+                    <div>
+                      <span className="template-time">⏱ {t.time}</span>
+                    </div>
+                    <span className="template-cta">Send now →</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
             </div>
           </div>
 
@@ -82,7 +84,7 @@ export default function Home() {
               View Profile
             </Link>
           </div>
-        </section>
+
 
         {/* Templates Section */}
         <section className="templates-section" id="templates">
