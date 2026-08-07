@@ -400,7 +400,7 @@ function InteractiveApologyFlowTemplate({ note, isPreview = false }) {
           )}
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setStep(1); setForgiven(false); setShowConfetti(false); setVibe('cute'); }} isPreview={isPreview} />
+      {forgiven && <ReplayAndMarketingFooter onReplay={() => { setStep(1); setForgiven(false); setShowConfetti(false); setVibe('cute'); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -526,7 +526,7 @@ function BirthdaySurpriseTemplate({ note, isPreview = false }) {
           </div>
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setCurtainsOpen(false); setCandlesBlown(false); setShowConfetti(false); }} isPreview={isPreview} />
+      {candlesBlown && <ReplayAndMarketingFooter onReplay={() => { setCurtainsOpen(false); setCandlesBlown(false); setShowConfetti(false); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -652,7 +652,7 @@ function LoveLetterTemplate({ note, isPreview = false }) {
           </div>
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setUnsealed(false); setTypedText(''); }} isPreview={isPreview} />
+      {unsealed && <ReplayAndMarketingFooter onReplay={() => { setUnsealed(false); setTypedText(''); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -737,7 +737,7 @@ function LetterForMomTemplate({ note, isPreview = false }) {
       <div className="cursive" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '2.4rem', color: '#be185d' }}>
         Thank you, Ma! ❤️
       </div>
-      <ReplayAndMarketingFooter onReplay={() => { setSecretRevealed(false); setShowConfetti(false); }} isPreview={isPreview} />
+      {secretRevealed && <ReplayAndMarketingFooter onReplay={() => { setSecretRevealed(false); setShowConfetti(false); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -836,7 +836,7 @@ function BeMyValentineTemplate({ note, isPreview = false }) {
           </div>
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setAccepted(false); setNoCount(0); setShowConfetti(false); }} isPreview={isPreview} />
+      {accepted && <ReplayAndMarketingFooter onReplay={() => { setAccepted(false); setNoCount(0); setShowConfetti(false); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -873,10 +873,13 @@ function WeddingInvitationTemplate({ note, isPreview = false }) {
         💒 SHUBH VIVAH & SAVE THE DATE
       </div>
       <h1 style={{ color: '#fef3c7', fontSize: 'clamp(1.75rem, 5vw, 3rem)', margin: '0.75rem 0 0.5rem', fontFamily: 'Georgia, serif' }}>
-        Wedding Invitation for {recipient}
+        {note?.custom_details?.bride_name && note?.custom_details?.groom_name
+          ? `${note.custom_details.bride_name} ❤️ ${note.custom_details.groom_name}`
+          : `Wedding Invitation for ${recipient}`}
       </h1>
       <p style={{ color: '#fde68a', fontSize: '0.95rem', fontStyle: 'italic', maxWidth: '550px', margin: '0 auto 1.5rem' }}>
-        Together with their families, we cordially invite you to share in our sacred auspicious union.
+        {note?.custom_details?.wedding_date ? `Save the Date: ${note.custom_details.wedding_date}` : 'Together with their families, we cordially invite you to share in our sacred auspicious union.'}
+        {note?.custom_details?.venue && <span style={{ display: 'block', marginTop: '0.35rem', color: '#fbbf24', fontWeight: 700 }}>📍 Venue: {note.custom_details.venue}</span>}
       </p>
 
       {/* Real-time Live Countdown Timer */}
@@ -914,30 +917,37 @@ function WeddingInvitationTemplate({ note, isPreview = false }) {
           <div className="event-card">
             <div className="event-icon">💛</div>
             <h4>Mehndi Ki Raat</h4>
-            <p className="event-time">4:00 PM onwards</p>
+            <p className="event-time">{note?.custom_details?.event_mehndi || '4:00 PM onwards'}</p>
           </div>
           <div className="event-card">
             <div className="event-icon">💃</div>
             <h4>Sangeet Sandhya</h4>
-            <p className="event-time">7:30 PM onwards</p>
+            <p className="event-time">{note?.custom_details?.event_sangeet || '7:30 PM onwards'}</p>
+          </div>
+          <div className="event-card">
+            <div className="event-icon">🌻</div>
+            <h4>Haldi Ceremony</h4>
+            <p className="event-time">{note?.custom_details?.event_haldi || '10:00 AM onwards'}</p>
           </div>
           <div className="event-card">
             <div className="event-icon">🪔</div>
             <h4>Shubh Vivah</h4>
-            <p className="event-time">10:00 AM auspicious muhurat</p>
+            <p className="event-time">{note?.custom_details?.event_wedding || '7:00 PM auspicious muhurat'}</p>
           </div>
-          <div className="event-card">
-            <div className="event-icon">🎉</div>
-            <h4>Grand Reception</h4>
-            <p className="event-time">7:00 PM onwards</p>
-          </div>
+          {note?.custom_details?.event_reception && (
+            <div className="event-card">
+              <div className="event-icon">🎉</div>
+              <h4>Grand Reception</h4>
+              <p className="event-time">{note.custom_details.event_reception}</p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Map Location Link Button */}
       <div style={{ margin: '1.5rem 0' }}>
         <a
-          href="https://maps.google.com"
+          href={note?.custom_details?.venue_map_url || "https://maps.google.com"}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -981,7 +991,7 @@ function WeddingInvitationTemplate({ note, isPreview = false }) {
           </div>
         )}
       </div>
-      <ReplayAndMarketingFooter onReplay={() => { setRsvp(null); }} isPreview={isPreview} />
+      {rsvp && <ReplayAndMarketingFooter onReplay={() => { setRsvp(null); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -1117,7 +1127,7 @@ function SurpriseRevealBoxTemplate({ note, isPreview = false }) {
           )}
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setStep(0); setShowConfetti(false); }} isPreview={isPreview} />
+      {step >= 4 && <ReplayAndMarketingFooter onReplay={() => { setStep(0); setShowConfetti(false); }} isPreview={isPreview} />}
     </div>
   );
 }
@@ -1189,343 +1199,562 @@ function RoseSpecialTemplate({ note, isPreview = false }) {
           )}
         </div>
       )}
-      <ReplayAndMarketingFooter onReplay={() => { setBloomed(false); setShowConfetti(false); }} isPreview={isPreview} />
+      {bloomed && <ReplayAndMarketingFooter onReplay={() => { setBloomed(false); setShowConfetti(false); }} isPreview={isPreview} />}
     </div>
   );
 }
 
 /* ==========================================================================
-   9. RAKSHA BANDHAN — A BOND FOREVER TEMPLATE (ID: rakshabandhan)
+   9. RAKSHA BANDHAN — A BOND FOREVER TEMPLATE (14-STAGE JOURNEY)
    ========================================================================== */
 function RakshabandhanTemplate({ note, isPreview = false }) {
-  const [step, setStep] = useState(1);
-  const [mood, setMood] = useState('bhai-behan'); // 'bhaiya', 'didi', 'bhai-behan'
-  const [divaCount, setDivaCount] = useState(0);
-  const [topIndex, setTopIndex] = useState(0);
-  const [typedText, setTypedText] = useState('');
-  const [rakhiAccepted, setRakhiAccepted] = useState(false);
+  const [stage, setStage] = useState(1);
+  const [doorOpen, setDoorOpen] = useState(false);
+  const [openedEnvelopes, setOpenedEnvelopes] = useState({});
+  const [knotsTied, setKnotsTied] = useState(0);
+  const [rakhiCeremonyDone, setRakhiCeremonyDone] = useState(false);
+  const [quizAnswered, setQuizAnswered] = useState(false);
+  const [unboxedLetter, setUnboxedLetter] = useState(false);
+  const [shagunSent, setShagunSent] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [rakhiDrawn, setRakhiDrawn] = useState(false);
+  const [typedBlessing, setTypedBlessing] = useState('');
 
-  const recipient = note?.recipient_name || 'Bhai / Didi';
+  const recipient = note?.recipient_name || 'Bhai';
   const customMsg = note?.custom_message ||
-    'This rakhi ties more than just a thread — it binds my heart to yours, forever and always. I am so proud of you and grateful to have you as my sibling. Happy Raksha Bandhan! 🪢💫';
+    'This rakhi ties more than just a thread — it binds my heart to yours, forever and always. I am endlessly proud of you and grateful to have you as my brother. Happy Raksha Bandhan! 🪢💫';
 
-  const moodConfig = {
-    'bhaiya':    { label: '💙 Bhaiya',    greeting: 'Mere pyaare Bhaiya',  color: '#1d4ed8' },
-    'didi':      { label: '💗 Didi',       greeting: 'Meri pyaari Didi',    color: '#db2777' },
-    'bhai-behan':{ label: '🧡 Bhai-Behan', greeting: 'My dearest sibling',  color: '#c2410c' },
-  };
-  const currentMood = moodConfig[mood];
-
-  const defaultPhotos = [
-    { url: 'https://images.unsplash.com/photo-1604881991720-f91add269bed?q=80&w=800&auto=format&fit=crop', caption: 'Always by my side 🧡' },
-    { url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop', caption: 'Growing up together 🌻' },
-    { url: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop', caption: 'Memories forever 🪢' },
+  // Dynamic Promises
+  const promises = [
+    note?.custom_details?.rakhi_promise_1 || 'I promise to always annoy you 😄',
+    note?.custom_details?.rakhi_promise_2 || 'I promise to stand beside you through thick & thin ❤️',
+    note?.custom_details?.rakhi_promise_3 || 'I promise to always pray for your happiness 🌟',
   ];
+
+  // Dynamic Unboxing Letter
+  const unboxingLetter = note?.custom_details?.unboxing_letter ||
+    `Dear ${recipient},\n\nYou know I don't need gifts — your love is enough!\n\nBut... traditions are traditions 😄\n\nSo here's your chance to give your sister some Shagun! ❤️`;
+
+  // Photos
+  const defaultPhotos = [
+    { url: 'https://images.unsplash.com/photo-1604881991720-f91add269bed?q=80&w=800&auto=format&fit=crop', year: '2012', note: 'Remember when you carried my bag? 🎒' },
+    { url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop', year: '2016', note: 'Our biggest fight... lasted 15 mins! 😂' },
+    { url: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop', year: '2020', note: 'Secretly buying chocolates for me 🍫' },
+  ];
+
   const photos = (note?.image_urls && note.image_urls.length > 0)
     ? note.image_urls.map((u, i) => ({
         url: u,
-        caption: i === 0 ? 'Always by my side 🧡' : i === 1 ? 'Growing up together 🌻' : 'Memories forever 🪢'
+        year: `${2015 + i}`,
+        note: i === 0 ? 'Always protecting me 🧡' : i === 1 ? 'Growing up together 🌻' : 'Memories forever 🪢'
       }))
     : defaultPhotos;
 
-  // Rakhi SVG draw-in animation trigger on step 1
-  useEffect(() => {
-    if (step === 1) {
-      const t = setTimeout(() => setRakhiDrawn(true), 400);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
+  // Background Theme based on Stage
+  const getThemeClass = () => {
+    if (stage <= 4) return 'theme-morning';
+    if (stage <= 9) return 'theme-sunset';
+    return 'theme-night';
+  };
 
-  // Auto-fill diya gauge in step 2
+  // Stage 9 Blessing Typewriter
   useEffect(() => {
-    let timer;
-    if (step === 2) {
-      setDivaCount(15);
-      timer = setInterval(() => {
-        setDivaCount((prev) => {
-          if (prev >= 100) { clearInterval(timer); return 100; }
-          return prev + 1.5;
-        });
-      }, 60);
-    }
-    return () => clearInterval(timer);
-  }, [step]);
-
-  // Typewriter on step 4
-  useEffect(() => {
-    if (step === 4) {
-      setTypedText('');
+    if (stage === 9) {
+      setTypedBlessing('');
+      const fullText = "Distance can never untie this thread... Time can never weaken our bond. You'll always have one person silently praying for you... Your sister ❤️";
       let idx = 0;
-      const t = setInterval(() => {
-        if (idx < customMsg.length) {
-          setTypedText((p) => p + customMsg.charAt(idx));
+      const timer = setInterval(() => {
+        if (idx < fullText.length) {
+          setTypedBlessing((prev) => prev + fullText.charAt(idx));
           idx++;
-        } else { clearInterval(t); }
-      }, 38);
-      return () => clearInterval(t);
+        } else { clearInterval(timer); }
+      }, 35);
+      return () => clearInterval(timer);
     }
-  }, [step, customMsg]);
+  }, [stage]);
 
-  const handleAcceptRakhi = () => {
-    setRakhiAccepted(true);
+  const handleDoorOpen = () => {
+    setDoorOpen(true);
+    setTimeout(() => setStage(4), 1200);
+  };
+
+  const handleTieKnot = () => {
+    if (knotsTied < 3) {
+      const next = knotsTied + 1;
+      setKnotsTied(next);
+      if (next === 3) {
+        setShowConfetti(true);
+      }
+    }
+  };
+
+  const handlePerformCeremony = () => {
+    setRakhiCeremonyDone(true);
     setShowConfetti(true);
   };
 
-  /* ── Confetti shapes override for festive ── */
-  const RakhiConfetti = ({ active }) => {
-    const [particles, setParticles] = useState([]);
-    useEffect(() => {
-      if (active) {
-        const shapes = ['🪢', '🌸', '🪔', '🌼', '✨', '🧡', '🌻'];
-        const p = Array.from({ length: 50 }).map((_, i) => ({
-          id: i,
-          left: Math.random() * 100,
-          dur: 2 + Math.random() * 2,
-          delay: Math.random() * 0.6,
-          size: 14 + Math.random() * 14,
-          shape: shapes[Math.floor(Math.random() * shapes.length)],
-        }));
-        setParticles(p);
-        const timer = setTimeout(() => setParticles([]), 5000);
-        return () => clearTimeout(timer);
-      }
-    }, [active]);
-    if (!particles.length) return null;
-    return (
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
-        {particles.map((p) => (
-          <div key={p.id} style={{
-            position: 'absolute', top: '-20px', left: `${p.left}%`,
-            fontSize: `${p.size}px`,
-            animation: `confettiFall ${p.dur}s cubic-bezier(0.25,0.46,0.45,0.94) ${p.delay}s forwards`,
-          }}>{p.shape}</div>
-        ))}
-      </div>
-    );
+  const handleSendShagun = () => {
+    setShagunSent(true);
+    setShowConfetti(true);
   };
 
   return (
-    <div className="rakhi-container">
-      <RakhiConfetti active={showConfetti} />
+    <div className={`rakhi-journey-wrapper ${getThemeClass()}`}>
+      <ConfettiCannon active={showConfetti} />
 
-      {/* Step dots */}
-      <div className="step-progress-dots">
-        {[1, 2, 3, 4].map((s) => (
-          <span key={s} className={`dot ${step === s ? 'active' : step > s ? 'completed' : ''}`}>
-            {s === 1 ? '🪢' : s === 2 ? '🪔' : s === 3 ? '📸' : '💌'}
-          </span>
-        ))}
+      {/* Firefly particles for night sky */}
+      {stage >= 10 && (
+        <div className="fireflies-container">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="firefly" style={{
+              top: `${Math.random() * 90}%`,
+              left: `${Math.random() * 90}%`,
+              animationDelay: `${Math.random() * 3}s`
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* Stage Tracker Dots */}
+      <div className="step-progress-dots" style={{ marginBottom: '1rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#fde68a' }}>
+          STAGE {stage} OF 14
+        </span>
       </div>
 
-      {/* ── STEP 1: Landing + Mood Selector ── */}
-      {step === 1 && (
-        <div className="sorry-flow-step">
-          {/* Animated Rakhi Thread SVG */}
-          <div className="rakhi-svg-stage">
-            <svg viewBox="0 0 200 80" width="220" height="90">
-              {/* Wrist band */}
-              <rect x="10" y="30" width="180" height="20" rx="10" fill="rgba(255,200,100,0.25)" stroke="#f59e0b" strokeWidth="2" />
-              {/* Thread */}
-              <path
-                className={`rakhi-thread-path ${rakhiDrawn ? 'drawn' : ''}`}
-                d="M 10 40 Q 50 10 100 40 Q 150 70 190 40"
-                fill="none" stroke="#f59e0b" strokeWidth="3"
-                strokeLinecap="round"
-              />
-              {/* Rakhi charm */}
-              <circle cx="100" cy="40" r="14" fill="#c2410c" />
-              <circle cx="100" cy="40" r="9" fill="#fbbf24" />
-              <circle cx="100" cy="40" r="5" fill="#fff" />
-              {/* Petals around charm */}
-              {[0,60,120,180,240,300].map((deg, i) => (
-                <ellipse key={i}
-                  cx={100 + 14 * Math.cos((deg * Math.PI) / 180)}
-                  cy={40 + 14 * Math.sin((deg * Math.PI) / 180)}
-                  rx="5" ry="3"
-                  fill="#f97316"
-                  transform={`rotate(${deg} ${100 + 14 * Math.cos((deg * Math.PI) / 180)} ${40 + 14 * Math.sin((deg * Math.PI) / 180)})`}
-                />
-              ))}
-            </svg>
-          </div>
-
-          <h1 className="sorry-flow-title" style={{ fontSize: 'clamp(1.5rem,4vw,2.2rem)' }}>
-            Happy Raksha Bandhan, {recipient}! 🪢
+      {/* ── STAGE 1: The Gift Arrives ── */}
+      {stage === 1 && (
+        <div className="text-center" style={{ padding: '2rem 1rem' }}>
+          <div style={{ fontSize: '4.5rem', marginBottom: '1rem', animation: 'heartPulse 2s infinite' }}>🎁🪢</div>
+          <span style={{ background: 'rgba(251,191,36,0.2)', color: '#fbbf24', padding: '0.4rem 1.2rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
+            SPECIAL SURPRISE FOR {recipient.toUpperCase()}
+          </span>
+          <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', color: '#fff', marginTop: '1rem', marginBottom: '0.75rem' }}>
+            Someone tied a Rakhi for you ❤️
           </h1>
-          <p className="sorry-flow-subtitle">
-            A 4-step interactive sibling celebration crafted just for you.
+          <p style={{ color: '#fde68a', fontSize: '0.95rem', maxWidth: '480px', margin: '0 auto 2rem' }}>
+            Even before you opened this link, a sister's blessing was waiting for you.
           </p>
-
-          {/* Mood Selector */}
-          <div className="vibe-selector-group">
-            <p style={{ fontSize: '0.8rem', color: '#fde68a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Who is this for?
-            </p>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-              {Object.entries(moodConfig).map(([key, val]) => (
-                <button
-                  key={key}
-                  className={`rakhi-mood-chip ${mood === key ? 'active' : ''}`}
-                  onClick={() => setMood(key)}
-                >
-                  {val.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button className="rakhi-btn-glowing" onClick={() => setStep(2)} style={{ marginTop: '1.5rem' }}>
-            Start the Celebration ➔
+          <button
+            className="rakhi-btn-glowing"
+            onClick={() => setStage(2)}
+            style={{ fontSize: '1.1rem', padding: '0.85rem 2.2rem' }}
+          >
+            🪢 Open My Rakhi ➔
           </button>
         </div>
       )}
 
-      {/* ── STEP 2: Diya Sincerity Gauge ── */}
-      {step === 2 && (
-        <div className="sorry-flow-step">
-          <h2 style={{ fontSize: '1.5rem', color: '#fde68a', fontWeight: 700 }}>
-            Light the Diya of Blessings 🪔
+      {/* ── STAGE 2: Personal Welcome ── */}
+      {stage === 2 && (
+        <div className="text-center" style={{ padding: '2rem 1rem' }}>
+          <span style={{ fontSize: '3rem' }}>🌸</span>
+          <h2 style={{ fontSize: '2.2rem', color: '#fde68a', fontFamily: 'Georgia, serif', margin: '0.5rem 0' }}>
+            Dear {recipient}...
           </h2>
-          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.5rem 0 1rem' }}>
-            Tap the diya to pour your love & blessings!
+          <p style={{ fontSize: '1.15rem', color: '#fff', lineHeight: 1.7, maxWidth: '500px', margin: '1.5rem auto 2.5rem' }}>
+            "Before I tie this Rakhi, I want you to travel through our little world of memories."
+          </p>
+          <button className="rakhi-btn-glowing" onClick={() => setStage(3)}>
+            Begin the Journey ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 3: Childhood Door ── */}
+      {stage === 3 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <h2 style={{ fontSize: '1.5rem', color: '#fde68a' }}>Childhood Door 🚪</h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', marginBottom: '1rem' }}>
+            Every Rakhi begins with a memory. Tap to open our childhood door...
           </p>
 
-          <div
-            className="rakhi-diya-gauge"
-            onClick={() => setDivaCount((c) => Math.min(100, c + 12))}
-          >
-            {/* Diya SVG */}
-            <div className="rakhi-diya-svg-wrap">
-              <svg viewBox="0 0 100 120" width="110" height="130">
-                {/* Flame glow */}
-                <ellipse cx="50" cy="30" rx={8 + divaCount * 0.1} ry={12 + divaCount * 0.1}
-                  fill="rgba(251,146,60,0.25)" />
-                {/* Flame */}
-                <path d="M50 50 C44 38 38 28 50 18 C62 28 56 38 50 50 Z" fill="#fb923c" />
-                <path d="M50 46 C46 36 43 30 50 22 C57 30 54 36 50 46 Z" fill="#fde68a" />
-                {/* Diya body */}
-                <path d="M30 75 Q50 60 70 75 L65 90 Q50 100 35 90 Z" fill="#c2410c" />
-                <path d="M35 75 Q50 65 65 75" fill="none" stroke="#fbbf24" strokeWidth="2" />
-                {/* Oil */}
-                <ellipse cx="50" cy="72" rx="14" ry="5" fill={`rgba(251,191,36,${0.3 + divaCount / 200})`} />
-              </svg>
-              <div className="rakhi-diya-percent">{Math.round(divaCount)}%</div>
-            </div>
-
-            {divaCount >= 95 && (
-              <div className="rakhi-blessing-badge pulse-anim">
-                🌟 Full Blessings Sent! ✨
+          <div className={`rakhi-door-stage ${doorOpen ? 'open' : ''}`} onClick={handleDoorOpen}>
+            <div className="rakhi-door-frame">
+              <div className="rakhi-door-panel left" />
+              <div className="rakhi-door-panel right" />
+              <div style={{ textAlign: 'center', zIndex: 1 }}>
+                <span style={{ fontSize: '2.5rem' }}>✨🌻</span>
+                <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, color: '#78350f' }}>Opening Memories...</p>
               </div>
-            )}
-          </div>
-
-          <button className="rakhi-btn-glowing" onClick={() => setStep(3)}>
-            See Our Memories ➔
-          </button>
-        </div>
-      )}
-
-      {/* ── STEP 3: Marigold Polaroid Photo Reel ── */}
-      {step === 3 && (
-        <div className="sorry-flow-step">
-          <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, margin: 0 }}>
-            Our Sibling Memories 📸
-          </h2>
-          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.25rem 0 1rem' }}>
-            Tap the stack to flip through our moments
-          </p>
-
-          <div
-            className="polaroid-deck-container rakhi-polaroid-deck"
-            onClick={() => setTopIndex((prev) => (prev + 1) % photos.length)}
-          >
-            {photos.map((item, idx) => {
-              const offset = (idx - topIndex + photos.length) % photos.length;
-              const isTop = offset === 0;
-              const rotDeg = isTop ? 0 : offset % 2 === 0 ? 6 : -6;
-              const scaleVal = 1 - offset * 0.05;
-              const translateYVal = offset * 12;
-              return (
-                <div key={idx} className="polaroid-card rakhi-polaroid-card" style={{
-                  zIndex: photos.length - offset,
-                  transform: `translateY(${translateYVal}px) rotate(${rotDeg}deg) scale(${scaleVal})`,
-                  opacity: offset > 2 ? 0 : 1,
-                  pointerEvents: isTop ? 'auto' : 'none',
-                }}>
-                  <img src={item.url} alt={`Memory ${idx + 1}`} />
-                  <div className="polaroid-caption" style={{ color: '#92400e' }}>{item.caption}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          <button className="rakhi-btn-glowing" onClick={() => setStep(4)} style={{ marginTop: '1.5rem' }}>
-            Read Rakhi Message ➔
-          </button>
-        </div>
-      )}
-
-      {/* ── STEP 4: Typewriter Message + Accept Rakhi ── */}
-      {step === 4 && (
-        <div className="sorry-flow-step">
-          <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>🪢</div>
-          <h2 className="sorry-flow-title" style={{ fontSize: '1.8rem' }}>
-            {currentMood.greeting}, {recipient} ✨
-          </h2>
-
-          <div className="typewriter-card-box rakhi-typewriter-box">
-            <div className="typewriter-content">
-              {typedText}
-              <span className="blinking-cursor" />
             </div>
           </div>
 
-          {!rakhiAccepted ? (
-            <button
-              className="rakhi-btn-glowing rakhi-accept-btn"
-              onClick={handleAcceptRakhi}
-              style={{ marginTop: '1.5rem' }}
-            >
-              🪢 Accept this Rakhi 💛
+          {!doorOpen && (
+            <button className="rakhi-btn-glowing" onClick={handleDoorOpen} style={{ marginTop: '1rem' }}>
+              🚪 Open the Door ➔
             </button>
-          ) : (
-            <div className="rakhi-blessing-card">
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem', animation: 'heartPulse 1.5s infinite' }}>🌟🪔🌟</div>
-              <h3 style={{ color: '#fbbf24', fontSize: '1.4rem', margin: '0 0 0.5rem' }}>
-                Rakhi Accepted! 🎉
-              </h3>
-              <p style={{ color: '#fde68a', fontSize: '0.95rem', lineHeight: 1.7 }}>
-                May this bond always stay strong. Dua hai ke tujhe zindagi mein sab kuch mile. ❤️
-              </p>
-
-              {note?.shagun_qr_url && (
-                <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(245, 158, 11, 0.1)', border: '2px dashed #f59e0b', borderRadius: '12px' }}>
-                  <h4 style={{ color: '#fcd34d', fontSize: '1.1rem', margin: '0 0 0.75rem' }}>💸 Now, time for Shagun!</h4>
-                  <p style={{ color: '#fef3c7', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                    As per tradition, drop some love (and money) on my QR code below! I accept all UPI payments. 😉
-                  </p>
-                  <img src={note.shagun_qr_url} alt="Shagun QR Code" style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '3px solid #fbbf24', margin: '0 auto' }} />
-                </div>
-              )}
-            </div>
           )}
         </div>
       )}
 
-      <ReplayAndMarketingFooter
-        onReplay={() => {
-          setStep(1); setMood('bhai-behan'); setDivaCount(0);
-          setRakhiAccepted(false); setShowConfetti(false);
-          setTypedText(''); setRakhiDrawn(false); setTopIndex(0);
-        }}
-        isPreview={isPreview}
-      />
+      {/* ── STAGE 4: Memory Timeline ── */}
+      {stage === 4 && (
+        <div className="text-center" style={{ padding: '1rem' }}>
+          <h2 style={{ fontSize: '1.5rem', color: '#fde68a', margin: 0 }}>
+            Our Memory Timeline 📸
+          </h2>
+          <p style={{ fontSize: '0.8rem', color: '#fed7aa', marginBottom: '1rem' }}>
+            Swipe across to journey through our years together ({photos.length} memories)
+          </p>
+
+          <div className="rakhi-timeline-scroll">
+            {photos.map((item, idx) => (
+              <div key={idx} className="rakhi-memory-card">
+                <span style={{ background: '#fbbf24', color: '#78350f', padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800 }}>
+                  {item.year}
+                </span>
+                <img src={item.url} alt={`Memory ${idx + 1}`} style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '12px', margin: '0.75rem 0', border: '2px solid #fbbf24' }} />
+                <p style={{ fontSize: '0.85rem', color: '#fff', margin: 0, fontStyle: 'italic' }}>
+                  {item.note}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStage(5)} style={{ marginTop: '1.5rem' }}>
+            Things I'll Never Forget ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 5: Things I'll Never Forget ── */}
+      {stage === 5 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a', marginBottom: '1.5rem' }}>
+            Things I'll Never Forget ❤️
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '420px', margin: '0 auto 2rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid #fbbf24', padding: '1.25rem', borderRadius: '16px' }}>
+              <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '0.35rem' }}>🛡️</span>
+              <p style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: 700 }}>You always protected me when things were tough.</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid #fbbf24', padding: '1.25rem', borderRadius: '16px' }}>
+              <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '0.35rem' }}>🌟</span>
+              <p style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: 700 }}>You always believed in me, even when I doubted myself.</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid #fbbf24', padding: '1.25rem', borderRadius: '16px' }}>
+              <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '0.35rem' }}>💖</span>
+              <p style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: 700 }}>Even when we fought, you never stopped caring.</p>
+            </div>
+          </div>
+          <button className="rakhi-btn-glowing" onClick={() => setStage(6)}>
+            Open Hidden Envelopes ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 6: Hidden Envelopes ── */}
+      {stage === 6 && (
+        <div className="text-center" style={{ padding: '1rem' }}>
+          <h2 style={{ fontSize: '1.5rem', color: '#fde68a' }}>Hidden Sister Messages 📩</h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', marginBottom: '1rem' }}>Tap each envelope to reveal sister secrets:</p>
+
+          <div className="rakhi-envelope-grid">
+            {[
+              { id: 1, title: '📩 Note #1', text: 'Thank you for becoming my first superhero 🦸‍♂️' },
+              { id: 2, title: '📩 Note #2', text: 'Thank you for never saying no when I needed you 💛' },
+              { id: 3, title: '📩 Note #3', text: 'Thank you for treating me like your princess 👑' },
+            ].map((env) => (
+              <div
+                key={env.id}
+                className="rakhi-envelope-btn"
+                onClick={() => setOpenedEnvelopes((prev) => ({ ...prev, [env.id]: true }))}
+              >
+                {openedEnvelopes[env.id] ? (
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#78350f', lineHeight: 1.4 }}>{env.text}</p>
+                ) : (
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block' }}>✉️</span>
+                    <span>{env.title}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStage(7)} style={{ marginTop: '2rem' }}>
+            Tie Promise Bracelet ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 7: Promise Bracelet (Interactive Knot Tying) ── */}
+      {stage === 7 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a', margin: 0 }}>Promise Bracelet 🪢</h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.5rem 0 1.5rem' }}>
+            Tap the button to tie each sacred knot and reveal sister promises ({knotsTied}/3)
+          </p>
+
+          <div style={{ background: 'rgba(0,0,0,0.3)', border: '2px solid #fbbf24', borderRadius: '20px', padding: '1.5rem', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+              {[1, 2, 3].map((k) => (
+                <div key={k} style={{
+                  width: '50px', height: '50px', borderRadius: '50%',
+                  background: knotsTied >= k ? '#fbbf24' : 'rgba(255,255,255,0.2)',
+                  color: knotsTied >= k ? '#78350f' : '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.5rem', fontWeight: 800, transition: 'all 0.4s ease'
+                }}>
+                  {knotsTied >= k ? '🪢' : k}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ minHeight: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {knotsTied === 0 && <p style={{ color: '#fed7aa', fontStyle: 'italic' }}>Tap below to tie the 1st promise knot...</p>}
+              {knotsTied >= 1 && (
+                <div style={{ color: '#fff', fontSize: '0.95rem' }}>
+                  <p style={{ margin: 0, fontWeight: 700, color: '#fde68a' }}>✨ Promise #{knotsTied}:</p>
+                  <p style={{ margin: '0.35rem 0 0', lineHeight: 1.5 }}>"{promises[knotsTied - 1]}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {knotsTied < 3 ? (
+            <button className="rakhi-btn-glowing" onClick={handleTieKnot}>
+              🪢 Tie Knot #{knotsTied + 1} ➔
+            </button>
+          ) : (
+            <button className="rakhi-btn-glowing" onClick={() => setStage(8)}>
+              Begin Virtual Rakhi Ceremony ➔
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── STAGE 8: Virtual Rakhi Ceremony (Core Ritual) ── */}
+      {stage === 8 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a', margin: 0 }}>Virtual Rakhi Ceremony 🌟</h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.5rem 0 1.5rem' }}>
+            Tap the sacred thali to tie the Rakhi and receive Tilak & Blessings
+          </p>
+
+          <div style={{
+            width: '220px', height: '220px', margin: '0 auto 1.5rem',
+            borderRadius: '50%', background: 'radial-gradient(circle, #fde68a, #d97706)',
+            border: '6px solid #fbbf24', boxShadow: '0 0 30px rgba(251,191,36,0.5)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer'
+          }} onClick={handlePerformCeremony}>
+            <div style={{ fontSize: '3.5rem', animation: rakhiCeremonyDone ? 'none' : 'heartPulse 1.5s infinite' }}>
+              {rakhiCeremonyDone ? '🪔✨🪢' : '✋'}
+            </div>
+            <p style={{ color: '#78350f', fontWeight: 800, fontSize: '0.8rem', marginTop: '0.5rem', margin: 0 }}>
+              {rakhiCeremonyDone ? 'RAKHI TIED!' : 'Tap to Place Wrist & Tie'}
+            </p>
+          </div>
+
+          {rakhiCeremonyDone ? (
+            <div>
+              <p style={{ fontSize: '1.1rem', color: '#fde68a', fontWeight: 800, marginBottom: '1.5rem' }}>
+                🎉 Happy Raksha Bandhan, {recipient}! ❤️
+              </p>
+              <button className="rakhi-btn-glowing" onClick={() => setStage(9)}>
+                Read Sister's Blessing ➔
+              </button>
+            </div>
+          ) : (
+            <button className="rakhi-btn-glowing" onClick={handlePerformCeremony}>
+              🪔 Perform Rakhi Ritual ➔
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── STAGE 9: Blessing Screen ── */}
+      {stage === 9 && (
+        <div className="text-center" style={{ padding: '2rem 1rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>✨🕊️✨</div>
+          <h2 style={{ fontSize: '1.8rem', color: '#fde68a', fontFamily: 'Georgia, serif', marginBottom: '1.5rem' }}>
+            Sister's Blessing
+          </h2>
+
+          <div style={{ background: 'rgba(0,0,0,0.35)', border: '2px solid #fbbf24', borderRadius: '20px', padding: '1.75rem 1.25rem', maxWidth: '480px', margin: '0 auto 2rem', minHeight: '130px', textAlign: 'left' }}>
+            <p style={{ fontSize: '1.05rem', color: '#fff', lineHeight: 1.8, margin: 0, fontFamily: 'Georgia, serif' }}>
+              {typedBlessing}
+              <span className="blinking-cursor" />
+            </p>
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStage(10)}>
+            Take Brother Meter Quiz 😂 ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 10: Brother Meter Quiz ── */}
+      {stage === 10 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <span style={{ fontSize: '3rem' }}>😎</span>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a', margin: '0.5rem 0' }}>The Brother Meter Quiz</h2>
+          <p style={{ fontSize: '0.9rem', color: '#fed7aa', marginBottom: '1.5rem' }}>
+            Quick question: Who's the absolute best brother in the whole wide world?
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '340px', margin: '0 auto 1.5rem' }}>
+            {['😎 Me', '😎 Obviously Me', '😎 Still Me'].map((opt, idx) => (
+              <button
+                key={idx}
+                className="rakhi-btn-glowing"
+                onClick={() => setQuizAnswered(true)}
+                style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', color: '#451a03' }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+
+          {quizAnswered && (
+            <div style={{ background: 'rgba(251,191,36,0.2)', padding: '1rem', borderRadius: '12px', border: '1px solid #fbbf24', marginBottom: '1.5rem' }}>
+              <p style={{ margin: 0, color: '#fde68a', fontWeight: 800 }}>
+                100% CORRECT ANSWER! 🎉 No arguments there! 😄
+              </p>
+            </div>
+          )}
+
+          <button className="rakhi-btn-glowing" onClick={() => setStage(11)}>
+            Open Secret Gift Box 🎁 ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 11: Secret Gift Box ── */}
+      {stage === 11 && (
+        <div className="text-center" style={{ padding: '1.5rem 1rem' }}>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a' }}>One Last Secret Surprise... 🎁</h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', marginBottom: '1.5rem' }}>
+            Tap the gift box to unbox sister's letter
+          </p>
+
+          {!unboxedLetter ? (
+            <div
+              style={{ fontSize: '5rem', cursor: 'pointer', animation: 'heartPulse 1.5s infinite', margin: '1rem 0' }}
+              onClick={() => setUnboxedLetter(true)}
+            >
+              🎁
+            </div>
+          ) : (
+            <div style={{ background: 'linear-gradient(135deg, #fffbeb, #fef3c7)', color: '#78350f', border: '3px solid #fbbf24', borderRadius: '20px', padding: '1.5rem', maxWidth: '460px', margin: '0 auto 1.5rem', textAlign: 'left' }}>
+              <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>📜</span>
+              <p style={{ fontSize: '0.95rem', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'Georgia, serif' }}>
+                {unboxingLetter}
+              </p>
+            </div>
+          )}
+
+          <button className="rakhi-btn-glowing" onClick={() => setStage(12)} style={{ marginTop: '1rem' }}>
+            Enter Shagun Ritual ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 12: Shagun Ritual Thali ── */}
+      {stage === 12 && (
+        <div className="text-center" style={{ padding: '1rem' }}>
+          <span style={{ background: '#fbbf24', color: '#78350f', padding: '0.3rem 1rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>
+            TRADITIONAL SHAGUN RITUAL 💸
+          </span>
+          <h2 style={{ fontSize: '1.6rem', color: '#fde68a', margin: '0.75rem 0 0.35rem' }}>
+            Sister's Shagun Thali 🪔
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', maxWidth: '440px', margin: '0 auto 1rem' }}>
+            "The Rakhi is tied & blessings are shared. If you'd like to continue the tradition, send your Shagun with love."
+          </p>
+
+          <div className="shagun-thali-plate">
+            {note?.shagun_qr_url ? (
+              <div>
+                <img
+                  src={note.shagun_qr_url}
+                  alt="Shagun UPI QR"
+                  style={{ width: '135px', height: '135px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #78350f', margin: '0 auto 0.5rem' }}
+                />
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#451a03', fontWeight: 800 }}>Scan QR to send Shagun 💸</p>
+              </div>
+            ) : (
+              <div>
+                <span style={{ fontSize: '3rem', display: 'block' }}>🪙🪔🌸</span>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#78350f', fontWeight: 800 }}>Sister's Blessing & Love 💛</p>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+            <button className="rakhi-btn-glowing" onClick={handleSendShagun}>
+              ❤️ I've Sent It ➔
+            </button>
+            <button className="rakhi-btn-glowing" onClick={() => setStage(14)} style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid #fbbf24' }}>
+              Skip to Final Message ➔
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STAGE 13: Celebration ── */}
+      {stage === 13 && (
+        <div className="text-center" style={{ padding: '2rem 1rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🎉🎆✨</div>
+          <h2 style={{ fontSize: '2rem', color: '#fbbf24', margin: '0 0 0.5rem' }}>
+            Blessings Received! ❤️
+          </h2>
+          <p style={{ fontSize: '1.05rem', color: '#fff', lineHeight: 1.7, maxWidth: '460px', margin: '0 auto 2rem' }}>
+            Your love & blessings have reached your sister. May this sacred bond stay strong forever and ever.
+          </p>
+          <button className="rakhi-btn-glowing" onClick={() => setStage(14)}>
+            View Final Memory Frame ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STAGE 14: Final Photo Frame & Starry Night ── */}
+      {stage === 14 && (
+        <div className="text-center" style={{ padding: '2rem 1rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌌✨🪢</div>
+          <h2 style={{ fontSize: '1.8rem', color: '#fde68a', fontFamily: 'Georgia, serif', margin: '0 0 0.5rem' }}>
+            Forever & Always
+          </h2>
+          <p style={{ fontSize: '0.95rem', color: '#fed7aa', fontStyle: 'italic', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
+            "Some relationships are born. Some are chosen. But ours... is forever."
+          </p>
+
+          {photos.length > 0 && (
+            <div style={{ width: '220px', height: '220px', margin: '0 auto 1.5rem', borderRadius: '20px', border: '4px solid #fbbf24', overflow: 'hidden', boxShadow: '0 0 30px rgba(251,191,36,0.4)' }}>
+              <img src={photos[0].url} alt="Sibling Final Memory" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          )}
+
+          <p style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 800, margin: '0 0 0.25rem' }}>
+            Happy Raksha Bandhan ❤️
+          </p>
+          <p style={{ fontSize: '0.9rem', color: '#fde68a', fontStyle: 'italic' }}>
+            From Your Loving Sister
+          </p>
+        </div>
+      )}
+
+      {/* Conditional Replay Footer on Final Stage */}
+      {stage >= 13 && (
+        <ReplayAndMarketingFooter
+          onReplay={() => {
+            setStage(1);
+            setDoorOpen(false);
+            setOpenedEnvelopes({});
+            setKnotsTied(0);
+            setRakhiCeremonyDone(false);
+            setQuizAnswered(false);
+            setUnboxedLetter(false);
+            setShagunSent(false);
+            setShowConfetti(false);
+          }}
+          isPreview={isPreview}
+        />
+      )}
     </div>
   );
 }
-
 
 function ReplayAndMarketingFooter({ onReplay, isPreview = false }) {
   return (

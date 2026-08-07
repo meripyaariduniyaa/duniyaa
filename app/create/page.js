@@ -44,8 +44,14 @@ function CreateNoteContent() {
   const [message, setMessage] = useState('');
   const [images, setImages] = useState([]);
   const [shagunQrUrl, setShagunQrUrl] = useState('');
+  const [customDetails, setCustomDetails] = useState({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  // Helper to update a single field in customDetails
+  const updateDetail = (key, value) => {
+    setCustomDetails((prev) => ({ ...prev, [key]: value }));
+  };
 
   // Custom slug state
   const [customSlug, setCustomSlug] = useState('');
@@ -204,6 +210,7 @@ function CreateNoteContent() {
         custom_message: message.trim(),
         image_urls: images,
         shagun_qr_url: shagunQrUrl.trim() || null,
+        custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
         is_paid: false,
         template: selectedTemplateId || 'default',
         custom_slug: customSlug || null,
@@ -228,6 +235,7 @@ function CreateNoteContent() {
     custom_message: message.trim() || sampleMessages[selectedTemplateId] || 'Your message will appear here in real-time...',
     image_urls: images,
     shagun_qr_url: shagunQrUrl.trim() || null,
+    custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
     template: selectedTemplateId,
   };
 
@@ -250,37 +258,7 @@ function CreateNoteContent() {
           </p>
         </div>
 
-        {/* 1. VISUAL TEMPLATE SELECTOR CAROUSEL / GRID */}
-        <div style={{ marginBottom: '2.5rem' }}>
-          <p style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#be185d', marginBottom: '1rem' }}>
-            1. Select Greeting Template Format ({templates.length} Available):
-          </p>
-          <div className="template-selector-grid">
-            {templates.map((t) => {
-              const isSelected = selectedTemplateId === t.id;
-              return (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedTemplateId(t.id)}
-                  className={`template-select-card ${isSelected ? 'selected' : ''}`}
-                >
-                  <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>{t.icon}</div>
-                  <h3 style={{ fontSize: '1rem', color: '#3b0f1b', marginBottom: '0.35rem' }}>{t.title}</h3>
-                  <p style={{ fontSize: '0.75rem', color: '#8e3249', lineHeight: 1.4, flex: 1, marginBottom: '0.75rem' }}>
-                    {t.description}
-                  </p>
-                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                    {t.bestFor?.map((tag, idx) => (
-                      <span key={idx} className="tag-chip">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+
 
         {/* 2. SPLIT SCREEN: FORM LEFT, LIVE INTERACTIVE PREVIEW RIGHT */}
         <div className="create-split-grid">
@@ -636,7 +614,7 @@ function CreateNoteContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <CloudinaryUpload onUpload={(url) => setImages((current) => [...current, url])} />
                   <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-                    {images.length ? `${images.length} photo(s) added` : 'Up to 6 photos max'}
+                    {images.length ? `${images.length} photo(s) added` : `Up to ${selectedTemplate?.photoRequirement?.max || 6} photos max`}
                   </span>
                 </div>
 
@@ -672,6 +650,262 @@ function CreateNoteContent() {
                   </div>
                 )}
               </div>
+
+              {/* ── TEMPLATE-SPECIFIC EXTRA FIELDS ── */}
+
+              {/* Sorry: 3 Promises */}
+              {selectedTemplateId === 'sorry' && (
+                <div className="form-group">
+                  <label className="form-label">🤞 Your 3 Promises for the Future</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>These appear as interactive reveal cards in the animation.</p>
+                  {[0, 1, 2].map((i) => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`promise_${i + 1}`] || ''}
+                      onChange={(e) => updateDetail(`promise_${i + 1}`, e.target.value)}
+                      placeholder={i === 0 ? 'e.g. I promise to listen more carefully' : i === 1 ? 'e.g. I will always be honest with you' : 'e.g. I will never take you for granted'}
+                      maxLength={200}
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Birthday: Age / Milestone */}
+              {selectedTemplateId === 'birthday-surprise' && (
+                <div className="form-group">
+                  <label className="form-label">🎂 Age / Milestone (Optional)</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.age_milestone || ''}
+                    onChange={(e) => updateDetail('age_milestone', e.target.value)}
+                    placeholder="e.g. Turning 25!, The Big 30"
+                    maxLength={60}
+                  />
+                </div>
+              )}
+
+              {/* Love Letter: Special Date */}
+              {selectedTemplateId === 'love-letter' && (
+                <div className="form-group">
+                  <label className="form-label">💕 Special Date / Anniversary (Optional)</label>
+                  <input
+                    className="form-input"
+                    type="date"
+                    value={customDetails.special_date || ''}
+                    onChange={(e) => updateDetail('special_date', e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Letter for Mom: Secret */}
+              {selectedTemplateId === 'letter-for-mom' && (
+                <div className="form-group">
+                  <label className="form-label">🤫 One Thing You Never Told Her</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This appears as a secret reveal in the blooming flower animation.</p>
+                  <textarea
+                    className="form-textarea"
+                    value={customDetails.secret_note || ''}
+                    onChange={(e) => updateDetail('secret_note', e.target.value)}
+                    placeholder="e.g. Ma, I never told you but your strength inspires me every single day..."
+                    rows={3}
+                    maxLength={400}
+                  />
+                </div>
+              )}
+
+              {/* Be My Valentine: Date Idea */}
+              {selectedTemplateId === 'be-my-valentine' && (
+                <div className="form-group">
+                  <label className="form-label">💘 Date Idea / Surprise Details</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed when they finally click YES!</p>
+                  <textarea
+                    className="form-textarea"
+                    value={customDetails.date_idea || ''}
+                    onChange={(e) => updateDetail('date_idea', e.target.value)}
+                    placeholder="e.g. Dinner at our favorite rooftop café + a walk under the stars ✨"
+                    rows={3}
+                    maxLength={400}
+                  />
+                </div>
+              )}
+
+              {/* Wedding Invitation: Full Details */}
+              {selectedTemplateId === 'wedding-invitation' && (
+                <div className="form-group" style={{
+                  background: 'linear-gradient(135deg, #fef2f2, #fff1f2)',
+                  border: '2px dashed #f472b6',
+                  borderRadius: '16px',
+                  padding: '1.25rem'
+                }}>
+                  <label className="form-label" style={{ color: '#881337' }}>💒 Wedding Event Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Bride's Name</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.bride_name || ''}
+                    onChange={(e) => updateDetail('bride_name', e.target.value)}
+                    placeholder="e.g. Priya Sharma"
+                    maxLength={100}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Groom's Name</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.groom_name || ''}
+                    onChange={(e) => updateDetail('groom_name', e.target.value)}
+                    placeholder="e.g. Arjun Patel"
+                    maxLength={100}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Wedding Date</label>
+                  <input
+                    className="form-input"
+                    type="date"
+                    value={customDetails.wedding_date || ''}
+                    onChange={(e) => updateDetail('wedding_date', e.target.value)}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue / Location</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.venue || ''}
+                    onChange={(e) => updateDetail('venue', e.target.value)}
+                    placeholder="e.g. The Grand Ballroom, Mumbai"
+                    maxLength={200}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue Map Link (Optional)</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.venue_map_url || ''}
+                    onChange={(e) => updateDetail('venue_map_url', e.target.value)}
+                    placeholder="e.g. https://maps.google.com/..."
+                    maxLength={500}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>📋 Event Schedule</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Add your Mehndi, Sangeet, Haldi, Vivah timings:</p>
+
+                  <input
+                    className="form-input"
+                    value={customDetails.event_mehndi || ''}
+                    onChange={(e) => updateDetail('event_mehndi', e.target.value)}
+                    placeholder="Mehndi — e.g. 12 Feb, 4:00 PM at Home"
+                    maxLength={200}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <input
+                    className="form-input"
+                    value={customDetails.event_sangeet || ''}
+                    onChange={(e) => updateDetail('event_sangeet', e.target.value)}
+                    placeholder="Sangeet — e.g. 13 Feb, 7:00 PM at Grand Hall"
+                    maxLength={200}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <input
+                    className="form-input"
+                    value={customDetails.event_haldi || ''}
+                    onChange={(e) => updateDetail('event_haldi', e.target.value)}
+                    placeholder="Haldi — e.g. 14 Feb, 10:00 AM"
+                    maxLength={200}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <input
+                    className="form-input"
+                    value={customDetails.event_wedding || ''}
+                    onChange={(e) => updateDetail('event_wedding', e.target.value)}
+                    placeholder="Wedding Ceremony — e.g. 14 Feb, 7:00 PM at Temple"
+                    maxLength={200}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <input
+                    className="form-input"
+                    value={customDetails.event_reception || ''}
+                    onChange={(e) => updateDetail('event_reception', e.target.value)}
+                    placeholder="Reception — e.g. 15 Feb, 8:00 PM at Banquet Hall"
+                    maxLength={200}
+                  />
+                </div>
+              )}
+
+              {/* Surprise Reveal Box: 3 Layer Hints + Final Surprise */}
+              {selectedTemplateId === 'surprise-reveal-box' && (
+                <div className="form-group">
+                  <label className="form-label">🎁 3-Layer Surprise Hints</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Each hint is revealed as they untie a ribbon layer.</p>
+                  {[1, 2, 3].map((i) => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`hint_${i}`] || ''}
+                      onChange={(e) => updateDetail(`hint_${i}`, e.target.value)}
+                      placeholder={i === 1 ? 'Hint #1 — e.g. It\'s something sweet...' : i === 2 ? 'Hint #2 — e.g. It\'s about us two...' : 'Hint #3 — e.g. Open to see the big reveal!'}
+                      maxLength={200}
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                  ))}
+                  <label className="form-label" style={{ marginTop: '0.5rem' }}>🎉 Final Big Surprise Announcement</label>
+                  <textarea
+                    className="form-textarea"
+                    value={customDetails.final_surprise || ''}
+                    onChange={(e) => updateDetail('final_surprise', e.target.value)}
+                    placeholder="e.g. We're going to Goa next month! 🏖️✨"
+                    rows={3}
+                    maxLength={400}
+                  />
+                </div>
+              )}
+
+              {/* Rose: Dedication Line */}
+              {selectedTemplateId === 'a-rose-for-someone-special' && (
+                <div className="form-group">
+                  <label className="form-label">🌹 Dedication Line</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This appears at the center of the blooming rose.</p>
+                  <input
+                    className="form-input"
+                    value={customDetails.dedication_line || ''}
+                    onChange={(e) => updateDetail('dedication_line', e.target.value)}
+                    placeholder="e.g. For the love of my life — forever yours ❤️"
+                    maxLength={200}
+                  />
+                </div>
+              )}
+
+              {/* Rakshabandhan: Custom Promises, Unboxing Letter & Cherished Memory */}
+              {selectedTemplateId === 'rakshabandhan' && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">✨ 3 Promises for the Knot Ceremony</label>
+                    <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed as brother ties each knot in Stage 7.</p>
+                    {[1, 2, 3].map((i) => (
+                      <input
+                        key={i}
+                        className="form-input"
+                        value={customDetails[`rakhi_promise_${i}`] || ''}
+                        onChange={(e) => updateDetail(`rakhi_promise_${i}`, e.target.value)}
+                        placeholder={i === 1 ? 'Knot #1: e.g. I promise to always annoy you 😄' : i === 2 ? 'Knot #2: e.g. I promise to stand beside you through thick & thin ❤️' : 'Knot #3: e.g. I promise to always pray for your happiness 🌟'}
+                        maxLength={150}
+                        style={{ marginBottom: '0.5rem' }}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">📜 Sister's Secret Unboxing Letter</label>
+                    <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This letter appears inside the secret gift box before the Shagun QR.</p>
+                    <textarea
+                      className="form-textarea"
+                      value={customDetails.unboxing_letter || ''}
+                      onChange={(e) => updateDetail('unboxing_letter', e.target.value)}
+                      placeholder="e.g. Dear Bhai, You know I don't need gifts — your love is enough! But... traditions are traditions 😄 So here is your chance to give your sister some Shagun! ❤️"
+                      rows={3}
+                      maxLength={500}
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Rakshabandhan-only: Shagun QR Upload */}
               {selectedTemplateId === 'rakshabandhan' && (

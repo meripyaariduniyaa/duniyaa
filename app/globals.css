@@ -915,3 +915,180 @@ a {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
+
+/* ==========================================================================
+   RAKSHA BANDHAN 14-STAGE CINEMATIC JOURNEY STYLES
+   ========================================================================== */
+.rakhi-journey-wrapper {
+  position: relative;
+  min-height: 580px;
+  border-radius: 24px;
+  padding: 2rem 1.25rem;
+  color: #fff;
+  transition: background 1.5s ease-in-out;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  font-family: inherit;
+}
+
+/* Time of Day Theme Backgrounds */
+.theme-morning {
+  background: linear-gradient(145deg, #78350f, #92400e, #451a03);
+}
+
+.theme-sunset {
+  background: linear-gradient(145deg, #9a3412, #c2410c, #7c2d12);
+}
+
+.theme-night {
+  background: linear-gradient(145deg, #1e1b4b, #311042, #0f172a);
+}
+
+/* 3D Wooden Door Animation */
+.rakhi-door-stage {
+  perspective: 1000px;
+  width: 220px;
+  height: 220px;
+  margin: 1.5rem auto;
+  position: relative;
+  cursor: pointer;
+}
+
+.rakhi-door-frame {
+  width: 100%;
+  height: 100%;
+  border: 8px solid #b45309;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rakhi-door-panel {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, #78350f, #92400e);
+  border: 2px solid #fbbf24;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.rakhi-door-panel.left {
+  left: 0;
+  transform-origin: left;
+}
+
+.rakhi-door-panel.right {
+  right: 0;
+  transform-origin: right;
+}
+
+.rakhi-door-stage.open .rakhi-door-panel.left {
+  transform: rotateY(-110deg);
+}
+
+.rakhi-door-stage.open .rakhi-door-panel.right {
+  transform: rotateY(110deg);
+}
+
+/* Memory Timeline Cards */
+.rakhi-timeline-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 1rem 0.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rakhi-memory-card {
+  flex: 0 0 250px;
+  scroll-snap-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(251, 191, 36, 0.4);
+  border-radius: 16px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.rakhi-memory-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Hidden Envelope Cards */
+.rakhi-envelope-grid {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.rakhi-envelope-btn {
+  background: linear-gradient(135deg, #fde68a, #fef3c7);
+  color: #78350f;
+  border: 2px solid #fbbf24;
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  width: 140px;
+  cursor: pointer;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rakhi-envelope-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+}
+
+/* Shagun Ritual Thali Plate */
+.shagun-thali-plate {
+  background: radial-gradient(circle, #fde68a 0%, #d97706 70%, #78350f 100%);
+  border: 6px solid #fbbf24;
+  border-radius: 50%;
+  width: 290px;
+  height: 290px;
+  margin: 1.5rem auto;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  position: relative;
+}
+
+/* Firefly Floating Glow Particles */
+.fireflies-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fde68a;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #fbbf24;
+  animation: floatFirefly 4s infinite ease-in-out alternate;
+}
+
+@keyframes floatFirefly {
+  0% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-30px) translateX(15px); opacity: 0.3; }
+}
