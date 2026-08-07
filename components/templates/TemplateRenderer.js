@@ -1218,6 +1218,7 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
   const [shagunSent, setShagunSent] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [typedBlessing, setTypedBlessing] = useState('');
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const recipient = note?.recipient_name || 'Bhai';
   const customMsg = note?.custom_message ||
@@ -1295,6 +1296,7 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
   const handleSendShagun = () => {
     setShagunSent(true);
     setShowConfetti(true);
+    setStage(13);
   };
 
   return (
@@ -1664,15 +1666,19 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
             "The Rakhi is tied & blessings are shared. If you'd like to continue the tradition, send your Shagun with love."
           </p>
 
-          <div className="shagun-thali-plate">
+          <div
+            className="shagun-thali-plate"
+            onClick={() => note?.shagun_qr_url && setShowQrModal(true)}
+            style={{ cursor: note?.shagun_qr_url ? 'pointer' : 'default' }}
+          >
             {note?.shagun_qr_url ? (
               <div>
                 <img
                   src={note.shagun_qr_url}
                   alt="Shagun UPI QR"
-                  style={{ width: '135px', height: '135px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #78350f', margin: '0 auto 0.5rem' }}
+                  style={{ width: '135px', height: '135px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #78350f', margin: '0 auto 0.35rem' }}
                 />
-                <p style={{ margin: 0, fontSize: '0.75rem', color: '#451a03', fontWeight: 800 }}>Scan QR to send Shagun 💸</p>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#451a03', fontWeight: 800 }}>🔍 Tap to Enlarge QR 📱</p>
               </div>
             ) : (
               <div>
@@ -1682,7 +1688,47 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
             )}
           </div>
 
+          {/* Full-Screen Zoomed QR Modal Popup */}
+          {showQrModal && note?.shagun_qr_url && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              padding: '1.5rem', backdropFilter: 'blur(8px)'
+            }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                padding: '1.75rem', borderRadius: '24px', border: '4px solid #fbbf24',
+                textAlign: 'center', maxWidth: '320px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+              }}>
+                <span style={{ background: '#f59e0b', color: '#fff', padding: '0.2rem 0.8rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                  📱 SCAN TO PAY SHAGUN
+                </span>
+                <h3 style={{ color: '#78350f', margin: '0.75rem 0 0.5rem', fontSize: '1.2rem' }}>UPI / GPay / PhonePe QR</h3>
+                <img
+                  src={note.shagun_qr_url}
+                  alt="Zoomed Shagun QR"
+                  style={{ width: '220px', height: '220px', objectFit: 'cover', borderRadius: '16px', border: '4px solid #78350f', margin: '0.5rem auto' }}
+                />
+                <p style={{ fontSize: '0.8rem', color: '#92400e', margin: '0.5rem 0 1rem', fontStyle: 'italic' }}>
+                  Scan with any UPI App or take a screenshot to import in Google Pay / PhonePe.
+                </p>
+                <button
+                  className="rakhi-btn-glowing"
+                  onClick={() => setShowQrModal(false)}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  ✕ Close QR Code
+                </button>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+            {note?.shagun_qr_url && (
+              <button className="rakhi-btn-glowing" onClick={() => setShowQrModal(true)} style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
+                📱 Scan / Zoom QR
+              </button>
+            )}
             <button className="rakhi-btn-glowing" onClick={handleSendShagun}>
               ❤️ I've Sent It ➔
             </button>
