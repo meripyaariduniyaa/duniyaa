@@ -1676,7 +1676,7 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
                 <img
                   src={note.shagun_qr_url}
                   alt="Shagun UPI QR"
-                  style={{ width: '135px', height: '135px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #78350f', margin: '0 auto 0.35rem' }}
+                  style={{ width: '135px', height: '135px', objectFit: 'cover', borderRadius: '12px', border: '3px solid #78350f', margin: '0 auto 0.35rem', background: '#fff' }}
                 />
                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#451a03', fontWeight: 800 }}>🔍 Tap to Enlarge QR 📱</p>
               </div>
@@ -1707,7 +1707,7 @@ function RakshabandhanTemplate({ note, isPreview = false }) {
                 <img
                   src={note.shagun_qr_url}
                   alt="Zoomed Shagun QR"
-                  style={{ width: '220px', height: '220px', objectFit: 'cover', borderRadius: '16px', border: '4px solid #78350f', margin: '0.5rem auto' }}
+                  style={{ width: '220px', height: '220px', objectFit: 'cover', borderRadius: '16px', border: '4px solid #78350f', margin: '0.5rem auto', background: '#fff' }}
                 />
                 <p style={{ fontSize: '0.8rem', color: '#92400e', margin: '0.5rem 0 1rem', fontStyle: 'italic' }}>
                   Scan with any UPI App or take a screenshot to import in Google Pay / PhonePe.
