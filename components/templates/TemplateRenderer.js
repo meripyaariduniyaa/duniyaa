@@ -120,9 +120,9 @@ function InteractiveApologyFlowTemplate({ note, isPreview = false }) {
     : defaultPhotos;
 
   const promiseList = [
-    "I promise to always listen and never let anger win.",
-    "I promise to give you extra hugs and make your smile my #1 priority.",
-    "I promise to cherish you every single day and never take you for granted."
+    note?.custom_details?.promise_1 || "I promise to always listen and never let anger win.",
+    note?.custom_details?.promise_2 || "I promise to give you extra hugs and make your smile my #1 priority.",
+    note?.custom_details?.promise_3 || "I promise to cherish you every single day and never take you for granted."
   ];
 
   // Auto fill cuteness meter in Step 2
@@ -429,9 +429,14 @@ function BirthdaySurpriseTemplate({ note, isPreview = false }) {
       <div style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffe4e6' }}>
         🎂 CINEMATIC BIRTHDAY SURPRISE
       </div>
-      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', color: '#fff', margin: '0.5rem 0 1rem' }}>
+      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', color: '#fff', margin: '0.5rem 0 0.25rem' }}>
         Happy Birthday {recipient}! 🎉
       </h1>
+      {note?.custom_details?.age_milestone && (
+        <span style={{ background: '#ffd700', color: '#3b0f1b', padding: '0.25rem 0.9rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 800, display: 'inline-block', marginBottom: '1rem' }}>
+          ✨ {note.custom_details.age_milestone} ✨
+        </span>
+      )}
 
       {/* Theme Picker */}
       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
@@ -628,6 +633,11 @@ function LoveLetterTemplate({ note, isPreview = false }) {
           <h2 className="letter-header-name">
             Dearest {recipient},
           </h2>
+          {note?.custom_details?.special_date && (
+            <p style={{ fontSize: '0.85rem', fontStyle: 'italic', opacity: 0.8, marginTop: '-0.35rem', marginBottom: '1rem' }}>
+              🗓️ Special Date: {note.custom_details.special_date}
+            </p>
+          )}
 
           <div className="typewriter-handwriting-body">
             {typedLines}
@@ -727,7 +737,7 @@ function LetterForMomTemplate({ note, isPreview = false }) {
                 </svg>
               </div>
               <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#be185d', marginTop: '0.5rem' }}>
-                &ldquo;You are my hero, Ma. No matter where I go, your love is my anchor. Thank you for everything!&rdquo; ❤️
+                &ldquo;{note?.custom_details?.secret_note || "You are my hero, Ma. No matter where I go, your love is my anchor. Thank you for everything!"}&rdquo; ❤️
               </p>
             </div>
           )}
@@ -825,6 +835,13 @@ function BeMyValentineTemplate({ note, isPreview = false }) {
             <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#4c0519', whiteSpace: 'pre-wrap' }}>
               {customMsg}
             </p>
+
+            {note?.custom_details?.date_idea && (
+              <div style={{ marginTop: '1.25rem', padding: '1rem', background: '#ffe4e6', borderRadius: '12px', border: '2px dashed #e11d48' }}>
+                <h4 style={{ color: '#be185d', margin: '0 0 0.25rem 0', fontSize: '0.95rem' }}>💘 Our Special Valentine Date:</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#9f1239' }}>{note.custom_details.date_idea}</p>
+              </div>
+            )}
 
             {note.image_urls?.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -1081,6 +1098,11 @@ function SurpriseRevealBoxTemplate({ note, isPreview = false }) {
               <h2 style={{ color: '#d81e5b', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
                 Personal Message for {recipient}
               </h2>
+              {note?.custom_details?.hint_1 && (
+                <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  💡 Hint #1: {note.custom_details.hint_1}
+                </p>
+              )}
               <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#3b0f1b', whiteSpace: 'pre-wrap' }}>
                 {customMsg}
               </p>
@@ -1097,6 +1119,11 @@ function SurpriseRevealBoxTemplate({ note, isPreview = false }) {
               <h2 style={{ color: '#d81e5b', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
                 Memory Gallery
               </h2>
+              {note?.custom_details?.hint_2 && (
+                <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+                  💡 Hint #2: {note.custom_details.hint_2}
+                </p>
+              )}
 
               {note.image_urls?.length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
@@ -1118,8 +1145,13 @@ function SurpriseRevealBoxTemplate({ note, isPreview = false }) {
             <div className="surprise-layer-card final-reveal-glow">
               <div style={{ fontSize: '4rem', textAlign: 'center', animation: 'heartPulse 1.5s infinite' }}>💖🎁🎉</div>
               <h2 style={{ color: '#d81e5b', fontSize: '1.8rem', textAlign: 'center', margin: '0.5rem 0' }}>
-                You Are My Greatest Surprise!
+                {note?.custom_details?.final_surprise || "You Are My Greatest Surprise!"}
               </h2>
+              {note?.custom_details?.hint_3 && (
+                <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#be185d', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  ✨ {note.custom_details.hint_3}
+                </p>
+              )}
               <p style={{ textAlign: 'center', fontSize: '1rem', color: '#8e3249' }}>
                 Every layer opened, forever sealed with infinite love. ❤️
               </p>
@@ -1186,6 +1218,11 @@ function RoseSpecialTemplate({ note, isPreview = false }) {
           <p style={{ fontSize: '0.8rem', color: '#fecdd3', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
             🌹 Dedicated Message:
           </p>
+          {note?.custom_details?.dedication_line && (
+            <p style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fbbf24', fontStyle: 'italic', marginBottom: '1rem', borderBottom: '1px dashed rgba(251,191,36,0.3)', paddingBottom: '0.5rem' }}>
+              ✨ &ldquo;{note.custom_details.dedication_line}&rdquo;
+            </p>
+          )}
           <p style={{ fontSize: '1.05rem', lineHeight: 1.9, color: '#ffe4e6', whiteSpace: 'pre-wrap' }}>
             {customMsg}
           </p>

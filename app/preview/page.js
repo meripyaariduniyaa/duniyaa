@@ -46,6 +46,8 @@ function PreviewContent() {
           recipient_name: raw.recipient_name || '',
           custom_message: raw.custom_message || '',
           image_urls: Array.isArray(raw.image_urls) ? raw.image_urls : [],
+          shagun_qr_url: raw.shagun_qr_url || null,
+          custom_details: raw.custom_details || null,
           template: raw.template || 'default',
           custom_slug: raw.custom_slug || null,
           is_paid: raw.is_paid || false,

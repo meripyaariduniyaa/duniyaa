@@ -41,6 +41,8 @@ export default async function SorryPage({ params }) {
     recipient_name: apology.recipient_name || '',
     custom_message: apology.custom_message || '',
     image_urls: Array.isArray(apology.image_urls) ? apology.image_urls : [],
+    shagun_qr_url: apology.shagun_qr_url || null,
+    custom_details: apology.custom_details || null,
     template: apology.template || 'default',
     custom_slug: apology.custom_slug || null,
     is_paid: apology.is_paid || false,
