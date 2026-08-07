@@ -43,6 +43,7 @@ function CreateNoteContent() {
   const [recipientName, setRecipientName] = useState('');
   const [message, setMessage] = useState('');
   const [images, setImages] = useState([]);
+  const [shagunQrUrl, setShagunQrUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,7 +60,8 @@ function CreateNoteContent() {
     'be-my-valentine': "You bring magic, smiles, and joy into my life every single day. I want to celebrate love with you today and always. Will you be my Valentine? 💕🌹",
     'wedding-invitation': "We cordially request the honor of your presence to celebrate love, laughter, and togetherness as we begin our sacred new journey together. 💒🪔",
     'surprise-reveal-box': "Behind every bow and ribbon lies a heart overflowing with love for you. Unbox each layer to discover your special surprise! 🎁✨",
-    'a-rose-for-someone-special': "Like a rose that blooms under the moonlight, my feelings for you grow deeper with every passing moment. Dedicated to you with all my affection. 🌹✨"
+    'a-rose-for-someone-special': "Like a rose that blooms under the moonlight, my feelings for you grow deeper with every passing moment. Dedicated to you with all my affection. 🌹✨",
+    'rakshabandhan': "This rakhi ties more than just a thread — it binds my heart to yours, forever and always. I may not say it often, but I am endlessly proud of you and grateful to have you as my sibling. Happy Raksha Bandhan! 🪢💫"
   };
 
   // AI Magic Assistant State
@@ -201,6 +203,7 @@ function CreateNoteContent() {
         recipient_name: recipientName.trim(),
         custom_message: message.trim(),
         image_urls: images,
+        shagun_qr_url: shagunQrUrl.trim() || null,
         is_paid: false,
         template: selectedTemplateId || 'default',
         custom_slug: customSlug || null,
@@ -224,6 +227,7 @@ function CreateNoteContent() {
     recipient_name: recipientName.trim() || 'Maya',
     custom_message: message.trim() || sampleMessages[selectedTemplateId] || 'Your message will appear here in real-time...',
     image_urls: images,
+    shagun_qr_url: shagunQrUrl.trim() || null,
     template: selectedTemplateId,
   };
 
@@ -668,6 +672,53 @@ function CreateNoteContent() {
                   </div>
                 )}
               </div>
+
+              {/* Rakshabandhan-only: Shagun QR Upload */}
+              {selectedTemplateId === 'rakshabandhan' && (
+                <div className="form-group" style={{
+                  background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                  border: '2px dashed #f59e0b',
+                  borderRadius: '16px',
+                  padding: '1.25rem'
+                }}>
+                  <label className="form-label" style={{ color: '#92400e', marginBottom: '0.25rem' }}>
+                    🪢 Sister's Shagun QR Code (Optional but Recommended 😏)
+                  </label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.75rem', color: '#b45309' }}>
+                    Upload your UPI / PhonePe / GPay QR screenshot — it'll appear at the end of the card with a playful money request message! 💸
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <CloudinaryUpload onUpload={(url) => setShagunQrUrl(url)} />
+                    {shagunQrUrl ? (
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <img
+                          src={shagunQrUrl}
+                          alt="Shagun QR"
+                          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', border: '3px solid #f59e0b' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShagunQrUrl('')}
+                          style={{
+                            position: 'absolute', top: '-6px', right: '-6px',
+                            background: '#e11d48', color: '#fff', border: 'none',
+                            borderRadius: '50%', width: '20px', height: '20px',
+                            fontSize: '0.7rem', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}
+                        >✕</button>
+                      </div>
+                    ) : (
+                      <span className="text-muted" style={{ fontSize: '0.8rem', color: '#b45309' }}>
+                        No QR yet — upload your payment QR
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '0.72rem', color: '#d97706', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                    💡 Tip: Open your PhonePe/GPay app → "Receive Money" → take a screenshot of the QR
+                  </p>
+                </div>
+              )}
 
               {/* Custom Link */}
               <div className="form-group">

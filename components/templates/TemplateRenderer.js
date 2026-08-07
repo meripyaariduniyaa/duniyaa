@@ -26,6 +26,8 @@ export default function TemplateRenderer({ note, isPreview = false }) {
       return <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} />;
     case 'a-rose-for-someone-special':
       return <RoseSpecialTemplate note={note} isPreview={isPreview} />;
+    case 'rakshabandhan':
+      return <RakshabandhanTemplate note={note} isPreview={isPreview} />;
     default:
       return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }
@@ -1193,8 +1195,338 @@ function RoseSpecialTemplate({ note, isPreview = false }) {
 }
 
 /* ==========================================================================
-   REPLAY ANIMATION & MARKETING CTA FOOTER
+   9. RAKSHA BANDHAN — A BOND FOREVER TEMPLATE (ID: rakshabandhan)
    ========================================================================== */
+function RakshabandhanTemplate({ note, isPreview = false }) {
+  const [step, setStep] = useState(1);
+  const [mood, setMood] = useState('bhai-behan'); // 'bhaiya', 'didi', 'bhai-behan'
+  const [divaCount, setDivaCount] = useState(0);
+  const [topIndex, setTopIndex] = useState(0);
+  const [typedText, setTypedText] = useState('');
+  const [rakhiAccepted, setRakhiAccepted] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [rakhiDrawn, setRakhiDrawn] = useState(false);
+
+  const recipient = note?.recipient_name || 'Bhai / Didi';
+  const customMsg = note?.custom_message ||
+    'This rakhi ties more than just a thread — it binds my heart to yours, forever and always. I am so proud of you and grateful to have you as my sibling. Happy Raksha Bandhan! 🪢💫';
+
+  const moodConfig = {
+    'bhaiya':    { label: '💙 Bhaiya',    greeting: 'Mere pyaare Bhaiya',  color: '#1d4ed8' },
+    'didi':      { label: '💗 Didi',       greeting: 'Meri pyaari Didi',    color: '#db2777' },
+    'bhai-behan':{ label: '🧡 Bhai-Behan', greeting: 'My dearest sibling',  color: '#c2410c' },
+  };
+  const currentMood = moodConfig[mood];
+
+  const defaultPhotos = [
+    { url: 'https://images.unsplash.com/photo-1604881991720-f91add269bed?q=80&w=800&auto=format&fit=crop', caption: 'Always by my side 🧡' },
+    { url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop', caption: 'Growing up together 🌻' },
+    { url: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop', caption: 'Memories forever 🪢' },
+  ];
+  const photos = (note?.image_urls && note.image_urls.length > 0)
+    ? note.image_urls.map((u, i) => ({
+        url: u,
+        caption: i === 0 ? 'Always by my side 🧡' : i === 1 ? 'Growing up together 🌻' : 'Memories forever 🪢'
+      }))
+    : defaultPhotos;
+
+  // Rakhi SVG draw-in animation trigger on step 1
+  useEffect(() => {
+    if (step === 1) {
+      const t = setTimeout(() => setRakhiDrawn(true), 400);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
+
+  // Auto-fill diya gauge in step 2
+  useEffect(() => {
+    let timer;
+    if (step === 2) {
+      setDivaCount(15);
+      timer = setInterval(() => {
+        setDivaCount((prev) => {
+          if (prev >= 100) { clearInterval(timer); return 100; }
+          return prev + 1.5;
+        });
+      }, 60);
+    }
+    return () => clearInterval(timer);
+  }, [step]);
+
+  // Typewriter on step 4
+  useEffect(() => {
+    if (step === 4) {
+      setTypedText('');
+      let idx = 0;
+      const t = setInterval(() => {
+        if (idx < customMsg.length) {
+          setTypedText((p) => p + customMsg.charAt(idx));
+          idx++;
+        } else { clearInterval(t); }
+      }, 38);
+      return () => clearInterval(t);
+    }
+  }, [step, customMsg]);
+
+  const handleAcceptRakhi = () => {
+    setRakhiAccepted(true);
+    setShowConfetti(true);
+  };
+
+  /* ── Confetti shapes override for festive ── */
+  const RakhiConfetti = ({ active }) => {
+    const [particles, setParticles] = useState([]);
+    useEffect(() => {
+      if (active) {
+        const shapes = ['🪢', '🌸', '🪔', '🌼', '✨', '🧡', '🌻'];
+        const p = Array.from({ length: 50 }).map((_, i) => ({
+          id: i,
+          left: Math.random() * 100,
+          dur: 2 + Math.random() * 2,
+          delay: Math.random() * 0.6,
+          size: 14 + Math.random() * 14,
+          shape: shapes[Math.floor(Math.random() * shapes.length)],
+        }));
+        setParticles(p);
+        const timer = setTimeout(() => setParticles([]), 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [active]);
+    if (!particles.length) return null;
+    return (
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
+        {particles.map((p) => (
+          <div key={p.id} style={{
+            position: 'absolute', top: '-20px', left: `${p.left}%`,
+            fontSize: `${p.size}px`,
+            animation: `confettiFall ${p.dur}s cubic-bezier(0.25,0.46,0.45,0.94) ${p.delay}s forwards`,
+          }}>{p.shape}</div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="rakhi-container">
+      <RakhiConfetti active={showConfetti} />
+
+      {/* Step dots */}
+      <div className="step-progress-dots">
+        {[1, 2, 3, 4].map((s) => (
+          <span key={s} className={`dot ${step === s ? 'active' : step > s ? 'completed' : ''}`}>
+            {s === 1 ? '🪢' : s === 2 ? '🪔' : s === 3 ? '📸' : '💌'}
+          </span>
+        ))}
+      </div>
+
+      {/* ── STEP 1: Landing + Mood Selector ── */}
+      {step === 1 && (
+        <div className="sorry-flow-step">
+          {/* Animated Rakhi Thread SVG */}
+          <div className="rakhi-svg-stage">
+            <svg viewBox="0 0 200 80" width="220" height="90">
+              {/* Wrist band */}
+              <rect x="10" y="30" width="180" height="20" rx="10" fill="rgba(255,200,100,0.25)" stroke="#f59e0b" strokeWidth="2" />
+              {/* Thread */}
+              <path
+                className={`rakhi-thread-path ${rakhiDrawn ? 'drawn' : ''}`}
+                d="M 10 40 Q 50 10 100 40 Q 150 70 190 40"
+                fill="none" stroke="#f59e0b" strokeWidth="3"
+                strokeLinecap="round"
+              />
+              {/* Rakhi charm */}
+              <circle cx="100" cy="40" r="14" fill="#c2410c" />
+              <circle cx="100" cy="40" r="9" fill="#fbbf24" />
+              <circle cx="100" cy="40" r="5" fill="#fff" />
+              {/* Petals around charm */}
+              {[0,60,120,180,240,300].map((deg, i) => (
+                <ellipse key={i}
+                  cx={100 + 14 * Math.cos((deg * Math.PI) / 180)}
+                  cy={40 + 14 * Math.sin((deg * Math.PI) / 180)}
+                  rx="5" ry="3"
+                  fill="#f97316"
+                  transform={`rotate(${deg} ${100 + 14 * Math.cos((deg * Math.PI) / 180)} ${40 + 14 * Math.sin((deg * Math.PI) / 180)})`}
+                />
+              ))}
+            </svg>
+          </div>
+
+          <h1 className="sorry-flow-title" style={{ fontSize: 'clamp(1.5rem,4vw,2.2rem)' }}>
+            Happy Raksha Bandhan, {recipient}! 🪢
+          </h1>
+          <p className="sorry-flow-subtitle">
+            A 4-step interactive sibling celebration crafted just for you.
+          </p>
+
+          {/* Mood Selector */}
+          <div className="vibe-selector-group">
+            <p style={{ fontSize: '0.8rem', color: '#fde68a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Who is this for?
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+              {Object.entries(moodConfig).map(([key, val]) => (
+                <button
+                  key={key}
+                  className={`rakhi-mood-chip ${mood === key ? 'active' : ''}`}
+                  onClick={() => setMood(key)}
+                >
+                  {val.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStep(2)} style={{ marginTop: '1.5rem' }}>
+            Start the Celebration ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STEP 2: Diya Sincerity Gauge ── */}
+      {step === 2 && (
+        <div className="sorry-flow-step">
+          <h2 style={{ fontSize: '1.5rem', color: '#fde68a', fontWeight: 700 }}>
+            Light the Diya of Blessings 🪔
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.5rem 0 1rem' }}>
+            Tap the diya to pour your love & blessings!
+          </p>
+
+          <div
+            className="rakhi-diya-gauge"
+            onClick={() => setDivaCount((c) => Math.min(100, c + 12))}
+          >
+            {/* Diya SVG */}
+            <div className="rakhi-diya-svg-wrap">
+              <svg viewBox="0 0 100 120" width="110" height="130">
+                {/* Flame glow */}
+                <ellipse cx="50" cy="30" rx={8 + divaCount * 0.1} ry={12 + divaCount * 0.1}
+                  fill="rgba(251,146,60,0.25)" />
+                {/* Flame */}
+                <path d="M50 50 C44 38 38 28 50 18 C62 28 56 38 50 50 Z" fill="#fb923c" />
+                <path d="M50 46 C46 36 43 30 50 22 C57 30 54 36 50 46 Z" fill="#fde68a" />
+                {/* Diya body */}
+                <path d="M30 75 Q50 60 70 75 L65 90 Q50 100 35 90 Z" fill="#c2410c" />
+                <path d="M35 75 Q50 65 65 75" fill="none" stroke="#fbbf24" strokeWidth="2" />
+                {/* Oil */}
+                <ellipse cx="50" cy="72" rx="14" ry="5" fill={`rgba(251,191,36,${0.3 + divaCount / 200})`} />
+              </svg>
+              <div className="rakhi-diya-percent">{Math.round(divaCount)}%</div>
+            </div>
+
+            {divaCount >= 95 && (
+              <div className="rakhi-blessing-badge pulse-anim">
+                🌟 Full Blessings Sent! ✨
+              </div>
+            )}
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStep(3)}>
+            See Our Memories ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STEP 3: Marigold Polaroid Photo Reel ── */}
+      {step === 3 && (
+        <div className="sorry-flow-step">
+          <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 700, margin: 0 }}>
+            Our Sibling Memories 📸
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#fed7aa', margin: '0.25rem 0 1rem' }}>
+            Tap the stack to flip through our moments
+          </p>
+
+          <div
+            className="polaroid-deck-container rakhi-polaroid-deck"
+            onClick={() => setTopIndex((prev) => (prev + 1) % photos.length)}
+          >
+            {photos.map((item, idx) => {
+              const offset = (idx - topIndex + photos.length) % photos.length;
+              const isTop = offset === 0;
+              const rotDeg = isTop ? 0 : offset % 2 === 0 ? 6 : -6;
+              const scaleVal = 1 - offset * 0.05;
+              const translateYVal = offset * 12;
+              return (
+                <div key={idx} className="polaroid-card rakhi-polaroid-card" style={{
+                  zIndex: photos.length - offset,
+                  transform: `translateY(${translateYVal}px) rotate(${rotDeg}deg) scale(${scaleVal})`,
+                  opacity: offset > 2 ? 0 : 1,
+                  pointerEvents: isTop ? 'auto' : 'none',
+                }}>
+                  <img src={item.url} alt={`Memory ${idx + 1}`} />
+                  <div className="polaroid-caption" style={{ color: '#92400e' }}>{item.caption}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button className="rakhi-btn-glowing" onClick={() => setStep(4)} style={{ marginTop: '1.5rem' }}>
+            Read Rakhi Message ➔
+          </button>
+        </div>
+      )}
+
+      {/* ── STEP 4: Typewriter Message + Accept Rakhi ── */}
+      {step === 4 && (
+        <div className="sorry-flow-step">
+          <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>🪢</div>
+          <h2 className="sorry-flow-title" style={{ fontSize: '1.8rem' }}>
+            {currentMood.greeting}, {recipient} ✨
+          </h2>
+
+          <div className="typewriter-card-box rakhi-typewriter-box">
+            <div className="typewriter-content">
+              {typedText}
+              <span className="blinking-cursor" />
+            </div>
+          </div>
+
+          {!rakhiAccepted ? (
+            <button
+              className="rakhi-btn-glowing rakhi-accept-btn"
+              onClick={handleAcceptRakhi}
+              style={{ marginTop: '1.5rem' }}
+            >
+              🪢 Accept this Rakhi 💛
+            </button>
+          ) : (
+            <div className="rakhi-blessing-card">
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem', animation: 'heartPulse 1.5s infinite' }}>🌟🪔🌟</div>
+              <h3 style={{ color: '#fbbf24', fontSize: '1.4rem', margin: '0 0 0.5rem' }}>
+                Rakhi Accepted! 🎉
+              </h3>
+              <p style={{ color: '#fde68a', fontSize: '0.95rem', lineHeight: 1.7 }}>
+                May this bond always stay strong. Dua hai ke tujhe zindagi mein sab kuch mile. ❤️
+              </p>
+
+              {note?.shagun_qr_url && (
+                <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(245, 158, 11, 0.1)', border: '2px dashed #f59e0b', borderRadius: '12px' }}>
+                  <h4 style={{ color: '#fcd34d', fontSize: '1.1rem', margin: '0 0 0.75rem' }}>💸 Now, time for Shagun!</h4>
+                  <p style={{ color: '#fef3c7', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    As per tradition, drop some love (and money) on my QR code below! I accept all UPI payments. 😉
+                  </p>
+                  <img src={note.shagun_qr_url} alt="Shagun QR Code" style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '3px solid #fbbf24', margin: '0 auto' }} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <ReplayAndMarketingFooter
+        onReplay={() => {
+          setStep(1); setMood('bhai-behan'); setDivaCount(0);
+          setRakhiAccepted(false); setShowConfetti(false);
+          setTypedText(''); setRakhiDrawn(false); setTopIndex(0);
+        }}
+        isPreview={isPreview}
+      />
+    </div>
+  );
+}
+
+
 function ReplayAndMarketingFooter({ onReplay, isPreview = false }) {
   return (
     <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '2px dashed rgba(216, 30, 91, 0.25)', textAlign: 'center', width: '100%' }}>
