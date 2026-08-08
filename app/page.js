@@ -88,8 +88,16 @@ export default function Home() {
 
         {/* Templates Section */}
         <section className="templates-section" id="templates">
-          <p className="templates-section-label">THE TEMPLATES</p>
-          <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>A gift tuned for every kind of moment.</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <p className="templates-section-label">THE TEMPLATES</p>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: 0 }}>A gift tuned for every kind of moment.</h2>
+            </div>
+            <Link href="/templates" className="btn-secondary" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+              🔍 Browse SEO Template Directory →
+            </Link>
+          </div>
+          
           <p className="templates-subtitle">
             Everything is now priced at ₹149, with a special launch offer of 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
           </p>

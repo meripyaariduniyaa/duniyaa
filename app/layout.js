@@ -55,15 +55,49 @@ export const viewport = {
 export default function RootLayout({ children }) {
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: siteName,
-    url: baseUrl,
-    description: siteDescription,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${baseUrl}/create`,
-      'query-input': 'required name=search_term_string',
-    },
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
+        name: siteName,
+        url: baseUrl,
+        description: siteDescription,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${baseUrl}/templates?q={search_term_string}`
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        '@id': `${baseUrl}/#navigation`,
+        name: [
+          'Birthday Card',
+          'Interactive Romantic Apology',
+          'Love Letter',
+          'Will You Be My Valentine?',
+          'Wedding Invitation',
+          'Surprise Reveal Box',
+          'A Rose for Someone Special',
+          'A Letter for Mom',
+          'Raksha Bandhan'
+        ],
+        url: [
+          `${baseUrl}/templates/birthday-surprise`,
+          `${baseUrl}/templates/sorry`,
+          `${baseUrl}/templates/love-letter`,
+          `${baseUrl}/templates/be-my-valentine`,
+          `${baseUrl}/templates/wedding-invitation`,
+          `${baseUrl}/templates/surprise-reveal-box`,
+          `${baseUrl}/templates/a-rose-for-someone-special`,
+          `${baseUrl}/templates/letter-for-mom`,
+          `${baseUrl}/templates/rakshabandhan`
+        ]
+      }
+    ]
   };
 
   return (

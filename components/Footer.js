@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith('/p/') || pathname?.startsWith('/sorry/')) {
+  if (pathname?.startsWith('/p/')) {
     return null;
   }
 
@@ -32,12 +32,12 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-heading">Occasions</h4>
           <ul className="footer-list">
-            <li><Link href="/create?template=birthday-surprise">Birthday Gifts</Link></li>
-            <li><Link href="/create?template=love-letter">Anniversary Gifts</Link></li>
-            <li><Link href="/create?template=letter-for-mom">Mother&apos;s Day Gifts</Link></li>
-            <li><Link href="/create?template=be-my-valentine">Valentine&apos;s Day Gifts</Link></li>
-            <li><Link href="/create?template=wedding-invitation">Wedding Gifts</Link></li>
-            <li><Link href="/create?template=memoryverse">Long-Distance Gifts</Link></li>
+            <li><Link href="/templates/birthday-surprise">Birthday Card</Link></li>
+            <li><Link href="/templates/love-letter">Love Letter & Anniversary</Link></li>
+            <li><Link href="/templates/letter-for-mom">Letter for Mom</Link></li>
+            <li><Link href="/templates/be-my-valentine">Will You Be My Valentine?</Link></li>
+            <li><Link href="/templates/wedding-invitation">Wedding Invitation</Link></li>
+            <li><Link href="/templates/sorry">Interactive Apology</Link></li>
           </ul>
         </div>
 
@@ -45,10 +45,12 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-heading">For Someone Special</h4>
           <ul className="footer-list">
-            <li><Link href="/create?template=be-my-valentine">Gifts for Girlfriend</Link></li>
-            <li><Link href="/create?template=love-letter">Gifts for Boyfriend</Link></li>
-            <li><Link href="/create?template=letter-for-mom">Gifts for Mom</Link></li>
-            <li><Link href="/create?template=a-rose-for-someone-special">Romantic Gifts</Link></li>
+            <li><Link href="/templates/be-my-valentine">Gifts for Girlfriend</Link></li>
+            <li><Link href="/templates/love-letter">Gifts for Boyfriend</Link></li>
+            <li><Link href="/templates/letter-for-mom">Gifts for Mom</Link></li>
+            <li><Link href="/templates/a-rose-for-someone-special">A Rose for Someone Special</Link></li>
+            <li><Link href="/templates/surprise-reveal-box">Surprise Reveal Box</Link></li>
+            <li><Link href="/templates/rakshabandhan">Raksha Bandhan Card</Link></li>
           </ul>
         </div>
 
@@ -56,6 +58,7 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-heading">Product</h4>
           <ul className="footer-list">
+            <li><Link href="/templates">All Templates</Link></li>
             <li><Link href="/create">Create a Gift</Link></li>
             <li><Link href="/profile">My Dashboard</Link></li>
           </ul>

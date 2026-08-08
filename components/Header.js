@@ -8,7 +8,7 @@ export default function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (pathname?.startsWith('/p/') || pathname?.startsWith('/sorry/')) {
+  if (pathname?.startsWith('/p/')) {
     return null;
   }
 
@@ -18,6 +18,7 @@ export default function Header() {
         Lovely<span>Crafts</span>
       </Link>
       <div className="nav-links">
+        <Link href="/templates" className="nav-link">Templates</Link>
         <Link href="/create" className="nav-link">Create</Link>
         {user ? (
           <Link href="/profile" className="nav-link">My Dashboard</Link>
