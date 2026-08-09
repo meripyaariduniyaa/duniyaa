@@ -26,118 +26,129 @@ export default function Home() {
 
   return (
     <main className="shell">
-      {/* Background decorations */}
-      <div className="bg-glow bg-glow--top" aria-hidden="true" />
-      <div className="bg-glow bg-glow--bottom" aria-hidden="true" />
-
       <div className="main-content">
         {/* Hero Section */}
-        <section className="hero-section text-center mt-8 mb-8">
-          <div className="hero-sale-banner">🎉 Launch celebration: 50% OFF everything — premium notes now ₹99.5</div>
-          <h1>
-            Some moments deserve <br/>
-            <span className="text-gradient cursive">more than a text.</span>
+        <section className="hero-section text-center mt-4 mb-8" style={{ background: '#ffffff', borderRadius: '32px', padding: '3.5rem 1.5rem 3rem', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.03)' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)', background: '#fafaf9', padding: '0.35rem 1rem', borderRadius: '99px', border: '1px solid rgba(0,0,0,0.06)', display: 'inline-block', marginBottom: '1.25rem' }}>
+            Personalized Digital Gifts for People You Love
+          </span>
+
+          <h1 style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.75rem)', lineHeight: 1.15, fontWeight: 600, color: '#1c1917', marginBottom: '1.25rem', letterSpacing: '-0.03em' }}>
+            Craft unforgettable<br />
+            <em className="cursive" style={{ fontSize: '1em', color: 'var(--accent-primary)' }}>interactive surprises.</em>
           </h1>
-          <p className="hero-copy text-muted">
-            Create a beautiful, private space for the person you want to reach — photos, words, and memories.
-            It disappears safely after 90 days, with secure sharing, animated templates, and easy mobile access.
+
+          <p className="hero-copy text-muted" style={{ maxWidth: '640px', margin: '0 auto 1.75rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
+            Go beyond standard greeting cards. Turn special moments, photos, and heartfelt messages into gamified digital experiences they open right on their phone.
           </p>
 
-          <div style={{ marginTop: '3rem', textAlign: 'left' }}>
-            <p className="templates-section-label">ONGOING EVENTS</p>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', textAlign: 'left' }}>Celebrate Special Moments 🪢</h2>
-            <p className="templates-subtitle" style={{ textAlign: 'left', marginBottom: '1rem' }}>
-              Special interactive cards and limited time offers for upcoming festivals!
-            </p>
-            
-            <div className="events-carousel">
-            {displayTemplates.filter(t => t.isNew || t.id === 'rakshabandhan' || t.id === 'birthday-surprise').map((t) => (
-              <Link
-                key={t.id}
-                href={`/create?template=${t.id}`}
-                style={{ textDecoration: 'none', color: 'inherit', flex: '0 0 auto', width: '85%', maxWidth: '350px' }}
-              >
-                <div className="template-card event-card-featured">
-                  <div className="template-badge template-badge--premium" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                    🔥 Trending Now
-                  </div>
-                  <div className="template-icon" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>{t.icon}</div>
-                  <h3>{t.title}</h3>
-                  <p className="template-desc">{t.description}</p>
-                  <div className="template-meta">
-                    <div>
-                      <span className="template-time">⏱ {t.time}</span>
-                    </div>
-                    <span className="template-cta">Send now →</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-            </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fafaf9', border: '1px solid rgba(0,0,0,0.08)', padding: '0.4rem 1.1rem', borderRadius: '99px', fontSize: '0.85rem', color: '#1c1917', fontWeight: 600, marginBottom: '1.75rem' }}>
+            <span>🎉 Special Offer:</span>
+            <del style={{ color: 'var(--text-muted)', fontWeight: 400 }}>₹499</del>
+            <span style={{ color: '#16a34a' }}>₹149 (70% OFF)</span>
           </div>
 
-          <div className="hero-actions">
-            <Link href="/create" className="btn-primary">
-              ✨ Create a Note
+          {/* Quick Pill Navigation */}
+          <div className="hero-pills">
+            {displayTemplates.slice(0, 7).map((t) => (
+              <Link key={t.id} href={`/create?template=${t.id}`} className="hero-pill-item">
+                <span>{t.icon}</span>
+                <span>{t.title}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="hero-actions" style={{ marginTop: '1rem' }}>
+            <Link href="/templates" className="btn-primary" style={{ padding: '0.95rem 2.25rem', fontSize: '1rem' }}>
+              ✨ Craft a Surprise Now
             </Link>
-            <Link href="/profile" className="btn-secondary">
-              View Profile
-            </Link>
+            <a href="#experiences" className="btn-secondary" style={{ padding: '0.95rem 1.75rem', fontSize: '0.95rem' }}>
+              Explore Experiences ↓
+            </a>
           </div>
         </section>
 
-        {/* Templates Section */}
-        <section className="templates-section" id="templates">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div>
-              <p className="templates-section-label">THE TEMPLATES</p>
-              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', margin: 0 }}>A gift tuned for every kind of moment.</h2>
-            </div>
-            <Link href="/templates" className="btn-secondary" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
-              🔍 Browse SEO Template Directory →
-            </Link>
+        {/* Bento Grid: Something for Every Moment */}
+        <section className="bento-section" id="experiences">
+          <div className="text-center" style={{ marginBottom: '2rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
+              OUR EXPERIENCES
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', marginTop: '0.35rem', fontWeight: 600, color: '#1c1917' }}>
+              Something for every moment
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.35rem' }}>
+              Choose a gamified interactive template and personalize it in 2 minutes.
+            </p>
           </div>
-          
-          <p className="templates-subtitle">
-            Everything is now priced at ₹199, with a special launch offer of 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
-          </p>
 
-          <div className="templates-grid">
+          <div className="bento-grid">
             {displayTemplates.map((t) => (
-              <Link
-                key={t.id}
-                href={`/create?template=${t.id}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div className="template-card">
-                  {t.recommended && (
-                    <div className="template-badge">⭐ Recommended</div>
-                  )}
-                  {t.price && !t.recommended && (
-                    <div className="template-badge template-badge--premium">
-                      💎 Premium — ₹{t.price}
-                    </div>
-                  )}
-
-                  <div className="template-icon">{t.icon}</div>
-                  <h3>{t.title}</h3>
-                  <p className="template-desc">{t.description}</p>
-
-                  <div className="template-meta">
-                    <div>
-                      <span className="template-time">⏱ {t.time}</span>
-                      <div className="template-tags">
-                        {t.bestFor.map((tag) => (
-                          <span key={tag} className="template-tag">{tag}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <span className="template-cta">Make this gift →</span>
+              <Link key={t.id} href={`/create?template=${t.id}`} className="bento-card">
+                <div>
+                  <div className="bento-card-header">
+                    <span className="bento-emoji">{t.icon}</span>
+                    <h3 className="bento-card-title">{t.title}</h3>
                   </div>
+                  <p className="bento-card-desc">{t.description}</p>
+                </div>
+
+                <div className="bento-card-footer">
+                  <div className="bento-price-tag">
+                    <del>₹499</del>
+                    <span>₹149</span>
+                  </div>
+                  <span className="bento-cta">
+                    Create Now →
+                  </span>
                 </div>
               </Link>
             ))}
           </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="how-it-works-section">
+          <div className="text-center">
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
+              SIMPLE & FAST
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.25rem)', marginTop: '0.25rem', fontWeight: 600, color: '#1c1917' }}>
+              How it works
+            </h2>
+          </div>
+
+          <div className="how-it-works-grid">
+            <div className="how-card">
+              <div className="how-step-num">1</div>
+              <h3 className="how-title">Pick an Experience</h3>
+              <p className="how-desc">Select from Proposals, Puzzles, Birthday Bashes, Sorry Cards, or Mother&apos;s Day tributes.</p>
+            </div>
+            <div className="how-card">
+              <div className="how-step-num">2</div>
+              <h3 className="how-title">Add Your Personal Touch</h3>
+              <p className="how-desc">Upload special photos, craft heartfelt letters, add secret notes, or pick promises.</p>
+            </div>
+            <div className="how-card">
+              <div className="how-step-num">3</div>
+              <h3 className="how-title">Send with Love</h3>
+              <p className="how-desc">Share a private link directly via WhatsApp or SMS. Watch their reaction live!</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Loved by Users Banner */}
+        <section className="social-proof-banner">
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🥰 ❤️ 🥳</div>
+          <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 600, color: '#1c1917', marginBottom: '0.5rem' }}>
+            Created with Love. Loved by You. ❤️
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+            Join thousands of people turning ordinary messages into unforgettable digital memories.
+          </p>
+          <Link href="/templates" className="btn-primary">
+            ✨ Craft Your Surprise Note
+          </Link>
         </section>
       </div>
     </main>

@@ -84,18 +84,93 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <main className="shell">
-        <div className="bg-glow bg-glow--top" aria-hidden="true" />
+      <main className="shell" style={{ background: 'linear-gradient(135deg, #fff5f7 0%, #ffebf0 100%)', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+        {/* Animated background elements */}
+        <div style={{ position: 'absolute', top: '20%', left: '15%', fontSize: '2rem', animation: 'floatFirefly 8s infinite alternate', opacity: 0.5 }}>💝</div>
+        <div style={{ position: 'absolute', top: '70%', left: '80%', fontSize: '2.5rem', animation: 'floatFirefly 12s infinite alternate-reverse', opacity: 0.4 }}>✨</div>
+        <div style={{ position: 'absolute', top: '15%', right: '20%', fontSize: '1.5rem', animation: 'floatFirefly 10s infinite alternate', opacity: 0.6 }}>💌</div>
+        <div style={{ position: 'absolute', bottom: '15%', left: '20%', fontSize: '2rem', animation: 'floatFirefly 9s infinite alternate', opacity: 0.4 }}>🌸</div>
 
-        <div className="main-content center-screen">
-          <div className="glass-card text-center" style={{ maxWidth: '400px', width: '100%' }}>
-            <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>My Dashboard</h1>
-            <p className="text-muted" style={{ marginBottom: '2rem' }}>
-              Sign in to view your created notes and manage your links.
+        <div className="main-content center-screen" style={{ position: 'relative', zIndex: 10, minHeight: '85vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          
+          <div className="glass-card" style={{ 
+            textAlign: 'center', 
+            maxWidth: '440px', 
+            width: '100%', 
+            padding: '3.5rem 2.5rem',
+            background: 'rgba(255, 255, 255, 0.65)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 25px 50px -12px rgba(225, 29, 72, 0.15)',
+            borderRadius: '32px'
+          }}>
+            <div style={{ 
+              width: '80px', 
+              height: '80px', 
+              background: 'var(--accent-gradient)', 
+              borderRadius: '24px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontSize: '2.5rem', 
+              margin: '0 auto 1.5rem',
+              boxShadow: '0 10px 25px rgba(225, 29, 72, 0.3)',
+              transform: 'rotate(-5deg)'
+            }}>
+              ✨
+            </div>
+            
+            <h1 style={{ fontFamily: 'var(--font-bold)', fontSize: '2rem', color: '#1c1917', margin: '0 0 0.5rem 0', letterSpacing: '-0.03em' }}>
+              Welcome back
+            </h1>
+            <p style={{ color: '#881337', fontSize: '1rem', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+              Sign in to manage your digital surprises and keep track of your beautiful memories.
             </p>
-            <button className="btn-primary w-full" onClick={login}>
-              Sign In with Google
+
+            <button 
+              onClick={login}
+              style={{
+                width: '100%',
+                background: '#ffffff',
+                color: '#1c1917',
+                border: '1px solid rgba(0,0,0,0.05)',
+                borderRadius: '16px',
+                padding: '1rem',
+                fontSize: '1.05rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.02)',
+                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                marginBottom: '2rem'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(225, 29, 72, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(225, 29, 72, 0.2)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.02)';
+                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.05)';
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.81 15.7 17.59V20.34H19.26C21.34 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
+                <path d="M12 23C14.97 23 17.46 22.02 19.26 20.34L15.7 17.59C14.73 18.24 13.48 18.64 12 18.64C9.13 18.64 6.7 16.7 5.84 14.08H2.16V16.94C3.98 20.55 7.73 23 12 23Z" fill="#34A853"/>
+                <path d="M5.84 14.08C5.62 13.43 5.49 12.73 5.49 12C5.49 11.27 5.62 10.57 5.84 9.92V7.06H2.16C1.41 8.56 1 10.24 1 12C1 13.76 1.41 15.44 2.16 16.94L5.84 14.08Z" fill="#FBBC05"/>
+                <path d="M12 5.38C13.62 5.38 15.06 5.93 16.2 7.02L19.34 3.88C17.45 2.12 14.97 1 12 1C7.73 1 3.98 3.45 2.16 7.06L5.84 9.92C6.7 7.3 9.13 5.38 12 5.38Z" fill="#EA4335"/>
+              </svg>
+              Sign in with Google
             </button>
+
+            <p style={{ fontSize: '0.8rem', color: '#881337', lineHeight: 1.6, margin: 0, opacity: 0.8 }}>
+              By continuing, you agree to our <br/>
+              <Link href="/terms" style={{ color: 'var(--accent-secondary)', fontWeight: 600, textDecoration: 'none' }}>Terms of Service</Link> &middot; <Link href="/privacy" style={{ color: 'var(--accent-secondary)', fontWeight: 600, textDecoration: 'none' }}>Privacy Policy</Link>
+            </p>
           </div>
         </div>
       </main>

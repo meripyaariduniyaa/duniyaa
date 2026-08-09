@@ -14,18 +14,19 @@ export default function Header() {
 
   return (
     <nav className="topbar" id="site-header">
-            <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-        Lovely<span>Crafts</span>
+      <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
+        <span>❤️</span> Lovely<span>Crafts</span>
       </Link>
       <div className="nav-links">
-        <Link href="/templates" className="nav-link">Templates</Link>
-        <Link href="/occasions" className="nav-link">Occasions</Link>
-        <Link href="/create" className="nav-link">Create</Link>
+        <Link href="/templates" className="nav-link hide-on-mobile">Templates</Link>
         {user ? (
-          <Link href="/profile" className="nav-link">My Dashboard</Link>
+          <Link href="/profile" className="nav-link">Dashboard</Link>
         ) : (
           <Link href="/profile" className="nav-link">Sign In</Link>
         )}
+        <Link href="/templates" className="btn-primary" style={{ padding: '0.45rem 1.1rem', fontSize: '0.85rem' }}>
+          ✨ Create Gift
+        </Link>
       </div>
     </nav>
   );

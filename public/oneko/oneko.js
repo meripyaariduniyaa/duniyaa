@@ -162,6 +162,10 @@
     if (!nekoEl.isConnected) {
       return;
     }
+    
+    // Playful rainbow color cycle!
+    nekoEl.style.filter = `sepia(1) saturate(1000%) hue-rotate(${(timestamp / 10) % 360}deg)`;
+    
     if (!lastFrameTimestamp) {
       lastFrameTimestamp = timestamp;
     }

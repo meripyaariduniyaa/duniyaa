@@ -7,7 +7,6 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { templates } from '@/lib/templates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
-import TemplateRenderer from '@/components/templates/TemplateRenderer';
 
 export default function CreateNote() {
   return (
@@ -60,10 +59,10 @@ function CreateNoteContent() {
   // Sample Preset Messages for quick autofill
   const sampleMessages = {
     'sorry': "I know I messed up and said things out of anger. I am truly sorry from the bottom of my heart. You mean everything to me, and I promise to do so much better for us. Please forgive me? 💕",
-    'birthday-surprise': "Wishing you a year filled with endless laughter, boundless happiness, unforgettable adventures, and all your heart's desires. Happy Birthday! 🎉🎂",
-    'love-letter': "I cherish every single moment with you. You bring warmth, beauty, and joy to my world. Thank you for being you and filling my life with endless happiness. Yours always ❤️",
-    'letter-for-mom': "Thank you for every meal, every warm hug, every sacrifice, and endless support. You are the strongest, sweetest person in my life. Thank you for everything, Ma! 💐",
-    'be-my-valentine': "You bring magic, smiles, and joy into my life every single day. I want to celebrate love with you today and always. Will you be my Valentine? 💕🌹",
+    'birthday': "Wishing you a year filled with endless laughter, boundless happiness, unforgettable adventures, and all your heart's desires. Happy Birthday! 🎉🎂",
+    'anniversary': "I cherish every single moment with you. You bring warmth, beauty, and joy to my world. Thank you for being you and filling my life with endless happiness. Yours always ❤️",
+    'mothers-day': "Thank you for every meal, every warm hug, every sacrifice, and endless support. You are the strongest, sweetest person in my life. Thank you for everything, Ma! 💐",
+    'proposal': "You bring magic, smiles, and joy into my life every single day. I want to celebrate love with you today and always. Will you be my forever? 💕🌹",
     'wedding-invitation': "We cordially request the honor of your presence to celebrate love, laughter, and togetherness as we begin our sacred new journey together. 💒🪔",
     'surprise-reveal-box': "Behind every bow and ribbon lies a heart overflowing with love for you. Unbox each layer to discover your special surprise! 🎁✨",
     'a-rose-for-someone-special': "Like a rose that blooms under the moonlight, my feelings for you grow deeper with every passing moment. Dedicated to you with all my affection. 🌹✨",
@@ -229,15 +228,6 @@ function CreateNoteContent() {
     }
   }
 
-  // Draft note object for real-time live preview
-  const draftNote = {
-    recipient_name: recipientName.trim() || 'Maya',
-    custom_message: message.trim() || sampleMessages[selectedTemplateId] || 'Your message will appear here in real-time...',
-    image_urls: images,
-    shagun_qr_url: shagunQrUrl.trim() || null,
-    custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
-    template: selectedTemplateId,
-  };
 
   return (
     <main className="shell" style={{ padding: '2rem 1rem' }}>
@@ -260,9 +250,9 @@ function CreateNoteContent() {
 
 
 
-        {/* 2. SPLIT SCREEN: FORM LEFT, LIVE INTERACTIVE PREVIEW RIGHT */}
-        <div className="create-split-grid">
-          {/* Left Column: Input Form */}
+        {/* 2. FORM ONLY (Preview removed per user request) */}
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          {/* Input Form */}
           <div className="glass-card" style={{ width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px dashed rgba(216, 30, 91, 0.2)', paddingBottom: '0.75rem' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#3b0f1b', margin: 0 }}>
@@ -672,10 +662,20 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Birthday: Age / Milestone */}
-              {selectedTemplateId === 'birthday-surprise' && (
+              {/* Birthday: Theme */}
+              {selectedTemplateId === 'birthday' && (
                 <div className="form-group">
-                  <label className="form-label">🎂 Age / Milestone (Optional)</label>
+                  <label className="form-label">🎂 Visual Theme</label>
+                  <select
+                    className="form-input"
+                    value={customDetails.theme || 'cake'}
+                    onChange={(e) => updateDetail('theme', e.target.value)}
+                  >
+                    <option value="cake">Classic Cake</option>
+                    <option value="galaxy">Galaxy Space</option>
+                  </select>
+
+                  <label className="form-label" style={{ marginTop: '0.5rem' }}>Age / Milestone (Optional)</label>
                   <input
                     className="form-input"
                     value={customDetails.age_milestone || ''}
@@ -699,8 +699,8 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Letter for Mom: Secret */}
-              {selectedTemplateId === 'letter-for-mom' && (
+              {/* Letter for Mom: Secret & Sticky Notes */}
+              {selectedTemplateId === 'mothers-day' && (
                 <div className="form-group">
                   <label className="form-label">🤫 One Thing You Never Told Her</label>
                   <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This appears as a secret reveal in the blooming flower animation.</p>
@@ -712,11 +712,24 @@ function CreateNoteContent() {
                     rows={3}
                     maxLength={400}
                   />
+
+                  <label className="form-label" style={{ marginTop: '1rem' }}>📝 2-3 Sticky Note Memories</label>
+                  {[1, 2, 3].map(i => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`sticky_note_${i}`] || ''}
+                      onChange={(e) => updateDetail(`sticky_note_${i}`, e.target.value)}
+                      placeholder={`Memory #${i} (e.g. Making cookies together)`}
+                      maxLength={150}
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                  ))}
                 </div>
               )}
 
-              {/* Be My Valentine: Date Idea */}
-              {selectedTemplateId === 'be-my-valentine' && (
+              {/* Be My Valentine / Proposal */}
+              {selectedTemplateId === 'proposal' && (
                 <div className="form-group">
                   <label className="form-label">💘 Date Idea / Surprise Details</label>
                   <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed when they finally click YES!</p>
@@ -728,6 +741,60 @@ function CreateNoteContent() {
                     rows={3}
                     maxLength={400}
                   />
+                </div>
+              )}
+
+              {/* Puzzle: Hidden Message */}
+              {selectedTemplateId === 'puzzle' && (
+                <div className="form-group">
+                  <label className="form-label">🧩 Hidden Message</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed only after they solve the puzzle!</p>
+                  <textarea
+                    className="form-textarea"
+                    value={customDetails.hidden_message || ''}
+                    onChange={(e) => updateDetail('hidden_message', e.target.value)}
+                    placeholder="e.g. Surprise! We're going to Paris!"
+                    rows={2}
+                    maxLength={300}
+                  />
+                </div>
+              )}
+
+              {/* Friendship Day: Traits and Vibe */}
+              {selectedTemplateId === 'friendship' && (
+                <div className="form-group">
+                  <label className="form-label">👯 Relationship Vibe</label>
+                  <select className="form-input" value={customDetails.vibe || 'funny'} onChange={(e) => updateDetail('vibe', e.target.value)}>
+                    <option value="funny">Funny & Chaotic</option>
+                    <option value="emotional">Emotional & Deep</option>
+                    <option value="chill">Chill & Supportive</option>
+                  </select>
+
+                  <label className="form-label" style={{ marginTop: '0.5rem' }}>Bond Traits (Comma separated)</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.bond_traits || ''}
+                    onChange={(e) => updateDetail('bond_traits', e.target.value)}
+                    placeholder="e.g. Loud, Always Eating, Secret Keepers"
+                  />
+                </div>
+              )}
+
+              {/* Anniversary: 5 Promises */}
+              {selectedTemplateId === 'anniversary' && (
+                <div className="form-group">
+                  <label className="form-label">💕 5 Promises for the Future</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>These will float around after the pinky promise.</p>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`promise_${i}`] || ''}
+                      onChange={(e) => updateDetail(`promise_${i}`, e.target.value)}
+                      placeholder={`Promise #${i}`}
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                  ))}
                 </div>
               )}
 
@@ -987,22 +1054,6 @@ function CreateNoteContent() {
                 {busy ? 'Saving your note…' : 'Continue to preview & share link →'}
               </button>
             </form>
-          </div>
-
-          {/* Right Column: Live Interactive Preview */}
-          <div className="live-preview-column">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#be185d', margin: 0 }}>
-                👁️ Live Interactive Preview:
-              </p>
-              <span style={{ fontSize: '0.75rem', background: '#d81e5b', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '999px', fontWeight: 700 }}>
-                Real-Time Render
-              </span>
-            </div>
-
-            <div className="live-preview-wrapper-box">
-              <TemplateRenderer note={draftNote} isPreview={true} />
-            </div>
           </div>
         </div>
       </div>

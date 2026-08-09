@@ -3,14 +3,7 @@ import { templates } from '@/lib/templates';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
-const occasionsList = [
-  'birthday',
-  'raksha-bandhan',
-  'anniversary',
-  'apology',
-  'romantic',
-  'valentines-day',
-];
+
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -28,12 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-    {
-      url: `${SITE_URL}/occasions`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
+
     {
       url: `${SITE_URL}/create`,
       lastModified: now,
@@ -63,12 +51,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     }));
 
-  const occasionPages: MetadataRoute.Sitemap = occasionsList.map((slug) => ({
-    url: `${SITE_URL}/occasions/${slug}`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
-
-  return [...staticPages, ...templatePages, ...occasionPages];
+  return [...staticPages, ...templatePages];
 }
