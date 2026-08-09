@@ -4,7 +4,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
-import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from '@/lib/seo';
+import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, CONTACT_EMAIL, INSTAGRAM_URL, X_URL } from '@/lib/seo';
 
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
 const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
@@ -42,9 +42,16 @@ export default function RootLayout({ children }) {
     '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: `${SITE_URL}/lovelycrafts-logo.png`,
     description: DEFAULT_DESCRIPTION,
-    sameAs: [],
+    email: CONTACT_EMAIL,
+    sameAs: [INSTAGRAM_URL, X_URL],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: CONTACT_EMAIL,
+      contactType: 'customer support',
+      availableLanguage: ['English', 'Hindi'],
+    },
   };
 
   const siteNavigationSchema = {

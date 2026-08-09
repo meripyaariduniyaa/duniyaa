@@ -33,14 +33,14 @@ export default function Home() {
       <div className="main-content">
         {/* Hero Section */}
         <section className="hero-section text-center mt-8 mb-8">
-          <div className="hero-sale-banner">🎉 Launch celebration: 50% OFF everything — premium notes now ₹149</div>
+          <div className="hero-sale-banner">🎉 Launch celebration: 50% OFF everything — premium notes now ₹99.5</div>
           <h1>
             Some moments deserve <br/>
             <span className="text-gradient cursive">more than a text.</span>
           </h1>
           <p className="hero-copy text-muted">
             Create a beautiful, private space for the person you want to reach — photos, words, and memories.
-            It disappears safely after 15 days, with secure sharing, animated templates, and easy mobile access.
+            It disappears safely after 90 days, with secure sharing, animated templates, and easy mobile access.
           </p>
 
           <div style={{ marginTop: '3rem', textAlign: 'left' }}>
@@ -99,7 +99,7 @@ export default function Home() {
           </div>
           
           <p className="templates-subtitle">
-            Everything is now priced at ₹149, with a special launch offer of 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
+            Everything is now priced at ₹199, with a special launch offer of 50% off till 30 Sep 2026. Use coupon <strong>new2026</strong>.
           </p>
 
           <div className="templates-grid">

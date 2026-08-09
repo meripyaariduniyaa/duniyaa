@@ -24,7 +24,7 @@ export async function POST(request) {
     const normalizedCode = (couponCode || '').trim().toLowerCase();
     const selectedCoupon = normalizedCode ? couponRules[normalizedCode] : null;
     const customLinkSurcharge = raw.custom_slug ? 2900 : 0; // ₹29 for custom links
-    const baseAmount = 14900; // ₹149 base note price
+    const baseAmount = 19900; // ₹199 base note price
     const totalAmount = baseAmount + customLinkSurcharge;
 
     if (selectedCoupon?.percent === 100) {

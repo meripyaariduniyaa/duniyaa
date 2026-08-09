@@ -95,7 +95,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
           style={{ fontSize: '0.95rem' }}
         />
         <button className="btn-primary w-full" onClick={pay} disabled={busy}>
-          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : `Pay ₹${displayAmount || 149} & unlock link`}
+          {busy ? 'Unlocking…' : couponCode.trim() ? 'Apply coupon & unlock' : `Pay ₹${displayAmount || 199} & unlock link`}
         </button>
       </div>
       {feedback && <p style={{ color: '#166534', marginTop: '0.75rem', fontSize: '0.875rem' }}>{feedback}</p>}

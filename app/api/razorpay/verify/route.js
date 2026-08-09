@@ -20,7 +20,7 @@ export async function POST(request) {
     if (free === true) {
       await ref.update({
         is_paid: true,
-        expires_at: Timestamp.fromDate(new Date(created.getTime() + 15 * 24 * 60 * 60 * 1000)),
+        expires_at: Timestamp.fromDate(new Date(created.getTime() + 90 * 24 * 60 * 60 * 1000)),
         coupon_code: couponCode || null,
         discount_percent: 100,
         payment_method: 'coupon',
@@ -44,7 +44,7 @@ export async function POST(request) {
 
     await ref.update({
       is_paid: true,
-      expires_at: Timestamp.fromDate(new Date(created.getTime() + 15 * 24 * 60 * 60 * 1000)),
+      expires_at: Timestamp.fromDate(new Date(created.getTime() + 90 * 24 * 60 * 60 * 1000)),
       razorpay_order_id,
       razorpay_payment_id,
       coupon_code: couponCode || null,

@@ -70,7 +70,7 @@ export default async function TemplateDetailPage({ params }) {
     },
     offers: {
       '@type': 'Offer',
-      price: template.price || 149,
+      price: template.price || 199,
       priceCurrency: 'INR',
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,
@@ -122,7 +122,7 @@ export default async function TemplateDetailPage({ params }) {
               ⏱ {template.time} setup time
             </span>
             <span className="template-tag" style={{ fontSize: '0.85rem', padding: '0.3rem 0.75rem', background: '#fef3c7', color: '#b45309' }}>
-              🏷️ ₹{template.price || 149} (50% Off)
+              🏷️ ₹{template.price ? template.price / 2 : 99.5} (50% Off)
             </span>
           </div>
 

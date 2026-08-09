@@ -65,7 +65,7 @@ const occasionsData = {
     heading: 'A Gift Tuned for Pure Romance 🌹',
     introText: 'Send a virtual rose that never withers. Accompanied by candlelight visuals, soft background music, and your words framed inside the bloom.',
     faqs: [
-      { q: 'Will the link expire?', a: 'The link remains private and active for 15 days so your partner can revisit it anytime.' },
+      { q: 'Will the link expire?', a: 'The link remains private and active for 90 days so your partner can revisit it anytime.' },
     ],
   },
   'valentines-day': {

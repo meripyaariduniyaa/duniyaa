@@ -73,7 +73,7 @@ function PreviewContent() {
   }, [apology]);
 
   const hasCustomSlug = Boolean(apology?.custom_slug);
-  const basePrice = 149;
+  const basePrice = 199;
   const customLinkFee = hasCustomSlug ? 29 : 0;
   const totalBeforeCoupon = basePrice + customLinkFee;
 
@@ -138,7 +138,7 @@ function PreviewContent() {
                   <div style={{ width: '48px', height: '48px', background: '#d81e5b', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 1.5rem', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }}>✓</div>
                   <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your link is ready.</h2>
                   <p className="text-muted" style={{ marginBottom: '2rem' }}>
-                    Send this private link to {apology.recipient_name}. It will expire safely in 15 days.
+                    Send this private link to {apology.recipient_name}. It will expire safely in 90 days.
                   </p>
                   
                   <div style={{ background: '#fff4f8', padding: '1rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.5rem', border: '3px solid rgba(59, 15, 27, 0.25)', fontSize: '0.85rem', boxShadow: 'inset 2px 2px 0px rgba(255, 77, 109, 0.12)' }}>
