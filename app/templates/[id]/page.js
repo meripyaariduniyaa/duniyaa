@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { templates } from '@/lib/templates';
-
-const siteName = 'Lovely Crafts';
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { SITE_URL, SITE_NAME } from '@/lib/seo';
 
 export async function generateStaticParams() {
   return templates.map((t) => ({
@@ -16,33 +15,33 @@ export async function generateMetadata({ params }) {
   const template = templates.find((t) => t.id === id);
 
   if (!template) {
-    return {
-      title: 'Template Not Found',
-    };
+    return { title: 'Template Not Found | LovelyCrafts', robots: { index: false } };
   }
 
-  const title = `${template.title} — Personalized Digital Gift Card & Surprise`;
-  const description = `${template.description} Create a personalized ${template.title} with photo memories, custom interactive animations, and heartfelt messages.`;
-  const url = `${baseUrl}/templates/${template.id}`;
+  const title = `${template.title} — ${template.bestFor.join(', ')} Digital Experience`;
+  const description = `${template.description} Personalize with your own photos, heartfelt messages, and share instantly on WhatsApp.`;
+  const canonicalUrl = `${SITE_URL}/templates/${template.id}`;
 
   return {
     title,
     description,
-    keywords: [...template.bestFor, 'digital gift', 'personalized card', 'online surprise', 'Lovely Crafts'],
-    alternates: {
-      canonical: url,
-    },
+    keywords: [...template.bestFor, 'digital gift', 'personalized card', 'online surprise', 'LovelyCrafts', 'interactive greeting'],
+    alternates: { canonical: canonicalUrl },
     openGraph: {
-      title: `${title} | ${siteName}`,
+      title: `${title} | ${SITE_NAME}`,
       description,
-      url,
-      type: 'article',
-      siteName,
+      url: canonicalUrl,
+      type: 'website',
+      siteName: SITE_NAME,
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | ${siteName}`,
+      title: `${title} | ${SITE_NAME}`,
       description,
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   };
 }
@@ -55,22 +54,26 @@ export default async function TemplateDetailPage({ params }) {
     notFound();
   }
 
-  const jsonLd = {
+  const canonicalUrl = `${SITE_URL}/templates/${template.id}`;
+
+  // Use CreativeWork schema (accurate for digital experiences, not a physical product)
+  const creativeWorkSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Product',
+    '@type': 'CreativeWork',
     name: template.title,
     description: template.description,
-    image: `${baseUrl}/opengraph-image.png`,
-    brand: {
-      '@type': 'Brand',
-      name: siteName,
+    url: canonicalUrl,
+    creator: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     offers: {
       '@type': 'Offer',
       price: template.price || 149,
       priceCurrency: 'INR',
       availability: 'https://schema.org/InStock',
-      url: `${baseUrl}/templates/${template.id}`,
+      url: canonicalUrl,
     },
   };
 
@@ -78,37 +81,16 @@ export default async function TemplateDetailPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: baseUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Templates',
-        item: `${baseUrl}/templates`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: template.title,
-        item: `${baseUrl}/templates/${template.id}`,
-      },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Templates', item: `${SITE_URL}/templates` },
+      { '@type': 'ListItem', position: 3, name: template.title, item: canonicalUrl },
     ],
   };
 
   return (
     <main className="shell">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }}
-      />
+      <JsonLd data={creativeWorkSchema} />
+      <JsonLd data={breadcrumbsLd} />
 
       <div className="main-content" style={{ maxWidth: '850px', margin: '0 auto' }}>
         {/* Breadcrumb Navigation */}
@@ -176,6 +158,18 @@ export default async function TemplateDetailPage({ params }) {
           </div>
         </div>
 
+        {/* How It Works */}
+        <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '1.25rem', border: '1px solid rgba(0,0,0,0.06)', marginTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#111' }}>⚡ How It Works</h2>
+          <ol style={{ paddingLeft: '1.5rem', margin: 0, fontSize: '0.95rem', color: '#444', lineHeight: 2 }}>
+            <li>Choose the <strong>{template.title}</strong> experience</li>
+            <li>Add the recipient&apos;s name and your personalized message</li>
+            <li>Upload {template.photoRequirement.recommended} cherished memory photos</li>
+            <li>Customize any template-specific details (promises, dates, names)</li>
+            <li>Get a private shareable link — send on WhatsApp in seconds</li>
+          </ol>
+        </div>
+
         {/* Sample Prompt Ideas */}
         {template.prompts && template.prompts.length > 0 && (
           <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '1.25rem', border: '1px solid rgba(0,0,0,0.06)', marginTop: '2rem' }}>
@@ -190,12 +184,31 @@ export default async function TemplateDetailPage({ params }) {
           </div>
         )}
 
-        {/* Tips section */}
+        {/* Creator Tip */}
         {template.tips && (
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1.25rem 1.5rem', borderRadius: '1rem', marginTop: '2rem', color: '#166534', fontSize: '0.95rem' }}>
             <strong>💡 Creator Tip:</strong> {template.tips}
           </div>
         )}
+
+        {/* Related Occasions */}
+        <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '1.25rem', border: '1px solid rgba(0,0,0,0.06)', marginTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#111' }}>🗂️ Browse by Occasion</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {[
+              { slug: 'birthday', label: '🎂 Birthday Surprises' },
+              { slug: 'raksha-bandhan', label: '🪢 Raksha Bandhan' },
+              { slug: 'anniversary', label: '💌 Anniversary & Love' },
+              { slug: 'apology', label: '🥺 Apology & Making Up' },
+              { slug: 'romantic', label: '🌹 Romantic Confessions' },
+              { slug: 'valentines-day', label: '💕 Valentine\'s Day' },
+            ].map((occ) => (
+              <Link key={occ.slug} href={`/occasions/${occ.slug}`} className="template-tag" style={{ textDecoration: 'none', fontSize: '0.85rem', padding: '0.4rem 0.85rem', background: '#fff1f2', color: '#be185d', borderRadius: '999px', fontWeight: 600 }}>
+                {occ.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom CTA */}
         <div style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '3rem', padding: '2.5rem', background: 'linear-gradient(135deg, #fff1f2, #ffe4e6)', borderRadius: '1.5rem' }}>

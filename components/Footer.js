@@ -30,14 +30,14 @@ export default function Footer() {
 
         {/* Occasions Column */}
         <div className="footer-col">
-          <h4 className="footer-heading">Occasions</h4>
+          <h4 className="footer-heading">By Occasion</h4>
           <ul className="footer-list">
-            <li><Link href="/templates/birthday-surprise">Birthday Card</Link></li>
-            <li><Link href="/templates/love-letter">Love Letter & Anniversary</Link></li>
-            <li><Link href="/templates/letter-for-mom">Letter for Mom</Link></li>
-            <li><Link href="/templates/be-my-valentine">Will You Be My Valentine?</Link></li>
-            <li><Link href="/templates/wedding-invitation">Wedding Invitation</Link></li>
-            <li><Link href="/templates/sorry">Interactive Apology</Link></li>
+            <li><Link href="/occasions/birthday">Birthday Surprises</Link></li>
+            <li><Link href="/occasions/anniversary">Anniversary & Love</Link></li>
+            <li><Link href="/occasions/raksha-bandhan">Raksha Bandhan</Link></li>
+            <li><Link href="/occasions/apology">Apology & Making Up</Link></li>
+            <li><Link href="/occasions/romantic">Romantic Confessions</Link></li>
+            <li><Link href="/occasions/valentines-day">Valentine's Day</Link></li>
           </ul>
         </div>
 
@@ -59,6 +59,7 @@ export default function Footer() {
           <h4 className="footer-heading">Product</h4>
           <ul className="footer-list">
             <li><Link href="/templates">All Templates</Link></li>
+            <li><Link href="/occasions">All Occasions</Link></li>
             <li><Link href="/create">Create a Gift</Link></li>
             <li><Link href="/profile">My Dashboard</Link></li>
           </ul>

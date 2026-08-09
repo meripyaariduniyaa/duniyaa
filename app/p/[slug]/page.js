@@ -6,9 +6,9 @@ export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
+// Private note pages are NEVER indexed — all generated user content stays private
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const canonicalUrl = `${siteUrl}/p/${slug}`;
   let apology = null;
 
   try {
@@ -19,39 +19,23 @@ export async function generateMetadata({ params }) {
   const expires = apology?.expires_at?.toDate?.() || (apology?.expires_at ? new Date(apology.expires_at) : null);
   const valid = apology?.is_paid === true && expires && expires.getTime() > Date.now();
 
+  // Always noindex private recipient pages regardless of validity
+  const noindex = { index: false, follow: false };
+
   if (!valid || !apology) {
     return {
-      title: 'Private note unavailable | Lovely Crafts',
+      title: 'Private note unavailable | LovelyCrafts',
       description: 'This note link has expired, is not yet unlocked, or is no longer available.',
-      alternates: { canonical: canonicalUrl },
-      robots: {
-        index: false,
-        follow: false,
-      },
+      robots: noindex,
     };
   }
 
   const recipientName = apology.recipient_name || 'someone special';
 
   return {
-    title: `A heartfelt note for ${recipientName} | Lovely Crafts`,
-    description: `A private, beautiful note for ${recipientName}. Unlock the message and share it securely.`,
-    alternates: { canonical: canonicalUrl },
-    robots: {
-      index: false,
-      follow: false,
-    },
-    openGraph: {
-      title: `A heartfelt note for ${recipientName}`,
-      description: `A private, beautiful note for ${recipientName}.`,
-      url: canonicalUrl,
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `A heartfelt note for ${recipientName}`,
-      description: `A private, beautiful note for ${recipientName}.`,
-    },
+    title: `A heartfelt note for ${recipientName} | LovelyCrafts`,
+    description: `A private, beautiful digital note for ${recipientName}.`,
+    robots: noindex,
   };
 }
 

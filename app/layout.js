@@ -4,47 +4,13 @@ import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
+import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from '@/lib/seo';
 
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
 const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
 const dancing = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-dancing', display: 'swap' });
 
-const siteName = 'Lovely Crafts';
-const siteDescription = 'Create heartfelt, private notes that feel personal, beautiful, and unforgettable.';
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
-
-export const metadata = {
-  metadataBase: new URL(baseUrl),
-  title: {
-    default: `${siteName} — Private, heartfelt notes that feel personal`,
-    template: `%s | ${siteName}`,
-  },
-  description: siteDescription,
-  keywords: ['private notes', 'heartfelt messages', 'memory gift', 'digital note', 'personal letter', 'special message'],
-  alternates: {
-    canonical: '/',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    'max-image-preview': 'large',
-    'max-snippet': -1,
-    'max-video-preview': -1,
-  },
-  openGraph: {
-    title: `${siteName} — Private, heartfelt notes that feel personal`,
-    description: siteDescription,
-    url: baseUrl,
-    siteName,
-    type: 'website',
-    locale: 'en_US',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${siteName} — Private, heartfelt notes that feel personal`,
-    description: siteDescription,
-  },
-};
+export const metadata = siteMetadata;
 
 export const viewport = {
   width: 'device-width',
@@ -53,51 +19,60 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
-  const structuredData = {
+  const websiteSchema = {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebSite',
-        '@id': `${baseUrl}/#website`,
-        name: siteName,
-        url: baseUrl,
-        description: siteDescription,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: {
-            '@type': 'EntryPoint',
-            urlTemplate: `${baseUrl}/templates?q={search_term_string}`
-          },
-          'query-input': 'required name=search_term_string',
-        },
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: DEFAULT_DESCRIPTION,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/templates?q={search_term_string}`,
       },
-      {
-        '@type': 'SiteNavigationElement',
-        '@id': `${baseUrl}/#navigation`,
-        name: [
-          'Birthday Card',
-          'Interactive Romantic Apology',
-          'Love Letter',
-          'Will You Be My Valentine?',
-          'Wedding Invitation',
-          'Surprise Reveal Box',
-          'A Rose for Someone Special',
-          'A Letter for Mom',
-          'Raksha Bandhan'
-        ],
-        url: [
-          `${baseUrl}/templates/birthday-surprise`,
-          `${baseUrl}/templates/sorry`,
-          `${baseUrl}/templates/love-letter`,
-          `${baseUrl}/templates/be-my-valentine`,
-          `${baseUrl}/templates/wedding-invitation`,
-          `${baseUrl}/templates/surprise-reveal-box`,
-          `${baseUrl}/templates/a-rose-for-someone-special`,
-          `${baseUrl}/templates/letter-for-mom`,
-          `${baseUrl}/templates/rakshabandhan`
-        ]
-      }
-    ]
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: DEFAULT_DESCRIPTION,
+    sameAs: [],
+  };
+
+  const siteNavigationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    '@id': `${SITE_URL}/#navigation`,
+    name: [
+      'Birthday Card',
+      'Interactive Romantic Apology',
+      'Love Letter',
+      'Will You Be My Valentine?',
+      'Wedding Invitation',
+      'Surprise Reveal Box',
+      'A Rose for Someone Special',
+      'A Letter for Mom',
+      'Raksha Bandhan',
+    ],
+    url: [
+      `${SITE_URL}/templates/birthday-surprise`,
+      `${SITE_URL}/templates/sorry`,
+      `${SITE_URL}/templates/love-letter`,
+      `${SITE_URL}/templates/be-my-valentine`,
+      `${SITE_URL}/templates/wedding-invitation`,
+      `${SITE_URL}/templates/surprise-reveal-box`,
+      `${SITE_URL}/templates/a-rose-for-someone-special`,
+      `${SITE_URL}/templates/letter-for-mom`,
+      `${SITE_URL}/templates/rakshabandhan`,
+    ],
   };
 
   return (
@@ -111,7 +86,9 @@ export default function RootLayout({ children }) {
           <div className="page-content">{children}</div>
           <Footer />
         </AuthProvider>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema).replace(/</g, '\\u003c') }} />
         <Script src="/oneko/oneko.js" strategy="lazyOnload" />
       </body>
     </html>

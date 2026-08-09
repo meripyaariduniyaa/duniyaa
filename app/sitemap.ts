@@ -1,42 +1,62 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
 import { templates } from '@/lib/templates';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
+
+const occasionsList = [
+  'birthday',
+  'raksha-bandhan',
+  'anniversary',
+  'apology',
+  'romantic',
+  'valentines-day',
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
+  const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
+      url: SITE_URL,
+      lastModified: now,
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/templates`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
+      url: `${SITE_URL}/templates`,
+      lastModified: now,
+      changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/create`,
-      lastModified: new Date(),
+      url: `${SITE_URL}/occasions`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/create`,
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/profile`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
   ];
 
-  const templatePages: MetadataRoute.Sitemap = templates.map((t) => ({
-    url: `${baseUrl}/templates/${t.id}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
+  const templatePages: MetadataRoute.Sitemap = templates
+    .filter((template) => template.id)
+    .map((template) => ({
+      url: `${SITE_URL}/templates/${encodeURIComponent(template.id)}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    }));
+
+  const occasionPages: MetadataRoute.Sitemap = occasionsList.map((slug) => ({
+    url: `${SITE_URL}/occasions/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
     priority: 0.8,
   }));
 
-  return [...staticPages, ...templatePages];
+  return [...staticPages, ...templatePages, ...occasionPages];
 }
