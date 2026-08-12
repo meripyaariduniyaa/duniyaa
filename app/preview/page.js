@@ -73,7 +73,7 @@ function PreviewContent() {
   }, [apology]);
 
   const hasCustomSlug = Boolean(apology?.custom_slug);
-  const basePrice = 149;
+  const basePrice = 199;
   const customLinkFee = hasCustomSlug ? 29 : 0;
   const totalBeforeCoupon = basePrice + customLinkFee;
 

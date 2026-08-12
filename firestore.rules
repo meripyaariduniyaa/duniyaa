@@ -1,11 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
     match /notes/{token} {
-      allow list: if request.auth != null && resource.data.creator_uid == request.auth.uid;
-      allow create: if request.resource.data.creator_uid != null;
+
+      // ── Public read ──────────────────────────────────────────────────────────
+      // Anyone can fetch a single note (needed for /p/[slug] public share page
+      // and for checking custom-slug availability during creation).
       allow get: if true;
-      allow update, delete: if request.auth != null && resource.data.creator_uid == request.auth.uid;
+
+      // ── Authenticated list (profile page) ────────────────────────────────────
+      // Only the signed-in owner can list their own notes.
+      // Client query always filters: where('creator_uid', '==', user.uid)
+      allow list: if request.auth != null
+                  && request.query.filters.size() == 1
+                  && request.query.filters[0].fieldPath == 'creator_uid'
+                  && request.query.filters[0].value    == request.auth.uid;
+
+      // ── Create (unauthenticated / device-ID) ─────────────────────────────────
+      // Notes are created before payment, so auth is not required.
+      // Enforce that all mandatory fields are present and types are correct.
+      allow create: if request.resource.data.keys().hasAll([
+                        'creator_uid', 'recipient_name', 'custom_message',
+                        'image_urls', 'is_paid', 'template', 'created_at'
+                      ])
+                    && request.resource.data.creator_uid is string
+                    && request.resource.data.creator_uid.size() > 0
+                    && request.resource.data.recipient_name is string
+                    && request.resource.data.is_paid == false
+                    && request.resource.data.expires_at == null;
+
+      // ── Update / Delete ───────────────────────────────────────────────────────
+      // Payment verification and note claiming go through the Admin SDK (server-
+      // side) and bypass these rules entirely.
+      // Client-side edits (e.g. profile page future edit flow) require the
+      // authenticated owner.
+      allow update, delete: if request.auth != null
+                            && resource.data.creator_uid == request.auth.uid;
     }
+
   }
 }

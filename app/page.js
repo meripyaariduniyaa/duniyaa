@@ -45,7 +45,7 @@ export default function Home() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fafaf9', border: '1px solid rgba(0,0,0,0.08)', padding: '0.4rem 1.1rem', borderRadius: '99px', fontSize: '0.85rem', color: '#1c1917', fontWeight: 600, marginBottom: '1.75rem' }}>
             <span>🎉 Special Offer:</span>
             <del style={{ color: 'var(--text-muted)', fontWeight: 400 }}>₹499</del>
-            <span style={{ color: '#16a34a' }}>₹149 (70% OFF)</span>
+            <span style={{ color: '#16a34a' }}>₹199 (60% OFF)</span>
           </div>
 
           {/* Quick Pill Navigation */}
@@ -96,7 +96,7 @@ export default function Home() {
                 <div className="bento-card-footer">
                   <div className="bento-price-tag">
                     <del>₹499</del>
-                    <span>₹149</span>
+                    <span>₹199</span>
                   </div>
                   <span className="bento-cta">
                     Create Now →
