@@ -256,7 +256,7 @@ function CreateNoteContent() {
           <div className="glass-card" style={{ width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px dashed rgba(216, 30, 91, 0.2)', paddingBottom: '0.75rem' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#3b0f1b', margin: 0 }}>
-                2. Personalize Your Message
+                Personalize Your Message
               </h2>
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#d81e5b' }}>
                 {selectedTemplate?.icon} {selectedTemplate?.title}
@@ -264,63 +264,7 @@ function CreateNoteContent() {
             </div>
 
             <form onSubmit={submit}>
-              {/* TEMPLATE REQUIREMENTS & PHOTO GUIDELINES BANNER */}
-              {selectedTemplate && (
-                <div
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(253, 230, 238, 0.95))',
-                    border: '1.5px solid #f472b6',
-                    borderRadius: '16px',
-                    padding: '1.25rem',
-                    marginBottom: '1.75rem',
-                    boxShadow: '0 4px 14px rgba(216, 30, 91, 0.08)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>{selectedTemplate.icon}</span>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#881337', fontWeight: 800 }}>
-                        Requirements for {selectedTemplate.title}
-                      </h4>
-                      <span style={{ fontSize: '0.75rem', color: '#be185d', fontWeight: 600 }}>
-                        {selectedTemplate.time} completion • {selectedTemplate.photoRequirement?.recommended || 3} photos recommended
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Photo Requirement Tip */}
-                  {selectedTemplate.photoRequirement && (
-                    <div style={{ background: '#fff', padding: '0.65rem 0.9rem', borderRadius: '10px', borderLeft: '4px solid #ec4899', marginBottom: '0.75rem' }}>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#4c0519', fontWeight: 700 }}>
-                        📸 <strong>Photo Recommendation:</strong> {selectedTemplate.photoRequirement.tip}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Key Details Checklist */}
-                  {selectedTemplate.detailsNeeded && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#9f1239', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Key Details to Include:
-                      </span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.35rem' }}>
-                        {selectedTemplate.detailsNeeded.map((detail, idx) => (
-                          <span key={idx} style={{ background: '#ffe4e6', color: '#9f1239', padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                            ✓ {detail}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Pro Tip */}
-                  {selectedTemplate.tips && (
-                    <p style={{ margin: 0, marginTop: '0.5rem', fontSize: '0.78rem', color: '#881337', fontStyle: 'italic' }}>
-                      💡 <strong>Creator Tip:</strong> {selectedTemplate.tips}
-                    </p>
-                  )}
-                </div>
-              )}
 
               {/* Their Name */}
               <div className="form-group">
@@ -548,37 +492,7 @@ function CreateNoteContent() {
                   <span>{message.length} / 1200</span>
                 </div>
 
-                {/* Template Specific Interactive Prompts */}
-                {selectedTemplate?.prompts && selectedTemplate.prompts.length > 0 && (
-                  <div style={{ marginTop: '0.85rem', background: 'rgba(255, 255, 255, 0.85)', padding: '0.75rem 0.9rem', borderRadius: '12px', border: '1px dashed #f472b6' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#be185d', display: 'block', marginBottom: '0.5rem' }}>
-                      💡 Inspiration prompts for "{selectedTemplate.title}" (click to insert):
-                    </span>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                      {selectedTemplate.prompts.map((promptText, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setMessage((prev) => (prev ? `${prev}\n\n${promptText}` : promptText))}
-                          style={{
-                            textAlign: 'left',
-                            background: '#fff',
-                            border: '1px solid #fbcfe8',
-                            borderRadius: '8px',
-                            padding: '0.45rem 0.75rem',
-                            fontSize: '0.75rem',
-                            color: '#881337',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          ✨ "+ {promptText}"
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
 
               {/* Photos */}
@@ -683,13 +597,13 @@ function CreateNoteContent() {
                   <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎈 4 Balloon Words — Revealed one by one as they pop each balloon</label>
                   <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Default: You · are · so · special!</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    {[1,2,3,4].map(i => (
+                    {[1, 2, 3, 4].map(i => (
                       <input
                         key={i}
                         className="form-input"
                         value={customDetails[`balloon_word_${i}`] || ''}
                         onChange={(e) => updateDetail(`balloon_word_${i}`, e.target.value)}
-                        placeholder={`Word ${i} e.g. ${['You','are','so','special!'][i-1]}`}
+                        placeholder={`Word ${i} e.g. ${['You', 'are', 'so', 'special!'][i - 1]}`}
                         maxLength={30}
                       />
                     ))}
@@ -697,13 +611,13 @@ function CreateNoteContent() {
 
                   <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>💐 6 Bouquet Messages — Float around the rose bouquet</label>
                   <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Short sweet notes — keep them under 25 characters each.</p>
-                  {[1,2,3,4,5,6].map(i => (
+                  {[1, 2, 3, 4, 5, 6].map(i => (
                     <input
                       key={i}
                       className="form-input"
                       value={customDetails[`bouquet_msg_${i}`] || ''}
                       onChange={(e) => updateDetail(`bouquet_msg_${i}`, e.target.value)}
-                      placeholder={['Forever yours 💕','My sunshine ☀️','Lucky to have you','Happy Birthday 🌸','My fav person','Sending all love ❤️'][i-1]}
+                      placeholder={['Forever yours 💕', 'My sunshine ☀️', 'Lucky to have you', 'Happy Birthday 🌸', 'My fav person', 'Sending all love ❤️'][i - 1]}
                       maxLength={40}
                       style={{ marginBottom: '0.4rem' }}
                     />
@@ -743,7 +657,7 @@ function CreateNoteContent() {
                       className="form-input"
                       value={customDetails[`promise_${i}`] || ''}
                       onChange={(e) => updateDetail(`promise_${i}`, e.target.value)}
-                      placeholder={['I promise to always choose you every day.','I promise to be your safe place, always.','I promise to make you smile on hard days.','I promise to grow with you, not apart.','I promise to love you more tomorrow than today.'][i-1]}
+                      placeholder={['I promise to always choose you every day.', 'I promise to be your safe place, always.', 'I promise to make you smile on hard days.', 'I promise to grow with you, not apart.', 'I promise to love you more tomorrow than today.'][i - 1]}
                       maxLength={200}
                       style={{ marginBottom: '0.4rem' }}
                     />
@@ -793,7 +707,7 @@ function CreateNoteContent() {
                       className="form-input"
                       value={customDetails[`sticky_note_${i}`] || ''}
                       onChange={(e) => updateDetail(`sticky_note_${i}`, e.target.value)}
-                      placeholder={`Memory #${i} — e.g. ${['Making cookies together 🍪','You stayed up when I was sick 🌡️','Your bedtime stories 📖'][i-1]}`}
+                      placeholder={`Memory #${i} — e.g. ${['Making cookies together 🍪', 'You stayed up when I was sick 🌡️', 'Your bedtime stories 📖'][i - 1]}`}
                       maxLength={150}
                       style={{ marginBottom: '0.5rem' }}
                     />
@@ -915,10 +829,10 @@ function CreateNoteContent() {
 
                   <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>📋 Event Schedule — Add your Mehndi / Sangeet / Haldi / Vivah timings:</label>
                   {[
-                    { key: 'event_mehndi',    ph: 'Mehndi — e.g. 12 Feb, 4:00 PM at Home' },
-                    { key: 'event_sangeet',   ph: 'Sangeet — e.g. 13 Feb, 7:00 PM at Grand Hall' },
-                    { key: 'event_haldi',     ph: 'Haldi — e.g. 14 Feb, 10:00 AM' },
-                    { key: 'event_wedding',   ph: 'Wedding Ceremony — e.g. 14 Feb, 7:00 PM at Temple' },
+                    { key: 'event_mehndi', ph: 'Mehndi — e.g. 12 Feb, 4:00 PM at Home' },
+                    { key: 'event_sangeet', ph: 'Sangeet — e.g. 13 Feb, 7:00 PM at Grand Hall' },
+                    { key: 'event_haldi', ph: 'Haldi — e.g. 14 Feb, 10:00 AM' },
+                    { key: 'event_wedding', ph: 'Wedding Ceremony — e.g. 14 Feb, 7:00 PM at Temple' },
                     { key: 'event_reception', ph: 'Reception — e.g. 15 Feb, 8:00 PM at Banquet Hall' },
                   ].map(({ key, ph }) => (
                     <input key={key} className="form-input" value={customDetails[key] || ''} onChange={(e) => updateDetail(key, e.target.value)} placeholder={ph} maxLength={200} style={{ marginBottom: '0.5rem' }} />
@@ -995,7 +909,7 @@ function CreateNoteContent() {
                           "Knot #1: e.g. I promise to always annoy you 😄",
                           "Knot #2: e.g. I promise to stand beside you through thick & thin ❤️",
                           "Knot #3: e.g. I promise to always pray for your happiness 🌟"
-                        ][i-1]}
+                        ][i - 1]}
                         maxLength={150}
                         style={{ marginBottom: '0.5rem' }}
                       />

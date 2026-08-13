@@ -174,7 +174,7 @@ function PreviewContent() {
                   <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>READY TO SEND?</p>
                   <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Give it a little courage.</h2>
                   <p className="text-muted" style={{ marginBottom: '2rem' }}>
-                    Your page stays private until you unlock it. Once unlocked, you&apos;ll get a shareable link that expires safely in 15 days.
+                    Your page stays private until you unlock it. Once unlocked, you&apos;ll get a shareable link that expires safely in 90 days.
                   </p>
 
                   <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: '14px', padding: '1rem', marginBottom: '1.25rem' }}>

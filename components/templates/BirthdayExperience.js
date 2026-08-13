@@ -744,7 +744,7 @@ export default function BirthdayExperience({ note, isPreview = false }) {
     /* ── Outer dark stage ── */
     <div style={{
       display:'flex', alignItems:'center', justifyContent:'center',
-      minHeight:'100vh', width:'100%',
+      minHeight:'100dvh', width:'100%',
       background:'radial-gradient(circle at center, #211526, #09070c)',
       padding: '0',
     }}>
