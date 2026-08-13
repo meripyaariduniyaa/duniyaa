@@ -643,18 +643,20 @@ function CreateNoteContent() {
 
               {/* ── TEMPLATE-SPECIFIC EXTRA FIELDS ── */}
 
-              {/* Sorry: 3 Promises */}
-              {selectedTemplateId === 'sorry' && (
-                <div className="form-group">
-                  <label className="form-label">🤞 Your 3 Promises for the Future</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>These appear as interactive reveal cards in the animation.</p>
-                  {[0, 1, 2].map((i) => (
+              {/* ───────────────────────────────────────────
+                  SORRY / APOLOGY — 3 Promises
+              ─────────────────────────────────────────── */}
+              {(selectedTemplateId === 'sorry' || selectedTemplateId === 'apology') && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff5f8,#fef2f2)', border: '2px dashed #f472b6', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#881337' }}>🤞 Your 3 Promises for the Future</label>
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.75rem' }}>These appear as interactive flip-reveal cards in the animation.</p>
+                  {[1, 2, 3].map((i) => (
                     <input
                       key={i}
                       className="form-input"
-                      value={customDetails[`promise_${i + 1}`] || ''}
-                      onChange={(e) => updateDetail(`promise_${i + 1}`, e.target.value)}
-                      placeholder={i === 0 ? 'e.g. I promise to listen more carefully' : i === 1 ? 'e.g. I will always be honest with you' : 'e.g. I will never take you for granted'}
+                      value={customDetails[`promise_${i}`] || ''}
+                      onChange={(e) => updateDetail(`promise_${i}`, e.target.value)}
+                      placeholder={i === 1 ? 'e.g. I promise to listen more carefully' : i === 2 ? 'e.g. I will always be honest with you' : 'e.g. I will never take you for granted'}
                       maxLength={200}
                       style={{ marginBottom: '0.5rem' }}
                     />
@@ -662,48 +664,119 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Birthday: Theme */}
-              {selectedTemplateId === 'birthday' && (
-                <div className="form-group">
-                  <label className="form-label">🎂 Visual Theme</label>
-                  <select
-                    className="form-input"
-                    value={customDetails.theme || 'cake'}
-                    onChange={(e) => updateDetail('theme', e.target.value)}
-                  >
-                    <option value="cake">Classic Cake</option>
-                    <option value="galaxy">Galaxy Space</option>
-                  </select>
+              {/* ───────────────────────────────────────────
+                  BIRTHDAY — Sender name + balloon words + bouquet messages
+              ─────────────────────────────────────────── */}
+              {(selectedTemplateId === 'birthday' || selectedTemplateId === 'birthday-surprise') && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff5fb,#fce7f3)', border: '2px dashed #ec4899', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#881337' }}>🎂 Birthday Experience Details</label>
 
-                  <label className="form-label" style={{ marginTop: '0.5rem' }}>Age / Milestone (Optional)</label>
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>✍️ Your Name (Sender) — Appears on the letter sign-off</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.sender_name || ''}
+                    onChange={(e) => updateDetail('sender_name', e.target.value)}
+                    placeholder="e.g. Rohan, Your Secret Admirer"
+                    maxLength={80}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎈 4 Balloon Words — Revealed one by one as they pop each balloon</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Default: You · are · so · special!</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    {[1,2,3,4].map(i => (
+                      <input
+                        key={i}
+                        className="form-input"
+                        value={customDetails[`balloon_word_${i}`] || ''}
+                        onChange={(e) => updateDetail(`balloon_word_${i}`, e.target.value)}
+                        placeholder={`Word ${i} e.g. ${['You','are','so','special!'][i-1]}`}
+                        maxLength={30}
+                      />
+                    ))}
+                  </div>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>💐 6 Bouquet Messages — Float around the rose bouquet</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Short sweet notes — keep them under 25 characters each.</p>
+                  {[1,2,3,4,5,6].map(i => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`bouquet_msg_${i}`] || ''}
+                      onChange={(e) => updateDetail(`bouquet_msg_${i}`, e.target.value)}
+                      placeholder={['Forever yours 💕','My sunshine ☀️','Lucky to have you','Happy Birthday 🌸','My fav person','Sending all love ❤️'][i-1]}
+                      maxLength={40}
+                      style={{ marginBottom: '0.4rem' }}
+                    />
+                  ))}
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎁 Age / Milestone (Optional)</label>
                   <input
                     className="form-input"
                     value={customDetails.age_milestone || ''}
                     onChange={(e) => updateDetail('age_milestone', e.target.value)}
-                    placeholder="e.g. Turning 25!, The Big 30"
+                    placeholder="e.g. Turning 25! • The Big 3-0 • Sweet 16"
                     maxLength={60}
                   />
                 </div>
               )}
 
-              {/* Love Letter: Special Date */}
-              {selectedTemplateId === 'love-letter' && (
-                <div className="form-group">
-                  <label className="form-label">💕 Special Date / Anniversary (Optional)</label>
+              {/* ───────────────────────────────────────────
+                  ANNIVERSARY / LOVE LETTER — Special Date + 5 Promises
+              ─────────────────────────────────────────── */}
+              {(selectedTemplateId === 'anniversary' || selectedTemplateId === 'love-letter') && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fdf4ff,#fce7f3)', border: '2px dashed #c026d3', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#86198f' }}>💕 Anniversary Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🗓️ Your Anniversary / Special Date</label>
                   <input
                     className="form-input"
                     type="date"
                     value={customDetails.special_date || ''}
                     onChange={(e) => updateDetail('special_date', e.target.value)}
                   />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>💌 5 Promises — Float as particles during the letter scene</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Will also appear as a list after the love letter.</p>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <input
+                      key={i}
+                      className="form-input"
+                      value={customDetails[`promise_${i}`] || ''}
+                      onChange={(e) => updateDetail(`promise_${i}`, e.target.value)}
+                      placeholder={['I promise to always choose you every day.','I promise to be your safe place, always.','I promise to make you smile on hard days.','I promise to grow with you, not apart.','I promise to love you more tomorrow than today.'][i-1]}
+                      maxLength={200}
+                      style={{ marginBottom: '0.4rem' }}
+                    />
+                  ))}
                 </div>
               )}
 
-              {/* Letter for Mom: Secret & Sticky Notes */}
-              {selectedTemplateId === 'mothers-day' && (
-                <div className="form-group">
-                  <label className="form-label">🤫 One Thing You Never Told Her</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This appears as a secret reveal in the blooming flower animation.</p>
+              {/* ───────────────────────────────────────────
+                  LETTER FOR MOM / MOTHERS-DAY
+              ─────────────────────────────────────────── */}
+              {(selectedTemplateId === 'mothers-day' || selectedTemplateId === 'letter-for-mom') && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff7ed,#fef3c7)', border: '2px dashed #f59e0b', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#92400e' }}>💐 Letter for Mom — Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>What do you call her?</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.mom_title || ''}
+                    onChange={(e) => updateDetail('mom_title', e.target.value)}
+                    placeholder="e.g. Maa, Amma, Ma, Mumma, Mom"
+                    maxLength={40}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>Your Relation / Role (Optional)</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.relation || ''}
+                    onChange={(e) => updateDetail('relation', e.target.value)}
+                    placeholder="e.g. Your loving son, Your daughter"
+                    maxLength={80}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🤫 One Thing You Never Told Her — Revealed in the secret scene</label>
                   <textarea
                     className="form-textarea"
                     value={customDetails.secret_note || ''}
@@ -713,14 +786,14 @@ function CreateNoteContent() {
                     maxLength={400}
                   />
 
-                  <label className="form-label" style={{ marginTop: '1rem' }}>📝 2-3 Sticky Note Memories</label>
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>📝 2-3 Sticky Note Memories — Shown as floating sticky notes</label>
                   {[1, 2, 3].map(i => (
                     <input
                       key={i}
                       className="form-input"
                       value={customDetails[`sticky_note_${i}`] || ''}
                       onChange={(e) => updateDetail(`sticky_note_${i}`, e.target.value)}
-                      placeholder={`Memory #${i} (e.g. Making cookies together)`}
+                      placeholder={`Memory #${i} — e.g. ${['Making cookies together 🍪','You stayed up when I was sick 🌡️','Your bedtime stories 📖'][i-1]}`}
                       maxLength={150}
                       style={{ marginBottom: '0.5rem' }}
                     />
@@ -728,11 +801,14 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Be My Valentine / Proposal */}
-              {selectedTemplateId === 'proposal' && (
-                <div className="form-group">
-                  <label className="form-label">💘 Date Idea / Surprise Details</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed when they finally click YES!</p>
+              {/* ───────────────────────────────────────────
+                  PROPOSAL / BE MY VALENTINE — Date idea
+              ─────────────────────────────────────────── */}
+              {(selectedTemplateId === 'proposal' || selectedTemplateId === 'be-my-valentine') && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff0f6,#fce7f3)', border: '2px dashed #ec4899', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#9d174d' }}>💘 Proposal Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🌹 Date Idea / Surprise Plan — Revealed when they click YES!</label>
                   <textarea
                     className="form-textarea"
                     value={customDetails.date_idea || ''}
@@ -744,176 +820,133 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Puzzle: Hidden Message */}
+              {/* ───────────────────────────────────────────
+                  FRIENDSHIP DAY — Vibe, bond traits, one-liner, years
+              ─────────────────────────────────────────── */}
+              {selectedTemplateId === 'friendship' && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#f0fdf4,#dcfce7)', border: '2px dashed #4ade80', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#14532d' }}>👯 Friendship Day Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>Your Name (Sender)</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.sender_name || ''}
+                    onChange={(e) => updateDetail('sender_name', e.target.value)}
+                    placeholder="e.g. Ankita, Your bestie forever"
+                    maxLength={80}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>👯 Relationship Vibe</label>
+                  <select className="form-input" value={customDetails.vibe || 'funny'} onChange={(e) => updateDetail('vibe', e.target.value)}>
+                    <option value="funny">Funny & Chaotic 😂</option>
+                    <option value="emotional">Emotional & Deep 🥺</option>
+                    <option value="chill">Chill & Supportive 💆</option>
+                  </select>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>⏳ Years Known</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.years_known || ''}
+                    onChange={(e) => updateDetail('years_known', e.target.value)}
+                    placeholder="e.g. 7 years, Since Class 6, Since 2017"
+                    maxLength={40}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>💬 One-Liner that Describes You Two</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.one_liner || ''}
+                    onChange={(e) => updateDetail('one_liner', e.target.value)}
+                    placeholder="e.g. Partners in crime since forever 💖"
+                    maxLength={100}
+                  />
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🏷️ Bond Traits (comma-separated) — Used in word search game</label>
+                  <input
+                    className="form-input"
+                    value={customDetails.bond_traits || ''}
+                    onChange={(e) => updateDetail('bond_traits', e.target.value)}
+                    placeholder="e.g. Loud, Always Eating, Secret Keepers, Late Night Calls"
+                    maxLength={200}
+                  />
+                </div>
+              )}
+
+              {/* ───────────────────────────────────────────
+                  PUZZLE — Hidden Message
+              ─────────────────────────────────────────── */}
               {selectedTemplateId === 'puzzle' && (
-                <div className="form-group">
-                  <label className="form-label">🧩 Hidden Message</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed only after they solve the puzzle!</p>
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#f0f9ff,#e0f2fe)', border: '2px dashed #38bdf8', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#0c4a6e' }}>🧩 Puzzle Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎉 Hidden Message — Revealed only after they solve the puzzle!</label>
                   <textarea
                     className="form-textarea"
                     value={customDetails.hidden_message || ''}
                     onChange={(e) => updateDetail('hidden_message', e.target.value)}
-                    placeholder="e.g. Surprise! We're going to Paris!"
+                    placeholder="e.g. Surprise! We're going to Paris! ✈️🗼"
                     rows={2}
                     maxLength={300}
                   />
                 </div>
               )}
 
-              {/* Friendship Day: Traits and Vibe */}
-              {selectedTemplateId === 'friendship' && (
-                <div className="form-group">
-                  <label className="form-label">👯 Relationship Vibe</label>
-                  <select className="form-input" value={customDetails.vibe || 'funny'} onChange={(e) => updateDetail('vibe', e.target.value)}>
-                    <option value="funny">Funny & Chaotic</option>
-                    <option value="emotional">Emotional & Deep</option>
-                    <option value="chill">Chill & Supportive</option>
-                  </select>
+              {/* ───────────────────────────────────────────
+                  WEDDING INVITATION — Full event details
+              ─────────────────────────────────────────── */}
+              {selectedTemplateId === 'wedding-invitation' && (
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fef2f2,#fff1f2)', border: '2px dashed #f472b6', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#881337' }}>💒 Wedding Event Details</label>
 
-                  <label className="form-label" style={{ marginTop: '0.5rem' }}>Bond Traits (Comma separated)</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.bond_traits || ''}
-                    onChange={(e) => updateDetail('bond_traits', e.target.value)}
-                    placeholder="e.g. Loud, Always Eating, Secret Keepers"
-                  />
-                </div>
-              )}
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Bride's Name</label>
+                  <input className="form-input" value={customDetails.bride_name || ''} onChange={(e) => updateDetail('bride_name', e.target.value)} placeholder="e.g. Priya Sharma" maxLength={100} />
 
-              {/* Anniversary: 5 Promises */}
-              {selectedTemplateId === 'anniversary' && (
-                <div className="form-group">
-                  <label className="form-label">💕 5 Promises for the Future</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>These will float around after the pinky promise.</p>
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <input
-                      key={i}
-                      className="form-input"
-                      value={customDetails[`promise_${i}`] || ''}
-                      onChange={(e) => updateDetail(`promise_${i}`, e.target.value)}
-                      placeholder={`Promise #${i}`}
-                      style={{ marginBottom: '0.5rem' }}
-                    />
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Groom's Name</label>
+                  <input className="form-input" value={customDetails.groom_name || ''} onChange={(e) => updateDetail('groom_name', e.target.value)} placeholder="e.g. Arjun Patel" maxLength={100} />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Wedding Date</label>
+                  <input className="form-input" type="date" value={customDetails.wedding_date || ''} onChange={(e) => updateDetail('wedding_date', e.target.value)} />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue / Location</label>
+                  <input className="form-input" value={customDetails.venue || ''} onChange={(e) => updateDetail('venue', e.target.value)} placeholder="e.g. The Grand Ballroom, Mumbai" maxLength={200} />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue Map Link (Optional)</label>
+                  <input className="form-input" value={customDetails.venue_map_url || ''} onChange={(e) => updateDetail('venue_map_url', e.target.value)} placeholder="e.g. https://maps.google.com/..." maxLength={500} />
+
+                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>📋 Event Schedule — Add your Mehndi / Sangeet / Haldi / Vivah timings:</label>
+                  {[
+                    { key: 'event_mehndi',    ph: 'Mehndi — e.g. 12 Feb, 4:00 PM at Home' },
+                    { key: 'event_sangeet',   ph: 'Sangeet — e.g. 13 Feb, 7:00 PM at Grand Hall' },
+                    { key: 'event_haldi',     ph: 'Haldi — e.g. 14 Feb, 10:00 AM' },
+                    { key: 'event_wedding',   ph: 'Wedding Ceremony — e.g. 14 Feb, 7:00 PM at Temple' },
+                    { key: 'event_reception', ph: 'Reception — e.g. 15 Feb, 8:00 PM at Banquet Hall' },
+                  ].map(({ key, ph }) => (
+                    <input key={key} className="form-input" value={customDetails[key] || ''} onChange={(e) => updateDetail(key, e.target.value)} placeholder={ph} maxLength={200} style={{ marginBottom: '0.5rem' }} />
                   ))}
                 </div>
               )}
 
-              {/* Wedding Invitation: Full Details */}
-              {selectedTemplateId === 'wedding-invitation' && (
-                <div className="form-group" style={{
-                  background: 'linear-gradient(135deg, #fef2f2, #fff1f2)',
-                  border: '2px dashed #f472b6',
-                  borderRadius: '16px',
-                  padding: '1.25rem'
-                }}>
-                  <label className="form-label" style={{ color: '#881337' }}>💒 Wedding Event Details</label>
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Bride's Name</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.bride_name || ''}
-                    onChange={(e) => updateDetail('bride_name', e.target.value)}
-                    placeholder="e.g. Priya Sharma"
-                    maxLength={100}
-                  />
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Groom's Name</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.groom_name || ''}
-                    onChange={(e) => updateDetail('groom_name', e.target.value)}
-                    placeholder="e.g. Arjun Patel"
-                    maxLength={100}
-                  />
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Wedding Date</label>
-                  <input
-                    className="form-input"
-                    type="date"
-                    value={customDetails.wedding_date || ''}
-                    onChange={(e) => updateDetail('wedding_date', e.target.value)}
-                  />
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue / Location</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.venue || ''}
-                    onChange={(e) => updateDetail('venue', e.target.value)}
-                    placeholder="e.g. The Grand Ballroom, Mumbai"
-                    maxLength={200}
-                  />
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue Map Link (Optional)</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.venue_map_url || ''}
-                    onChange={(e) => updateDetail('venue_map_url', e.target.value)}
-                    placeholder="e.g. https://maps.google.com/..."
-                    maxLength={500}
-                  />
-
-                  <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>📋 Event Schedule</label>
-                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Add your Mehndi, Sangeet, Haldi, Vivah timings:</p>
-
-                  <input
-                    className="form-input"
-                    value={customDetails.event_mehndi || ''}
-                    onChange={(e) => updateDetail('event_mehndi', e.target.value)}
-                    placeholder="Mehndi — e.g. 12 Feb, 4:00 PM at Home"
-                    maxLength={200}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
-                  <input
-                    className="form-input"
-                    value={customDetails.event_sangeet || ''}
-                    onChange={(e) => updateDetail('event_sangeet', e.target.value)}
-                    placeholder="Sangeet — e.g. 13 Feb, 7:00 PM at Grand Hall"
-                    maxLength={200}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
-                  <input
-                    className="form-input"
-                    value={customDetails.event_haldi || ''}
-                    onChange={(e) => updateDetail('event_haldi', e.target.value)}
-                    placeholder="Haldi — e.g. 14 Feb, 10:00 AM"
-                    maxLength={200}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
-                  <input
-                    className="form-input"
-                    value={customDetails.event_wedding || ''}
-                    onChange={(e) => updateDetail('event_wedding', e.target.value)}
-                    placeholder="Wedding Ceremony — e.g. 14 Feb, 7:00 PM at Temple"
-                    maxLength={200}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
-                  <input
-                    className="form-input"
-                    value={customDetails.event_reception || ''}
-                    onChange={(e) => updateDetail('event_reception', e.target.value)}
-                    placeholder="Reception — e.g. 15 Feb, 8:00 PM at Banquet Hall"
-                    maxLength={200}
-                  />
-                </div>
-              )}
-
-              {/* Surprise Reveal Box: 3 Layer Hints + Final Surprise */}
+              {/* ───────────────────────────────────────────
+                  SURPRISE REVEAL BOX — 3 Hints + Final Surprise
+              ─────────────────────────────────────────── */}
               {selectedTemplateId === 'surprise-reveal-box' && (
-                <div className="form-group">
-                  <label className="form-label">🎁 3-Layer Surprise Hints</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Each hint is revealed as they untie a ribbon layer.</p>
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fdf4ff,#fae8ff)', border: '2px dashed #a855f7', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#6b21a8' }}>🎁 Surprise Reveal Box Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎀 3-Layer Surprise Hints — Each hint is revealed as they untie a ribbon layer</label>
                   {[1, 2, 3].map((i) => (
                     <input
                       key={i}
                       className="form-input"
                       value={customDetails[`hint_${i}`] || ''}
                       onChange={(e) => updateDetail(`hint_${i}`, e.target.value)}
-                      placeholder={i === 1 ? 'Hint #1 — e.g. It\'s something sweet...' : i === 2 ? 'Hint #2 — e.g. It\'s about us two...' : 'Hint #3 — e.g. Open to see the big reveal!'}
+                      placeholder={i === 1 ? "Hint #1 — e.g. It's something sweet..." : i === 2 ? "Hint #2 — e.g. It's about us two..." : "Hint #3 — e.g. Open to see the big reveal!"}
                       maxLength={200}
                       style={{ marginBottom: '0.5rem' }}
                     />
                   ))}
-                  <label className="form-label" style={{ marginTop: '0.5rem' }}>🎉 Final Big Surprise Announcement</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.5rem' }}>🎉 Final Big Surprise Announcement</label>
                   <textarea
                     className="form-textarea"
                     value={customDetails.final_surprise || ''}
@@ -925,11 +958,14 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Rose: Dedication Line */}
+              {/* ───────────────────────────────────────────
+                  A ROSE FOR SOMEONE SPECIAL — Dedication line
+              ─────────────────────────────────────────── */}
               {selectedTemplateId === 'a-rose-for-someone-special' && (
-                <div className="form-group">
-                  <label className="form-label">🌹 Dedication Line</label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This appears at the center of the blooming rose.</p>
+                <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff1f2,#ffe4e6)', border: '2px dashed #fb7185', borderRadius: '16px', padding: '1.25rem' }}>
+                  <label className="form-label" style={{ color: '#9f1239' }}>🌹 Rose Details</label>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>✍️ Dedication Line — Appears at the center of the blooming rose</label>
                   <input
                     className="form-input"
                     value={customDetails.dedication_line || ''}
@@ -940,85 +976,66 @@ function CreateNoteContent() {
                 </div>
               )}
 
-              {/* Rakshabandhan: Custom Promises, Unboxing Letter & Cherished Memory */}
+              {/* ───────────────────────────────────────────
+                  RAKSHABANDHAN — Promises, Unboxing Letter, Shagun QR
+              ─────────────────────────────────────────── */}
               {selectedTemplateId === 'rakshabandhan' && (
                 <>
-                  <div className="form-group">
-                    <label className="form-label">✨ 3 Promises for the Knot Ceremony</label>
-                    <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Revealed as brother ties each knot in Stage 7.</p>
+                  <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff7ed,#ffedd5)', border: '2px dashed #fb923c', borderRadius: '16px', padding: '1.25rem' }}>
+                    <label className="form-label" style={{ color: '#7c2d12' }}>🪢 Raksha Bandhan Details</label>
+
+                    <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>✨ 3 Promises — Revealed as each knot is tied in the ceremony</label>
                     {[1, 2, 3].map((i) => (
                       <input
                         key={i}
                         className="form-input"
                         value={customDetails[`rakhi_promise_${i}`] || ''}
                         onChange={(e) => updateDetail(`rakhi_promise_${i}`, e.target.value)}
-                        placeholder={i === 1 ? 'Knot #1: e.g. I promise to always annoy you 😄' : i === 2 ? 'Knot #2: e.g. I promise to stand beside you through thick & thin ❤️' : 'Knot #3: e.g. I promise to always pray for your happiness 🌟'}
+                        placeholder={[
+                          "Knot #1: e.g. I promise to always annoy you 😄",
+                          "Knot #2: e.g. I promise to stand beside you through thick & thin ❤️",
+                          "Knot #3: e.g. I promise to always pray for your happiness 🌟"
+                        ][i-1]}
                         maxLength={150}
                         style={{ marginBottom: '0.5rem' }}
                       />
                     ))}
-                  </div>
 
-                  <div className="form-group">
-                    <label className="form-label">📜 Sister's Secret Unboxing Letter</label>
-                    <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>This letter appears inside the secret gift box before the Shagun QR.</p>
+                    <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>📜 Sister's Secret Unboxing Letter — Shown inside the gift box before the Shagun QR</label>
                     <textarea
                       className="form-textarea"
                       value={customDetails.unboxing_letter || ''}
                       onChange={(e) => updateDetail('unboxing_letter', e.target.value)}
-                      placeholder="e.g. Dear Bhai, You know I don't need gifts — your love is enough! But... traditions are traditions 😄 So here is your chance to give your sister some Shagun! ❤️"
+                      placeholder="e.g. Dear Bhai, traditions are traditions 😄 so here's your chance to give your sister some Shagun! ❤️"
                       rows={3}
                       maxLength={500}
                     />
                   </div>
-                </>
-              )}
 
-              {/* Rakshabandhan-only: Shagun QR Upload */}
-              {selectedTemplateId === 'rakshabandhan' && (
-                <div className="form-group" style={{
-                  background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                  border: '2px dashed #f59e0b',
-                  borderRadius: '16px',
-                  padding: '1.25rem'
-                }}>
-                  <label className="form-label" style={{ color: '#92400e', marginBottom: '0.25rem' }}>
-                    🪢 Sister's Shagun QR Code (Optional but Recommended 😏)
-                  </label>
-                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.75rem', color: '#b45309' }}>
-                    Upload your UPI / PhonePe / GPay QR screenshot — it'll appear at the end of the card with a playful money request message! 💸
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    <CloudinaryUpload onUpload={(url) => setShagunQrUrl(url)} />
-                    {shagunQrUrl ? (
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <img
-                          src={shagunQrUrl}
-                          alt="Shagun QR"
-                          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', border: '3px solid #f59e0b' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShagunQrUrl('')}
-                          style={{
-                            position: 'absolute', top: '-6px', right: '-6px',
-                            background: '#e11d48', color: '#fff', border: 'none',
-                            borderRadius: '50%', width: '20px', height: '20px',
-                            fontSize: '0.7rem', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                          }}
-                        >✕</button>
-                      </div>
-                    ) : (
-                      <span className="text-muted" style={{ fontSize: '0.8rem', color: '#b45309' }}>
-                        No QR yet — upload your payment QR
-                      </span>
-                    )}
+                  {/* Shagun QR — Raksha Bandhan only */}
+                  <div className="form-group" style={{ background: 'linear-gradient(135deg,#fffbeb,#fef3c7)', border: '2px dashed #f59e0b', borderRadius: '16px', padding: '1.25rem' }}>
+                    <label className="form-label" style={{ color: '#92400e', marginBottom: '0.25rem' }}>
+                      🪢 Sister's Shagun QR Code (Optional but Recommended 😏)
+                    </label>
+                    <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '0.75rem', color: '#b45309' }}>
+                      Upload your UPI / PhonePe / GPay QR screenshot — it'll appear at the end with a playful money request message! 💸
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                      <CloudinaryUpload onUpload={(url) => setShagunQrUrl(url)} />
+                      {shagunQrUrl ? (
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                          <img src={shagunQrUrl} alt="Shagun QR" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', border: '3px solid #f59e0b' }} />
+                          <button type="button" onClick={() => setShagunQrUrl('')} style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        </div>
+                      ) : (
+                        <span className="text-muted" style={{ fontSize: '0.8rem', color: '#b45309' }}>No QR yet — upload your payment QR</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: '0.72rem', color: '#d97706', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                      💡 Tip: Open PhonePe/GPay → "Receive Money" → screenshot the QR
+                    </p>
                   </div>
-                  <p style={{ fontSize: '0.72rem', color: '#d97706', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                    💡 Tip: Open your PhonePe/GPay app → "Receive Money" → take a screenshot of the QR
-                  </p>
-                </div>
+                </>
               )}
 
               {/* Custom Link */}
