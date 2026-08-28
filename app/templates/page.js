@@ -7,14 +7,22 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 export const metadata = {
   title: 'Personalized Digital Gift Templates & Interactive Cards',
   description: 'Explore our full library of interactive digital gift templates: romantic apologies, birthday surprises, love letters, proposals, wedding save-the-dates, and festive cards.',
+  keywords: ['digital gift templates', 'interactive cards library', 'birthday surprise templates', 'proposal cards online', 'Raksha Bandhan digital cards'],
   alternates: {
     canonical: '/templates',
   },
   openGraph: {
-    title: 'Personalized Digital Gift Templates & Interactive Cards | Lovely Crafts',
+    title: 'Personalized Digital Gift Templates & Interactive Cards | LovelyCrafts',
     description: 'Explore our full library of interactive digital gift templates: romantic apologies, birthday surprises, love letters, proposals, wedding save-the-dates, and festive cards.',
     url: `${baseUrl}/templates`,
     type: 'website',
+    images: [{ url: `${baseUrl}/og-banner.jpg`, width: 1200, height: 630, alt: 'LovelyCrafts Templates' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Personalized Digital Gift Templates & Interactive Cards | LovelyCrafts',
+    description: 'Explore our full library of interactive digital gift templates for all occasions.',
+    images: [`${baseUrl}/og-banner.jpg`],
   },
 };
 

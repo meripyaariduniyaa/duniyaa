@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { templates } from '@/lib/templates';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { SITE_URL, SITE_NAME } from '@/lib/seo';
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 export async function generateStaticParams() {
   return templates.map((t) => ({
@@ -33,11 +33,14 @@ export async function generateMetadata({ params }) {
       url: canonicalUrl,
       type: 'website',
       siteName: SITE_NAME,
+      locale: 'en_IN',
+      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: `${template.title} — ${SITE_NAME}` }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} | ${SITE_NAME}`,
       description,
+      images: [DEFAULT_OG_IMAGE],
     },
     robots: {
       index: true,
@@ -63,6 +66,17 @@ export default async function TemplateDetailPage({ params }) {
     name: template.title,
     description: template.description,
     url: canonicalUrl,
+    inLanguage: 'en-IN',
+    datePublished: '2026-08-09',
+    dateModified: '2026-08-28',
+    audience: {
+      '@type': 'PeopleAudience',
+      audienceType: template.bestFor.join(', '),
+      geographicArea: {
+        '@type': 'Country',
+        name: 'India',
+      },
+    },
     creator: {
       '@type': 'Organization',
       name: SITE_NAME,
@@ -191,22 +205,21 @@ export default async function TemplateDetailPage({ params }) {
           </div>
         )}
 
-        {/* Related Occasions */}
+        {/* Other Templates */}
         <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '1.25rem', border: '1px solid rgba(0,0,0,0.06)', marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#111' }}>🗂️ Browse by Occasion</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {[
-              { slug: 'birthday', label: '🎂 Birthday Surprises' },
-              { slug: 'raksha-bandhan', label: '🪢 Raksha Bandhan' },
-              { slug: 'anniversary', label: '💌 Anniversary & Love' },
-              { slug: 'apology', label: '🥺 Apology & Making Up' },
-              { slug: 'romantic', label: '🌹 Romantic Confessions' },
-              { slug: 'valentines-day', label: '💕 Valentine\'s Day' },
-            ].map((occ) => (
-              <Link key={occ.slug} href={`/occasions/${occ.slug}`} className="template-tag" style={{ textDecoration: 'none', fontSize: '0.85rem', padding: '0.4rem 0.85rem', background: '#fff1f2', color: '#be185d', borderRadius: '999px', fontWeight: 600 }}>
-                {occ.label}
-              </Link>
-            ))}
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#111' }}>🎁 Explore Other Popular Experiences</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+            {templates
+              .filter((t) => t.id !== template.id)
+              .slice(0, 6)
+              .map((other) => (
+                <Link key={other.id} href={`/templates/${other.id}`} className="template-tag" style={{ textDecoration: 'none', fontSize: '0.88rem', padding: '0.45rem 0.9rem', background: '#fff1f2', color: '#be185d', borderRadius: '999px', fontWeight: 600 }}>
+                  {other.icon} {other.title}
+                </Link>
+              ))}
+            <Link href="/templates" className="template-tag" style={{ textDecoration: 'none', fontSize: '0.88rem', padding: '0.45rem 0.9rem', background: '#f3f4f6', color: '#374151', borderRadius: '999px', fontWeight: 600 }}>
+              ✨ View All Templates →
+            </Link>
           </div>
         </div>
 

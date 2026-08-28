@@ -1,29 +1,15 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
 import Link from 'next/link';
-import { templates } from '@/lib/templates';
+import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
 
-const shuffleArray = (array) => {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+export const metadata = {
+  title: 'LovelyCrafts — Personalized Digital Gifts & Surprises India',
+  description: 'Create and send personalized digital gifts on WhatsApp in minutes. Interactive birthday cards, romantic proposals, anniversary cards, and apology links starting at ₹199.',
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function Home() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const [displayTemplates, setDisplayTemplates] = useState(templates);
-
-  useEffect(() => {
-    setDisplayTemplates(shuffleArray(templates));
-  }, []);
-
   return (
     <main className="shell">
       <div className="main-content">
@@ -49,14 +35,7 @@ export default function Home() {
           </div>
 
           {/* Quick Pill Navigation */}
-          <div className="hero-pills">
-            {displayTemplates.slice(0, 7).map((t) => (
-              <Link key={t.id} href={`/create?template=${t.id}`} className="hero-pill-item">
-                <span>{t.icon}</span>
-                <span>{t.title}</span>
-              </Link>
-            ))}
-          </div>
+          <HeroPills />
 
           <div className="hero-actions" style={{ marginTop: '1rem' }}>
             <Link href="/templates" className="btn-primary" style={{ padding: '0.95rem 2.25rem', fontSize: '1rem' }}>
@@ -82,29 +61,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="bento-grid">
-            {displayTemplates.map((t) => (
-              <Link key={t.id} href={`/create?template=${t.id}`} className="bento-card">
-                <div>
-                  <div className="bento-card-header">
-                    <span className="bento-emoji">{t.icon}</span>
-                    <h3 className="bento-card-title">{t.title}</h3>
-                  </div>
-                  <p className="bento-card-desc">{t.description}</p>
-                </div>
-
-                <div className="bento-card-footer">
-                  <div className="bento-price-tag">
-                    <del>₹499</del>
-                    <span>₹199</span>
-                  </div>
-                  <span className="bento-cta">
-                    Create Now →
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <BentoGrid />
         </section>
 
         {/* How It Works Section */}

@@ -3,42 +3,53 @@ import { templates } from '@/lib/templates';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
+// Fixed dates for static pages — avoids signalling false daily content changes on every build
+const SITE_LAUNCH = new Date('2026-08-09');
+const TEMPLATES_UPDATED = new Date('2026-08-28');
+const LEGAL_UPDATED = new Date('2026-08-09');
 
+const enInAlternates = (path: string) => ({
+  languages: {
+    'en-IN': `${SITE_URL}${path}`,
+  },
+});
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
-      lastModified: now,
+      lastModified: SITE_LAUNCH,
       changeFrequency: 'weekly',
       priority: 1.0,
+      alternates: enInAlternates('/'),
     },
     {
       url: `${SITE_URL}/templates`,
-      lastModified: now,
+      lastModified: TEMPLATES_UPDATED,
       changeFrequency: 'weekly',
       priority: 0.9,
+      alternates: enInAlternates('/templates'),
     },
-
     {
       url: `${SITE_URL}/create`,
-      lastModified: now,
-      changeFrequency: 'weekly',
+      lastModified: TEMPLATES_UPDATED,
+      changeFrequency: 'monthly',
       priority: 0.8,
+      alternates: enInAlternates('/create'),
     },
     {
       url: `${SITE_URL}/privacy`,
-      lastModified: now,
+      lastModified: LEGAL_UPDATED,
       changeFrequency: 'yearly',
       priority: 0.3,
+      alternates: enInAlternates('/privacy'),
     },
     {
       url: `${SITE_URL}/terms`,
-      lastModified: now,
+      lastModified: LEGAL_UPDATED,
       changeFrequency: 'yearly',
       priority: 0.3,
+      alternates: enInAlternates('/terms'),
     },
   ];
 
@@ -46,9 +57,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((template) => template.id)
     .map((template) => ({
       url: `${SITE_URL}/templates/${encodeURIComponent(template.id)}`,
-      lastModified: now,
+      lastModified: TEMPLATES_UPDATED,
       changeFrequency: 'monthly',
       priority: 0.8,
+      alternates: enInAlternates(`/templates/${encodeURIComponent(template.id)}`),
     }));
 
   return [...staticPages, ...templatePages];
