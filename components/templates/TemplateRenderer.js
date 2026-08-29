@@ -51,7 +51,26 @@ export default function TemplateRenderer({ note, isPreview = false }) {
     default:
       experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }
-  return <div className={`experience-vibe experience-vibe--${vibe}`}>{experience}</div>;
+  return <div className={`experience-vibe experience-vibe--${vibe}`}>
+    {!isPreview && <ImmersiveAtmosphere vibe={vibe} />}
+    {experience}
+  </div>;
+}
+
+function ImmersiveAtmosphere({ vibe }) {
+  const [celebrating, setCelebrating] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setCelebrating(false), 5200);
+    return () => clearTimeout(timer);
+  }, []);
+  const symbols = vibe === 'playful' ? ['✦', '●', '✿', '★'] : vibe === 'deep' ? ['✦', '·', '✧', '⋆'] : ['♥', '✦', '✧', '❋'];
+  return <div className="immersive-atmosphere" aria-hidden="true">
+    <div className="immersive-vignette" />
+    <div className="immersive-glow immersive-glow--one" />
+    <div className="immersive-glow immersive-glow--two" />
+    {Array.from({ length: 20 }, (_, index) => <span className="immersive-spark" key={index} style={{ '--spark-left': `${(index * 37) % 101}%`, '--spark-top': `${(index * 61) % 92}%`, '--spark-delay': `${(index % 7) * .45}s`, '--spark-size': `${8 + (index % 4) * 4}px` }}>{symbols[index % symbols.length]}</span>)}
+    {celebrating && <div className="immersive-confetti">{Array.from({ length: 42 }, (_, index) => <i key={index} style={{ '--confetti-left': `${(index * 29) % 100}%`, '--confetti-delay': `${(index % 11) * .09}s`, '--confetti-rotate': `${(index * 47) % 360}deg`, '--confetti-color': ['#fb7185', '#fbbf24', '#a78bfa', '#38bdf8', '#f9a8d4'][index % 5] }} />)}</div>}
+  </div>;
 }
 
 /* ==========================================================================
