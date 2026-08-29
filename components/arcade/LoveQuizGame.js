@@ -72,12 +72,14 @@ const QUIZ_QUESTIONS = [
 ];
 
 export default function LoveQuizGame({ onGameOver, challengeTargetScore = null, challengerName = null }) {
-  const [gameState, setGameState] = useState('ready'); // 'ready', 'playing', 'gameover'
+  const [gameState, setGameState] = useState('ready');
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [hintTokens, setHintTokens] = useState(2);       // 2 x 50/50 hints per game
+  const [eliminatedOptions, setEliminatedOptions] = useState([]); // indices eliminated this Q
 
   useEffect(() => {
     if (gameState !== 'playing') return;
@@ -108,7 +110,23 @@ export default function LoveQuizGame({ onGameOver, challengeTargetScore = null, 
     setCurrentQIndex(0);
     setTimeLeft(30);
     setSelectedOption(null);
+    setHintTokens(2);
+    setEliminatedOptions([]);
     setGameState('playing');
+  };
+
+  // 50/50 hint: eliminate 2 options from the current question (-100 pts)
+  const use5050Hint = () => {
+    if (hintTokens <= 0 || gameState !== 'playing' || selectedOption !== null) return;
+    const q = QUIZ_QUESTIONS[currentQIndex];
+    // Pick 2 random indices to eliminate (never the highest-pts option)
+    const highest = q.options.reduce((best, o, i) => o.pts > q.options[best].pts ? i : best, 0);
+    const candidates = q.options.map((_, i) => i).filter((i) => i !== highest && !eliminatedOptions.includes(i));
+    const toEliminate = candidates.sort(() => Math.random() - 0.5).slice(0, Math.min(2, candidates.length));
+    setEliminatedOptions(toEliminate);
+    setHintTokens((prev) => prev - 1);
+    setScore((prev) => Math.max(0, prev - 100));
+    if (window.navigator?.vibrate) window.navigator.vibrate(20);
   };
 
   const handleSelectOption = (optionIndex, pts) => {
@@ -129,6 +147,7 @@ export default function LoveQuizGame({ onGameOver, challengeTargetScore = null, 
       if (currentQIndex + 1 < QUIZ_QUESTIONS.length) {
         setCurrentQIndex((prev) => prev + 1);
         setSelectedOption(null);
+        setEliminatedOptions([]); // reset eliminations for next question
       } else {
         setGameState('gameover');
       }
@@ -217,15 +236,39 @@ export default function LoveQuizGame({ onGameOver, challengeTargetScore = null, 
 
       {gameState === 'playing' && currentQ && (
         <div style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid #fecdd3', padding: '1.5rem 1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#be185d', background: '#fff1f2', padding: '0.2rem 0.7rem', borderRadius: '999px' }}>
               Question {currentQIndex + 1} of {QUIZ_QUESTIONS.length}
             </span>
-            {streak > 1 && (
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#d97706', background: '#fef3c7', padding: '0.2rem 0.7rem', borderRadius: '999px' }}>
-                🔥 {streak}x Streak!
-              </span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {streak > 1 && (
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#d97706', background: '#fef3c7', padding: '0.2rem 0.7rem', borderRadius: '999px' }}>
+                  🔥 {streak}x Streak!
+                </span>
+              )}
+              {/* 50/50 Hint Tokens */}
+              <button
+                type="button"
+                onClick={use5050Hint}
+                disabled={hintTokens <= 0 || selectedOption !== null}
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  background: hintTokens > 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#e5e7eb',
+                  color: hintTokens > 0 ? '#ffffff' : '#9ca3af',
+                  border: 'none',
+                  borderRadius: '999px',
+                  padding: '0.25rem 0.65rem',
+                  cursor: hintTokens > 0 ? 'pointer' : 'default',
+                  touchAction: 'manipulation',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}
+              >
+                💡 50/50 ×{hintTokens}
+              </button>
+            </div>
           </div>
 
           <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{currentQ.emoji}</div>
@@ -236,31 +279,36 @@ export default function LoveQuizGame({ onGameOver, challengeTargetScore = null, 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem', maxWidth: '500px', margin: '0 auto' }}>
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedOption === idx;
+              const isEliminated = eliminatedOptions.includes(idx);
               return (
                 <button
                   key={idx}
                   type="button"
-                  onPointerDown={() => handleSelectOption(idx, opt.pts)}
+                  onPointerDown={() => !isEliminated && handleSelectOption(idx, opt.pts)}
+                  disabled={isEliminated}
                   style={{
-                    background: isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : '#fdf2f8',
-                    color: isSelected ? '#ffffff' : '#881337',
-                    border: '1.5px solid #fbcfe8',
+                    background: isEliminated ? '#f3f4f6' : isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : '#fdf2f8',
+                    color: isEliminated ? '#d1d5db' : isSelected ? '#ffffff' : '#881337',
+                    border: `1.5px solid ${isEliminated ? '#e5e7eb' : '#fbcfe8'}`,
                     borderRadius: '16px',
                     padding: '0.9rem 1.25rem',
                     fontSize: '0.98rem',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: isEliminated ? 'not-allowed' : 'pointer',
                     touchAction: 'manipulation',
                     textAlign: 'left',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     transition: 'all 0.15s ease',
-                    transform: isSelected ? 'scale(0.98)' : 'none'
+                    transform: isSelected ? 'scale(0.98)' : 'none',
+                    opacity: isEliminated ? 0.45 : 1,
+                    textDecoration: isEliminated ? 'line-through' : 'none'
                   }}
                 >
                   <span>{opt.text}</span>
-                  <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>+{opt.pts}</span>
+                  {!isEliminated && <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>+{opt.pts}</span>}
+                  {isEliminated && <span style={{ fontSize: '0.8rem' }}>✕</span>}
                 </button>
               );
             })}

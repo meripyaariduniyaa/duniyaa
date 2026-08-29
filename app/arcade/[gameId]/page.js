@@ -9,6 +9,7 @@ import SpeedTapGame from '@/components/arcade/SpeedTapGame';
 import LoveQuizGame from '@/components/arcade/LoveQuizGame';
 import WordScrambleGame from '@/components/arcade/WordScrambleGame';
 import GameDuelCard from '@/components/arcade/GameDuelCard';
+import ArcadeAdBanner from '@/components/ArcadeAdBanner';
 
 const GAME_INFO = {
   'heart-rush': {
@@ -241,6 +242,9 @@ function GameRunner() {
             challengerName={challengeData ? challengeData.creatorName : null}
           />
         </div>
+
+        {/* Arcade Monetization Ad Banner */}
+        <ArcadeAdBanner slot="arcade-game-bottom" />
 
         {/* Challenge Mode: Partner Score Submission & Live Winner Card */}
         {challengeId && latestScore !== null && !duelResult && (

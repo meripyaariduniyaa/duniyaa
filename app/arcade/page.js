@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ArcadeAdBanner from '@/components/ArcadeAdBanner';
 import { useAuth } from '@/components/AuthProvider';
 
 const GAMES = [
@@ -196,6 +197,9 @@ export default function ArcadeLobby() {
             );
           })}
         </div>
+
+        {/* Monetization Ad Unit */}
+        <ArcadeAdBanner slot="arcade-lobby-middle" />
 
         {/* How Duels Work Card */}
         <div style={{

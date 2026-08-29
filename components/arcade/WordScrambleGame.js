@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import RewardedAdModal from '@/components/arcade/RewardedAdModal';
 
 const LOVE_WORDS = [
   { word: 'SOULMATE', hint: '💞 Your perfect match forever' },
@@ -29,12 +30,16 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
   const [timeLeft, setTimeLeft] = useState(60);
   const [flash, setFlash] = useState(null); // 'correct' | 'wrong'
   const [solved, setSolved] = useState(0);
+  const [hintsLeft, setHintsLeft] = useState(3);       // per-game hint tokens
+  const [revealedSlots, setRevealedSlots] = useState([]); // indices already placed by hints
+  const [showAdModal, setShowAdModal] = useState(false);
 
   const currentWord = words[currentWordIdx];
 
   const setupWord = useCallback((word) => {
     setScrambled(shuffle(word.split('')).map((ch, i) => ({ ch, id: i, used: false })));
     setSelected([]);
+    setRevealedSlots([]);
   }, []);
 
   const startGame = () => {
@@ -43,10 +48,55 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
     setCurrentWordIdx(0);
     setScore(0);
     setSolved(0);
+    setHintsLeft(3);
+    setRevealedSlots([]);
     setTimeLeft(60);
     setFlash(null);
     setupWord(picked[0].word);
     setGameState('playing');
+  };
+
+  // Hint: place the next correct letter into the next empty answer slot
+  const useHint = () => {
+    if (!currentWord || hintsLeft <= 0 || gameState !== 'playing') return;
+    const word = currentWord.word;
+    // Find next slot not yet filled
+    const nextSlot = selected.length; // we always fill left-to-right
+    if (nextSlot >= word.length) return;
+
+    const correctLetter = word[nextSlot];
+    // Find an unused scrambled tile with this letter
+    const tile = scrambled.find((s) => !s.used && s.ch === correctLetter);
+    if (!tile) return;
+
+    const cost = hintsLeft === 3 ? 0 : 50; // first hint free, subsequent cost 50 pts each
+    setScore((prev) => Math.max(0, prev - cost));
+    setHintsLeft((prev) => prev - 1);
+    setRevealedSlots((prev) => [...prev, nextSlot]);
+    setScrambled((prev) => prev.map((s) => s.id === tile.id ? { ...s, used: true } : s));
+    setSelected((prev) => [...prev, tile]);
+    if (window.navigator?.vibrate) window.navigator.vibrate(15);
+  };
+
+  // Hint: reveal full word answer (-150 pts)
+  const revealFullWord = () => {
+    if (!currentWord || hintsLeft <= 0 || gameState !== 'playing') return;
+    const word = currentWord.word;
+    // Build full answer from scrambled tiles
+    const remaining = [...scrambled.filter((s) => !s.used)];
+    const fullSelected = [...selected];
+    for (let i = selected.length; i < word.length; i++) {
+      const correctLetter = word[i];
+      const tileIdx = remaining.findIndex((s) => s.ch === correctLetter);
+      if (tileIdx === -1) break;
+      const tile = remaining.splice(tileIdx, 1)[0];
+      fullSelected.push(tile);
+    }
+    setScore((prev) => Math.max(0, prev - 150));
+    setHintsLeft(0);
+    setScrambled((prev) => prev.map((s) => fullSelected.some((f) => f.id === s.id) ? { ...s, used: true } : s));
+    setSelected(fullSelected);
+    if (window.navigator?.vibrate) window.navigator.vibrate(30);
   };
 
   useEffect(() => {
@@ -102,6 +152,7 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
   };
 
   const tapSelected = (index) => {
+    if (revealedSlots.includes(index)) return; // can't undo a hint-placed letter
     const removed = selected[index];
     setSelected((prev) => prev.filter((_, i) => i !== index));
     setScrambled((prev) => prev.map((s) => s.id === removed.id ? { ...s, used: false } : s));
@@ -150,8 +201,16 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
 
       {gameState === 'playing' && currentWord && (
         <div style={{ background: flashBg, borderRadius: '24px', border: `1px solid ${flash === 'correct' ? '#86efac' : flash === 'wrong' ? '#fca5a5' : '#fecdd3'}`, padding: '1.5rem 1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.04)', transition: 'background 0.2s ease' }}>
-          <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', padding: '0.3rem 0.8rem', borderRadius: '999px', display: 'inline-block', marginBottom: '0.75rem' }}>
-            Word {currentWordIdx + 1} of {words.length}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', padding: '0.3rem 0.8rem', borderRadius: '999px' }}>
+              Word {currentWordIdx + 1} of {words.length}
+            </div>
+            {/* Hint Tokens */}
+            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+              {[...Array(3)].map((_, i) => (
+                <span key={i} style={{ fontSize: '1rem', opacity: i < hintsLeft ? 1 : 0.25 }}>💡</span>
+              ))}
+            </div>
           </div>
 
           <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.75rem', fontStyle: 'italic' }}>{currentWord.hint}</p>
@@ -160,22 +219,24 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
           <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
             {Array.from({ length: currentWord.word.length }).map((_, i) => {
               const letter = selected[i];
+              const isHintSlot = revealedSlots.includes(i);
               return (
                 <button
                   key={i}
                   type="button"
-                  onPointerDown={() => letter && tapSelected(i)}
+                  onPointerDown={() => letter && !isHintSlot && tapSelected(i)}
                   style={{
                     width: '2.6rem', height: '2.6rem',
-                    background: letter ? '#7c3aed' : 'rgba(124,58,237,0.08)',
+                    background: isHintSlot ? 'linear-gradient(135deg, #f59e0b, #d97706)' : letter ? '#7c3aed' : 'rgba(124,58,237,0.08)',
                     color: '#ffffff',
-                    border: `2px solid ${letter ? '#7c3aed' : '#c4b5fd'}`,
+                    border: `2px solid ${isHintSlot ? '#d97706' : letter ? '#7c3aed' : '#c4b5fd'}`,
                     borderRadius: '12px',
                     fontWeight: 900, fontSize: '1.1rem',
-                    cursor: letter ? 'pointer' : 'default',
+                    cursor: (letter && !isHintSlot) ? 'pointer' : 'default',
                     touchAction: 'manipulation',
                     transition: 'all 0.15s ease',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: isHintSlot ? '0 0 8px rgba(245,158,11,0.5)' : 'none'
                   }}
                 >
                   {letter?.ch || ''}
@@ -209,11 +270,94 @@ export default function WordScrambleGame({ onGameOver, challengeTargetScore = nu
             ))}
           </div>
 
-          <button type="button" onClick={() => { setSelected([]); setScrambled((prev) => prev.map((s) => ({ ...s, used: false }))); }} style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
-            ↺ Clear
-          </button>
+          {/* Action Row: Clear + Hints */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.6rem', marginTop: '1.1rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const nonHintSelected = selected.filter((_, i) => !revealedSlots.includes(i));
+                setSelected(selected.filter((_, i) => revealedSlots.includes(i)));
+                setScrambled((prev) => prev.map((s) =>
+                  nonHintSelected.some((f) => f.id === s.id) ? { ...s, used: false } : s
+                ));
+              }}
+              style={{ fontSize: '0.78rem', color: '#9ca3af', background: 'none', border: '1px solid #e5e7eb', borderRadius: '999px', padding: '0.3rem 0.8rem', cursor: 'pointer', fontWeight: 700 }}
+            >
+              ↺ Clear
+            </button>
+
+            <button
+              type="button"
+              onClick={useHint}
+              disabled={hintsLeft <= 0 || selected.length >= currentWord.word.length}
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                background: hintsLeft > 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#e5e7eb',
+                color: hintsLeft > 0 ? '#ffffff' : '#9ca3af',
+                border: 'none',
+                borderRadius: '999px',
+                padding: '0.35rem 0.9rem',
+                cursor: hintsLeft > 0 ? 'pointer' : 'default',
+                touchAction: 'manipulation',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              💡 {hintsLeft === 3 ? 'Hint (Free)' : `Hint (-50pts) ×${hintsLeft}`}
+            </button>
+
+            {hintsLeft === 0 ? (
+              <button
+                type="button"
+                onClick={() => setShowAdModal(true)}
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #ec4899, #be185d)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '999px',
+                  padding: '0.35rem 0.9rem',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation',
+                  boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)'
+                }}
+              >
+                🎬 Watch Ad (+2 Hints)
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={revealFullWord}
+                disabled={hintsLeft <= 0}
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  background: hintsLeft > 0 ? '#fff1f2' : '#e5e7eb',
+                  color: hintsLeft > 0 ? '#be185d' : '#9ca3af',
+                  border: `1px solid ${hintsLeft > 0 ? '#fecdd3' : '#e5e7eb'}`,
+                  borderRadius: '999px',
+                  padding: '0.35rem 0.9rem',
+                  cursor: hintsLeft > 0 ? 'pointer' : 'default',
+                  touchAction: 'manipulation'
+                }}
+              >
+                🔓 Reveal (-150pts)
+              </button>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Rewarded Ad Modal */}
+      <RewardedAdModal
+        isOpen={showAdModal}
+        onClose={() => setShowAdModal(false)}
+        rewardTitle="+2 Free Hints"
+        onRewardGranted={() => setHintsLeft((prev) => prev + 2)}
+      />
 
       {gameState === 'gameover' && (
         <div style={{ padding: '2rem 1rem', background: '#ffffff', borderRadius: '24px', border: '2px solid #7c3aed', boxShadow: '0 12px 36px rgba(0,0,0,0.08)' }}>
