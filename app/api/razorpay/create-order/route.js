@@ -60,7 +60,7 @@ export async function POST(request) {
     }
 
     if (normalizedCode) {
-      return NextResponse.json({ error: 'Invalid coupon code.' }, { status: 400 });
+      return NextResponse.json({ invalidCoupon: true, error: 'Invalid coupon code. Please check and try again.' }, { status: 200 });
     }
 
     const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });

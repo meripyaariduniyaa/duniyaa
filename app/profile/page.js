@@ -12,14 +12,30 @@ export default function ProfilePage() {
   const [fetching, setFetching] = useState(true);
   const [claiming, setClaiming] = useState(false);
 
+  // Instant cached render from localStorage on mount
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('cached_profile_notes');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setNotes(parsed);
+          setFetching(false);
+        }
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     async function initProfile() {
       if (user) {
-        setClaiming(true);
-        try {
-          // Claim anonymous notes first
-          const deviceId = localStorage.getItem('note_device_id');
-          if (deviceId) {
+        // Start fetching user notes immediately
+        fetchUserNotes();
+
+        // Claim device notes silently in background without blocking UI
+        const deviceId = localStorage.getItem('note_device_id');
+        if (deviceId) {
+          try {
             const token = await user.getIdToken();
             await fetch('/api/claim-notes', {
               method: 'POST',
@@ -29,15 +45,14 @@ export default function ProfilePage() {
               },
               body: JSON.stringify({ deviceId })
             });
+            // Re-sync after claiming
+            fetchUserNotes();
+          } catch (err) {
+            console.error('Error claiming notes:', err);
           }
-        } catch (err) {
-          console.error('Error claiming notes:', err);
-        } finally {
-          setClaiming(false);
-          fetchUserNotes();
         }
       } else {
-        // Fetch notes created on this device without requiring login
+        // Fetch notes created on this device
         fetchDeviceNotes();
       }
     }
@@ -47,7 +62,6 @@ export default function ProfilePage() {
 
   async function fetchUserNotes() {
     if (!user) return;
-    setFetching(true);
     try {
       const q = query(
         collection(db, 'notes'),
@@ -65,6 +79,7 @@ export default function ProfilePage() {
       });
       
       setNotes(data);
+      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch {}
     } catch (e) {
       console.warn('Query by Auth UID failed, falling back to local note IDs:', e?.message);
       await fetchDeviceNotes();
@@ -74,14 +89,13 @@ export default function ProfilePage() {
   }
 
   async function fetchDeviceNotes() {
-    setFetching(true);
     try {
       const storedIds = JSON.parse(localStorage.getItem('created_note_ids') || '[]');
       const deviceId = localStorage.getItem('note_device_id');
       
       const notesMap = new Map();
 
-      // Query by device ID if available
+      // 1. Query by device ID if available
       if (deviceId) {
         try {
           const q = query(
@@ -91,18 +105,21 @@ export default function ProfilePage() {
           const snap = await getDocs(q);
           snap.forEach(d => notesMap.set(d.id, { id: d.id, ...d.data() }));
         } catch (err) {
-          // If Firestore query rules prevent device listing, fallback to direct document IDs
+          // Fallback handled by direct stored ID lookups
         }
       }
 
-      // Also fetch by direct stored IDs
-      for (const id of storedIds) {
-        if (!notesMap.has(id)) {
-          const docSnap = await getDoc(doc(db, 'notes', id));
-          if (docSnap.exists()) {
-            notesMap.set(id, { id: docSnap.id, ...docSnap.data() });
+      // 2. Fetch missing stored IDs IN PARALLEL with Promise.all (lightning fast!)
+      const missingIds = storedIds.filter(id => !notesMap.has(id));
+      if (missingIds.length > 0) {
+        const docSnaps = await Promise.all(
+          missingIds.map(id => getDoc(doc(db, 'notes', id)).catch(() => null))
+        );
+        docSnaps.forEach(docSnap => {
+          if (docSnap && docSnap.exists()) {
+            notesMap.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
           }
-        }
+        });
       }
 
       const data = Array.from(notesMap.values());
@@ -113,6 +130,7 @@ export default function ProfilePage() {
       });
 
       setNotes(data);
+      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch {}
     } catch (e) {
       console.error(e);
     } finally {

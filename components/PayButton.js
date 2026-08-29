@@ -30,7 +30,10 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
       });
       const order = await res.json();
 
-      if (!res.ok) throw new Error(order.error || 'Could not validate coupon.');
+      if (!res.ok || order.invalidCoupon) {
+        setError(order.error || 'Could not validate coupon.');
+        return;
+      }
 
       // Store the full order so Step 2 can use it
       setResolvedOrder(order);

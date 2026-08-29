@@ -687,7 +687,8 @@ function CreateNoteContent() {
                   <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🗓️ Your Anniversary / Special Date</label>
                   <input
                     className="form-input"
-                    type="date"
+                    type="text"
+                    placeholder="e.g. 14th Feb 2026 or 2026-02-14"
                     value={customDetails.special_date || ''}
                     onChange={(e) => updateDetail('special_date', e.target.value)}
                   />
@@ -862,7 +863,7 @@ function CreateNoteContent() {
                   <input className="form-input" value={customDetails.groom_name || ''} onChange={(e) => updateDetail('groom_name', e.target.value)} placeholder="e.g. Arjun Patel" maxLength={100} />
 
                   <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Wedding Date</label>
-                  <input className="form-input" type="date" value={customDetails.wedding_date || ''} onChange={(e) => updateDetail('wedding_date', e.target.value)} />
+                  <input className="form-input" type="text" placeholder="e.g. 15th December 2026" value={customDetails.wedding_date || ''} onChange={(e) => updateDetail('wedding_date', e.target.value)} />
 
                   <label className="form-label" style={{ fontSize: '0.8rem', marginTop: '0.75rem' }}>Venue / Location</label>
                   <input className="form-input" value={customDetails.venue || ''} onChange={(e) => updateDetail('venue', e.target.value)} placeholder="e.g. The Grand Ballroom, Mumbai" maxLength={200} />
