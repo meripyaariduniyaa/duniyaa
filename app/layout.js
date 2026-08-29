@@ -4,6 +4,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MarketingPopup from '@/components/MarketingPopup';
+import LaunchBanner from '@/components/LaunchBanner';
 import Script from 'next/script';
 import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, CONTACT_EMAIL, INSTAGRAM_URL, X_URL } from '@/lib/seo';
 
@@ -91,9 +92,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en-IN" className={`${fredoka.variable} ${caveat.variable} ${dancing.variable}`}>
       <body>
-        <div style={{ background: '#fff7ed', color: '#9a2c00', borderBottom: '1px solid #fdba74', padding: '0.8rem 1rem', textAlign: 'center', fontSize: '0.95rem', fontWeight: 700 }}>
-          Special launch offer: 50% off till 30 Sep 2026 • Coupon code <strong>new2026</strong>
-        </div>
+        <LaunchBanner />
         <AuthProvider>
           <Header />
           <div className="page-content">{children}</div>

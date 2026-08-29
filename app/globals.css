@@ -1062,6 +1062,36 @@ a {
   }
 }
 
+/* Responsive receiver experience layer: designed for thumb use on phones and
+   a cinematic canvas on larger screens. These rules never affect previews. */
+.recipient-experience {
+  --receiver-gutter: clamp(1rem, 4vw, 4rem);
+  --receiver-type: clamp(1rem, 1.2vw + .72rem, 1.25rem);
+  font-size: var(--receiver-type);
+}
+.recipient-experience button,
+.recipient-experience a { min-height: 44px; touch-action: manipulation; }
+.recipient-experience .emotional-experience > div { max-width: min(100%, 820px); }
+.recipient-experience .emotional-experience { padding: clamp(1.25rem, 5vw, 5rem) var(--receiver-gutter) !important; }
+.recipient-experience .emotional-experience h1 { font-size: clamp(2.1rem, 5.5vw, 5rem); }
+.recipient-experience .emotional-experience h2 { font-size: clamp(1.7rem, 4.4vw, 3.6rem) !important; }
+.recipient-experience .emotional-reveal-card { font-size: clamp(.95rem, 1vw + .7rem, 1.12rem); padding: clamp(.9rem, 2vw, 1.25rem); }
+.recipient-experience .birthday-experience__frame { width: min(100vw, 100%) !important; height: 100dvh !important; max-height: none !important; border: 0 !important; border-radius: 0 !important; }
+.recipient-experience .birthday-experience { min-height: 100dvh !important; }
+.recipient-experience .sorry-flow-container { padding: clamp(1.25rem, 5vw, 4rem) var(--receiver-gutter); display: grid; place-items: center; }
+.recipient-experience .sorry-flow-step { width: min(100%, 720px); }
+.recipient-experience .puzzle-stage { max-width: min(100%, 760px) !important; min-height: 100dvh; margin: 0 auto !important; border-radius: 0 !important; display: grid; align-content: center; }
+@media (max-width: 600px) {
+  .recipient-experience .birthday-experience__frame { height: 100svh !important; }
+  .recipient-experience .sorry-flow-container { padding: 1rem; }
+  .recipient-experience .step-progress-dots { gap: .35rem; }
+  .recipient-experience .tap-cards-grid { grid-template-columns: 1fr; }
+  .recipient-experience img { max-width: 100%; height: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recipient-experience *, .recipient-experience *::before, .recipient-experience *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem 0;
@@ -1578,3 +1608,33 @@ a {
 .experience-vibe--romantic .emotional-reveal-card:hover,
 .experience-vibe--cinematic .emotional-reveal-card:hover,
 .experience-vibe--deep .emotional-reveal-card:hover { background: rgba(255,255,255,.20); }
+
+/* Recipient links are cinematic, edge-to-edge experiences — previews stay compact. */
+.recipient-experience {
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #160913;
+}
+.recipient-experience > * { width: 100%; min-height: 100dvh; }
+.recipient-experience .experience-vibe { display: flex; min-height: 100dvh; }
+.recipient-experience .emotional-experience { width: 100%; min-height: 100dvh !important; border-radius: 0 !important; }
+.recipient-experience .sorry-flow-container,
+.recipient-experience .birthday-stage,
+.recipient-experience .rose-special-container,
+.recipient-experience .rakhi-journey-wrapper {
+  min-height: 100dvh;
+  width: 100%;
+  border-radius: 0;
+}
+@media (max-width: 600px) {
+  .recipient-experience { min-height: 100svh; }
+  .recipient-experience > *,
+  .recipient-experience .experience-vibe,
+  .recipient-experience .emotional-experience { min-height: 100svh !important; }
+}

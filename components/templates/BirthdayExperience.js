@@ -742,14 +742,14 @@ export default function BirthdayExperience({ note, isPreview = false }) {
 
   return (
     /* ── Outer dark stage ── */
-    <div style={{
+    <div className={isPreview ? 'birthday-experience birthday-experience--preview' : 'birthday-experience'} style={{
       display:'flex', alignItems:'center', justifyContent:'center',
       minHeight:'100dvh', width:'100%',
       background:'radial-gradient(circle at center, #211526, #09070c)',
       padding: '0',
     }}>
       {/* ── Phone container ── */}
-      <div style={{
+      <div className="birthday-experience__frame" style={{
         position:'relative',
         width: 'min(100vw, 430px)',
         height: 'min(100dvh, 860px)',

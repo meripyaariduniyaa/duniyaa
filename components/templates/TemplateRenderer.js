@@ -1969,9 +1969,7 @@ function ReplayAndMarketingFooter({ onReplay, isPreview = false }) {
             Surprise your partner, best friend, or family with a custom interactive greeting card — complete with music, candles, rose blooms, & memory swiper!
           </p>
           <a
-            href="/create"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/templates"
             style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg, #d81e5b, #be185d)',

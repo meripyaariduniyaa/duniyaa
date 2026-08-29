@@ -83,22 +83,9 @@ export default async function CustomLinkPage({ params }) {
     is_paid: apology.is_paid || false,
   };
 
-  // Birthday templates need a full-viewport render (no card wrapper / max-width)
-  const isBirthdayTemplate = apology.template === 'birthday' || apology.template === 'birthday-surprise';
-
-  if (isBirthdayTemplate) {
-    return (
-      <main style={{ margin: 0, padding: 0, width: '100%', minHeight: '100vh', overflow: 'hidden' }}>
-        <TemplateRenderer note={serializableNote} isPreview={false} />
-      </main>
-    );
-  }
-
   return (
-    <main className="shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
-      <div style={{ maxWidth: '750px', width: '100%' }}>
-        <TemplateRenderer note={serializableNote} isPreview={false} />
-      </div>
+    <main className="recipient-experience" aria-label="A private LovelyCrafts experience">
+      <TemplateRenderer note={serializableNote} isPreview={false} />
     </main>
   );
 }
