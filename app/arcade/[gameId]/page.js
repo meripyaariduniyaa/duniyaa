@@ -6,6 +6,8 @@ import Link from 'next/link';
 import HeartRushGame from '@/components/arcade/HeartRushGame';
 import MemoryMatchGame from '@/components/arcade/MemoryMatchGame';
 import SpeedTapGame from '@/components/arcade/SpeedTapGame';
+import LoveQuizGame from '@/components/arcade/LoveQuizGame';
+import WordScrambleGame from '@/components/arcade/WordScrambleGame';
 import GameDuelCard from '@/components/arcade/GameDuelCard';
 
 const GAME_INFO = {
@@ -23,6 +25,16 @@ const GAME_INFO = {
     title: '10s Hug Frenzy',
     icon: '⚡🫂',
     component: SpeedTapGame
+  },
+  'love-quiz': {
+    title: 'Couple Chemistry Quiz',
+    icon: '🧠❓',
+    component: LoveQuizGame
+  },
+  'word-scramble': {
+    title: 'Love Word Scramble',
+    icon: '🔡💌',
+    component: WordScrambleGame
   }
 };
 
@@ -130,18 +142,69 @@ function GameRunner() {
   };
 
   return (
-    <main className="shell" style={{ padding: 'clamp(1rem, 3vw, 2.5rem) clamp(0.5rem, 2vw, 1.5rem)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ width: '100%', maxWidth: 'min(100%, 820px)', margin: '0 auto' }}>
+    <main style={{
+      minHeight: '100dvh',
+      width: '100%',
+      background: 'radial-gradient(ellipse at 50% 0%, #fff1f2 0%, #fdf4f5 50%, #fef2f2 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: 'clamp(0.75rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 1.25rem)'
+    }}>
+      <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto' }}>
         
-        {/* Navigation Breadcrumb */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', padding: '0 0.5rem' }}>
-          <Link href="/arcade" style={{ color: '#be185d', textDecoration: 'none', fontWeight: 700, fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            ← Back to Arcade
+        {/* Sleek Minimal Floating Header Bar */}
+        <header style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(254, 205, 211, 0.8)',
+          borderRadius: '999px',
+          padding: '0.45rem 0.85rem',
+          marginBottom: '1rem',
+          boxShadow: '0 4px 16px rgba(190, 24, 93, 0.06)'
+        }}>
+          <Link
+            href="/arcade"
+            style={{
+              color: '#be185d',
+              textDecoration: 'none',
+              fontWeight: 800,
+              fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.3rem 0.6rem',
+              borderRadius: '999px',
+              background: 'rgba(253, 242, 248, 0.8)',
+              transition: 'background 0.2s ease'
+            }}
+          >
+            ← <span>Arcade</span>
           </Link>
-          <span style={{ fontSize: 'clamp(0.75rem, 1.8vw, 0.85rem)', fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '999px' }}>
-            🏆 Personal Best: {highScore} pts
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '1.1rem' }}>{gameConfig.icon}</span>
+            <span style={{ fontWeight: 800, fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', color: '#1f2937' }}>
+              {gameConfig.title}
+            </span>
+          </div>
+
+          <span style={{
+            fontSize: 'clamp(0.72rem, 1.8vw, 0.82rem)',
+            fontWeight: 800,
+            color: '#16a34a',
+            background: '#dcfce7',
+            padding: '0.3rem 0.7rem',
+            borderRadius: '999px',
+            border: '1px solid #bbf7d0'
+          }}>
+            🏆 {highScore} pts
           </span>
-        </div>
+        </header>
 
         {/* Active Challenge Alert Banner */}
         {challengeData && !duelResult && (
@@ -149,28 +212,27 @@ function GameRunner() {
             background: 'linear-gradient(135deg, #fdf2f8, #ffe4e6)',
             border: '2px solid #f43f5e',
             borderRadius: '20px',
-            padding: '1rem 1.25rem',
-            marginBottom: '1.25rem',
+            padding: '0.85rem 1.25rem',
+            marginBottom: '1rem',
             textAlign: 'center',
             boxShadow: '0 4px 16px rgba(244,63,94,0.1)'
           }}>
-            <span style={{ fontSize: '1.75rem', display: 'block', marginBottom: '0.25rem' }}>⚔️💌</span>
-            <h2 style={{ fontSize: '1.2rem', color: '#881337', fontWeight: 800, margin: '0 0 0.25rem' }}>
-              {challengeData.creatorName} has challenged you!
+            <h2 style={{ fontSize: '1.1rem', color: '#881337', fontWeight: 800, margin: '0 0 0.2rem' }}>
+              ⚔️💌 {challengeData.creatorName} has challenged you!
             </h2>
-            <p style={{ fontSize: '0.9rem', color: '#9f1239', margin: 0 }}>
-              Their score to beat: <strong style={{ fontSize: '1.2rem', color: '#be185d' }}>{challengeData.creatorScore} pts</strong>
+            <p style={{ fontSize: '0.85rem', color: '#9f1239', margin: 0 }}>
+              Their score to beat: <strong style={{ fontSize: '1.1rem', color: '#be185d' }}>{challengeData.creatorScore} pts</strong>
             </p>
           </div>
         )}
 
-        {/* Main Game Interface with Auto-Adjusting Viewport */}
+        {/* Main Dedicated Game Interface */}
         <div style={{
           background: '#ffffff',
-          borderRadius: 'clamp(20px, 4vw, 32px)',
-          padding: 'clamp(1rem, 2.5vw, 2rem) clamp(0.75rem, 2vw, 1.75rem)',
-          border: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '0 12px 36px rgba(0,0,0,0.05)',
+          borderRadius: 'clamp(20px, 3.5vw, 30px)',
+          padding: 'clamp(0.85rem, 2.5vw, 1.75rem)',
+          border: '1px solid rgba(254, 205, 211, 0.6)',
+          boxShadow: '0 12px 36px rgba(190, 24, 93, 0.07)',
           width: '100%'
         }}>
           <GameComponent
@@ -187,7 +249,7 @@ function GameRunner() {
             border: '2px solid #f43f5e',
             borderRadius: '24px',
             padding: '1.5rem',
-            marginTop: '1.5rem',
+            marginTop: '1.25rem',
             textAlign: 'center',
             animation: 'sorryStepFadeIn 0.4s ease'
           }}>
@@ -226,7 +288,7 @@ function GameRunner() {
             border: '3px solid #f43f5e',
             borderRadius: '24px',
             padding: '2rem 1.5rem',
-            marginTop: '1.5rem',
+            marginTop: '1.25rem',
             textAlign: 'center',
             boxShadow: '0 10px 30px rgba(244,63,94,0.18)',
             animation: 'sorryStepFadeIn 0.5s ease'

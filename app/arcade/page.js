@@ -34,6 +34,26 @@ const GAMES = [
     badge: '⚡ SPEED TEST',
     color: '#f59e0b',
     bg: 'linear-gradient(135deg, #fffbeb, #fef3c7)'
+  },
+  {
+    id: 'love-quiz',
+    title: 'Couple Chemistry Quiz',
+    icon: '🧠❓',
+    tagline: '6 Romance Questions in 30s',
+    description: 'Answer rapid-fire romantic questions as a couple. Speed bonuses and streaks boost your chemistry score!',
+    badge: '🧪 NEW GAME',
+    color: '#059669',
+    bg: 'linear-gradient(135deg, #ecfdf5, #d1fae5)'
+  },
+  {
+    id: 'word-scramble',
+    title: 'Love Word Scramble',
+    icon: '🔡💌',
+    tagline: '6 Romantic Words in 60s',
+    description: 'Unscramble secret love words before the clock runs out. How many can you and your partner solve?',
+    badge: '🔡 WORD GAME',
+    color: '#7c3aed',
+    bg: 'linear-gradient(135deg, #f5f3ff, #ede9fe)'
   }
 ];
 

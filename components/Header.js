@@ -27,44 +27,79 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
-  if (pathname?.startsWith('/p/')) {
+  if (pathname?.startsWith('/p/') || (pathname?.startsWith('/arcade/') && pathname !== '/arcade')) {
     return null;
   }
 
   return (
     <>
       <nav className="topbar" id="site-header">
-        <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-          <span>❤</span> Lovely<span>Crafts</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <div className="nav-links desktop-nav">
-          <Link href="/#feelings" className="nav-link">By feeling</Link>
-          <Link href="/templates" className="nav-link">All gifts</Link>
-          <Link href="/arcade" className="nav-link">🎮 Arcade</Link>
-          {user ? (
-            <Link href="/profile" className="nav-link">Dashboard</Link>
-          ) : (
-            <Link href="/profile" className="nav-link">Sign In</Link>
-          )}
-          <Link href="/#feelings" className="btn-primary header-create-button">
-            Create a moment
+        <div className="topbar-inner">
+          <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
+            <span className="logo-heart">❤️</span>
+            <span className="logo-text">Lovely<span className="logo-accent">Crafts</span></span>
           </Link>
-        </div>
 
-        {/* Mobile Hamburger Toggle Button */}
-        <button
-          type="button"
-          className="mobile-menu-btn"
-          onClick={() => setMobileMenuOpen((prev) => !prev)}
-          aria-label={mobileMenuOpen ? 'Close mobile menu' : 'Open mobile menu'}
-          aria-expanded={mobileMenuOpen}
-        >
-          <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
-          <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
-          <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
-        </button>
+          {/* Desktop Navigation */}
+          <div className="nav-links desktop-nav">
+            <Link
+              href="/#feelings"
+              className={`nav-link ${pathname === '/#feelings' ? 'active' : ''}`}
+            >
+              💖 By feeling
+            </Link>
+
+            <Link
+              href="/templates"
+              className={`nav-link ${pathname === '/templates' ? 'active' : ''}`}
+            >
+              🎁 All gifts
+            </Link>
+
+            <Link
+              href="/arcade"
+              className={`nav-link ${pathname?.startsWith('/arcade') ? 'active' : ''}`}
+            >
+              🎮 Arcade
+            </Link>
+
+            <Link
+              href="/profile"
+              className={`nav-link nav-user-pill ${pathname === '/profile' ? 'active' : ''}`}
+            >
+              {user ? (
+                <>
+                  <span className="user-dot" />
+                  <span>Dashboard</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                </>
+              )}
+            </Link>
+
+            <Link
+              href="/templates"
+              className="btn-primary header-create-button"
+            >
+              ✨ Craft a Surprise
+            </Link>
+          </div>
+
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? 'Close mobile menu' : 'Open mobile menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
+            <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
+            <span className={`burger-bar ${mobileMenuOpen ? 'open' : ''}`} />
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Drawer Backdrop */}
@@ -80,7 +115,7 @@ export default function Header() {
       <div className={`mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-drawer-header">
           <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-            <span>❤</span> Lovely<span>Crafts</span>
+            <span className="logo-heart">❤️</span> Lovely<span className="logo-accent">Crafts</span>
           </Link>
           <button
             type="button"
@@ -113,7 +148,7 @@ export default function Header() {
             <span className="mobile-nav-icon">🎁</span>
             <div>
               <strong>All Gift Experiences</strong>
-              <small>Explore all 18 interactive templates</small>
+              <small>Explore all 18+ interactive templates</small>
             </div>
           </Link>
 
@@ -144,7 +179,7 @@ export default function Header() {
 
         <div className="mobile-drawer-footer">
           <Link
-            href="/create?template=birthday"
+            href="/templates"
             className="btn-primary mobile-cta-button"
             onClick={() => setMobileMenuOpen(false)}
           >

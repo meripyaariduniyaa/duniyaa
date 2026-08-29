@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getAdminDb } from '@/lib/firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request) {
   try {
     const bearer = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!bearer) return NextResponse.json({ error: 'Sign in required.' }, { status: 401 });
 
-    const decoded = await getAuth().verifyIdToken(bearer);
+    const adminAuth = getAdminAuth();
+    const decoded = await adminAuth.verifyIdToken(bearer);
     const { deviceId } = await request.json();
 
     if (!deviceId) return NextResponse.json({ ok: true, message: 'No device ID provided' });

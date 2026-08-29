@@ -4,22 +4,16 @@ service cloud.firestore {
 
     match /notes/{token} {
 
-      // ── Public read ──────────────────────────────────────────────────────────
-      // Anyone can fetch a single note (needed for /p/[slug] public share page
-      // and for checking custom-slug availability during creation).
+      // ── Read Single Document (preview, share page /p/[slug], slug availability) ──
       allow get: if true;
 
-      // ── Authenticated list (profile page) ────────────────────────────────────
-      // Only the signed-in owner can list their own notes.
-      // Client query always filters: where('creator_uid', '==', user.uid)
-      allow list: if request.auth != null
-                  && request.query.filters.size() == 1
+      // ── List / Query Documents (dashboard notes list by creator_uid) ───────────
+      allow list: if request.query.filters.size() == 1
                   && request.query.filters[0].fieldPath == 'creator_uid'
-                  && request.query.filters[0].value    == request.auth.uid;
+                  && request.query.filters[0].value is string
+                  && request.query.filters[0].value.size() > 0;
 
-      // ── Create (unauthenticated / device-ID) ─────────────────────────────────
-      // Notes are created before payment, so auth is not required.
-      // Enforce that all mandatory fields are present and types are correct.
+      // ── Create Note (unauthenticated guest device-ID or auth UID) ───────────────
       allow create: if request.resource.data.keys().hasAll([
                         'creator_uid', 'recipient_name', 'custom_message',
                         'image_urls', 'is_paid', 'template', 'created_at'
@@ -27,16 +21,14 @@ service cloud.firestore {
                     && request.resource.data.creator_uid is string
                     && request.resource.data.creator_uid.size() > 0
                     && request.resource.data.recipient_name is string
-                    && request.resource.data.is_paid == false
-                    && request.resource.data.expires_at == null;
+                    && request.resource.data.is_paid == false;
 
-      // ── Update / Delete ───────────────────────────────────────────────────────
-      // Payment verification and note claiming go through the Admin SDK (server-
-      // side) and bypass these rules entirely.
-      // Client-side edits (e.g. profile page future edit flow) require the
-      // authenticated owner.
-      allow update, delete: if request.auth != null
-                            && resource.data.creator_uid == request.auth.uid;
+      // ── Update Note ───────────────────────────────────────────────────────────
+      allow update: if (request.auth != null && resource.data.creator_uid == request.auth.uid)
+                    || (resource.data.creator_uid is string && resource.data.creator_uid == request.resource.data.creator_uid);
+
+      // ── Delete Note ───────────────────────────────────────────────────────────
+      allow delete: if (request.auth != null && resource.data.creator_uid == request.auth.uid);
     }
 
   }

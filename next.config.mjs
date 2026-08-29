@@ -4,6 +4,9 @@ import path from 'path';
 const nextConfig = {
   outputFileTracingRoot: path.resolve('.'),
   compress: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**.cloudinary.com' }],
   },

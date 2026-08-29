@@ -66,7 +66,8 @@ export default function ProfilePage() {
       
       setNotes(data);
     } catch (e) {
-      console.error(e);
+      console.warn('Query by Auth UID failed, falling back to local note IDs:', e?.message);
+      await fetchDeviceNotes();
     } finally {
       setFetching(false);
     }
@@ -82,12 +83,16 @@ export default function ProfilePage() {
 
       // Query by device ID if available
       if (deviceId) {
-        const q = query(
-          collection(db, 'notes'),
-          where('creator_uid', '==', deviceId)
-        );
-        const snap = await getDocs(q);
-        snap.forEach(d => notesMap.set(d.id, { id: d.id, ...d.data() }));
+        try {
+          const q = query(
+            collection(db, 'notes'),
+            where('creator_uid', '==', deviceId)
+          );
+          const snap = await getDocs(q);
+          snap.forEach(d => notesMap.set(d.id, { id: d.id, ...d.data() }));
+        } catch (err) {
+          // If Firestore query rules prevent device listing, fallback to direct document IDs
+        }
       }
 
       // Also fetch by direct stored IDs

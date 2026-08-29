@@ -108,10 +108,20 @@ export default function HeartRushGame({ onGameOver, challengeTargetScore = null,
 
   const handleCatch = (item, e) => {
     if (gameState !== 'playing') return;
-    e.stopPropagation();
+    if (e) {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+    }
 
     // Remove caught item
     setFallingItems((prev) => prev.filter((i) => i.id !== item.id));
+
+    // Light mobile haptic vibration
+    if (typeof window !== 'undefined' && window.navigator?.vibrate) {
+      try {
+        window.navigator.vibrate(item.type === 'bomb' ? [40, 30, 40] : 18);
+      } catch {}
+    }
 
     if (item.type === 'bomb') {
       playSound('bomb');
@@ -125,6 +135,10 @@ export default function HeartRushGame({ onGameOver, challengeTargetScore = null,
       setCombo((prev) => Math.min(prev + 1, 5));
       addPopup(`+${addedScore} ✨`, item.x, item.y, '#ec4899');
     }
+  };
+
+  const removeItem = (id) => {
+    setFallingItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const addPopup = (text, x, y, color) => {
@@ -246,24 +260,43 @@ export default function HeartRushGame({ onGameOver, challengeTargetScore = null,
               <button
                 key={item.id}
                 type="button"
+                onPointerDown={(e) => handleCatch(item, e)}
+                onTouchStart={(e) => handleCatch(item, e)}
                 onClick={(e) => handleCatch(item, e)}
+                onAnimationEnd={() => removeItem(item.id)}
                 style={{
                   position: 'absolute',
                   left: `${item.x}%`,
                   top: '0%',
-                  fontSize: 'clamp(32px, 6.5vw, 44px)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 'clamp(60px, 15vw, 76px)',
+                  height: 'clamp(60px, 15vw, 76px)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '10px',
+                  padding: 0,
                   animation: `fallAnimation ${item.speed}s linear forwards`,
-                  filter: item.type === 'bomb' ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.25))' : 'drop-shadow(0 4px 12px rgba(244,63,94,0.4))',
                   transform: 'translateX(-50%)',
-                  touchAction: 'none'
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  userSelect: 'none',
+                  zIndex: 10
                 }}
                 aria-label={item.label}
               >
-                {item.emoji}
+                <span
+                  style={{
+                    fontSize: 'clamp(32px, 7.5vw, 46px)',
+                    filter: item.type === 'bomb' ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' : 'drop-shadow(0 4px 12px rgba(244,63,94,0.45))',
+                    display: 'inline-block',
+                    pointerEvents: 'none',
+                    transition: 'transform 0.1s ease'
+                  }}
+                >
+                  {item.emoji}
+                </span>
               </button>
             ))}
 
