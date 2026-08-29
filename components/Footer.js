@@ -62,6 +62,8 @@ export default function Footer() {
             <li><Link href="/#feelings">Find by feeling</Link></li>
             <li><Link href="/templates">Browse all gifts</Link></li>
             <li><Link href="/templates/birthday">Classic birthday surprise</Link></li>
+            <li><Link href="/templates/fathers-day">A Letter to Dad</Link></li>
+            <li><Link href="/templates/get-well-soon">Warm Hug &amp; Get Well</Link></li>
             <li><Link href="/templates/proposal">Classic proposal</Link></li>
             <li><Link href="/profile">My Dashboard</Link></li>
           </ul>

@@ -1,6 +1,6 @@
 import { getAdminDb } from '@/lib/firebase-admin';
 import Link from 'next/link';
-import TemplateRenderer from '@/components/templates/TemplateRenderer';
+import RecipientExperienceWrapper from '@/components/RecipientExperienceWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +85,7 @@ export default async function CustomLinkPage({ params }) {
 
   return (
     <main className="recipient-experience" aria-label="A private LovelyCrafts experience">
-      <TemplateRenderer note={serializableNote} isPreview={false} />
+      <RecipientExperienceWrapper note={serializableNote} />
     </main>
   );
 }

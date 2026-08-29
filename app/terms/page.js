@@ -2,15 +2,24 @@ import Link from 'next/link';
 import { SITE_URL, SITE_NAME, CONTACT_EMAIL } from '@/lib/seo';
 
 export const metadata = {
-  title: 'Terms of Service | LovelyCrafts',
-  description: 'Read the LovelyCrafts Terms of Service — your rights and responsibilities when using our digital gifting platform, payment terms, refund policy, and content guidelines.',
-  alternates: {
-    canonical: '/terms',
+  title: 'Terms of Service — Your Rights & Our Guidelines | LovelyCrafts',
+  description: 'Read the LovelyCrafts Terms of Service — your rights and responsibilities, payment terms, refund policy, content guidelines, and how we handle your digital gift experiences.',
+  alternates: { canonical: `${SITE_URL}/terms` },
+  openGraph: {
+    title: 'Terms of Service | LovelyCrafts',
+    description: 'LovelyCrafts terms covering your rights, payment policy, refunds, content guidelines, and how we deliver personalized digital gift experiences.',
+    url: `${SITE_URL}/terms`,
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'en_IN',
   },
-  robots: {
-    index: true,
-    follow: true,
+  twitter: {
+    card: 'summary',
+    site: '@lovelycraftsin',
+    title: 'Terms of Service | LovelyCrafts',
+    description: 'LovelyCrafts terms: your rights, payment, refunds, and content guidelines.',
   },
+  robots: { index: true, follow: true },
 };
 
 const EFFECTIVE_DATE = 'August 9, 2026';

@@ -18,17 +18,28 @@ export async function generateMetadata({ params }) {
     return { title: 'Template Not Found | LovelyCrafts', robots: { index: false } };
   }
 
-  const title = `${template.title} — ${template.bestFor.join(', ')} Digital Experience`;
-  const description = `${template.description} Personalize with your own photos, heartfelt messages, and share instantly on WhatsApp.`;
   const canonicalUrl = `${SITE_URL}/templates/${template.id}`;
+  const title = `${template.title} — Interactive Digital ${template.bestFor[0] || 'Gift'} Experience | ${SITE_NAME}`;
+  const description = `${template.description} Personalize with your own photos, heartfelt messages, and share a private link instantly on WhatsApp. Takes only 3 minutes to create. Starting at ₹${template.price || 199}.`;
+  const keywords = [
+    ...template.bestFor,
+    template.title,
+    'digital gift India',
+    'personalized digital card',
+    'send on WhatsApp',
+    'online surprise link',
+    'LovelyCrafts',
+    'interactive greeting India',
+    `${template.title.toLowerCase()} online India`,
+  ];
 
   return {
     title,
     description,
-    keywords: [...template.bestFor, 'digital gift', 'personalized card', 'online surprise', 'LovelyCrafts', 'interactive greeting'],
+    keywords,
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title: `${title} | ${SITE_NAME}`,
+      title,
       description,
       url: canonicalUrl,
       type: 'website',
@@ -38,13 +49,16 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | ${SITE_NAME}`,
+      site: '@lovelycraftsin',
+      creator: '@lovelycraftsin',
+      title,
       description,
       images: [DEFAULT_OG_IMAGE],
     },
     robots: {
       index: true,
       follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     },
   };
 }

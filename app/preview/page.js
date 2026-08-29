@@ -9,6 +9,7 @@ import PayButton from '@/components/PayButton';
 import Link from 'next/link';
 import TemplateRenderer from '@/components/templates/TemplateRenderer';
 import { templates } from '@/lib/templates';
+import { createKeepsakePoster } from '@/components/KeepsakePoster';
 
 export default function PreviewPage() {
   return (
@@ -34,6 +35,8 @@ function PreviewContent() {
   const [loading, setLoading] = useState(true);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [downloadingQr, setDownloadingQr] = useState(false);
+  const [downloadingKeepsake, setDownloadingKeepsake] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -52,6 +55,9 @@ function PreviewContent() {
           template: raw.template || 'default',
           custom_slug: raw.custom_slug || null,
           is_paid: raw.is_paid || false,
+          view_count: raw.view_count || 0,
+          last_viewed_at: raw.last_viewed_at || null,
+          recipient_reaction: raw.recipient_reaction || null,
         };
         setApology(data);
         setPaid(raw.is_paid || false);
@@ -90,13 +96,19 @@ function PreviewContent() {
   }
 
   // Determine the share URL: use custom slug if available, fallback to ID
-  const shareSlug = apology.custom_slug || apology.id;
   const getShareUrl = (note = apology) => {
     const slug = note?.custom_slug || note?.id;
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/p/${slug}`;
     }
     return `/p/${slug}`;
+  };
+
+  const getWhatsAppShareUrl = () => {
+    const link = getShareUrl();
+    const name = apology.recipient_name || 'you';
+    const text = `✨ Hey ${name}! Someone made an unforgettable private interactive surprise for you... 🎁\n\nTap here to unwrap your moment: ${link}\n\n(Made with ♥ on LovelyCrafts)`;
+    return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   };
 
   async function downloadQrCode() {
@@ -107,12 +119,34 @@ function PreviewContent() {
       const brandedQrUrl = await createBrandedQrImage(qrCodeUrl);
       const link = document.createElement('a');
       link.href = brandedQrUrl;
-      link.download = 'lovelycrafts-scan-to-open.png';
+      link.download = `lovelycrafts-scan-${apology.recipient_name || 'special'}.png`;
       link.click();
     } finally {
       setDownloadingQr(false);
     }
   }
+
+  async function downloadKeepsake() {
+    setDownloadingKeepsake(true);
+    try {
+      const posterDataUrl = await createKeepsakePoster(apology, qrCodeUrl);
+      const link = document.createElement('a');
+      link.href = posterDataUrl;
+      link.download = `lovelycrafts-keepsake-${(apology.recipient_name || 'moment').toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.click();
+    } catch (e) {
+      console.error('Error generating keepsake poster:', e);
+      alert('Could not download keepsake image right now. Please try again.');
+    } finally {
+      setDownloadingKeepsake(false);
+    }
+  }
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(getShareUrl());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
     <main className="shell">
@@ -139,18 +173,89 @@ function PreviewContent() {
             <aside className="glass-card" style={{ position: 'sticky', top: '120px' }}>
               {paid ? (
                 <div className="text-center">
-                  <div style={{ width: '48px', height: '48px', background: '#d81e5b', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 1.5rem', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }}>✓</div>
-                  <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your link is ready.</h2>
-                  <p className="text-muted" style={{ marginBottom: '2rem' }}>
-                    Send this private link to {apology.recipient_name}. It will expire safely in 90 days.
+                  <div style={{ width: '48px', height: '48px', background: '#d81e5b', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 1.25rem', border: '3px solid rgba(59, 15, 27, 0.9)', boxShadow: '2px 2px 0px rgba(59, 15, 27, 0.9)' }}>✓</div>
+                  <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Your link is ready!</h2>
+                  <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.92rem' }}>
+                    Send this private link to {apology.recipient_name}. It is unlocked and safe.
                   </p>
+
+                  {/* Recipient Reaction & Read Receipt Status */}
+                  <div style={{ background: '#fff1f2', border: '1.5px solid #fecdd3', borderRadius: '14px', padding: '14px', marginBottom: '1.5rem', textAlign: 'left' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '16px' }}>👀</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#be185d' }}>
+                        {apology.view_count > 0 ? `Opened ${apology.view_count} time(s)` : 'Awaiting first open'}
+                      </span>
+                    </div>
+                    {apology.recipient_reaction ? (
+                      <div style={{ marginTop: '8px', background: '#ffffff', borderRadius: '10px', padding: '10px 12px', border: '1px solid #fbcfe8' }}>
+                        <p style={{ fontSize: '12px', color: '#9d174d', fontWeight: 700, margin: '0 0 2px' }}>
+                          💌 {apology.recipient_name} responded:
+                        </p>
+                        <p style={{ fontSize: '13px', color: '#1f2937', margin: 0, fontWeight: 600 }}>
+                          {apology.recipient_reaction.emoji} &ldquo;{apology.recipient_reaction.message || apology.recipient_reaction.label}&rdquo;
+                        </p>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+                        When {apology.recipient_name} opens and reacts to your note, their reply will show up here live!
+                      </p>
+                    )}
+                  </div>
                   
-                  <div style={{ background: '#fff4f8', padding: '1rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.5rem', border: '3px solid rgba(59, 15, 27, 0.25)', fontSize: '0.85rem', boxShadow: 'inset 2px 2px 0px rgba(255, 77, 109, 0.12)' }}>
+                  <div style={{ background: '#fff4f8', padding: '0.85rem', borderRadius: '12px', wordBreak: 'break-all', marginBottom: '1.25rem', border: '2px solid rgba(244, 63, 94, 0.25)', fontSize: '0.85rem', fontWeight: 600, color: '#881337' }}>
                     {getShareUrl()}
                   </div>
 
+                  {/* 1-Click WhatsApp Direct Button */}
+                  <a
+                    href={getWhatsAppShareUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary w-full"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                      borderColor: '#128C7E',
+                      color: 'white',
+                      marginBottom: '0.75rem',
+                      textDecoration: 'none',
+                      fontSize: '15px'
+                    }}
+                  >
+                    <span>💬 Send on WhatsApp</span>
+                  </a>
+
+                  {/* Copy Link Button */}
+                  <button
+                    className="btn-secondary w-full"
+                    onClick={copyLink}
+                    style={{ marginBottom: '0.75rem' }}
+                  >
+                    {copied ? '✓ Link Copied!' : '📋 Copy Private Link'}
+                  </button>
+
+                  {/* Download Forever Keepsake Poster */}
+                  <button
+                    className="btn-secondary w-full"
+                    onClick={downloadKeepsake}
+                    disabled={downloadingKeepsake}
+                    style={{
+                      marginBottom: '0.75rem',
+                      background: '#fffdfa',
+                      border: '1.5px solid #f59e0b',
+                      color: '#b45309',
+                      fontWeight: 600
+                    }}
+                  >
+                    {downloadingKeepsake ? 'Generating Keepsake Poster…' : '📜 Download "Forever Keepsake" Poster'}
+                  </button>
+
                   {qrCodeUrl && (
-                    <div className="branded-qr" style={{ marginBottom: '1.25rem' }}>
+                    <div className="branded-qr" style={{ margin: '1.25rem 0' }}>
                       <div className="branded-qr__heading"><span>♥</span> LovelyCrafts</div>
                       <div className="branded-qr__frame">
                         <span className="branded-qr__heart">♥</span>
@@ -160,23 +265,17 @@ function PreviewContent() {
                       <p><strong>Scan to open</strong><br />a moment made just for them</p>
                     </div>
                   )}
-                  
-                  <button
-                    className="btn-primary w-full"
-                    onClick={() => navigator.clipboard.writeText(getShareUrl())}
-                  >
-                    Copy secure link
-                  </button>
+
                   <button
                     className="btn-secondary w-full"
                     onClick={downloadQrCode}
                     disabled={downloadingQr || !qrCodeUrl}
-                    style={{ marginTop: '0.75rem' }}
                   >
-                    {downloadingQr ? 'Preparing image…' : 'Download QR image'}
+                    {downloadingQr ? 'Preparing image…' : '🖼️ Download Branded QR Card'}
                   </button>
-                  <p className="text-muted" style={{ fontSize: '0.875rem', marginTop: '1.5rem' }}>
-                    You can also view this later by going to your <Link href="/profile" style={{ textDecoration: 'underline' }}>Dashboard</Link>.
+
+                  <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '1.5rem' }}>
+                    You can revisit this anytime in your <Link href="/profile" style={{ textDecoration: 'underline', color: 'var(--accent-primary)' }}>Dashboard</Link>.
                   </p>
                 </div>
               ) : (
@@ -184,7 +283,7 @@ function PreviewContent() {
                   <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>READY TO SEND?</p>
                   <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Give it a little courage.</h2>
                   <p className="text-muted" style={{ marginBottom: '2rem' }}>
-                    Your page stays private until you unlock it. Once unlocked, you&apos;ll get a shareable link that expires safely in 90 days.
+                    Your page stays private until you unlock it. Once unlocked, you&apos;ll get a shareable link, WhatsApp instant sender, and forever keepsake poster.
                   </p>
 
                   <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: '14px', padding: '1rem', marginBottom: '1.25rem' }}>
@@ -206,7 +305,7 @@ function PreviewContent() {
                       </div>
                     </div>
                     <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.9rem' }}>
-                      ✨ Coupons apply to the entire total amount (including custom link)!
+                      ✨ Includes Background Music, Wax Seal Reveal, and Forever Keepsake Poster!
                     </p>
                   </div>
 
@@ -299,6 +398,6 @@ function roundedRect(context, x, y, width, height, radius) {
   context.arcTo(x + width, y, x + width, y + height, radius);
   context.arcTo(x + width, y + height, x, y + height, radius);
   context.arcTo(x, y + height, x, y, radius);
-  context.arcTo(x, y, x + width, y, radius);
+  context.arcTo(x, y + width, y, radius);
   context.closePath();
 }

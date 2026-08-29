@@ -1,45 +1,64 @@
 import Link from 'next/link';
 import { templates } from '@/lib/templates';
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
-const siteName = 'Lovely Crafts';
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
 export const metadata = {
-  title: 'Personalized Digital Gift Templates & Interactive Cards',
-  description: 'Explore our full library of interactive digital gift templates: romantic apologies, birthday surprises, love letters, proposals, wedding save-the-dates, and festive cards.',
-  keywords: ['digital gift templates', 'interactive cards library', 'birthday surprise templates', 'proposal cards online', 'Raksha Bandhan digital cards'],
-  alternates: {
-    canonical: '/templates',
-  },
+  title: 'Browse All Interactive Digital Gift Templates — 18 Experiences | LovelyCrafts',
+  description: 'Explore 18+ personalized interactive digital gift experiences: birthday surprises, romantic proposals, anniversary cards, apology notes, Get Well Soon, Father\'s Day letter, Raksha Bandhan, wedding invitations, and more. Share any on WhatsApp in minutes — from ₹199.',
+  keywords: [
+    'interactive digital gift templates India',
+    'personalized digital card templates',
+    'birthday surprise templates India',
+    'proposal website template',
+    'anniversary digital card',
+    'apology card online India',
+    'get well soon digital card India',
+    "father's day digital letter India",
+    'Raksha Bandhan digital gift template',
+    'wedding invitation link India',
+    'i miss you digital card',
+    'open when letters online',
+    'friendship day digital card India',
+    'interactive photo puzzle gift',
+    'emotional digital experience India',
+    'LovelyCrafts templates',
+  ],
+  alternates: { canonical: `${SITE_URL}/templates` },
   openGraph: {
-    title: 'Personalized Digital Gift Templates & Interactive Cards | LovelyCrafts',
-    description: 'Explore our full library of interactive digital gift templates: romantic apologies, birthday surprises, love letters, proposals, wedding save-the-dates, and festive cards.',
-    url: `${baseUrl}/templates`,
+    title: 'Browse 18+ Interactive Digital Gift Templates | LovelyCrafts',
+    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day, Raksha Bandhan, weddings & more — personalized interactive digital cards from ₹199.',
+    url: `${SITE_URL}/templates`,
     type: 'website',
-    images: [{ url: `${baseUrl}/og-banner.jpg`, width: 1200, height: 630, alt: 'LovelyCrafts Templates' }],
+    siteName: SITE_NAME,
+    locale: 'en_IN',
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'LovelyCrafts — 18+ Interactive Digital Gift Templates' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personalized Digital Gift Templates & Interactive Cards | LovelyCrafts',
-    description: 'Explore our full library of interactive digital gift templates for all occasions.',
-    images: [`${baseUrl}/og-banner.jpg`],
+    site: '@lovelycraftsin',
+    creator: '@lovelycraftsin',
+    title: 'Browse 18+ Interactive Digital Gift Templates | LovelyCrafts',
+    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day & more from ₹199. Share on WhatsApp in minutes.',
+    images: [DEFAULT_OG_IMAGE],
   },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 };
 
 export default function TemplatesPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Lovely Crafts Digital Templates',
-    description: 'Interactive personalized note and gift templates',
-    url: `${baseUrl}/templates`,
+    name: 'LovelyCrafts Digital Templates',
+    description: 'Interactive personalized digital gift and greeting experiences',
+    url: `${SITE_URL}/templates`,
     numberOfItems: templates.length,
     itemListElement: templates.map((t, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: t.title,
       description: t.description,
-      url: `${baseUrl}/templates/${t.id}`,
+      url: `${SITE_URL}/templates/${t.id}`,
     })),
   };
 
@@ -47,18 +66,8 @@ export default function TemplatesPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: baseUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Templates',
-        item: `${baseUrl}/templates`,
-      },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Templates', item: `${SITE_URL}/templates` },
     ],
   };
 

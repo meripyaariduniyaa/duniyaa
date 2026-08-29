@@ -2,15 +2,24 @@ import Link from 'next/link';
 import { SITE_URL, SITE_NAME, CONTACT_EMAIL } from '@/lib/seo';
 
 export const metadata = {
-  title: 'Privacy Policy | LovelyCrafts',
-  description: 'Read the LovelyCrafts Privacy Policy to understand how we collect, use, store and protect your personal data and user-generated content on our platform.',
-  alternates: {
-    canonical: '/privacy',
+  title: 'Privacy Policy — How We Protect Your Data | LovelyCrafts',
+  description: 'Read the LovelyCrafts Privacy Policy to understand how we collect, store, and protect your personal data, uploaded photos, and user-generated content on our digital gifting platform.',
+  alternates: { canonical: `${SITE_URL}/privacy` },
+  openGraph: {
+    title: 'Privacy Policy | LovelyCrafts',
+    description: 'Read how LovelyCrafts collects, uses, and protects your personal data when you create and share personalized digital gift experiences.',
+    url: `${SITE_URL}/privacy`,
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'en_IN',
   },
-  robots: {
-    index: true,
-    follow: true,
+  twitter: {
+    card: 'summary',
+    site: '@lovelycraftsin',
+    title: 'Privacy Policy | LovelyCrafts',
+    description: 'How LovelyCrafts protects your personal data and user-generated content.',
   },
+  robots: { index: true, follow: true },
 };
 
 const EFFECTIVE_DATE = 'August 9, 2026';

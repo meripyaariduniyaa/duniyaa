@@ -20,6 +20,7 @@ export default function Header() {
       <div className="nav-links">
         <Link href="/#feelings" className="nav-link hide-on-mobile">By feeling</Link>
         <Link href="/templates" className="nav-link hide-on-mobile">All gifts</Link>
+        <Link href="/arcade" className="nav-link">🎮 Arcade</Link>
         {user ? (
           <Link href="/profile" className="nav-link">Dashboard</Link>
         ) : (

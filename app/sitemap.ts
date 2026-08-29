@@ -5,7 +5,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
 // Fixed dates for static pages — avoids signalling false daily content changes on every build
 const SITE_LAUNCH = new Date('2026-08-09');
-const TEMPLATES_UPDATED = new Date('2026-08-28');
+const TEMPLATES_UPDATED = new Date('2026-08-29');
 const LEGAL_UPDATED = new Date('2026-08-09');
 
 const enInAlternates = (path: string) => ({
@@ -36,6 +36,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
       alternates: enInAlternates('/create'),
+    },
+    {
+      url: `${SITE_URL}/profile`,
+      lastModified: TEMPLATES_UPDATED,
+      changeFrequency: 'monthly',
+      priority: 0.4,
+      alternates: enInAlternates('/profile'),
+    },
+    {
+      url: `${SITE_URL}/arcade`,
+      lastModified: TEMPLATES_UPDATED,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+      alternates: enInAlternates('/arcade'),
     },
     {
       url: `${SITE_URL}/privacy`,

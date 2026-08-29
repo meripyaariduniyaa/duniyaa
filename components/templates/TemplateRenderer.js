@@ -48,6 +48,12 @@ export default function TemplateRenderer({ note, isPreview = false }) {
       experience = <RoseSpecialTemplate note={note} isPreview={isPreview} />; break;
     case 'rakshabandhan':
       experience = <RakshabandhanTemplate note={note} isPreview={isPreview} />; break;
+    case 'fathers-day':
+    case 'letter-for-dad':
+      experience = <LetterForDadTemplate note={note} isPreview={isPreview} />; break;
+    case 'get-well-soon':
+    case 'warm-hug':
+      experience = <GetWellSoonTemplate note={note} isPreview={isPreview} />; break;
     default:
       experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }
@@ -2014,8 +2020,10 @@ function ReplayAndMarketingFooter({ onReplay, isPreview = false }) {
    PUZZLE REVEAL TEMPLATE (ID: puzzle)
    ========================================================================== */
 function PuzzleTemplate({ note, isPreview = false }) {
+  const [stage, setStage] = useState(1);
   const recipient = note?.recipient_name || 'My Friend';
   const imageUrl = note?.image_urls?.[0] || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop';
+  const hiddenMessage = note?.custom_details?.hidden_message || 'You solved the puzzle of my heart!';
 
   // 3x3 Grid of tiles (0 to 8)
   const initialTiles = [8, 0, 5, 1, 4, 7, 2, 6, 3];
@@ -2043,6 +2051,7 @@ function PuzzleTemplate({ note, isPreview = false }) {
       if (checkSolved(nextTiles)) {
         setSolved(true);
         setShowConfetti(true);
+        setTimeout(() => setStage(3), 1200);
       }
     }
   };
@@ -2051,22 +2060,59 @@ function PuzzleTemplate({ note, isPreview = false }) {
     setTiles([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     setSolved(true);
     setShowConfetti(true);
+    setTimeout(() => setStage(3), 1000);
   };
 
   return (
-    <div className="puzzle-stage" style={{ textAlign: 'center', padding: '2.5rem 1.5rem', maxWidth: '540px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
-      <ConfettiCannon active={showConfetti} duration={4000} />
-      
-      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-primary)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
-        Interactive Photo Puzzle
-      </span>
-      <h2 style={{ fontSize: '1.75rem', margin: '0 0 1.5rem', color: '#1c1917', fontWeight: 600, letterSpacing: '-0.02em' }}>
-        A Secret for {recipient}
-      </h2>
+    <div className="puzzle-stage" style={{ textAlign: 'center', padding: '2.5rem 1.5rem', maxWidth: '580px', margin: '0 auto', background: '#ffffff', borderRadius: '28px', boxShadow: '0 20px 45px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+      {showConfetti && <ConfettiCannon active={showConfetti} duration={4000} />}
 
-      {!solved ? (
-        <div>
-          <p style={{ fontSize: '0.9rem', color: '#78716c', marginBottom: '1.75rem', lineHeight: 1.6 }}>
+      {/* Progress Indicator */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '1.5rem' }}>
+        {[1, 2, 3, 4, 5].map((s) => (
+          <span
+            key={s}
+            style={{
+              width: stage === s ? '24px' : '8px',
+              height: '8px',
+              borderRadius: '999px',
+              background: stage === s ? '#8b5cf6' : 'rgba(139, 92, 246, 0.2)',
+              transition: 'all 0.3s ease'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* STAGE 1: Mystery Intro */}
+      {stage === 1 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease' }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🧩</div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.15em', textTransform: 'uppercase', background: '#ede9fe', padding: '0.35rem 1rem', borderRadius: '99px', display: 'inline-block', marginBottom: '1rem' }}>
+            A MYSTERY TO UNLOCK
+          </span>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', color: '#1f2937', fontWeight: 800, margin: '0 0 1rem' }}>
+            A Secret For {recipient}
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '440px', margin: '0 auto 2rem' }}>
+            A hidden photo and message have been scrambled into a mystery puzzle. Piece them together to unlock what lies inside!
+          </p>
+          <button
+            className="btn-primary"
+            onClick={() => setStage(2)}
+            style={{ padding: '0.9rem 2.2rem', background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', borderColor: '#6d28d9' }}
+          >
+            🧩 Start Solving
+          </button>
+        </div>
+      )}
+
+      {/* STAGE 2: Interactive Puzzle Game */}
+      {stage === 2 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.4s ease' }}>
+          <h2 style={{ fontSize: '1.5rem', margin: '0 0 0.5rem', color: '#1f2937', fontWeight: 700 }}>
+            Swap the Tiles 🧩
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem' }}>
             Tap any two tiles to swap their positions and reconstruct the memory.
           </p>
 
@@ -2076,12 +2122,12 @@ function PuzzleTemplate({ note, isPreview = false }) {
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '6px',
               maxWidth: '340px',
-              margin: '0 auto 2rem',
+              margin: '0 auto 1.5rem',
               borderRadius: '16px',
               overflow: 'hidden',
-              background: '#f5f5f4',
-              padding: '6px',
-              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)'
+              background: '#f5f3ff',
+              padding: '8px',
+              boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.06)'
             }}
           >
             {tiles.map((tileVal, displayIdx) => {
@@ -2101,9 +2147,9 @@ function PuzzleTemplate({ note, isPreview = false }) {
                     backgroundPosition: `${col * 50}% ${row * 50}%`,
                     cursor: 'pointer',
                     borderRadius: '8px',
-                    boxShadow: isSelected ? '0 0 0 3px #1c1917, 0 8px 16px rgba(0,0,0,0.12)' : '0 2px 4px rgba(0,0,0,0.05)',
-                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    transform: isSelected ? 'scale(0.96)' : 'scale(1)',
+                    boxShadow: isSelected ? '0 0 0 3px #7c3aed, 0 8px 16px rgba(124, 58, 237, 0.25)' : '0 2px 4px rgba(0,0,0,0.05)',
+                    transition: 'all 0.2s ease',
+                    transform: isSelected ? 'scale(0.95)' : 'scale(1)',
                     opacity: isSelected ? 0.9 : 1
                   }}
                 />
@@ -2115,35 +2161,95 @@ function PuzzleTemplate({ note, isPreview = false }) {
             <button
               className="btn-secondary"
               onClick={autoSolve}
-              style={{ fontSize: '0.85rem', padding: '0.6rem 1.25rem' }}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 1.4rem' }}
             >
-              Auto Solve
+              ✨ Auto Solve
             </button>
           </div>
         </div>
-      ) : (
-        <div style={{ animation: 'fadeIn 0.6s ease' }}>
-          <div style={{ maxWidth: '340px', margin: '0 auto 1.5rem', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
+      )}
+
+      {/* STAGE 3: Revealed Photo */}
+      {stage === 3 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.15em', background: '#dcfce7', padding: '0.35rem 1rem', borderRadius: '99px', display: 'inline-block', marginBottom: '1rem' }}>
+            🎉 PUZZLE SOLVED!
+          </span>
+          <h2 style={{ fontSize: '1.6rem', color: '#1f2937', margin: '0 0 1.25rem', fontWeight: 700 }}>
+            Memory Unlocked
+          </h2>
+
+          <div style={{ maxWidth: '360px', margin: '0 auto 1.5rem', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 16px 36px rgba(0,0,0,0.12)', border: '4px solid #ffffff' }}>
             <img src={imageUrl} alt="Revealed memory" style={{ width: '100%', display: 'block' }} />
           </div>
 
-          {note?.custom_details?.hidden_message && (
-            <div style={{ background: '#fafaf9', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '14px', padding: '1.25rem', marginBottom: '1.5rem', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#78716c', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.35rem' }}>Hidden Note Unlocked</span>
-              <p style={{ fontSize: '1.05rem', fontWeight: 500, color: '#1c1917', margin: 0, fontStyle: 'italic' }}>
-                &ldquo;{note.custom_details.hidden_message}&rdquo;
-              </p>
-            </div>
-          )}
+          <p style={{ color: '#4b5563', fontSize: '0.95rem', marginBottom: '1.75rem' }}>
+            You pieced together this special moment perfectly!
+          </p>
 
-          <div style={{ background: '#ffffff', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.06)', marginBottom: '2rem', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-            <h4 style={{ color: '#1c1917', margin: '0 0 0.5rem 0', fontWeight: 600 }}>Dear {recipient},</h4>
-            <p style={{ fontSize: '1rem', lineHeight: 1.7, color: '#44403c', whiteSpace: 'pre-wrap' }}>
-              {note?.custom_message || "You solved the puzzle! You mean the absolute world to me."}
+          <button
+            className="btn-primary"
+            onClick={() => setStage(4)}
+            style={{ padding: '0.85rem 2rem', background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', borderColor: '#6d28d9' }}
+          >
+            Unlock Secret Note 🔑 →
+          </button>
+        </div>
+      )}
+
+      {/* STAGE 4: Decoded Hidden Message */}
+      {stage === 4 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            DECODED CYPHER
+          </span>
+          <h2 style={{ fontSize: '1.6rem', color: '#1f2937', margin: '0.5rem 0 1.25rem', fontWeight: 700 }}>
+            The Hidden Note
+          </h2>
+
+          <div style={{
+            background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+            border: '2px solid #c4b5fd',
+            borderRadius: '18px',
+            padding: '1.75rem',
+            margin: '0 auto 1.75rem',
+            maxWidth: '460px',
+            boxShadow: '0 8px 24px rgba(139, 92, 246, 0.12)'
+          }}>
+            <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>🗝️</span>
+            <p style={{ fontSize: '1.15rem', fontWeight: 700, color: '#5b21b6', margin: 0, fontStyle: 'italic', lineHeight: 1.6 }}>
+              &ldquo;{hiddenMessage}&rdquo;
             </p>
           </div>
 
-          <ReplayAndMarketingFooter onReplay={() => { setTiles(initialTiles); setSolved(false); setSelectedIndex(null); setShowConfetti(false); }} isPreview={isPreview} />
+          <button
+            className="btn-primary"
+            onClick={() => setStage(5)}
+            style={{ padding: '0.85rem 2rem', background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', borderColor: '#6d28d9' }}
+          >
+            Read Full Letter 💌 →
+          </button>
+        </div>
+      )}
+
+      {/* STAGE 5: Full Letter & Keepsake */}
+      {stage === 5 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease' }}>
+          <div style={{ background: '#ffffff', padding: '2rem 1.75rem', borderRadius: '20px', border: '1px solid #e5e7eb', marginBottom: '2rem', textAlign: 'left', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ color: '#1f2937', margin: '0 0 1rem 0', fontWeight: 700, fontSize: '1.2rem' }}>Dear {recipient},</h3>
+            <p style={{ fontSize: '1.02rem', lineHeight: 1.8, color: '#374151', whiteSpace: 'pre-wrap' }}>
+              {note?.custom_message || "You solved the puzzle! You mean the absolute world to me."}
+            </p>
+            <div style={{ marginTop: '1.5rem', textAlign: 'right', borderTop: '1px dashed #e5e7eb', paddingTop: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>With all my love &amp; appreciation,</p>
+              <p style={{ fontSize: '1.15rem', fontWeight: 700, color: '#7c3aed', fontFamily: 'cursive', margin: '4px 0 0' }}>Yours Always ❤️</p>
+            </div>
+          </div>
+
+          <ReplayAndMarketingFooter
+            onReplay={() => { setTiles(initialTiles); setSolved(false); setSelectedIndex(null); setShowConfetti(false); setStage(1); }}
+            isPreview={isPreview}
+          />
         </div>
       )}
     </div>
@@ -2473,3 +2579,542 @@ function FriendshipTemplate({ note, isPreview = false }) {
     </div>
   );
 }
+
+// -------------------------------------------------------------
+// 12. LETTER TO DAD / FATHER'S DAY TEMPLATE
+// -------------------------------------------------------------
+function LetterForDadTemplate({ note, isPreview = false }) {
+  const [scene, setScene] = useState(1);
+  const [openedLessons, setOpenedLessons] = useState({});
+  const [revealedGratitude, setRevealedGratitude] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const d = note?.custom_details || {};
+  const dadTitle = d.dad_title || note?.recipient_name || 'Papa';
+  const message = note?.custom_message || 'Thank you for every silent sacrifice, for teaching me strength, and for always being my pillar of courage. You are my hero.';
+  const lessons = [
+    d.lesson_1 || 'Work hard in silence and let your character speak.',
+    d.lesson_2 || 'Always stand tall, no matter how tough the storm gets.',
+    d.lesson_3 || 'Family always comes first, through everything.',
+  ].filter(Boolean);
+
+  const heroMemory = d.hero_memory || 'Remembering the times you held my hand and told me everything would be okay.';
+  const unspokenGratitude = d.unspoken_gratitude || 'I may not say it every day, but I am endlessly proud to be your child.';
+  const photos = Array.isArray(note?.image_urls) ? note.image_urls.filter(Boolean) : [];
+
+  return (
+    <div className="experience-dad-container" style={{
+      maxWidth: '680px',
+      margin: '0 auto',
+      padding: '2.5rem 1.5rem',
+      textAlign: 'center',
+      minHeight: '620px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative'
+    }}>
+      {showConfetti && <ConfettiOverlay />}
+
+      {/* SCENE 1: Pocket Watch / Hero Intro */}
+      {scene === 1 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.6s ease', width: '100%' }}>
+          <div style={{
+            width: '88px',
+            height: '88px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+            border: '3px solid #f59e0b',
+            boxShadow: '0 12px 30px rgba(245, 158, 11, 0.25), inset 0 2px 6px rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2.5rem',
+            margin: '0 auto 1.5rem'
+          }}>
+            👔
+          </div>
+
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d97706', background: '#fef3c7', padding: '0.3rem 0.9rem', borderRadius: '99px', display: 'inline-block', marginBottom: '1rem' }}>
+            A TRIBUTE TO MY HERO
+          </span>
+
+          <h1 style={{ fontSize: 'clamp(2rem, 5.5vw, 3rem)', color: '#0f172a', fontWeight: 800, margin: '0 0 1rem', lineHeight: 1.2 }}>
+            To the man who taught me everything, <span style={{ color: '#d97706' }}>{dadTitle}</span>.
+          </h1>
+
+          <p style={{ color: '#475569', fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto 2rem', lineHeight: 1.65 }}>
+            Some heroes wear capes. The greatest one held my hand, gave me courage, and showed me how to stand on my own feet.
+          </p>
+
+          <button
+            className="btn-primary"
+            onClick={() => setScene(2)}
+            style={{ padding: '0.9rem 2.2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #d97706, #b45309)', borderColor: '#b45309' }}
+          >
+            ⏳ Open Dad&apos;s Time Capsule
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 2: Life Lessons He Taught Me */}
+      {scene === 2 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#d97706' }}>
+            FOUNDATIONS OF LIFE
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.3rem)', color: '#0f172a', margin: '0.5rem 0 1.25rem', fontWeight: 800 }}>
+            Life Lessons From {dadTitle}
+          </h2>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+            Tap each lesson below to uncover the wisdom you gave me:
+          </p>
+
+          <div style={{ display: 'grid', gap: '12px', margin: '0 auto 2rem', maxWidth: '540px' }}>
+            {lessons.map((lesson, idx) => {
+              const isOpened = openedLessons[idx];
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setOpenedLessons(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                  style={{
+                    padding: '16px 20px',
+                    borderRadius: '16px',
+                    border: '2px solid',
+                    borderColor: isOpened ? '#f59e0b' : 'rgba(245, 158, 11, 0.3)',
+                    background: isOpened ? '#fffbeb' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    boxShadow: isOpened ? '0 8px 20px rgba(245, 158, 11, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{isOpened ? '🌟' : '📖'}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#b45309', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Lesson #{idx + 1}
+                    </p>
+                    <p style={{ fontSize: '0.95rem', color: '#1e293b', margin: 0, fontWeight: isOpened ? 600 : 400, fontStyle: isOpened ? 'normal' : 'italic' }}>
+                      {isOpened ? lesson : 'Tap to reveal wisdom…'}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            className="btn-primary"
+            onClick={() => setScene(3)}
+            style={{ padding: '0.85rem 2rem', background: 'linear-gradient(135deg, #d97706, #b45309)', borderColor: '#b45309' }}
+          >
+            Cherished Memories →
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 3: Cherished Memory & Unspoken Gratitude */}
+      {scene === 3 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%', maxWidth: '560px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#d97706' }}>
+            LOOKING BACK
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.2rem)', color: '#0f172a', margin: '0.5rem 0 1.25rem', fontWeight: 800 }}>
+            A Memory I Will Always Keep
+          </h2>
+
+          {photos.length > 0 && (
+            <div style={{
+              background: '#ffffff',
+              padding: '14px 14px 22px',
+              borderRadius: '16px',
+              boxShadow: '0 16px 36px rgba(0,0,0,0.12)',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.5rem',
+              maxWidth: '380px',
+              margin: '0 auto 1.5rem'
+            }}>
+              <img
+                src={photos[0]}
+                alt="A cherished memory with dad"
+                style={{ width: '100%', maxHeight: '280px', objectFit: 'cover', borderRadius: '10px' }}
+              />
+              <p style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic', margin: '12px 0 0' }}>
+                With you, {dadTitle} ❤️
+              </p>
+            </div>
+          )}
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.9)',
+            border: '1.5px solid #fed7aa',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            marginBottom: '1.5rem',
+            textAlign: 'left'
+          }}>
+            <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+              🎖️ Unforgettable Moment:
+            </p>
+            <p style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, margin: 0 }}>
+              {heroMemory}
+            </p>
+          </div>
+
+          {/* Unspoken Gratitude Tap Reveal */}
+          <div
+            onClick={() => setRevealedGratitude(!revealedGratitude)}
+            style={{
+              background: revealedGratitude ? '#eff6ff' : '#f8fafc',
+              border: '2px dashed',
+              borderColor: revealedGratitude ? '#3b82f6' : '#cbd5e1',
+              borderRadius: '16px',
+              padding: '1.25rem',
+              cursor: 'pointer',
+              marginBottom: '1.75rem',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <p style={{ fontSize: '0.8rem', fontWeight: 700, color: revealedGratitude ? '#1d4ed8' : '#64748b', textTransform: 'uppercase', margin: '0 0 4px' }}>
+              {revealedGratitude ? '💌 One Thing I Rarely Say Out Loud:' : '🔒 Tap to unlock a secret message for you…'}
+            </p>
+            {revealedGratitude && (
+              <p style={{ fontSize: '1rem', color: '#1e3a8a', fontWeight: 600, fontStyle: 'italic', margin: '6px 0 0', lineHeight: 1.5 }}>
+                &ldquo;{unspokenGratitude}&rdquo;
+              </p>
+            )}
+          </div>
+
+          <button
+            className="btn-primary"
+            onClick={() => { setScene(4); setShowConfetti(true); }}
+            style={{ padding: '0.85rem 2.2rem', background: 'linear-gradient(135deg, #d97706, #b45309)', borderColor: '#b45309' }}
+          >
+            Read Final Letter ✉️
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 4: Full Tribute Letter & World's Best Dad Award */}
+      {scene === 4 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%', maxWidth: '600px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#fef3c7',
+            border: '2px solid #f59e0b',
+            padding: '6px 18px',
+            borderRadius: '99px',
+            fontSize: '0.85rem',
+            fontWeight: 800,
+            color: '#92400e',
+            marginBottom: '1.5rem',
+            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.2)'
+          }}>
+            <span>🏆</span>
+            <span>OFFICIALLY THE WORLD&apos;S BEST DAD</span>
+          </div>
+
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            padding: '2rem 1.75rem',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.08)',
+            border: '1px solid #e2e8f0',
+            textAlign: 'left',
+            marginBottom: '2rem',
+            position: 'relative'
+          }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', fontFamily: 'serif' }}>
+              Dearest {dadTitle},
+            </p>
+            <p style={{ fontSize: '1rem', color: '#334155', lineHeight: 1.8, whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>
+              {message}
+            </p>
+            <div style={{ marginTop: '1.5rem', textAlign: 'right', borderTop: '1px dashed #e2e8f0', paddingTop: '1rem' }}>
+              <p style={{ fontSize: '0.9rem', color: '#64748b', fontStyle: 'italic', margin: 0 }}>
+                Forever grateful & proud,
+              </p>
+              <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#d97706', fontFamily: 'cursive', margin: '4px 0 0' }}>
+                Your child ❤️
+              </p>
+            </div>
+          </div>
+
+          <ReplayAndMarketingFooter
+            onReplay={() => { setScene(1); setOpenedLessons({}); setRevealedGratitude(false); setShowConfetti(false); }}
+            isPreview={isPreview}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
+// 13. WARM HUG & GET WELL SOON TEMPLATE
+// -------------------------------------------------------------
+function GetWellSoonTemplate({ note, isPreview = false }) {
+  const [scene, setScene] = useState(1);
+  const [takenDoses, setTakenDoses] = useState({});
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const d = note?.custom_details || {};
+  const recipient = note?.recipient_name || 'Friend';
+  const message = note?.custom_message || 'Sending you the biggest, warmest virtual hug! Take all the rest you need. You are stronger than this rough patch and you will bounce back brighter than ever ✨';
+  const warmWish = d.warm_wish || 'Take a deep breath, cozy up under the blanket, and let the healing begin.';
+  const doses = [
+    d.dose_1 || '1000mg of Pure Warm Hugs & Endless Cozy Vibes',
+    d.dose_2 || '500mg of Hot Ginger Chai, Rest & Zero Overthinking',
+    d.dose_3 || 'Infinite Dose of Silly Memories to make you smile',
+  ].filter(Boolean);
+
+  const comfortPromise = d.comfort_promise || 'I promise to bring you your favorite treats and celebrate the moment you are back on your feet!';
+  const photos = Array.isArray(note?.image_urls) ? note.image_urls.filter(Boolean) : [];
+
+  const handleTakeDose = (idx) => {
+    setTakenDoses(prev => ({ ...prev, [idx]: true }));
+  };
+
+  return (
+    <div className="experience-get-well-container" style={{
+      maxWidth: '660px',
+      margin: '0 auto',
+      padding: '2.5rem 1.5rem',
+      textAlign: 'center',
+      minHeight: '620px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative'
+    }}>
+      {showConfetti && <ConfettiOverlay />}
+
+      {/* SCENE 1: Steaming Cup of Care */}
+      {scene === 1 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.6s ease', width: '100%' }}>
+          <div style={{
+            width: '90px',
+            height: '90px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
+            border: '3px solid #10b981',
+            boxShadow: '0 12px 30px rgba(16, 185, 129, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2.8rem',
+            margin: '0 auto 1.5rem',
+            position: 'relative'
+          }}>
+            ☕
+          </div>
+
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#059669', background: '#ecfdf5', padding: '0.35rem 1rem', borderRadius: '99px', display: 'inline-block', marginBottom: '1rem', border: '1px solid #a7f3d0' }}>
+            A WARM VIRTUAL HUG
+          </span>
+
+          <h1 style={{ fontSize: 'clamp(2rem, 5.5vw, 2.9rem)', color: '#064e3b', fontWeight: 800, margin: '0 0 1rem', lineHeight: 1.2 }}>
+            Brewed with love for you, <span style={{ color: '#059669' }}>{recipient}</span>.
+          </h1>
+
+          <p style={{ color: '#374151', fontSize: '1.05rem', maxWidth: '500px', margin: '0 auto 2rem', lineHeight: 1.65 }}>
+            {warmWish}
+          </p>
+
+          <button
+            className="btn-primary"
+            onClick={() => setScene(2)}
+            style={{ padding: '0.9rem 2.2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #059669, #047857)', borderColor: '#047857' }}
+          >
+            🩹 Open Your Care Package
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 2: 3-Dose Prescription for Joy */}
+      {scene === 2 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#059669' }}>
+            DAILY MEDICINE
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.3rem)', color: '#064e3b', margin: '0.5rem 0 1.25rem', fontWeight: 800 }}>
+            Your Prescription For Joy 💊
+          </h2>
+          <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+            Tap each dose below to take your healing medicine:
+          </p>
+
+          <div style={{ display: 'grid', gap: '12px', margin: '0 auto 2rem', maxWidth: '540px' }}>
+            {doses.map((dose, idx) => {
+              const isTaken = takenDoses[idx];
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleTakeDose(idx)}
+                  style={{
+                    padding: '16px 20px',
+                    borderRadius: '16px',
+                    border: '2px solid',
+                    borderColor: isTaken ? '#10b981' : '#e5e7eb',
+                    background: isTaken ? '#ecfdf5' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    boxShadow: isTaken ? '0 6px 18px rgba(16, 185, 129, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>{isTaken ? '✨' : '💊'}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        Dose #{idx + 1}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isTaken ? '#059669' : '#9ca3af' }}>
+                        {isTaken ? '✓ DOSE TAKEN' : 'TAP TO TAKE'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.95rem', color: '#111827', margin: 0, fontWeight: 600 }}>
+                      {dose}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            className="btn-primary"
+            onClick={() => setScene(3)}
+            style={{ padding: '0.85rem 2rem', background: 'linear-gradient(135deg, #059669, #047857)', borderColor: '#047857' }}
+          >
+            A Sweet Promise →
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 3: Memory Photo & Comfort Promise */}
+      {scene === 3 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%', maxWidth: '560px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#059669' }}>
+            COMFORT & SMILES
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.2rem)', color: '#064e3b', margin: '0.5rem 0 1.25rem', fontWeight: 800 }}>
+            Here to Lift Your Spirits
+          </h2>
+
+          {photos.length > 0 && (
+            <div style={{
+              background: '#ffffff',
+              padding: '14px 14px 20px',
+              borderRadius: '16px',
+              boxShadow: '0 16px 36px rgba(0,0,0,0.1)',
+              border: '1px solid #d1fae5',
+              marginBottom: '1.5rem',
+              maxWidth: '380px',
+              margin: '0 auto 1.5rem'
+            }}>
+              <img
+                src={photos[0]}
+                alt="A happy memory to cheer you up"
+                style={{ width: '100%', maxHeight: '260px', objectFit: 'cover', borderRadius: '10px' }}
+              />
+              <p style={{ fontSize: '0.85rem', color: '#059669', fontWeight: 600, margin: '10px 0 0' }}>
+                Good times are waiting for you 🌈
+              </p>
+            </div>
+          )}
+
+          <div style={{
+            background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
+            border: '2px solid #a7f3d0',
+            borderRadius: '18px',
+            padding: '1.35rem',
+            marginBottom: '1.75rem',
+            textAlign: 'left'
+          }}>
+            <p style={{ fontSize: '0.8rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>
+              🤝 My Promise to You:
+            </p>
+            <p style={{ fontSize: '1rem', color: '#064e3b', fontWeight: 600, lineHeight: 1.6, margin: 0 }}>
+              &ldquo;{comfortPromise}&rdquo;
+            </p>
+          </div>
+
+          <button
+            className="btn-primary"
+            onClick={() => { setScene(4); setShowConfetti(true); }}
+            style={{ padding: '0.85rem 2.2rem', background: 'linear-gradient(135deg, #059669, #047857)', borderColor: '#047857' }}
+          >
+            Read Recovery Letter 💌
+          </button>
+        </div>
+      )}
+
+      {/* SCENE 4: Full Letter & Healing Wishes */}
+      {scene === 4 && (
+        <div style={{ animation: 'sorryStepFadeIn 0.5s ease', width: '100%', maxWidth: '600px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#ecfdf5',
+            border: '2px solid #10b981',
+            padding: '6px 20px',
+            borderRadius: '99px',
+            fontSize: '0.85rem',
+            fontWeight: 800,
+            color: '#065f46',
+            marginBottom: '1.5rem',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)'
+          }}>
+            <span>✨</span>
+            <span>GET WELL SOON &amp; BOUNCE BACK STRONGER</span>
+          </div>
+
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            padding: '2rem 1.75rem',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.08)',
+            border: '1.5px solid #d1fae5',
+            textAlign: 'left',
+            marginBottom: '2rem'
+          }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#064e3b', marginBottom: '1rem' }}>
+              Hey {recipient},
+            </p>
+            <p style={{ fontSize: '1.02rem', color: '#374151', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+              {message}
+            </p>
+            <div style={{ marginTop: '1.5rem', textAlign: 'right', borderTop: '1px dashed #a7f3d0', paddingTop: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                Sending you strength & love,
+              </p>
+              <p style={{ fontSize: '1.15rem', fontWeight: 700, color: '#059669', fontFamily: 'cursive', margin: '4px 0 0' }}>
+                Someone who cares deeply ❤️
+              </p>
+            </div>
+          </div>
+
+          <ReplayAndMarketingFooter
+            onReplay={() => { setScene(1); setTakenDoses({}); setShowConfetti(false); }}
+            isPreview={isPreview}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+

@@ -2,12 +2,48 @@ import Link from 'next/link';
 import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
 import EmotionFinder from '@/components/EmotionFinder';
 
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
+
 export const metadata = {
-  title: 'LovelyCrafts — Personalized Digital Gifts & Surprises India',
-  description: 'Create and send personalized digital gifts on WhatsApp in minutes. Interactive birthday cards, romantic proposals, anniversary cards, and apology links starting at ₹199.',
-  alternates: {
-    canonical: '/',
+  title: 'LovelyCrafts — Interactive Digital Gifts & Personalized Surprises India',
+  description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, romantic proposals, apology notes, anniversary gifts, and 18+ emotional experiences — personalized with your photos & message. Starting at ₹199. Share instantly on WhatsApp.',
+  keywords: [
+    'personalized digital gift India',
+    'interactive birthday card India',
+    'send surprise on WhatsApp',
+    'online proposal for girlfriend',
+    'romantic anniversary gift online',
+    'interactive apology card',
+    'digital gift for long distance relationship',
+    'get well soon digital card India',
+    'fathers day digital gift',
+    'letter to dad online India',
+    'Raksha Bandhan digital surprise',
+    'wedding invitation online India',
+    'digital birthday surprise link',
+    'emotional digital card India',
+    'LovelyCrafts',
+    'lovelycrafts.in',
+  ],
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: 'LovelyCrafts — Interactive Digital Gifts & Personalized Surprises India',
+    description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, proposals, apology notes, anniversary gifts, and 18+ emotional experiences — starting at ₹199.',
+    url: SITE_URL,
+    locale: 'en_IN',
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'LovelyCrafts — Personalized Digital Surprises from ₹199' }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@lovelycraftsin',
+    creator: '@lovelycraftsin',
+    title: 'LovelyCrafts — Interactive Digital Gifts & Surprises India',
+    description: 'Birthday cards, proposals, apology notes & 18+ emotional digital experiences starting at ₹199. Share on WhatsApp in seconds.',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 };
 
 export default function Home() {
