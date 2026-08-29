@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { templates } from '@/lib/templates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
+import VoiceNoteRecorder from '@/components/VoiceNoteRecorder';
 import { AUDIO_PRESETS } from '@/lib/audioPresets';
 
 const vibes = ['soft', 'romantic', 'playful', 'cinematic', 'deep'];
@@ -104,6 +105,7 @@ export default function LegacyCreator({ templateId }) {
   const fieldList = fields[normalizeTemplate(template.id)] || [];
   const [step, setStep] = useState(1);
   const [recipient, setRecipient] = useState('');
+  const [birthdayRelation, setBirthdayRelation] = useState('');
   const [message, setMessage] = useState('');
   const [details, setDetails] = useState({});
   const [images, setImages] = useState([]);
@@ -112,6 +114,7 @@ export default function LegacyCreator({ templateId }) {
   const [enablePasscode, setEnablePasscode] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [secretQuestion, setSecretQuestion] = useState('');
+  const [voiceNoteUrl, setVoiceNoteUrl] = useState('');
   const [aiContext, setAiContext] = useState('');
   const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
@@ -130,6 +133,7 @@ export default function LegacyCreator({ templateId }) {
           recipientName: recipient,
           tone: vibe === 'deep' ? 'sincere' : vibe,
           keywords: aiContext,
+          relationship: template.id === 'birthday' ? (birthdayRelation || 'Friend') : (details.relation || ''),
           mode: 'fill_template'
         })
       });
@@ -166,12 +170,14 @@ export default function LegacyCreator({ templateId }) {
         creator_uid: deviceId,
         recipient_name: recipient.trim(),
         custom_message: message.trim(),
+        voice_note_url: voiceNoteUrl || null,
         image_urls: images,
         shagun_qr_url: null,
         custom_details: {
           ...details,
           vibe,
           audio_preset: audioPreset,
+          birthday_relation: template.id === 'birthday' ? (birthdayRelation || 'Friend') : undefined,
           passcode: enablePasscode && passcode.trim() ? passcode.trim() : null,
           secret_question: enablePasscode && secretQuestion.trim() ? secretQuestion.trim() : null,
         },
@@ -191,7 +197,7 @@ export default function LegacyCreator({ templateId }) {
   };
 
   return <main className="shell emotional-creator-shell"><div className="emotional-creator-wrap"><div className="emotional-creator-heading"><span>CLASSIC EXPERIENCE</span><h1>{template.icon} {template.title}</h1><p>Make the classic experience personal, then preview it before payment.</p></div><section className="glass-card emotional-creator-card"><div className="emotional-stepper">{[1,2,3,4].map((item) => <span key={item} className={step >= item ? 'is-active' : ''}>{item}</span>)}</div>
-    {step === 1 && <><h2>Who is this for?</h2><div className="form-group"><label className="form-label">Their name</label><input className="form-input" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="Maya, Mom, Bestie…" maxLength={80} /></div></>}
+    {step === 1 && <><h2>Who is this for?</h2><div className="form-group"><label className="form-label">Their name</label><input className="form-input" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="Maya, Mom, Bestie…" maxLength={80} /></div>{template.id === 'birthday' && (<div className="form-group"><label className="form-label">They are your…</label><div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.4rem' }}>{[{label:'Best Friend 🤗',value:'Best Friend'},{label:'Girlfriend 💖',value:'Girlfriend'},{label:'Boyfriend 💙',value:'Boyfriend'},{label:'Mom 🌸',value:'Mom'},{label:'Dad 👔',value:'Dad'},{label:'Brother 💪',value:'Brother'},{label:'Sister 💝',value:'Sister'},{label:'Husband 🥂',value:'Husband'},{label:'Wife 💍',value:'Wife'}].map(({label, value}) => (<button type="button" key={value} onClick={() => setBirthdayRelation(value)} style={{ padding: '0.5rem 0.9rem', borderRadius: '99px', border: '1.5px solid', borderColor: birthdayRelation === value ? '#be185d' : '#f3f4f6', background: birthdayRelation === value ? '#fff1f2' : '#fafafa', color: birthdayRelation === value ? '#be185d' : '#6b7280', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s' }}>{label}</button>))}</div></div>)}</>}
     {step === 2 && <><div className="ai-fill-card"><strong>✨ Fill this template with AI</strong><p>Give a few real details and AI will draft the available fields. You can edit everything.</p><textarea className="form-input" rows="3" value={aiContext} onChange={(e) => setAiContext(e.target.value)} placeholder="e.g. we met in college, she loves chai, 5 years of friendship…" /><button type="button" className="btn-secondary" disabled={aiBusy} onClick={fill}>{aiBusy ? 'Writing your experience…' : '✨ Fill template fields'}</button></div>{fieldList.length ? <div className="legacy-field-grid">{fieldList.map(([key,label]) => <div className="form-group" key={key}><label className="form-label">{label}</label><input className="form-input" type={key.includes('date') ? 'date' : 'text'} value={details[key] || ''} onChange={(e) => update(key, e.target.value)} maxLength={300} /></div>)}</div> : <p className="text-muted">This experience is ready for your personal message in the next step.</p>}</>}
     {step === 3 && <>
       <div className="form-group"><label className="form-label">What do you want to say?</label><textarea className="form-input" rows="5" value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1500} placeholder="Write from the heart…" /></div>
@@ -260,7 +266,14 @@ export default function LegacyCreator({ templateId }) {
         )}
       </div>
 
-      <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoRequirement?.max || 6})</label><CloudinaryUpload onUpload={(url) => setImages((current) => current.length < (template.photoRequirement?.max || 6) ? [...current, url] : current)} /><div className="thumbs">{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, item) => item !== index))}><img src={url} alt="Selected memory" /></button>)}</div></div>
+      {/* Voice Note Recording */}
+      <VoiceNoteRecorder
+        onVoiceRecorded={(url) => setVoiceNoteUrl(url)}
+        onVoiceRemoved={() => setVoiceNoteUrl('')}
+        existingUrl={voiceNoteUrl}
+      />
+
+      <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoRequirement?.max || 6})</label><CloudinaryUpload onUpload={(url) => setImages((current) => current.length < (template.photoRequirement?.max || 6) ? [...current, url] : current)} currentCount={images.length} maxPhotos={template.photoRequirement?.max || 6} /><div className="thumbs">{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, item) => item !== index))}><img src={url} alt="Selected memory" /></button>)}</div></div>
     </>}
     {step === 4 && <><h2>Ready for your private preview</h2><p className="text-muted">You will review the live experience with wax seal entrance, background music, and download options next.</p></>}
     {error && <p style={{ color: '#be123c', fontWeight: 700, marginTop: 16 }}>{error}</p>}

@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { emotionalTemplates } from '@/lib/emotionalTemplates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
+import VoiceNoteRecorder from '@/components/VoiceNoteRecorder';
 import { AUDIO_PRESETS } from '@/lib/audioPresets';
 
 const relationships = ['Partner', 'Friend', 'Mom / Dad', 'Sibling', 'Someone special'];
@@ -28,6 +29,7 @@ export default function EmotionalCreator({ templateId }) {
   const [enablePasscode, setEnablePasscode] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [secretQuestion, setSecretQuestion] = useState('');
+  const [voiceNoteUrl, setVoiceNoteUrl] = useState('');
   const [message, setMessage] = useState('');
   const [details, setDetails] = useState({ unsaid: ['', '', ''], missed_things: ['', '', '', '', ''], envelopes: [{ title: 'you need a smile', message: '' }, { title: 'you miss me', message: '' }, { title: 'you feel alone', message: '' }, { title: 'you need courage', message: '' }], regrets: ['', '', ''], reasons: ['', '', '', '', ''], memories: ['', '', '', '', ''] });
   const [images, setImages] = useState([]);
@@ -48,20 +50,25 @@ export default function EmotionalCreator({ templateId }) {
   const advance = () => {
     setError('');
     if (step === 1 && !recipient.trim()) { setError('Add their name to continue.'); return; }
-    if (step === 2 && !personalizationComplete()) { setError('Please complete each of the personal details before continuing.'); return; }
-    if (step === 3 && !message.trim()) { setError('Write your final message before continuing.'); return; }
-    setStep(step + 1);
+    if (step === 2 && !personalizationComplete()) { setError('Complete all personalisation fields.'); return; }
+    if (step === 3 && !message.trim()) { setError('Write your final message.'); return; }
+    setStep((current) => current + 1);
   };
   const fillWithAi = async () => {
+    if (!aiContext.trim()) { setError('Describe a few memories so AI can help draft this experience.'); return; }
     setAiBusy(true); setError('');
     try {
-      const response = await fetch('/api/ai-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templateId: template.id, recipientName: recipient, relationship, tone: vibe === 'deep' ? 'sincere' : vibe, keywords: aiContext, mode: 'fill_template' }) });
+      const response = await fetch('/api/ai-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: template.id, recipientName: recipient, aiContext, mode: 'emotional-template' }),
+      });
       const raw = await response.text();
-      let data;
+      let data = {};
       try { data = JSON.parse(raw); } catch { throw new Error(`AI service returned an invalid response (${response.status}). Please try again.`); }
       if (!response.ok) throw new Error(data.error || 'AI could not fill this experience.');
       setDetails((current) => ({ ...current, ...(data.details || {}) }));
-      if (!message.trim() && data.message) setMessage(data.message);
+      if (!message && data.message) setMessage(data.message);
     } catch (e) { setError(e.message || 'AI could not fill this experience.'); } finally { setAiBusy(false); }
   };
   const save = async () => {
@@ -75,6 +82,7 @@ export default function EmotionalCreator({ templateId }) {
         creator_uid: deviceId,
         recipient_name: recipient.trim(),
         custom_message: message.trim(),
+        voice_note_url: voiceNoteUrl || null,
         image_urls: images,
         shagun_qr_url: null,
         custom_details: {
@@ -108,7 +116,7 @@ export default function EmotionalCreator({ templateId }) {
           
           {/* Soundscape Selection */}
           <div className="form-group">
-            <label className="form-label">🎵 Background Soundscape</label>
+            <label className="form-label">🎵 Background Soundtrack</label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
               {AUDIO_PRESETS.map((p) => (
                 <button
@@ -137,6 +145,13 @@ export default function EmotionalCreator({ templateId }) {
               ))}
             </div>
           </div>
+
+          {/* Voice Note Recording */}
+          <VoiceNoteRecorder
+            onVoiceRecorded={(url) => setVoiceNoteUrl(url)}
+            onVoiceRemoved={() => setVoiceNoteUrl('')}
+            existingUrl={voiceNoteUrl}
+          />
 
           <div className="form-group"><label className="form-label">Choose your vibe</label><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{vibes.map((item) => <button type="button" key={item} onClick={() => setVibe(item)} style={{ padding: '8px 12px', borderRadius: 99, border: '1px solid #f9a8d4', color: vibe === item ? '#fff' : '#9d174d', background: vibe === item ? '#be185d' : '#fff', cursor: 'pointer' }}>{item}</button>)}</div></div>
 
@@ -170,7 +185,7 @@ export default function EmotionalCreator({ templateId }) {
             )}
           </div>
 
-          <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoLimit})</label><CloudinaryUpload onUpload={addPhoto} />{images.length > 0 && <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, i) => i !== index))} style={{ border: 0, background: 'none', cursor: 'pointer' }}><img src={url} alt="Selected memory" style={{ width: 64, height: 64, borderRadius: 10, objectFit: 'cover' }} /></button>)}</div>}</div>
+          <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoLimit})</label><CloudinaryUpload onUpload={addPhoto} currentCount={images.length} maxPhotos={template.photoLimit} />{images.length > 0 && <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, i) => i !== index))} style={{ border: 0, background: 'none', cursor: 'pointer' }}><img src={url} alt="Selected memory" style={{ width: 64, height: 64, borderRadius: 10, objectFit: 'cover' }} /></button>)}</div>}</div>
         </>}
         {error && <p style={{ color: '#be123c', fontWeight: 700, marginTop: 16 }}>{error}</p>}
         {step === 4 && <><h2>Ready for your private preview</h2><p className="text-muted">Your complete experience with Wax Seal entrance, background music, WhatsApp instant sender, and forever keepsake poster are ready on the next page.</p></>}

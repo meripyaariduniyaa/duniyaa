@@ -93,8 +93,8 @@ const FAQS = [
     a: 'Once you customize your surprise, you receive a private 1-click link to share on WhatsApp, Instagram DM, or SMS. They just tap the link to experience it instantly—no app download required!'
   },
   {
-    q: 'Can I add my own photos and music?',
-    a: 'Yes! You can upload your favorite photos, custom heartfelt letters, choose mood music from our library or upload your own song track.'
+    q: 'Can I add my own photos, voice notes, and music?',
+    a: 'Yes! You can upload your favorite photos directly from your camera or gallery, record a personal 30-second voice note, craft heartfelt letters (with our AI Writer assistant to help draft text), and select curated background music soundtracks.'
   },
   {
     q: 'Is the surprise secure and private?',

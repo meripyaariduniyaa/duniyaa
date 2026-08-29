@@ -181,11 +181,16 @@ export default function BirthdayExperience({ note, isPreview = false }) {
   const currentScene = SCENES[sceneIndex];
 
   // Note data fields (matching existing Firestore schema)
-  const recipientName = note?.recipient_name || 'Beautiful';
+  const recipientName  = note?.recipient_name || 'Beautiful';
   // Sender name: check custom_details first, then top-level (legacy), then fallback
-  const senderName    = note?.custom_details?.sender_name || note?.sender_name || 'Me';
-  const customMessage = note?.custom_message || 'Happy birthday to someone truly special. You are my safe place, and every moment with you is precious. I hope this year brings you all the happiness you deserve.';
-  const photos        = (note?.image_urls && note.image_urls.length > 0) ? note.image_urls : [];
+  const senderName     = note?.custom_details?.sender_name || note?.sender_name || 'Me';
+  const customMessage  = note?.custom_message || 'Happy birthday to someone truly special. You are my safe place, and every moment with you is precious. I hope this year brings you all the happiness you deserve.';
+  const photos         = (note?.image_urls && note.image_urls.length > 0) ? note.image_urls : [];
+
+  // Relationship context for personalised copy
+  const relation       = note?.custom_details?.birthday_relation || '';
+  const relationEmoji  = { 'Girlfriend': '💖', 'Boyfriend': '💙', 'Mom': '🌸', 'Dad': '👔', 'Brother': '💪', 'Sister': '💝', 'Husband': '🥂', 'Wife': '💍', 'Best Friend': '🤗' }[relation] || '🎉';
+  const relationLabel  = relation ? `your ${relation} ${relationEmoji}` : 'someone special 🎉';
 
   // Balloon words — 4 individual words that pop out of each balloon
   const balloonMessages = [
@@ -233,10 +238,10 @@ export default function BirthdayExperience({ note, isPreview = false }) {
         ❤️
       </motion.div>
       <h2 style={{ fontFamily: T.fontHandwritten, fontSize: '2rem', color: T.pink800, margin:'0 0 8px', position:'relative', zIndex:1 }}>
-        Preparing your surprise...
+        A surprise for {relationLabel}
       </h2>
       <p style={{ fontFamily: T.fontSerif, color: T.pink700, opacity: 0.8, margin:'0 0 40px', position:'relative', zIndex:1 }}>
-        Almost ready...
+        Tap to open your special birthday gift 🎁
       </p>
       <motion.button
         whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
@@ -260,7 +265,7 @@ export default function BirthdayExperience({ note, isPreview = false }) {
         🥳
       </div>
       <p style={{ fontFamily: T.fontSerif, fontSize:'1.1rem', color: T.pink900, margin:'0 0 36px', position:'relative', zIndex:1 }}>
-        Are you excited for what's next?
+        {relation ? `A little birthday surprise made just for ${relation === 'Mom' || relation === 'Dad' ? 'you' : 'your ' + relation} ${relationEmoji}` : 'Are you excited for what\'s next?'}
       </p>
       {/* Yes button */}
       <motion.button

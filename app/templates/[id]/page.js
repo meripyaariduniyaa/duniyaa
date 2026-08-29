@@ -150,7 +150,7 @@ export default async function TemplateDetailPage({ params }) {
               ⏱ {template.time} setup time
             </span>
             <span className="template-tag" style={{ fontSize: '0.85rem', padding: '0.3rem 0.75rem', background: '#fef3c7', color: '#b45309' }}>
-              🏷️ ₹{template.price ? template.price / 2 : 99.5} (50% Off)
+              🏷️ ₹{Math.floor((template.price || 199) / 2)} (50% Off)
             </span>
           </div>
 

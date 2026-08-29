@@ -5,6 +5,7 @@ import TemplateRenderer from '@/components/templates/TemplateRenderer';
 import PasscodeLock from '@/components/PasscodeLock';
 import WaxSealEnvelope from '@/components/WaxSealEnvelope';
 import AudioPlayer from '@/components/AudioPlayer';
+import VoiceNotePlayer from '@/components/VoiceNotePlayer';
 import RecipientReactionBox from '@/components/RecipientReactionBox';
 
 export default function RecipientExperienceWrapper({ note }) {
@@ -58,6 +59,11 @@ export default function RecipientExperienceWrapper({ note }) {
     <div className="recipient-experience-container">
       {/* Background Audio Player with smooth soundscape */}
       <AudioPlayer presetId={musicPreset} autoStart={true} />
+
+      {/* Voice Note Player Pill if recorded */}
+      {note?.voice_note_url && (
+        <VoiceNotePlayer audioUrl={note.voice_note_url} recipientName={note.recipient_name} />
+      )}
 
       {/* Main Experience Template */}
       <TemplateRenderer note={note} isPreview={false} />

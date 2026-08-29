@@ -337,13 +337,15 @@ const TEMPLATE_ALIAS = {
 };
 
 // ─── Build a context-rich HuggingFace prompt ──────────────────────────────
-function buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage) {
+function buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage, relationship = '') {
   const resolvedId = TEMPLATE_ALIAS[templateId] || templateId;
   const ctx = TEMPLATE_CONTEXT[resolvedId] || TEMPLATE_CONTEXT['sorry'];
+  const relStr = relationship ? `The recipient is the sender's ${relationship}. ` : '';
 
   if (mode === 'enhance') {
     return [
       `You are an expert editor specializing in ${ctx.occasion} messages.`,
+      relStr ? `Relationship context: ${relStr}` : '',
       `Your task is to polish and enhance the spelling, grammar, flow, and emotional expressiveness of the original message for ${name} to be more ${tone}.`,
       `CRITICAL REQUIREMENT: You MUST preserve the exact core meaning, key details, specific memories, facts, and the personal essence of the original message. Do NOT change its meaning, do NOT write a generic message, and do NOT remove or replace their personal details/references.`,
       `Occasion: ${ctx.occasion}. Tone: ${tone}. Style direction: ${ctx.style}.`,
@@ -355,8 +357,9 @@ function buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage) {
 
   return [
     `You are an expert writer specializing in ${ctx.occasion} messages.`,
-    `Write a beautiful, personalized ${tone} ${ctx.occasion} message for ${name}.`,
+    `Write a beautiful, personalized ${tone} ${ctx.occasion} message for ${name}${relationship ? ` who is the sender's ${relationship}` : ''}.`,
     `Goal: ${ctx.goal}. Style: ${ctx.style}. Avoid: ${ctx.avoid}.`,
+    relStr ? `Make sure the emotion, tone, intimacy, and vocabulary perfectly match a message written for one's ${relationship}.` : '',
     keywords ? `Naturally weave in these personal details or memories: ${keywords}.` : '',
     `Return ONLY the message. No explanations, no labels, no quotation marks. Keep it under 130 words with sweet emojis.`,
   ].filter(Boolean).join(' ');
@@ -370,9 +373,64 @@ function interpolate(template, name, keywords) {
     .replace(/\{keywords\}/g, kw);
 }
 
-// ─── Get fallback messages for a given template + tone ────────────────────
-function getFallbackMessages(templateId, tone, name, keywords) {
+// ─── Get fallback messages for a given template + tone + relationship ─────
+function getFallbackMessages(templateId, tone, name, keywords, relationship = '') {
   const resolvedId = TEMPLATE_ALIAS[templateId] || templateId;
+
+  // Relationship-specific fallback messages for Birthday
+  if ((resolvedId === 'birthday' || resolvedId === 'birthday-surprise') && relationship) {
+    const rel = relationship.toLowerCase();
+    if (rel.includes('mom')) {
+      return [
+        `Happy Birthday to the most loving Mom in the world, ${name}! 🌸 Thank you for your warmth, endless support, and unconditional love. May your day be filled with peace, joy, and all the sweetness you bring into our lives! 💕💐`,
+        `Dearest Mom (${name}), wishing you the happiest of birthdays! 🎂✨ You are the heart of our family, and I am so blessed to be your child. Love you endlessly! ❤️🌸`,
+        `Happy Birthday Mom! 💐 Thank you for every quiet sacrifice, every warm meal, and always believing in me. Hope your special day is full of smiles! 🎂💖`
+      ];
+    }
+    if (rel.includes('dad')) {
+      return [
+        `Happy Birthday to my hero and Dad, ${name}! 👔 Thank you for your quiet strength, wisdom, and always guiding me forward. Wishing you health, happiness, and an awesome year ahead! 🌟🎂`,
+        `To the best Dad ever (${name}) — Happy Birthday! 🎉 Thank you for always having my back and teaching me how to stand strong. Enjoy your special day! 👔✨`,
+        `Wishing a fantastic Birthday to my Dad, ${name}! 🥳 May this year bring you great health, relaxation, and everything you love most! 👔🎁`
+      ];
+    }
+    if (rel.includes('girlfriend') || rel.includes('wife')) {
+      return [
+        `Happy Birthday to the love of my life, ${name}! 💖 You make every single day brighter, sweeter, and full of magic. I'm so grateful for you. Here's to making all your dreams come true! 🎂✨`,
+        `To my beautiful ${relationship}, ${name} — Happy Birthday! 🌸 You grow more gorgeous and amazing every year. I love you more than words can say. Yours forever 💕🥂`,
+        `Wishing the happiest birthday to my favorite person, ${name}! 🎁 Blow out the candles knowing I'll be right beside you for all of them! 💖✨`
+      ];
+    }
+    if (rel.includes('boyfriend') || rel.includes('husband')) {
+      return [
+        `Happy Birthday to my favourite person, ${name}! 💙 Thank you for being my rock, my biggest smile, and my safe place. Wishing you a year as incredible as you are! 🥂✨`,
+        `To my handsome ${relationship}, ${name} — Happy Birthday! 🥳 You bring so much joy and adventure into my world. So proud to walk beside you! ❤️🎈`,
+        `Wishing the happiest birthday to my love, ${name}! 🎂 May this new age bring you boundless success, happiness, and all the love in the world! 💙✨`
+      ];
+    }
+    if (rel.includes('brother')) {
+      return [
+        `Happy Birthday to the best brother ever, ${name}! 💪 From chaotic memories to always having each other's back, I'm so lucky to have you. Hope this year brings you massive success! 🎉🔥`,
+        `Hey Bro (${name}), Happy Birthday! 🚀 Another year older, but let's be honest — still not wiser! Have an absolute blast today! 😂🎂`,
+        `To my brother ${name} — Happy Birthday! 🥳 Thanks for being my partner-in-crime through thick and thin. Keep crushing it! 💪🎉`
+      ];
+    }
+    if (rel.includes('sister')) {
+      return [
+        `Happy Birthday to my sweet sister, ${name}! 💝 Thank you for being my confidante, my laugh-partner, and my built-in best friend. Shine bright today and always! 🎂✨`,
+        `To my amazing sister ${name} — Happy Birthday! 🌸 May your day be filled with sparkles, sweet treats, and everything that makes you happy! 💖🎁`,
+        `Happy Birthday Sister! 👯‍♀️ Life is so much sweeter and funnier with you in it. Keep being your wonderful self! 🎉💝`
+      ];
+    }
+    if (rel.includes('friend')) {
+      return [
+        `Happy Birthday to my bestie, ${name}! 🤗 Life is so much more fun with you in it. Here's to another year of unforgettable memories, inside jokes, and endless adventures! 🎉🎈`,
+        `Wishing the happiest birthday to my ride-or-die, ${name}! 🥂 Keep shining, keep laughing, and let's eat way too much cake today! 🍰✨`,
+        `To my favourite human ${name} — Happy Birthday! 🥳 So grateful for our friendship and all the chaotic fun we share! 🎁💛`
+      ];
+    }
+  }
+
   const engine = FALLBACK_ENGINE[resolvedId] || FALLBACK_ENGINE['sorry'];
 
   // Try exact tone first, then sensible defaults
@@ -390,8 +448,46 @@ function getFallbackMessages(templateId, tone, name, keywords) {
 // prose to parse, so the creator can safely review and edit every value.
 function buildTemplateFill(templateId, name, tone, keywords, relationship = '') {
   const context = keywords || `the little moments you share as ${relationship || 'people who care about each other'}`;
-  const message = getFallbackMessages(templateId, tone, name, context)[0];
+  const message = getFallbackMessages(templateId, tone, name, context, relationship)[0];
   const short = (prefix, index) => `${prefix} ${context}${index ? ` — memory ${index}` : ''}.`;
+
+  // Default birthday fields
+  let balloonWords = ['Joy', 'Love', 'Magic', 'Dreams'];
+  let bouquetMsgs = [
+    'Keep shining.',
+    'You are deeply loved.',
+    'Make a wish.',
+    'Celebrate yourself.',
+    'Your best year awaits.',
+    'Never stop being you.'
+  ];
+
+  if (relationship) {
+    const rel = relationship.toLowerCase();
+    if (rel.includes('mom')) {
+      balloonWords = ['Maa', 'Love', 'Warmth', 'Blessings'];
+      bouquetMsgs = ['Best Mom Ever 🌸', 'Thank you for everything 💕', 'Your warmth lights home 🏡', 'Always in my heart ❤️', 'Wishing you health & joy ✨', 'Love you endlessly Mom 💐'];
+    } else if (rel.includes('dad')) {
+      balloonWords = ['Dad', 'Strength', 'Wisdom', 'Hero'];
+      bouquetMsgs = ['My guiding light 👔', 'Thank you for your wisdom 💡', 'Proud of you Dad ⭐', 'Always my hero 🦸‍♂️', 'Wishing you peace & health 🌟', 'Love you Dad! ❤️'];
+    } else if (rel.includes('girlfriend') || rel.includes('wife')) {
+      balloonWords = ['Love', 'Forever', 'Mine', 'Beauty'];
+      bouquetMsgs = ['Forever yours 💕', 'You make my world beautiful 🌸', 'Lucky to have you 💖', 'Happy Birthday my love 🎂', 'My favourite person 🥰', 'Sending all my heart ❤️'];
+    } else if (rel.includes('boyfriend') || rel.includes('husband')) {
+      balloonWords = ['Love', 'Forever', 'Handsome', 'Joy'];
+      bouquetMsgs = ['My whole heart 💙', 'You make every day brighter ☀️', 'Lucky to walk beside you 🥂', 'Happy Birthday my love 🎂', 'My safest place 🤗', 'Forever & always ❤️'];
+    } else if (rel.includes('brother')) {
+      balloonWords = ['Bro', 'Legend', 'Chaos', 'Champ'];
+      bouquetMsgs = ['Best bro ever 💪', 'Partner in crime 🚀', 'Always have your back 🤝', 'Keep crushing it 🔥', 'Stop stealing my stuff 😂', 'Happy Birthday Bro! 🎉'];
+    } else if (rel.includes('sister')) {
+      balloonWords = ['Sister', 'Sparkle', 'Queen', 'Sweet'];
+      bouquetMsgs = ['Best sister ever 💝', 'Keep shining bright ✨', 'Built-in best friend 👯‍♀️', 'Always cheering for you 📣', 'Sweetest memories 🌸', 'Happy Birthday! 🎂'];
+    } else if (rel.includes('friend')) {
+      balloonWords = ['Bestie', 'Laughs', 'Vibes', 'Memories'];
+      bouquetMsgs = ['Ride or die 🤗', 'To wild memories 🥂', 'Unstoppable team 🚀', 'Stay awesome 🌟', 'Forever friends 💕', 'Happy Birthday Bestie! 🎉'];
+    }
+  }
+
   const fields = {
     'just-because': { small_detail: short('I keep thinking about', 0) },
     'things-i-never-said': { unsaid: [`I notice how you make life lighter.`, `I am grateful for your quiet kindness.`, `You matter to me more than I say.`], memory: short('I still smile when I remember', 1) },
@@ -401,7 +497,32 @@ function buildTemplateFill(templateId, name, tone, keywords, relationship = '') 
     'youre-my-person': { reasons: ['You make ordinary moments feel special.', 'You understand me without a long explanation.', 'You make me laugh when I need it most.', 'You show up with a kind heart.', 'Life feels more like home with you in it.'], memories: [short('I love remembering', 1), short('Another moment I hold close is', 2)], inside_joke: `Only we would understand ${context}.` },
     sorry: { promise_1: 'I will listen before I react.', promise_2: 'I will make space for your feelings.', promise_3: 'I will show you through my actions that I can do better.' },
     friendship: { sender_name: 'Your friend', vibe: tone === 'funny' ? 'funny' : 'emotional', years_known: '5', one_liner: `Built on ${context}.`, bond_traits: 'Loyal, Funny, Unforgettable' },
-    birthday: { sender_name: 'Someone who loves you', balloon_word_1: 'Joy', balloon_word_2: 'Love', balloon_word_3: 'Magic', balloon_word_4: 'Dreams', bouquet_msg_1: 'Keep shining.', bouquet_msg_2: 'You are deeply loved.', bouquet_msg_3: 'Make a wish.', bouquet_msg_4: 'Celebrate yourself.', bouquet_msg_5: 'Your best year awaits.', bouquet_msg_6: 'Never stop being you.' },
+    birthday: {
+      sender_name: relationship ? `Your ${relationship}` : 'Someone who loves you',
+      balloon_word_1: balloonWords[0],
+      balloon_word_2: balloonWords[1],
+      balloon_word_3: balloonWords[2],
+      balloon_word_4: balloonWords[3],
+      bouquet_msg_1: bouquetMsgs[0],
+      bouquet_msg_2: bouquetMsgs[1],
+      bouquet_msg_3: bouquetMsgs[2],
+      bouquet_msg_4: bouquetMsgs[3],
+      bouquet_msg_5: bouquetMsgs[4],
+      bouquet_msg_6: bouquetMsgs[5],
+    },
+    'birthday-surprise': {
+      sender_name: relationship ? `Your ${relationship}` : 'Someone who loves you',
+      balloon_word_1: balloonWords[0],
+      balloon_word_2: balloonWords[1],
+      balloon_word_3: balloonWords[2],
+      balloon_word_4: balloonWords[3],
+      bouquet_msg_1: bouquetMsgs[0],
+      bouquet_msg_2: bouquetMsgs[1],
+      bouquet_msg_3: bouquetMsgs[2],
+      bouquet_msg_4: bouquetMsgs[3],
+      bouquet_msg_5: bouquetMsgs[4],
+      bouquet_msg_6: bouquetMsgs[5],
+    },
     anniversary: { special_date: 'Our special day', promise_1: 'More laughter together.', promise_2: 'More patience and care.', promise_3: 'More beautiful memories.', promise_4: 'To choose you every day.', promise_5: 'To keep growing together.' },
     'mothers-day': { mom_title: 'Mom', relation: 'your child', secret_note: `Thank you for ${context}.`, sticky_note_1: 'Your hugs', sticky_note_2: 'Your strength', sticky_note_3: 'Your endless love' },
     proposal: { date_idea: `A little date inspired by ${context}.` },
@@ -426,7 +547,6 @@ export async function POST(request) {
 
     const name = recipientName?.trim() || 'my special someone';
 
-
     if (mode === 'fill_template') {
       const fill = buildTemplateFill(templateId, name, tone, keywords, relationship);
       return NextResponse.json({ success: true, ...fill, source: 'ai_template_engine' });
@@ -443,7 +563,7 @@ export async function POST(request) {
     // ── Attempt HuggingFace API if token is present ──────────────────────
     if (hfToken) {
       try {
-        const prompt = buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage);
+        const prompt = buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage, relationship);
 
         const hfRes = await fetch(
           `https://api-inference.huggingface.co/models/${model}`,
@@ -484,7 +604,7 @@ export async function POST(request) {
     }
 
     // ── Fill remaining slots with template-aware fallback messages ────────
-    const fallbackMessages = getFallbackMessages(templateId, tone, name, keywords);
+    const fallbackMessages = getFallbackMessages(templateId, tone, name, keywords, relationship);
     while (generatedOptions.length < 3) {
       const idx = generatedOptions.length % fallbackMessages.length;
       generatedOptions.push(fallbackMessages[idx]);

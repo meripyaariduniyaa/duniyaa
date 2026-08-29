@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { templates } from '@/lib/templates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
+import VoiceNoteRecorder from '@/components/VoiceNoteRecorder';
 import EmotionalCreator from '@/components/EmotionalCreator';
 import { isEmotionalTemplate } from '@/lib/emotionalTemplates';
 import LegacyCreator from '@/components/LegacyCreator';
@@ -44,6 +45,7 @@ function CreateNoteContent() {
 
   const [recipientName, setRecipientName] = useState('');
   const [message, setMessage] = useState('');
+  const [voiceNoteUrl, setVoiceNoteUrl] = useState('');
   const [images, setImages] = useState([]);
   const [shagunQrUrl, setShagunQrUrl] = useState('');
   const [customDetails, setCustomDetails] = useState({});
@@ -232,6 +234,7 @@ function CreateNoteContent() {
         creator_uid: deviceId,
         recipient_name: recipientName.trim(),
         custom_message: message.trim(),
+        voice_note_url: voiceNoteUrl || null,
         image_urls: images,
         shagun_qr_url: shagunQrUrl.trim() || null,
         custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
@@ -537,6 +540,13 @@ function CreateNoteContent() {
 
 
               </div>
+
+              {/* Voice Note Recording */}
+              <VoiceNoteRecorder
+                onVoiceRecorded={(url) => setVoiceNoteUrl(url)}
+                onVoiceRemoved={() => setVoiceNoteUrl('')}
+                existingUrl={voiceNoteUrl}
+              />
 
               {/* Photos */}
               <div className="form-group">

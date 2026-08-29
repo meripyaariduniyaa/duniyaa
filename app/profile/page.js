@@ -23,7 +23,7 @@ export default function ProfilePage() {
           setFetching(false);
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function ProfilePage() {
         fetchDeviceNotes();
       }
     }
-    
+
     initProfile();
   }, [user]);
 
@@ -67,19 +67,19 @@ export default function ProfilePage() {
         collection(db, 'notes'),
         where('creator_uid', '==', user.uid)
       );
-      
+
       const snap = await getDocs(q);
       const data = [];
       snap.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
-      
+
       data.sort((a, b) => {
         const timeA = a.created_at?.toMillis() || 0;
         const timeB = b.created_at?.toMillis() || 0;
         return timeB - timeA;
       });
-      
+
       setNotes(data);
-      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch {}
+      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch { }
     } catch (e) {
       console.warn('Query by Auth UID failed, falling back to local note IDs:', e?.message);
       await fetchDeviceNotes();
@@ -92,7 +92,7 @@ export default function ProfilePage() {
     try {
       const storedIds = JSON.parse(localStorage.getItem('created_note_ids') || '[]');
       const deviceId = localStorage.getItem('note_device_id');
-      
+
       const notesMap = new Map();
 
       // 1. Query by device ID if available
@@ -130,7 +130,7 @@ export default function ProfilePage() {
       });
 
       setNotes(data);
-      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch {}
+      try { localStorage.setItem('cached_profile_notes', JSON.stringify(data)); } catch { }
     } catch (e) {
       console.error(e);
     } finally {
@@ -166,9 +166,9 @@ export default function ProfilePage() {
                 Sign Out
               </button>
             ) : (
-              <button 
-                className="btn-secondary" 
-                onClick={login} 
+              <button
+                className="btn-secondary"
+                onClick={login}
                 style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <span>🔑</span> Sign in to Sync Across Devices
@@ -186,8 +186,8 @@ export default function ProfilePage() {
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>No notes found on this device</h3>
             <p className="text-muted" style={{ marginBottom: '2rem' }}>
-              {user 
-                ? "You haven't created any notes yet with this account." 
+              {user
+                ? "You haven't created any notes yet with this account."
                 : "Create a note to track it here, or sign in to sync notes from other devices."}
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -206,17 +206,17 @@ export default function ProfilePage() {
             {notes.map(note => {
               const shareSlug = note.custom_slug || note.id;
               const url = typeof window !== 'undefined' ? `${window.location.origin}/p/${shareSlug}` : '';
-              
+
               return (
                 <div key={note.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '1.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, margin: 0 }}>
                       To: {note.recipient_name}
                     </h3>
-                    <span style={{ 
-                      fontSize: '0.7rem', 
-                      fontWeight: 700, 
-                      padding: '0.2rem 0.6rem', 
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.6rem',
                       borderRadius: '999px',
                       background: note.is_paid ? '#dcfce7' : '#f1f5f9',
                       color: note.is_paid ? '#166534' : '#64748b',
@@ -243,17 +243,17 @@ export default function ProfilePage() {
                       )}
                     </div>
                   )}
-                  
+
                   {note.custom_slug && (
                     <p style={{ fontSize: '0.75rem', color: '#db2777', fontWeight: 600, marginBottom: '0.5rem', wordBreak: 'break-all' }}>
                       🔗 /p/{note.custom_slug}
                     </p>
                   )}
-                  
+
                   <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {note.custom_message}
                   </p>
-                  
+
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <Link
                       href={`/preview?id=${note.id}`}
@@ -263,8 +263,8 @@ export default function ProfilePage() {
                       {note.is_paid ? 'View Live Tracker' : 'Finish & Pay'}
                     </Link>
                     {note.is_paid && (
-                      <button 
-                        className="btn-primary" 
+                      <button
+                        className="btn-primary"
                         style={{ flex: 1, fontSize: '0.85rem', padding: '0.5rem' }}
                         onClick={() => {
                           navigator.clipboard.writeText(url);

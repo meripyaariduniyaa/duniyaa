@@ -8,6 +8,7 @@ import { db } from '@/lib/firebase';
 import PayButton from '@/components/PayButton';
 import Link from 'next/link';
 import TemplateRenderer from '@/components/templates/TemplateRenderer';
+import VoiceNotePlayer from '@/components/VoiceNotePlayer';
 import { templates } from '@/lib/templates';
 import { createKeepsakePoster } from '@/components/KeepsakePoster';
 
@@ -165,6 +166,9 @@ function PreviewContent() {
               </p>
             </div>
             
+            {apology.voice_note_url && (
+              <VoiceNotePlayer audioUrl={apology.voice_note_url} recipientName={apology.recipient_name} />
+            )}
             <TemplateRenderer note={apology} isPreview={true} />
           </div>
 
