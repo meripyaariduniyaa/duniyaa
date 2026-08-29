@@ -51,21 +51,21 @@ export default function Home() {
     <main className="shell">
       <div className="main-content">
         {/* Hero Section */}
-        <section className="hero-section text-center mt-4 mb-8" style={{ background: '#ffffff', borderRadius: '32px', padding: '3.5rem 1.5rem 3rem', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.03)' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)', background: '#fafaf9', padding: '0.35rem 1rem', borderRadius: '99px', border: '1px solid rgba(0,0,0,0.06)', display: 'inline-block', marginBottom: '1.25rem' }}>
+        <section className="hero-section text-center mt-2 mb-6" style={{ background: '#ffffff', borderRadius: 'clamp(20px, 5vw, 32px)', padding: 'clamp(1.75rem, 5vw, 3.25rem) clamp(1rem, 4vw, 2rem)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.03)' }}>
+          <span style={{ fontSize: 'clamp(0.68rem, 1.8vw, 0.75rem)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-primary)', background: '#fafaf9', padding: '0.3rem 0.85rem', borderRadius: '99px', border: '1px solid rgba(0,0,0,0.06)', display: 'inline-block', marginBottom: '1rem' }}>
             Personalized Digital Gifts for People You Love
           </span>
 
-          <h1 style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.75rem)', lineHeight: 1.15, fontWeight: 600, color: '#1c1917', marginBottom: '1.25rem', letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontSize: 'clamp(1.75rem, 6.5vw, 3.5rem)', lineHeight: 1.15, fontWeight: 700, color: '#1c1917', marginBottom: '1rem', letterSpacing: '-0.03em' }}>
             Craft unforgettable<br />
             <em className="cursive" style={{ fontSize: '1em', color: 'var(--accent-primary)' }}>interactive surprises.</em>
           </h1>
 
-          <p className="hero-copy text-muted" style={{ maxWidth: '640px', margin: '0 auto 1.75rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
+          <p className="hero-copy text-muted" style={{ maxWidth: '640px', margin: '0 auto 1.5rem', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', lineHeight: 1.6 }}>
             Go beyond standard greeting cards. Turn special moments, photos, and heartfelt messages into gamified digital experiences they open right on their phone.
           </p>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fafaf9', border: '1px solid rgba(0,0,0,0.08)', padding: '0.4rem 1.1rem', borderRadius: '99px', fontSize: '0.85rem', color: '#1c1917', fontWeight: 600, marginBottom: '1.75rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fafaf9', border: '1px solid rgba(0,0,0,0.08)', padding: '0.35rem 0.95rem', borderRadius: '99px', fontSize: 'clamp(0.78rem, 2vw, 0.85rem)', color: '#1c1917', fontWeight: 600, marginBottom: '1.5rem' }}>
             <span>🎉 Special Offer:</span>
             <del style={{ color: 'var(--text-muted)', fontWeight: 400 }}>₹499</del>
             <span style={{ color: '#16a34a' }}>₹199 (60% OFF)</span>
@@ -74,11 +74,11 @@ export default function Home() {
           {/* Quick Pill Navigation */}
           <HeroPills />
 
-          <div className="hero-actions" style={{ marginTop: '1rem' }}>
-            <Link href="/templates" className="btn-primary" style={{ padding: '0.95rem 2.25rem', fontSize: '1rem' }}>
+          <div className="hero-actions" style={{ marginTop: '1.25rem' }}>
+            <Link href="/templates" className="btn-primary" style={{ padding: 'clamp(0.75rem, 2.5vw, 0.95rem) clamp(1.4rem, 4vw, 2.25rem)', fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>
               ✨ Craft a Surprise Now
             </Link>
-            <a href="#experiences" className="btn-secondary" style={{ padding: '0.95rem 1.75rem', fontSize: '0.95rem' }}>
+            <a href="#experiences" className="btn-secondary" style={{ padding: 'clamp(0.75rem, 2.5vw, 0.95rem) clamp(1.2rem, 3.5vw, 1.75rem)', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
               Explore Experiences ↓
             </a>
           </div>

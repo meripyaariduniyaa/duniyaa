@@ -21,13 +21,15 @@ export function HeroPills() {
   }, []);
 
   return (
-    <div className="hero-pills">
-      {displayTemplates.slice(0, 7).map((t) => (
-        <Link key={t.id} href={`/create?template=${t.id}`} className="hero-pill-item">
-          <span>{t.icon}</span>
-          <span>{t.title}</span>
-        </Link>
-      ))}
+    <div className="hero-pills-container">
+      <div className="hero-pills">
+        {displayTemplates.slice(0, 8).map((t) => (
+          <Link key={t.id} href={`/create?template=${t.id}`} className="hero-pill-item">
+            <span>{t.icon}</span>
+            <span>{t.title}</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

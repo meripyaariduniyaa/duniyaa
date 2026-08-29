@@ -1666,3 +1666,410 @@ a {
   .recipient-experience .experience-vibe,
   .recipient-experience .emotional-experience { min-height: 100svh !important; }
 }
+
+/* ==========================================================================
+   MOBILE-FIRST ENHANCEMENTS & HAMBURGER MENU DRAWER
+   ========================================================================== */
+
+/* Hamburger Button */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid rgba(190, 24, 93, 0.15);
+  border-radius: 12px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 102;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: #fff1f5;
+  border-color: #f43f5e;
+}
+
+.burger-bar {
+  width: 100%;
+  height: 2.5px;
+  background: #1f2937;
+  border-radius: 99px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.burger-bar.open:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+  background: #be185d;
+}
+
+.burger-bar.open:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.burger-bar.open:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+  background: #be185d;
+}
+
+/* Mobile Drawer Backdrop */
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 5, 12, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 998;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+/* Mobile Navigation Drawer */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(85vw, 360px);
+  background: #ffffff;
+  z-index: 999;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1.25rem;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.mobile-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #fce7f3;
+}
+
+.mobile-drawer-close {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 1rem;
+  color: #9f1239;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.mobile-drawer-close:hover {
+  background: #fce7f3;
+}
+
+.mobile-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem 0;
+  flex: 1;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: #fafaf9;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item:active {
+  background: #fff1f5;
+  border-color: #fbcfe8;
+  transform: translateX(3px);
+}
+
+.mobile-nav-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-nav-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.mobile-nav-item small {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.mobile-drawer-footer {
+  padding-top: 1.25rem;
+  border-top: 1px solid #fce7f3;
+  text-align: center;
+}
+
+.mobile-cta-button {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, #ec4899, #be185d);
+}
+
+.mobile-drawer-subtext {
+  font-size: 0.75rem;
+  color: #9f1239;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+/* Hero Pills container with smooth touch scrolling */
+.hero-pills-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0 0.75rem;
+  margin-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.hero-pills-container::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-pills {
+  display: inline-flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.hero-pill-item:hover,
+.hero-pill-item:active {
+  background: #fff1f5;
+  border-color: #f43f5e;
+  color: #be185d;
+  transform: translateY(-1px);
+}
+
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(240px, 45vw, 340px), 1fr));
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  width: 100%;
+}
+
+.bento-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: clamp(18px, 3vw, 24px);
+  padding: clamp(1.2rem, 3vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.bento-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(244, 63, 94, 0.1);
+  border-color: #fbcfe8;
+}
+
+.bento-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.bento-emoji {
+  font-size: clamp(1.6rem, 4vw, 2rem);
+}
+
+.bento-card-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.bento-card-desc {
+  font-size: clamp(0.85rem, 2vw, 0.92rem);
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.bento-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.bento-price-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.bento-price-tag del {
+  color: #9ca3af;
+}
+
+.bento-price-tag span {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.bento-cta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #be185d;
+}
+
+/* How It Works Grid */
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(220px, 30vw, 320px), 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.how-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+  text-align: center;
+}
+
+.how-step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff1f5;
+  color: #be185d;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  border: 1.5px solid #fecdd3;
+}
+
+.how-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.35rem;
+}
+
+.how-desc {
+  font-size: 0.88rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Social Proof Banner */
+.social-proof-banner {
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+  border: 1px solid #fecdd3;
+  border-radius: clamp(20px, 4vw, 28px);
+  padding: clamp(1.75rem, 5vw, 2.75rem) clamp(1rem, 3vw, 2rem);
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+/* RESPONSIVE MEDIA QUERIES FOR PHONES */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .topbar {
+    padding: 0 1rem !important;
+    height: 62px !important;
+  }
+
+  .main-content {
+    padding: 1rem 0.75rem 2rem !important;
+  }
+
+  .hero-pills {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding: 0 0.5rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100% !important;
+  }
+}
+
