@@ -65,9 +65,10 @@ function PreviewContent() {
 
     const shareUrl = getShareUrl(apology);
     QRCode.toDataURL(shareUrl, {
-      width: 220,
-      margin: 1,
-      color: { dark: '#111827', light: '#ffffff' }
+      width: 360,
+      margin: 2,
+      errorCorrectionLevel: 'H',
+      color: { dark: '#881337', light: '#fffdfd' }
     })
       .then((url) => setQrCodeUrl(url))
       .catch(() => setQrCodeUrl(''));
@@ -103,9 +104,10 @@ function PreviewContent() {
     setDownloadingQr(true);
 
     try {
+      const brandedQrUrl = await createBrandedQrImage(qrCodeUrl);
       const link = document.createElement('a');
-      link.href = qrCodeUrl;
-      link.download = `note-link-${shareSlug}.png`;
+      link.href = brandedQrUrl;
+      link.download = 'lovelycrafts-scan-to-open.png';
       link.click();
     } finally {
       setDownloadingQr(false);
@@ -148,8 +150,14 @@ function PreviewContent() {
                   </div>
 
                   {qrCodeUrl && (
-                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                      <img src={qrCodeUrl} alt="QR code for note link" style={{ width: '180px', height: '180px', borderRadius: '12px', border: '3px solid rgba(59, 15, 27, 0.9)', background: 'white', padding: '0.5rem', boxShadow: '4px 4px 0px rgba(59, 15, 27, 0.9)' }} />
+                    <div className="branded-qr" style={{ marginBottom: '1.25rem' }}>
+                      <div className="branded-qr__heading"><span>♥</span> LovelyCrafts</div>
+                      <div className="branded-qr__frame">
+                        <span className="branded-qr__heart">♥</span>
+                        <span className="branded-qr__arrow">↘</span>
+                        <img src={qrCodeUrl} alt="Scan this QR code to open the private LovelyCrafts experience" />
+                      </div>
+                      <p><strong>Scan to open</strong><br />a moment made just for them</p>
                     </div>
                   )}
                   
@@ -216,4 +224,81 @@ function PreviewContent() {
       </div>
     </main>
   );
+}
+
+function createBrandedQrImage(qrDataUrl) {
+  return new Promise((resolve, reject) => {
+    const qr = new Image();
+    qr.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 900;
+      canvas.height = 1080;
+      const context = canvas.getContext('2d');
+      if (!context) return reject(new Error('Could not prepare QR image.'));
+
+      const rose = '#be185d';
+      const deepRose = '#881337';
+      const hotPink = '#f43f5e';
+      context.fillStyle = '#fffdfd';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Soft rosy glow behind the card.
+      const glow = context.createRadialGradient(450, 500, 100, 450, 500, 520);
+      glow.addColorStop(0, 'rgba(251, 207, 232, .7)');
+      glow.addColorStop(1, 'rgba(255, 253, 253, 0)');
+      context.fillStyle = glow;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      context.textAlign = 'center';
+      context.fillStyle = deepRose;
+      context.font = '700 34px Arial, sans-serif';
+      context.fillText('♥  LOVELYCRAFTS', 450, 94);
+
+      // Rounded outer scan frame.
+      roundedRect(context, 155, 150, 590, 590, 44);
+      context.fillStyle = '#fff7fa';
+      context.fill();
+      context.lineWidth = 5;
+      context.strokeStyle = hotPink;
+      context.stroke();
+      roundedRect(context, 177, 172, 546, 546, 28);
+      context.lineWidth = 8;
+      context.strokeStyle = '#fce7f3';
+      context.stroke();
+
+      // Directional corner marks + heart seal.
+      context.strokeStyle = hotPink;
+      context.lineWidth = 7;
+      context.beginPath(); context.moveTo(145, 236); context.lineTo(145, 170); context.lineTo(211, 170); context.stroke();
+      context.beginPath(); context.moveTo(755, 655); context.lineTo(755, 721); context.lineTo(689, 721); context.stroke();
+      context.fillStyle = hotPink;
+      context.beginPath(); context.arc(748, 162, 39, 0, Math.PI * 2); context.fill();
+      context.fillStyle = '#fff'; context.font = '700 31px Arial, sans-serif'; context.fillText('♥', 748, 173);
+      context.font = '700 54px Arial, sans-serif'; context.fillStyle = hotPink; context.fillText('↘', 155, 703);
+
+      context.drawImage(qr, 205, 200, 490, 490);
+      context.fillStyle = rose;
+      context.font = '700 34px Arial, sans-serif';
+      context.fillText('Scan to open', 450, 838);
+      context.font = '400 28px Arial, sans-serif';
+      context.fillStyle = '#9d174d';
+      context.fillText('a moment made just for them', 450, 883);
+      context.font = '400 22px Arial, sans-serif';
+      context.fillStyle = '#be185d';
+      context.fillText('lovelycrafts.in', 450, 970);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    qr.onerror = () => reject(new Error('Could not load QR image.'));
+    qr.src = qrDataUrl;
+  });
+}
+
+function roundedRect(context, x, y, width, height, radius) {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.arcTo(x + width, y, x + width, y + height, radius);
+  context.arcTo(x + width, y + height, x, y + height, radius);
+  context.arcTo(x, y + height, x, y, radius);
+  context.arcTo(x, y, x + width, y, radius);
+  context.closePath();
 }

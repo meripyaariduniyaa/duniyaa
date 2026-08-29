@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 
 function ShareButton() {
   const [copied, setCopied] = useState(false);
@@ -28,7 +29,13 @@ export default function EmotionalExperience({ note }) {
       {stage === 0 ? <><div style={{ fontSize: 48 }}>💌</div><p style={{ textTransform: 'uppercase', letterSpacing: '.14em', fontSize: 12, opacity: .75 }}>LovelyCrafts</p><h1 style={{ fontSize: 'clamp(2rem,8vw,3.5rem)', margin: '.25rem 0 1rem' }}>This was made for you, {name}.</h1><p style={{ fontSize: '1.1rem', opacity: .85 }}>Ready for a little moment?</p><button className="btn-primary" onClick={() => setStage(1)}>Open it</button></> : <>
         {scene.photo && <div style={{ marginBottom: '1.5rem' }}><Photo src={scene.photo} alt="A shared memory" /></div>}
         {scene.type === 'envelopes' ? <><p>{scene.eyebrow}</p><h2 style={{ fontSize: '2rem' }}>{scene.title}</h2><div style={{ display: 'grid', gap: 10, margin: '1.5rem 0' }}>{scene.items.map((item, i) => <button className="emotional-reveal-card" key={i} onClick={() => setOpened((x) => ({ ...x, [i]: !x[i] }))}>{opened[i] ? item.message : `✉️ Open when ${item.title}`}</button>)}</div></> : <><p style={{ textTransform: 'uppercase', letterSpacing: '.12em', fontSize: 12, opacity: .7 }}>{scene.eyebrow}</p><h2 style={{ fontSize: 'clamp(1.65rem,6vw,2.7rem)', margin: '.5rem 0 1rem', whiteSpace: 'pre-wrap' }}>{scene.title}</h2>{scene.body && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.75, fontSize: '1.05rem' }}>{scene.body}</p>}{scene.cards && <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>{scene.cards.map((card, i) => <button className="emotional-reveal-card" key={i} onClick={() => setOpened((x) => ({ ...x, [`${stage}-${i}`]: !x[`${stage}-${i}`] }))}>{opened[`${stage}-${i}`] ? card : 'Tap to reveal'}</button>)}</div>}</>}
-        <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>{stage < scenes.length - 1 ? <button className="btn-primary" onClick={() => setStage(stage + 1)}>Continue</button> : <ShareButton />}</div>
+        <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {stage < scenes.length - 1 ? <button className="btn-primary" onClick={() => setStage(stage + 1)}>Continue</button> : <>
+            <ShareButton />
+            <button className="emotional-secondary-action" onClick={() => { setStage(0); setOpened({}); }}>↻ Replay this moment</button>
+            <Link className="emotional-create-action" href="/templates">♥ Create your own</Link>
+          </>}
+        </div>
       </>}
     </div>
   </section>;
