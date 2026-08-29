@@ -7,6 +7,9 @@ import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { templates } from '@/lib/templates';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
+import EmotionalCreator from '@/components/EmotionalCreator';
+import { isEmotionalTemplate } from '@/lib/emotionalTemplates';
+import LegacyCreator from '@/components/LegacyCreator';
 
 export default function CreateNote() {
   return (
@@ -77,6 +80,12 @@ function CreateNoteContent() {
   const [aiOptions, setAiOptions] = useState([]);
   const [aiError, setAiError] = useState('');
 
+  const readAiResponse = async (response) => {
+    const raw = await response.text();
+    try { return JSON.parse(raw); }
+    catch { throw new Error(`AI service returned an invalid response (${response.status}). Please try again.`); }
+  };
+
   const generateAiMessages = async () => {
     setAiBusy(true);
     setAiError('');
@@ -92,7 +101,7 @@ function CreateNoteContent() {
           mode: 'generate',
         })
       });
-      const data = await res.json();
+      const data = await readAiResponse(res);
       if (!res.ok) throw new Error(data.error || 'Failed to generate AI options.');
       setAiOptions(data.options || []);
     } catch (e) {
@@ -119,7 +128,7 @@ function CreateNoteContent() {
           currentMessage: message.trim()
         })
       });
-      const data = await res.json();
+      const data = await readAiResponse(res);
       if (!res.ok) throw new Error(data.error || 'Failed to polish message.');
       if (data.options && data.options[0]) {
         setMessage(data.options[0]);
@@ -129,6 +138,22 @@ function CreateNoteContent() {
     } finally {
       setAiBusy(false);
     }
+  };
+
+  const fillTemplateWithAi = async () => {
+    setAiBusy(true);
+    setAiError('');
+    try {
+      const res = await fetch('/api/ai-message', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: selectedTemplateId, recipientName: recipientName.trim(), tone: aiTone, keywords: aiKeywords.trim(), mode: 'fill_template' })
+      });
+      const data = await readAiResponse(res);
+      if (!res.ok) throw new Error(data.error || 'Could not fill this template.');
+      setCustomDetails((current) => ({ ...current, ...(data.details || {}) }));
+      if (!message.trim() && data.message) setMessage(data.message);
+      setShowAiModal(false);
+    } catch (e) { setAiError(e.message || 'Could not fill this template.'); } finally { setAiBusy(false); }
   };
 
   const handleAutofillSample = () => {
@@ -227,6 +252,14 @@ function CreateNoteContent() {
       setBusy(false);
     }
   }
+
+  // New emotional products use the guided creator. The legacy creator below is
+  // intentionally kept intact for every pre-existing template and saved link.
+  if (isEmotionalTemplate(selectedTemplateId)) {
+    return <EmotionalCreator templateId={selectedTemplateId} />;
+  }
+
+  return <LegacyCreator templateId={selectedTemplateId} />;
 
 
   return (
@@ -395,6 +428,7 @@ function CreateNoteContent() {
                       </div>
                     </div>
 
+
                     {/* Keywords / Memories */}
                     <div style={{ marginBottom: '0.75rem' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9f1239', display: 'block', marginBottom: '0.35rem' }}>
@@ -427,6 +461,15 @@ function CreateNoteContent() {
                       }}
                     >
                       {aiBusy ? '🤖 AI is writing message options…' : '✨ Generate 3 AI Messages'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={fillTemplateWithAi}
+                      disabled={aiBusy}
+                      style={{ width: '100%', background: '#fff', color: '#9d174d', border: '1px solid #f472b6', borderRadius: '8px', padding: '0.5rem', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer', marginBottom: '0.75rem' }}
+                    >
+                      {aiBusy ? 'Filling template…' : '✨ Fill all template fields'}
                     </button>
 
                     {aiError && <p style={{ color: '#e11d48', fontSize: '0.75rem', fontWeight: 700, margin: '0.35rem 0' }}>{aiError}</p>}

@@ -99,10 +99,34 @@ const TEMPLATE_CONTEXT = {
     style: 'warm, nostalgic, festive, sibling-specific',
     avoid: 'generic religious content — focus on the personal sibling bond',
   },
+  'just-because': {
+    occasion: 'just-because appreciation note', goal: 'make the recipient feel seen and special without relying on an occasion', style: 'warm, effortless, personal', avoid: 'mentioning an apology, forgiveness, or a special event',
+  },
+  'things-i-never-said': {
+    occasion: 'deep unsaid-feelings reveal', goal: 'gently express truths the sender has held back', style: 'honest, intimate, tender', avoid: 'apology language or melodrama',
+  },
+  'i-miss-you': {
+    occasion: 'long-distance miss-you message', goal: 'make distance feel emotional but hopeful through specific everyday moments', style: 'nostalgic, affectionate, reassuring', avoid: 'guilt, blame, or an apology tone',
+  },
+  'open-when': {
+    occasion: 'open-when letter collection', goal: 'write short comforting messages for different moments in the recipient’s life', style: 'supportive, caring, concise', avoid: 'repeating the same message across envelopes',
+  },
+  'emotional-apology': {
+    occasion: 'accountable apology experience', goal: 'own the harm, name regret, and promise concrete change while respecting their space', style: 'calm, sincere, accountable', avoid: 'excuses, pressure to forgive, or romantic clichés',
+  },
+  'youre-my-person': {
+    occasion: 'you are my person tribute', goal: 'celebrate a uniquely close bond through reasons, memories, and an inside joke', style: 'affectionate, natural, deeply personal', avoid: 'generic apology or occasion-based language',
+  },
 };
 
 // ─── High-Quality Fallback Message Engine ─────────────────────────────────
 const FALLBACK_ENGINE = {
+  'just-because': { sincere: [`{name}, there is no occasion today. I just wanted to remind you that you make life warmer, lighter, and better. {keywords}You are so special to me. ✨`, `{name}, this is a small note for an important person. Thank you for being exactly who you are. {keywords}💛` ] },
+  'things-i-never-said': { sincere: [`{name}, some feelings deserve more than a passing message. {keywords}I notice you, I value you, and I hope you always know how much you mean to me. 💌`, `{name}, I have held these words quietly for too long: you make a real difference in my life. {keywords}✨`] },
+  'i-miss-you': { sincere: [`{name}, distance has a way of making the smallest things feel precious. {keywords}I miss you, and I am holding our next moment together close. 🫂`, `{name}, even from far away, you are part of my everyday thoughts. {keywords}Until we meet again, I am only a message away. 💛`] },
+  'open-when': { sincere: [`{name}, whenever you need this, please remember: you are loved, capable, and never as alone as you think. {keywords} 💌`, `{name}, save this for a hard day: I believe in you completely, even when you are struggling to believe in yourself. ✨`] },
+  'emotional-apology': { sincere: [`{name}, I am sorry for the hurt I caused. {keywords}I take responsibility without asking you to make this easier for me. I will do better through my actions.`, `{name}, I understand that an apology does not erase what happened. I am sorry, and I will respect whatever time and space you need. 💛`] },
+  'youre-my-person': { sincere: [`{name}, you are the person I want to tell everything to — the good, the messy, and the ordinary. {keywords}Life feels more like home with you in it. ❤️`, `{name}, some people become part of your world so naturally that you cannot imagine it without them. You are that person for me. ✨`] },
   sorry: {
     romantic: [
       `Dearest {name}, I know I messed up and said things out of anger. You mean everything to me, and my heart breaks knowing I hurt you. I promise to listen better, cherish you more, and make things right. Please forgive me? 💕`,
@@ -362,6 +386,31 @@ function getFallbackMessages(templateId, tone, name, keywords) {
   return toneList.map(msg => interpolate(msg, name, keywords));
 }
 
+// Structured template autofill. This intentionally returns fields, not HTML or
+// prose to parse, so the creator can safely review and edit every value.
+function buildTemplateFill(templateId, name, tone, keywords, relationship = '') {
+  const context = keywords || `the little moments you share as ${relationship || 'people who care about each other'}`;
+  const message = getFallbackMessages(templateId, tone, name, context)[0];
+  const short = (prefix, index) => `${prefix} ${context}${index ? ` — memory ${index}` : ''}.`;
+  const fields = {
+    'just-because': { small_detail: short('I keep thinking about', 0) },
+    'things-i-never-said': { unsaid: [`I notice how you make life lighter.`, `I am grateful for your quiet kindness.`, `You matter to me more than I say.`], memory: short('I still smile when I remember', 1) },
+    'i-miss-you': { from_location: 'my side of the world', to_location: 'yours', missed_things: ['your laugh', 'our easy conversations', 'the way you understand me', 'our little routines', 'being around you'], favorite_memory: short('My favourite memory is', 1) },
+    'open-when': { envelopes: [{ title: 'you need a smile', message: `Remember ${context}. You always make the world brighter.` }, { title: 'you miss me', message: `Distance cannot change what you mean to me, ${name}.` }, { title: 'you feel alone', message: `You do not have to carry everything by yourself. I am here.` }, { title: 'you need courage', message: `You have handled hard things before. I believe in you completely.` }] },
+    'emotional-apology': { what_happened: `I have been thinking about ${context} and the way I hurt you.`, regrets: ['I regret not listening with enough care.', 'I regret making you feel unseen.', 'I regret the pain my actions caused.'], promise: 'I will listen, take responsibility, and earn back your trust through my actions.' },
+    'youre-my-person': { reasons: ['You make ordinary moments feel special.', 'You understand me without a long explanation.', 'You make me laugh when I need it most.', 'You show up with a kind heart.', 'Life feels more like home with you in it.'], memories: [short('I love remembering', 1), short('Another moment I hold close is', 2)], inside_joke: `Only we would understand ${context}.` },
+    sorry: { promise_1: 'I will listen before I react.', promise_2: 'I will make space for your feelings.', promise_3: 'I will show you through my actions that I can do better.' },
+    friendship: { sender_name: 'Your friend', vibe: tone === 'funny' ? 'funny' : 'emotional', years_known: '5', one_liner: `Built on ${context}.`, bond_traits: 'Loyal, Funny, Unforgettable' },
+    birthday: { sender_name: 'Someone who loves you', balloon_word_1: 'Joy', balloon_word_2: 'Love', balloon_word_3: 'Magic', balloon_word_4: 'Dreams', bouquet_msg_1: 'Keep shining.', bouquet_msg_2: 'You are deeply loved.', bouquet_msg_3: 'Make a wish.', bouquet_msg_4: 'Celebrate yourself.', bouquet_msg_5: 'Your best year awaits.', bouquet_msg_6: 'Never stop being you.' },
+    anniversary: { special_date: 'Our special day', promise_1: 'More laughter together.', promise_2: 'More patience and care.', promise_3: 'More beautiful memories.', promise_4: 'To choose you every day.', promise_5: 'To keep growing together.' },
+    'mothers-day': { mom_title: 'Mom', relation: 'your child', secret_note: `Thank you for ${context}.`, sticky_note_1: 'Your hugs', sticky_note_2: 'Your strength', sticky_note_3: 'Your endless love' },
+    proposal: { date_idea: `A little date inspired by ${context}.` },
+    puzzle: { hidden_message: `The real surprise is how much you mean to me. ${context}.` },
+    'wedding-invitation': { bride_name: 'Priya', groom_name: 'Arjun', venue: 'A place filled with love', venue_map_url: '', event_1_name: 'Mehndi', event_1_time: '6:00 PM', event_2_name: 'Sangeet', event_2_time: '7:00 PM', event_3_name: 'Wedding', event_3_time: '8:00 PM' },
+  };
+  return { message, details: fields[templateId] || {} };
+}
+
 // ─── Route Handler ─────────────────────────────────────────────────────────
 export async function POST(request) {
   try {
@@ -372,9 +421,16 @@ export async function POST(request) {
       keywords = '',
       mode = 'generate',
       currentMessage = '',
+      relationship = '',
     } = await request.json();
 
     const name = recipientName?.trim() || 'my special someone';
+
+
+    if (mode === 'fill_template') {
+      const fill = buildTemplateFill(templateId, name, tone, keywords, relationship);
+      return NextResponse.json({ success: true, ...fill, source: 'ai_template_engine' });
+    }
     const hfToken =
       process.env.HUGGINGFACE_API_KEY ||
       process.env.HF_TOKEN ||

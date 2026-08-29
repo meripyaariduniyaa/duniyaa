@@ -2,45 +2,56 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import BirthdayExperience from './BirthdayExperience';
+import EmotionalExperience from './EmotionalExperience';
 
 export default function TemplateRenderer({ note, isPreview = false }) {
   if (!note) return null;
 
   const templateId = note.template || 'default';
+  const vibe = note?.custom_details?.vibe || 'soft';
+  let experience;
 
   switch (templateId) {
+    case 'just-because':
+    case 'things-i-never-said':
+    case 'i-miss-you':
+    case 'open-when':
+    case 'emotional-apology':
+    case 'youre-my-person':
+      experience = <EmotionalExperience note={note} isPreview={isPreview} />; break;
     case 'sorry':
     case 'apology':
-      return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
+      experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />; break;
     case 'birthday':
     case 'birthday-surprise':
-      return <BirthdayExperience note={note} isPreview={isPreview} />;
+      experience = <BirthdayExperience note={note} isPreview={isPreview} />; break;
     case 'anniversary':
     case 'love-letter':
-      return <LoveLetterTemplate note={note} isPreview={isPreview} />;
+      experience = <LoveLetterTemplate note={note} isPreview={isPreview} />; break;
     case 'mothers-day':
     case 'letter-for-mom':
-      return <LetterForMomTemplate note={note} isPreview={isPreview} />;
+      experience = <LetterForMomTemplate note={note} isPreview={isPreview} />; break;
     case 'proposal':
     case 'be-my-valentine':
-      return <BeMyValentineTemplate note={note} isPreview={isPreview} />;
+      experience = <BeMyValentineTemplate note={note} isPreview={isPreview} />; break;
     case 'puzzle':
       // Basic placeholder for now, ideally an interactive puzzle component
-      return <PuzzleTemplate note={note} isPreview={isPreview} />;
+      experience = <PuzzleTemplate note={note} isPreview={isPreview} />; break;
     case 'friendship':
       // Basic placeholder for now, ideally a friendship experience component
-      return <FriendshipTemplate note={note} isPreview={isPreview} />;
+      experience = <FriendshipTemplate note={note} isPreview={isPreview} />; break;
     case 'wedding-invitation':
-      return <WeddingInvitationTemplate note={note} isPreview={isPreview} />;
+      experience = <WeddingInvitationTemplate note={note} isPreview={isPreview} />; break;
     case 'surprise-reveal-box':
-      return <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} />;
+      experience = <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} />; break;
     case 'a-rose-for-someone-special':
-      return <RoseSpecialTemplate note={note} isPreview={isPreview} />;
+      experience = <RoseSpecialTemplate note={note} isPreview={isPreview} />; break;
     case 'rakshabandhan':
-      return <RakshabandhanTemplate note={note} isPreview={isPreview} />;
+      experience = <RakshabandhanTemplate note={note} isPreview={isPreview} />; break;
     default:
-      return <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
+      experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
   }
+  return <div className={`experience-vibe experience-vibe--${vibe}`}>{experience}</div>;
 }
 
 /* ==========================================================================

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
+import EmotionFinder from '@/components/EmotionFinder';
 
 export const metadata = {
   title: 'LovelyCrafts — Personalized Digital Gifts & Surprises India',
@@ -46,6 +47,8 @@ export default function Home() {
             </a>
           </div>
         </section>
+
+        <div id="feelings"><EmotionFinder /></div>
 
         {/* Bento Grid: Something for Every Moment */}
         <section className="bento-section" id="experiences">

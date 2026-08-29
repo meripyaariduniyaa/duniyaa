@@ -19,7 +19,7 @@ export default function Footer() {
             <span>❤️</span> Lovely<span>Crafts</span>
           </div>
           <p className="footer-desc">
-            Personalized digital gifts & gamified interactive surprises created with love for birthdays, anniversaries, proposals, apologies, and special moments.
+            Turn the feelings that are hard to say into a private, beautiful experience they can open anywhere.
           </p>
           <div className="footer-socials">
             <a href="https://www.instagram.com/lovely.crafts.in/" target="_blank" rel="noopener noreferrer" aria-label="Follow LovelyCrafts on Instagram" className="footer-social-link" title="Instagram">
@@ -42,16 +42,16 @@ export default function Footer() {
 
 
 
-        {/* Templates Column */}
+        {/* Emotion-first Column */}
         <div className="footer-col">
-          <h4 className="footer-heading">Interactive Templates</h4>
+          <h4 className="footer-heading">Send a feeling</h4>
           <ul className="footer-list">
-            <li><Link href="/templates/proposal">The Perfect Proposal</Link></li>
-            <li><Link href="/templates/birthday">Virtual Birthday Bash</Link></li>
-            <li><Link href="/templates/mothers-day">Mother's Day Reveal</Link></li>
-            <li><Link href="/templates/a-rose-for-someone-special">A Rose for Someone Special</Link></li>
-            <li><Link href="/templates/surprise-reveal-box">Surprise Reveal Box</Link></li>
-            <li><Link href="/templates/rakshabandhan">Raksha Bandhan Card</Link></li>
+            <li><Link href="/templates/just-because">Just Because</Link></li>
+            <li><Link href="/templates/things-i-never-said">Things I Never Said</Link></li>
+            <li><Link href="/templates/i-miss-you">I Miss You</Link></li>
+            <li><Link href="/templates/open-when">Open When…</Link></li>
+            <li><Link href="/templates/emotional-apology">I&apos;m Sorry</Link></li>
+            <li><Link href="/templates/youre-my-person">You&apos;re My Person</Link></li>
           </ul>
         </div>
 
@@ -59,8 +59,10 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-heading">Product</h4>
           <ul className="footer-list">
-            <li><Link href="/templates">All Templates</Link></li>
-            <li><Link href="/templates">Create a Gift</Link></li>
+            <li><Link href="/#feelings">Find by feeling</Link></li>
+            <li><Link href="/templates">Browse all gifts</Link></li>
+            <li><Link href="/templates/birthday">Classic birthday surprise</Link></li>
+            <li><Link href="/templates/proposal">Classic proposal</Link></li>
             <li><Link href="/profile">My Dashboard</Link></li>
           </ul>
           <h4 className="footer-heading" style={{ marginTop: '1.5rem' }}>Legal</h4>
@@ -74,7 +76,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="footer-bottom">
         <p>© {new Date().getFullYear()} Lovely Crafts. All rights reserved.</p>
-        <p>Made with 💛 for the people you love.</p>
+        <p>Made for the people who matter most.</p>
       </div>
     </footer>
   );

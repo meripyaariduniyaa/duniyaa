@@ -8,6 +8,7 @@ import { db } from '@/lib/firebase';
 import PayButton from '@/components/PayButton';
 import Link from 'next/link';
 import TemplateRenderer from '@/components/templates/TemplateRenderer';
+import { templates } from '@/lib/templates';
 
 export default function PreviewPage() {
   return (
@@ -73,7 +74,8 @@ function PreviewContent() {
   }, [apology]);
 
   const hasCustomSlug = Boolean(apology?.custom_slug);
-  const basePrice = 199;
+  const selectedTemplate = templates.find((template) => template.id === apology?.template);
+  const basePrice = selectedTemplate?.price || 199;
   const customLinkFee = hasCustomSlug ? 29 : 0;
   const totalBeforeCoupon = basePrice + customLinkFee;
 
@@ -181,7 +183,7 @@ function PreviewContent() {
                     <p style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>Order summary</p>
                     <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.95rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Interactive Greeting Note</span>
+                        <span>{selectedTemplate?.title || 'Interactive Greeting Note'}</span>
                         <span>₹{basePrice}</span>
                       </div>
                       {hasCustomSlug && (
