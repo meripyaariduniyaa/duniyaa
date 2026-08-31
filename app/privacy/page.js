@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
             <ul>
               <li><strong>Device Identifier:</strong> We generate and store an anonymous device ID in your browser&apos;s local storage to associate unpaid notes with your device for up to 90 days.</li>
               <li><strong>Usage Data:</strong> Standard server logs including IP address, browser type, referring URL, and pages visited may be retained for security and analytical purposes.</li>
-              <li><strong>Cookies:</strong> We use session cookies required for authentication and minimal analytics cookies. We do not serve advertising cookies or track you across third-party websites.</li>
+              <li><strong>Cookies & Advertising:</strong> We use cookies for session management, analytics, and serving non-intrusive advertisements via Google AdSense on public pages. Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to your website or other websites. You can opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899' }}>Google Ads Settings</a>.</li>
             </ul>
           </Section>
 
@@ -99,6 +99,7 @@ export default function PrivacyPolicyPage() {
           <Section title="5. Third-Party Services">
             <p>We use the following trusted third-party services. Each operates under their own privacy policy:</p>
             <Table rows={[
+              ['Google AdSense', 'Ad serving and monetization', 'https://policies.google.com/technologies/ads'],
               ['Firebase (Google)', 'Authentication, Firestore database', 'https://firebase.google.com/support/privacy'],
               ['Cloudinary', 'Image storage and delivery', 'https://cloudinary.com/privacy'],
               ['Razorpay', 'Payment processing (India)', 'https://razorpay.com/privacy/'],
