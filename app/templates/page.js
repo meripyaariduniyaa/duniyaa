@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { templates } from '@/lib/templates';
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 import GoogleAd from '@/components/GoogleAd';
+import PreviewDemoButton from '@/components/PreviewDemoButton';
 
 
 export const metadata = {
@@ -114,13 +115,13 @@ export default function TemplatesPage() {
                   </div>
                 </div>
 
-                <div className="template-meta" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <div className="template-meta" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.06)', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <span className="template-time">⏱ {t.time}</span>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <Link href={`/templates/${t.id}`} className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                      Learn Details ➔
-                    </Link>
-                    <Link href={`/create?template=${t.id}`} className="btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <PreviewDemoButton templateId={t.id} className="btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}>
+                      👁️ Live Demo
+                    </PreviewDemoButton>
+                    <Link href={`/create?template=${t.id}`} className="btn-primary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}>
                       Create Now
                     </Link>
                   </div>

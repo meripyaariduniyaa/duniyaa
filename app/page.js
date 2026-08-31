@@ -3,6 +3,7 @@ import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
 import EmotionFinder from '@/components/EmotionFinder';
 import LiveActivityTicker from '@/components/LiveActivityTicker';
 import GoogleAd from '@/components/GoogleAd';
+import PreviewDemoButton from '@/components/PreviewDemoButton';
 
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
@@ -268,13 +269,13 @@ export default function Home() {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                    <Link
-                      href={`/templates/${item.id}`}
+                    <PreviewDemoButton
+                      templateId={item.id}
                       className="btn-secondary"
-                      style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center' }}
+                      style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700, textAlign: 'center', width: '100%' }}
                     >
                       👁️ Preview
-                    </Link>
+                    </PreviewDemoButton>
                     <Link
                       href={`/create?template=${item.id}`}
                       className="btn-primary"

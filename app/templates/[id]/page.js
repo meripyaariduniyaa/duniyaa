@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { templates } from '@/lib/templates';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
+import PreviewDemoButton from '@/components/PreviewDemoButton';
 
 export async function generateStaticParams() {
   return templates.map((t) => ({
@@ -158,6 +159,9 @@ export default async function TemplateDetailPage({ params }) {
             <Link href={`/create?template=${template.id}`} className="btn-primary" style={{ padding: '0.8rem 1.8rem', fontSize: '1.05rem' }}>
               ✨ Create {template.title} Now
             </Link>
+            <PreviewDemoButton templateId={template.id} className="btn-secondary" style={{ padding: '0.8rem 1.5rem', fontSize: '1rem' }}>
+              👁️ Play Live Interactive Demo
+            </PreviewDemoButton>
             <Link href="/templates" className="btn-secondary" style={{ padding: '0.8rem 1.5rem', fontSize: '1rem' }}>
               ← View All Templates
             </Link>
