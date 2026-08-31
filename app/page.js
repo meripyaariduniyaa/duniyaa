@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
 import EmotionFinder from '@/components/EmotionFinder';
 import LiveActivityTicker from '@/components/LiveActivityTicker';
+import GoogleAd from '@/components/GoogleAd';
 
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
@@ -499,6 +500,9 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        {/* Subtle Home Page Ad Unit */}
+        <GoogleAd slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ID} className="home-ad-banner" />
 
         {/* High-Urgency Bottom Call-to-Action Banner */}
         <section style={{

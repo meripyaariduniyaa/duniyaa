@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { templates } from '@/lib/templates';
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
+import GoogleAd from '@/components/GoogleAd';
 
 
 export const metadata = {
@@ -128,6 +129,9 @@ export default function TemplatesPage() {
             ))}
           </div>
         </section>
+
+        {/* Subtle Templates Page Ad Unit */}
+        <GoogleAd slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ID} className="templates-ad-banner" />
       </div>
     </main>
   );

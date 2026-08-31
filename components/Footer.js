@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import GoogleAd from '@/components/GoogleAd';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -119,6 +120,9 @@ export default function Footer() {
           </div>
 
         </div>
+
+        {/* Subtle Google Ad Unit (Excluded automatically on /create, /preview, /p/*) */}
+        <GoogleAd slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ID} className="footer-ad-banner" />
 
         {/* Bottom Bar */}
         <div className="footer-bottom-bar">

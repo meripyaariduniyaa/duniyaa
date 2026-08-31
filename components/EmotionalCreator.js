@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/firebase';
 import { emotionalTemplates } from '@/lib/emotionalTemplates';
@@ -33,10 +33,37 @@ export default function EmotionalCreator({ templateId }) {
   const [message, setMessage] = useState('');
   const [details, setDetails] = useState({ unsaid: ['', '', ''], missed_things: ['', '', '', '', ''], envelopes: [{ title: 'you need a smile', message: '' }, { title: 'you miss me', message: '' }, { title: 'you feel alone', message: '' }, { title: 'you need courage', message: '' }], regrets: ['', '', ''], reasons: ['', '', '', '', ''], memories: ['', '', '', '', ''] });
   const [images, setImages] = useState([]);
+  const [customSlug, setCustomSlug] = useState('');
+  const [slugStatus, setSlugStatus] = useState('');
   const [aiContext, setAiContext] = useState('');
   const [aiBusy, setAiBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  const sanitizeSlug = (val) => {
+    return val
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60);
+  };
+
+  const handleSlugChange = async (val) => {
+    const clean = sanitizeSlug(val);
+    setCustomSlug(clean);
+    if (!clean || clean.length < 3) {
+      setSlugStatus('');
+      return;
+    }
+    setSlugStatus('checking');
+    try {
+      const snap = await getDoc(doc(db, 'notes', clean));
+      setSlugStatus(snap.exists() ? 'taken' : 'available');
+    } catch {
+      setSlugStatus('');
+    }
+  };
   const update = (key, value) => setDetails((current) => ({ ...current, [key]: value }));
   const valid = recipient.trim() && message.trim();
   const personalizationComplete = () => {
@@ -75,10 +102,19 @@ export default function EmotionalCreator({ templateId }) {
     if (!valid) { setError('Add their name and your final message before continuing.'); return; }
     setBusy(true); setError('');
     try {
-      const id = nanoid(32);
+      let docId = nanoid(32);
+      if (customSlug && customSlug.length >= 3) {
+        const snap = await getDoc(doc(db, 'notes', customSlug));
+        if (snap.exists()) {
+          setError('That custom link is already taken. Please choose another.');
+          setBusy(false);
+          return;
+        }
+        docId = customSlug;
+      }
       let deviceId = localStorage.getItem('note_device_id');
       if (!deviceId) { deviceId = nanoid(32); localStorage.setItem('note_device_id', deviceId); }
-      await setDoc(doc(db, 'notes', id), {
+      await setDoc(doc(db, 'notes', docId), {
         creator_uid: deviceId,
         recipient_name: recipient.trim(),
         custom_message: message.trim(),
@@ -96,12 +132,12 @@ export default function EmotionalCreator({ templateId }) {
         },
         is_paid: false,
         template: template.id,
-        custom_slug: null,
+        custom_slug: customSlug && customSlug.length >= 3 ? customSlug : null,
         created_at: serverTimestamp(),
         expires_at: null
       });
-      const ids = JSON.parse(localStorage.getItem('created_note_ids') || '[]'); localStorage.setItem('created_note_ids', JSON.stringify([...ids, id]));
-      router.push(`/preview?id=${id}`);
+      const ids = JSON.parse(localStorage.getItem('created_note_ids') || '[]'); localStorage.setItem('created_note_ids', JSON.stringify([...ids, docId]));
+      router.push(`/preview?id=${docId}`);
     } catch (e) { setError(e.message || 'Could not create this experience.'); setBusy(false); }
   };
   const addPhoto = (url) => setImages((current) => current.length < template.photoLimit ? [...current, url] : current);
@@ -183,6 +219,24 @@ export default function EmotionalCreator({ templateId }) {
                 />
               </div>
             )}
+          </div>
+
+          {/* Custom Link Section */}
+          <div className="form-group" style={{ background: '#fdf2f8', padding: '14px', borderRadius: '14px', border: '1px solid #fbcfe8' }}>
+            <label className="form-label" style={{ color: '#881337', marginBottom: '6px' }}>🔗 Personalize Custom Link (Optional)</label>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #f9a8d4', borderRadius: '8px', overflow: 'hidden' }}>
+              <span style={{ padding: '8px 12px', background: '#fce7f3', color: '#be185d', fontSize: '0.85rem', fontWeight: 600, borderRight: '1px solid #f9a8d4', whiteSpace: 'nowrap' }}>lovelycrafts.in/p/</span>
+              <input
+                className="form-input"
+                style={{ border: 'none', borderRadius: 0, outline: 'none', boxShadow: 'none' }}
+                placeholder="e.g. maya-25 (optional)"
+                value={customSlug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+              />
+            </div>
+            {slugStatus === 'checking' && <p style={{ color: '#9333ea', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>Checking link availability…</p>}
+            {slugStatus === 'available' && <p style={{ color: '#16a34a', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>✓ Custom link is available!</p>}
+            {slugStatus === 'taken' && <p style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>✗ Link taken. Try another name or numbers.</p>}
           </div>
 
           <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoLimit})</label><CloudinaryUpload onUpload={addPhoto} currentCount={images.length} maxPhotos={template.photoLimit} />{images.length > 0 && <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, i) => i !== index))} style={{ border: 0, background: 'none', cursor: 'pointer' }}><img src={url} alt="Selected memory" style={{ width: 64, height: 64, borderRadius: 10, objectFit: 'cover' }} /></button>)}</div>}</div>
