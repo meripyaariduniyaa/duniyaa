@@ -122,8 +122,14 @@ export default function RootLayout({ children }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema).replace(/</g, '\\u003c') }} />
-        <Script src="/oneko/oneko.js" strategy="lazyOnload" />
-
+        {/* Google AdSense Site Verification & Auto Ads Script */}
+        <Script
+          id="google-adsense-script"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8921431202323090"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
 
         {/* Google Analytics 4 */}
         {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'G-XXXXXXXXXX' && (
