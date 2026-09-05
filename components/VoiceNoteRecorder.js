@@ -24,6 +24,12 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
 
   const startRecording = async () => {
     setError('');
+
+    if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
+      setError('Microphone recording is not supported in this browser or environment.');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
@@ -63,8 +69,15 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
         });
       }, 1000);
     } catch (err) {
-      console.error('Microphone error:', err);
-      setError('Microphone permission denied or unsupported browser.');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError('Microphone access was blocked. Please allow microphone permissions in your browser address bar (🔒 icon).');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setError('No microphone found on your device.');
+      } else if (err.name === 'NotReadableError') {
+        setError('Microphone is currently in use by another application.');
+      } else {
+        setError('Could not access microphone. Please check your browser settings.');
+      }
     }
   };
 
