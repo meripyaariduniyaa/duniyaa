@@ -294,13 +294,13 @@ export default function EmotionalExperience({ note, isPreview = false }) {
         {stage === 0 ? (
           <div style={{ animation: 'sorryStepFadeIn 0.5s ease' }}>
             <div style={{ fontSize: 52, marginBottom: '0.5rem' }}>{scene.icon || '💌'}</div>
-            <p style={{ textTransform: 'uppercase', letterSpacing: '.18em', fontSize: 12, fontWeight: 700, color: '#be185d', marginBottom: '0.5rem' }}>
+            <p style={{ textTransform: 'uppercase', letterSpacing: '.18em', fontSize: 12, fontWeight: 700, color: 'var(--vibe-button, #be185d)', marginBottom: '0.5rem' }}>
               LovelyCrafts Experience
             </p>
-            <h1 style={{ fontSize: 'clamp(2rem,8vw,3.3rem)', margin: '.25rem 0 1rem', color: '#1f2937', fontWeight: 800 }}>
+            <h1 style={{ fontSize: 'clamp(2rem,8vw,3.3rem)', margin: '.25rem 0 1rem', color: 'var(--vibe-text, #1f2937)', fontWeight: 800 }}>
               {scene.title || `This was made for you, ${name}.`}
             </h1>
-            <p style={{ fontSize: '1.1rem', color: '#4b5563', maxWidth: '480px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '1.1rem', color: 'var(--vibe-muted, #4b5563)', maxWidth: '480px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
               {scene.subtitle || 'Ready for a journey made especially for you?'}
             </p>
             <button className="btn-primary" style={{ padding: '0.9rem 2.4rem', fontSize: '1.05rem' }} onClick={() => setStage(1)}>
@@ -326,8 +326,8 @@ export default function EmotionalExperience({ note, isPreview = false }) {
 
             {scene.type === 'envelopes' ? (
               <>
-                <p style={{ textTransform: 'uppercase', letterSpacing: '.14em', fontSize: 12, fontWeight: 700, color: '#be185d' }}>{scene.eyebrow}</p>
-                <h2 style={{ fontSize: 'clamp(1.75rem,6vw,2.5rem)', margin: '0.35rem 0 1.25rem', color: '#111827', fontWeight: 800 }}>{scene.title}</h2>
+                <p style={{ textTransform: 'uppercase', letterSpacing: '.14em', fontSize: 12, fontWeight: 700, color: 'var(--vibe-button, #be185d)' }}>{scene.eyebrow}</p>
+                <h2 style={{ fontSize: 'clamp(1.75rem,6vw,2.5rem)', margin: '0.35rem 0 1.25rem', color: 'var(--vibe-text, #111827)', fontWeight: 800 }}>{scene.title}</h2>
                 <div style={{ display: 'grid', gap: 12, margin: '1.5rem 0' }}>
                   {scene.items.map((item, i) => (
                     <button
@@ -348,9 +348,9 @@ export default function EmotionalExperience({ note, isPreview = false }) {
               </>
             ) : (
               <>
-                {scene.eyebrow && <p style={{ textTransform: 'uppercase', letterSpacing: '.14em', fontSize: 12, fontWeight: 700, color: '#be185d', marginBottom: '0.4rem' }}>{scene.eyebrow}</p>}
-                {scene.title && <h2 style={{ fontSize: 'clamp(1.65rem,6vw,2.6rem)', margin: '.25rem 0 1rem', color: '#111827', fontWeight: 800, whiteSpace: 'pre-wrap', lineHeight: 1.25 }}>{scene.title}</h2>}
-                {scene.body && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '1.05rem', color: '#374151', margin: '0 auto 1.5rem', maxWidth: '540px' }}>{scene.body}</p>}
+                {scene.eyebrow && <p style={{ textTransform: 'uppercase', letterSpacing: '.14em', fontSize: 12, fontWeight: 700, color: 'var(--vibe-button, #be185d)', marginBottom: '0.4rem' }}>{scene.eyebrow}</p>}
+                {scene.title && <h2 style={{ fontSize: 'clamp(1.65rem,6vw,2.6rem)', margin: '.25rem 0 1rem', color: 'var(--vibe-text, #111827)', fontWeight: 800, whiteSpace: 'pre-wrap', lineHeight: 1.25 }}>{scene.title}</h2>}
+                {scene.body && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: '1.05rem', color: 'var(--vibe-muted, #374151)', margin: '0 auto 1.5rem', maxWidth: '540px' }}>{scene.body}</p>}
                 {scene.cards && (
                   <div style={{ display: 'grid', gap: 12, marginTop: 20 }}>
                     {scene.cards.map((card, i) => {

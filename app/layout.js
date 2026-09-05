@@ -5,7 +5,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MarketingPopup from '@/components/MarketingPopup';
 import StickyCtaBar from '@/components/StickyCtaBar';
-import ArcadeAdSenseScript from '@/components/ArcadeAdSenseScript';
 import Script from 'next/script';
 import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, CONTACT_EMAIL, INSTAGRAM_URL, X_URL } from '@/lib/seo';
 
@@ -110,6 +109,14 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en-IN" className={`${fredoka.variable} ${caveat.variable} ${dancing.variable}`}>
+      <head>
+        {/* Google AdSense Site Verification & Auto Ads Script (Plain head script avoids data-nscript warning) */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-8921431202323090'}`}
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <AuthProvider>
           <Header />
@@ -117,19 +124,10 @@ export default function RootLayout({ children }) {
           <Footer />
           <MarketingPopup />
           <StickyCtaBar />
-          <ArcadeAdSenseScript />
         </AuthProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema).replace(/</g, '\\u003c') }} />
-        {/* Google AdSense Site Verification & Auto Ads Script */}
-        <Script
-          id="google-adsense-script"
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8921431202323090"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
 
         {/* Google Analytics 4 */}
         {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'G-XXXXXXXXXX' && (

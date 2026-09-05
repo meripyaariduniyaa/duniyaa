@@ -39,14 +39,15 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
       setResolvedOrder(order);
 
       if (order.free) {
-        setFeedback(`🎉 100% off! Your note is unlocked for free.`);
+        setFeedback(order.message || `🎉 100% off! Your note is unlocked for free.`);
       } else {
         const discounted = (order.amount / 100).toFixed(0);
         const saved = (basePrice - discounted).toFixed(0);
         setFeedback(
-          order.discountPercent
+          order.message ||
+          (order.discountPercent
             ? `✅ Coupon applied! ${order.discountPercent}% off — you save ₹${saved}.`
-            : '✅ Coupon applied!'
+            : '✅ Coupon applied!')
         );
       }
     } catch (e) {

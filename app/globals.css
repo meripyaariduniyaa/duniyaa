@@ -1067,13 +1067,6 @@ a {
   margin: 0;
 }
 
-.footer-coupon-highlight {
-  background: #be185d;
-  color: #ffffff;
-  padding: 0.15rem 0.5rem;
-  border-radius: 6px;
-  letter-spacing: 1px;
-}
 
 .footer-promo-btn {
   padding: 0.65rem 1.4rem;
@@ -1833,7 +1826,7 @@ a {
 .experience-vibe .emotional-experience { background: var(--vibe-bg); color: var(--vibe-text); box-shadow: 0 22px 55px rgba(15,23,42,.22); }
 .experience-vibe .emotional-experience h1,
 .experience-vibe .emotional-experience h2,
-.experience-vibe .emotional-experience h3 { color: var(--vibe-text); }
+.experience-vibe .emotional-experience h3 { color: var(--vibe-text) !important; }
 .experience-vibe .emotional-experience .btn-primary { background: var(--vibe-button); color: #fff; box-shadow: 0 9px 22px color-mix(in srgb, var(--vibe-button) 36%, transparent); }
 .emotional-reveal-card { border: 1px solid var(--vibe-border); border-radius: 14px; padding: 16px; color: var(--vibe-text); background: var(--vibe-surface); cursor: pointer; font: inherit; line-height: 1.5; transition: transform .2s ease, background .2s ease; }
 .emotional-reveal-card:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--vibe-surface) 70%, white); }

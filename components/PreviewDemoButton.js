@@ -30,7 +30,11 @@ export default function PreviewDemoButton({
           gap: '0.4rem',
           ...style,
         }}
-        onClick={() => setShowModal(true)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowModal(true);
+        }}
       >
         {children || '👁️ Live Preview'}
       </button>

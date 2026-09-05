@@ -45,7 +45,6 @@ const BEST_SELLERS = [
 
 export default function MarketingPopup() {
   const [isVisible, setIsVisible] = useState(false);
-  const [copied, setCopied] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -66,14 +65,6 @@ export default function MarketingPopup() {
       return () => clearTimeout(timer);
     }
   }, [pathname]);
-
-  const handleCopyCode = () => {
-    try {
-      navigator.clipboard.writeText('NEW2026');
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
-    } catch {}
-  };
 
   if (!isVisible) return null;
 
@@ -169,50 +160,7 @@ export default function MarketingPopup() {
             </Link>
           ))}
         </div>
-        
-        {/* Discount Box with 1-Click Copy */}
-        <div style={{
-          background: 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
-          border: '1.5px dashed #f43f5e',
-          borderRadius: '16px',
-          padding: '0.75rem 1rem',
-          marginBottom: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.5rem'
-        }}>
-          <div style={{ textAlign: 'left' }}>
-            <p style={{ margin: 0, fontWeight: 800, color: '#9f1239', fontSize: '0.85rem' }}>
-              🎁 Extra 50% OFF Code
-            </p>
-            <p style={{ margin: '2px 0 0', color: '#881337', fontSize: '0.75rem' }}>
-              Instant delivery on WhatsApp
-            </p>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleCopyCode}
-            style={{
-              background: '#be185d',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.4rem 0.85rem',
-              fontWeight: 800,
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'background 0.2s ease'
-            }}
-          >
-            {copied ? '✓ COPIED!' : '🏷️ NEW2026 (Copy)'}
-          </button>
-        </div>
 
         {/* Action Button */}
         <Link 

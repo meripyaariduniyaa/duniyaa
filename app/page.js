@@ -525,10 +525,6 @@ export default function Home() {
             Create a private, interactive digital experience that will touch their heart and stay forever.
           </p>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', border: '1px solid #fecdd3', padding: '0.45rem 1.2rem', borderRadius: '999px', fontWeight: 800, color: '#be185d', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-            <span>🏷️ Use Code <strong>NEW2026</strong> for Extra Discount</span>
-          </div>
-
           <div>
             <Link
               href="/templates"

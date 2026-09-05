@@ -18,9 +18,9 @@ export default function Footer() {
         {/* Top Mini Promo Ribbon */}
         <div className="footer-promo-card">
           <div className="footer-promo-left">
-            <span className="footer-promo-badge">🎁 SPECIAL LAUNCH OFFER</span>
+            <span className="footer-promo-badge">🎁 CRAFT A SURPRISE</span>
             <h3 className="footer-promo-title">Send an unforgettable interactive surprise today</h3>
-            <p className="footer-promo-desc">Use coupon code <strong className="footer-coupon-highlight">NEW2026</strong> for an extra 50% discount at checkout.</p>
+            <p className="footer-promo-desc">Personalize with photos, secret messages &amp; music in just 2 minutes.</p>
           </div>
           <Link href="/templates" className="btn-primary footer-promo-btn">
             ✨ Craft a Surprise (₹199) →
