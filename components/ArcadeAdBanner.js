@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 /**
@@ -10,29 +10,31 @@ import Link from 'next/link';
  * 1. Google AdSense (when NEXT_PUBLIC_ADSENSE_CLIENT_ID env is configured)
  * 2. High-converting internal House Ads / Premium Template Promos (when AdSense is loading/disabled/dev mode)
  */
-export default function ArcadeAdBanner({ slot = 'banner', format = 'auto', className = '' }) {
-  const [adSenseLoaded, setAdSenseLoaded] = useState(false);
+export default function ArcadeAdBanner({ slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ID || 'banner', format = 'auto', className = '' }) {
+  const adRef = useRef(null);
   const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
   useEffect(() => {
-    if (adsenseClientId && typeof window !== 'undefined') {
-      try {
+    if (!adsenseClientId || typeof window === 'undefined') return;
+
+    try {
+      if (adRef.current && !adRef.current.getAttribute('data-adsbygoogle-status')) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        setAdSenseLoaded(true);
-      } catch (err) {
-        console.warn('AdSense push error:', err);
       }
+    } catch {
+      // Gracefully catch duplicate pushes during React Fast Refresh / strict mode
     }
-  }, [adsenseClientId]);
+  }, [adsenseClientId, slot]);
 
   // If real Google AdSense ID is set, render the AdSense <ins> tag
-  if (adsenseClientId && adSenseLoaded) {
+  if (adsenseClientId) {
     return (
       <div className={`arcade-ad-wrapper ${className}`} style={{ margin: '1.25rem 0', textAlign: 'center' }}>
         <span style={{ fontSize: '0.65rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>
           ADVERTISEMENT
         </span>
         <ins
+          ref={adRef}
           className="adsbygoogle"
           style={{ display: 'block', minHeight: '90px' }}
           data-ad-client={adsenseClientId}

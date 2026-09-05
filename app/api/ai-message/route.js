@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server';
 
+const TEMPLATE_ALIAS = {
+  'birthday-surprise': 'birthday',
+  'love-letter': 'anniversary',
+  'letter-for-mom': 'mothers-day',
+  'letter-for-dad': 'fathers-day',
+  'be-my-valentine': 'proposal',
+  'warm-hug': 'get-well-soon',
+  apology: 'sorry',
+};
+
 // ─── Template Context Map ──────────────────────────────────────────────────
 // Describes each template's occasion/goal/style so the AI crafts relevant messages.
 const TEMPLATE_CONTEXT = {
@@ -329,13 +339,6 @@ const FALLBACK_ENGINE = {
   },
 };
 
-// ─── Alias map to normalize template IDs ──────────────────────────────────
-const TEMPLATE_ALIAS = {
-  apology: 'sorry',
-  'mothers-day': 'letter-for-mom',
-  anniversary: 'love-letter',
-};
-
 // ─── Build a context-rich HuggingFace prompt ──────────────────────────────
 function buildHFPrompt(templateId, name, tone, keywords, mode, currentMessage, relationship = '') {
   const resolvedId = TEMPLATE_ALIAS[templateId] || templateId;
@@ -529,7 +532,8 @@ function buildTemplateFill(templateId, name, tone, keywords, relationship = '') 
     puzzle: { hidden_message: `The real surprise is how much you mean to me. ${context}.` },
     'wedding-invitation': { bride_name: 'Priya', groom_name: 'Arjun', venue: 'A place filled with love', venue_map_url: '', event_1_name: 'Mehndi', event_1_time: '6:00 PM', event_2_name: 'Sangeet', event_2_time: '7:00 PM', event_3_name: 'Wedding', event_3_time: '8:00 PM' },
   };
-  return { message, details: fields[templateId] || {} };
+  const resolvedId = TEMPLATE_ALIAS[templateId] || templateId;
+  return { message, details: fields[resolvedId] || fields[templateId] || {} };
 }
 
 // ─── Route Handler ─────────────────────────────────────────────────────────
@@ -540,15 +544,17 @@ export async function POST(request) {
       recipientName,
       tone = 'romantic',
       keywords = '',
+      aiContext = '',
       mode = 'generate',
       currentMessage = '',
       relationship = '',
     } = await request.json();
 
     const name = recipientName?.trim() || 'my special someone';
+    const finalKeywords = (keywords || aiContext || '').trim();
 
-    if (mode === 'fill_template') {
-      const fill = buildTemplateFill(templateId, name, tone, keywords, relationship);
+    if (mode === 'fill_template' || mode === 'emotional-template') {
+      const fill = buildTemplateFill(templateId, name, tone, finalKeywords, relationship);
       return NextResponse.json({ success: true, ...fill, source: 'ai_template_engine' });
     }
     const hfToken =
