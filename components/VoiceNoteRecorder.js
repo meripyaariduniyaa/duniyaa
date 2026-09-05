@@ -12,6 +12,7 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'vkcgnlm1';
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'apology_images';
@@ -26,7 +27,7 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
     setError('');
 
     if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
-      setError('Microphone recording is not supported in this browser or environment.');
+      setError('Live microphone is restricted in this browser window. Please use the "Upload Audio" option below.');
       return;
     }
 
@@ -70,13 +71,11 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
       }, 1000);
     } catch (err) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setError('Microphone access was blocked. Please allow microphone permissions in your browser address bar (🔒 icon).');
+        setError('Microphone permission blocked. You can allow it via the 🔒 icon in the address bar, or use "Upload Audio" below.');
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setError('No microphone found on your device.');
-      } else if (err.name === 'NotReadableError') {
-        setError('Microphone is currently in use by another application.');
+        setError('No microphone found. Please use "Upload Audio" to attach an audio file.');
       } else {
-        setError('Could not access microphone. Please check your browser settings.');
+        setError('Microphone is restricted in this window. Please use "Upload Audio" to select your voice note.');
       }
     }
   };
@@ -92,12 +91,12 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
     setRecording(false);
   };
 
-  const uploadAudio = async (blob) => {
+  const uploadAudio = async (blobOrFile) => {
     setUploading(true);
     setError('');
     try {
       const formData = new FormData();
-      formData.append('file', blob, 'voicenote.webm');
+      formData.append('file', blobOrFile, 'voicenote.webm');
       formData.append('upload_preset', uploadPreset);
       formData.append('resource_type', 'video'); // Cloudinary handles audio as video resource_type
 
@@ -110,19 +109,40 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
       if (data?.secure_url) {
         onVoiceRecorded(data.secure_url);
       } else {
-        setError('Could not upload voice note. Please try again.');
+        setError('Could not upload audio note. Please try again.');
       }
     } catch (err) {
       console.error('Cloudinary audio upload failed:', err);
-      setError('Failed to save voice note. Check internet connection.');
+      setError('Failed to save audio note. Check internet connection.');
     } finally {
       setUploading(false);
     }
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|m4a|aac|ogg|webm)$/i)) {
+      setError('Please select a valid audio file (.mp3, .m4a, .wav, .aac, or .webm).');
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setError('Audio file is too large (max 15MB).');
+      return;
+    }
+
+    setError('');
+    const localUrl = URL.createObjectURL(file);
+    setAudioUrl(localUrl);
+    await uploadAudio(file);
+  };
+
   const removeVoiceNote = () => {
     setAudioUrl('');
     setTimeLeft(30);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     if (onVoiceRemoved) onVoiceRemoved();
   };
 
@@ -134,10 +154,18 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
       padding: '1rem 1.25rem',
       marginTop: '0.75rem',
     }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.webm"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '1.2rem' }}>🎙️</span>
-          <strong style={{ fontSize: '0.92rem', color: '#581c87' }}>Personal Voice Note (Max 30s)</strong>
+          <strong style={{ fontSize: '0.92rem', color: '#581c87' }}>Personal Voice Note / Audio</strong>
         </div>
         {recording && (
           <span style={{
@@ -155,33 +183,57 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
       </div>
 
       <p style={{ fontSize: '0.82rem', color: '#6b21a8', margin: '0 0 0.75rem 0', lineHeight: 1.4 }}>
-        Speak from the heart! Record up to 30 seconds of your voice to play inside the surprise note.
+        Speak from the heart! Record up to 30 seconds of your voice or upload a voice memo to play inside the surprise.
       </p>
 
       {!audioUrl && !recording && (
-        <button
-          type="button"
-          onClick={startRecording}
-          disabled={uploading}
-          style={{
-            width: '100%',
-            padding: '0.75rem 1rem',
-            background: 'linear-gradient(135deg, #a855f7, #7e22ce)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            boxShadow: '0 4px 12px rgba(168, 85, 247, 0.25)',
-          }}
-        >
-          <span>🎙️ Start Recording (30s)</span>
-        </button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={startRecording}
+            disabled={uploading}
+            style={{
+              padding: '0.75rem 0.75rem',
+              background: 'linear-gradient(135deg, #a855f7, #7e22ce)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.86rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 4px 12px rgba(168, 85, 247, 0.25)',
+            }}
+          >
+            <span>🎙️ Record (30s)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            style={{
+              padding: '0.75rem 0.75rem',
+              background: '#ffffff',
+              color: '#7e22ce',
+              border: '1.5px solid #d8b4fe',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.86rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            }}
+          >
+            <span>📁 Upload Audio</span>
+          </button>
+        </div>
       )}
 
       {recording && (
