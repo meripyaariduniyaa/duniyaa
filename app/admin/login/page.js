@@ -2,8 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { auth, signInWithGoogle } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 
 function AdminLoginContent() {
@@ -36,20 +35,29 @@ function AdminLoginContent() {
   const handleSignIn = async () => {
     setSigningIn(true);
     setError('');
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const token = await result.user.getIdToken();
-      const res = await fetch('/api/admin/overview', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        router.push('/admin/dashboard');
-      } else {
-        setError('Access Denied: Your Google account is not in the ADMIN_EMAILS allowlist.');
+    const { user: signedUser, error: authErr } = await signInWithGoogle();
+    if (authErr) {
+      setError(authErr);
+      setSigningIn(false);
+      return;
+    }
+    if (signedUser) {
+      try {
+        const token = await signedUser.getIdToken();
+        const res = await fetch('/api/admin/overview', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          router.push('/admin/dashboard');
+        } else {
+          setError('Access Denied: Your Google account is not in the ADMIN_EMAILS allowlist.');
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to verify admin status.');
+      } finally {
+        setSigningIn(false);
       }
-    } catch (err) {
-      setError(err.message || 'Failed to sign in.');
-    } finally {
+    } else {
       setSigningIn(false);
     }
   };

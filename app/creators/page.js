@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { signInWithGoogle } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 import { CREATOR_TIERS } from '@/lib/creator-club';
 
@@ -68,13 +67,11 @@ export default function CreatorsLandingPage() {
   const handleGoogleSignIn = async () => {
     setAuthLoading(true);
     setErrorMessage('');
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      setErrorMessage(err.message || 'Google sign in failed.');
-    } finally {
-      setAuthLoading(false);
+    const { error: authErr } = await signInWithGoogle();
+    if (authErr) {
+      setErrorMessage(authErr);
     }
+    setAuthLoading(false);
   };
 
   const handleAvatarUpload = async (e) => {

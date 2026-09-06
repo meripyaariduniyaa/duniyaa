@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { auth, signInWithGoogle } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function CreatorLoginPage() {
@@ -22,11 +21,15 @@ export default function CreatorLoginPage() {
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
     setError('');
-    try {
-      await signInWithPopup(auth, googleProvider);
+    const { user: signedUser, error: authErr } = await signInWithGoogle();
+    if (authErr) {
+      setError(authErr);
+      setSigningIn(false);
+      return;
+    }
+    if (signedUser) {
       router.push('/creator/dashboard');
-    } catch (err) {
-      setError(err.message || 'Failed to sign in with Google.');
+    } else {
       setSigningIn(false);
     }
   };
