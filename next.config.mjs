@@ -23,6 +23,7 @@ const nextConfig = {
           { key: 'X-Robots-Tag', value: 'index, follow, max-image-preview:large, max-snippet:-1' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
         ],
       },
       {
