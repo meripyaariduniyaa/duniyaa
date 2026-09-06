@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MarketingPopup from '@/components/MarketingPopup';
 import StickyCtaBar from '@/components/StickyCtaBar';
+import Oneko from '@/components/Oneko';
 import Script from 'next/script';
 import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, CONTACT_EMAIL, INSTAGRAM_URL, X_URL } from '@/lib/seo';
 
@@ -124,6 +125,7 @@ export default function RootLayout({ children }) {
           <Footer />
           <MarketingPopup />
           <StickyCtaBar />
+          <Oneko />
         </AuthProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
