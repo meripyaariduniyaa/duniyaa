@@ -27,7 +27,13 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
-  if (pathname?.startsWith('/p/') || (pathname?.startsWith('/arcade/') && pathname !== '/arcade')) {
+  if (
+    pathname?.startsWith('/p/') ||
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/creator/') ||
+    pathname === '/creator' ||
+    (pathname?.startsWith('/arcade/') && pathname !== '/arcade')
+  ) {
     return null;
   }
 
@@ -61,6 +67,13 @@ export default function Header() {
               className={`nav-link ${pathname?.startsWith('/arcade') ? 'active' : ''}`}
             >
               🎮 Arcade
+            </Link>
+
+            <Link
+              href="/creators"
+              className={`nav-link ${pathname?.startsWith('/creators') || pathname?.startsWith('/creator') ? 'active' : ''}`}
+            >
+              👑 Creators
             </Link>
 
             <Link
@@ -161,6 +174,18 @@ export default function Header() {
             <div>
               <strong>Couple &amp; Bestie Arcade</strong>
               <small>Play 30s mini-games &amp; send duels</small>
+            </div>
+          </Link>
+
+          <Link
+            href="/creators"
+            className="mobile-nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-nav-icon">👑</span>
+            <div>
+              <strong>LovelyCrafts Creator Club</strong>
+              <small>Earn up to 18% commission &amp; custom coupons</small>
             </div>
           </Link>
 

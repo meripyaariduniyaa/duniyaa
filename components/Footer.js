@@ -7,7 +7,13 @@ import GoogleAd from '@/components/GoogleAd';
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith('/p/') || (pathname?.startsWith('/arcade/') && pathname !== '/arcade')) {
+  if (
+    pathname?.startsWith('/p/') ||
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/creator/') ||
+    pathname === '/creator' ||
+    (pathname?.startsWith('/arcade/') && pathname !== '/arcade')
+  ) {
     return null;
   }
 

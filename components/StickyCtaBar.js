@@ -9,7 +9,13 @@ export default function StickyCtaBar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname?.startsWith('/p/') || pathname?.startsWith('/arcade/')) {
+    if (
+      pathname?.startsWith('/p/') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/creator/') ||
+      pathname === '/creator' ||
+      pathname?.startsWith('/arcade/')
+    ) {
       setShow(false);
       return;
     }

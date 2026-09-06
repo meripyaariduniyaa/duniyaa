@@ -48,8 +48,16 @@ export default function MarketingPopup() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Do not show popup on shared/preview or arcade pages
-    if (pathname?.startsWith('/p/') || pathname?.startsWith('/preview') || pathname?.startsWith('/share') || pathname?.startsWith('/arcade')) {
+    // Do not show popup on shared/preview, arcade, admin, or creator pages
+    if (
+      pathname?.startsWith('/p/') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/creator/') ||
+      pathname === '/creator' ||
+      pathname?.startsWith('/preview') ||
+      pathname?.startsWith('/share') ||
+      pathname?.startsWith('/arcade')
+    ) {
       return;
     }
 

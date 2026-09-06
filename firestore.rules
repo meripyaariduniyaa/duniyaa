@@ -2,18 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Public & Note Owner Access ──
     match /notes/{token} {
-
-      // ── Read Single Document (preview, share page /p/[slug], slug availability) ──
       allow get: if true;
 
-      // ── List / Query Documents (dashboard notes list by creator_uid) ───────────
       allow list: if request.query.filters.size() == 1
                   && request.query.filters[0].fieldPath == 'creator_uid'
                   && request.query.filters[0].value is string
                   && request.query.filters[0].value.size() > 0;
 
-      // ── Create Note (unauthenticated guest device-ID or auth UID) ───────────────
       allow create: if request.resource.data.keys().hasAll([
                         'creator_uid', 'recipient_name', 'custom_message',
                         'image_urls', 'is_paid', 'template', 'created_at'
@@ -23,13 +20,44 @@ service cloud.firestore {
                     && request.resource.data.recipient_name is string
                     && request.resource.data.is_paid == false;
 
-      // ── Update Note ───────────────────────────────────────────────────────────
       allow update: if (request.auth != null && resource.data.creator_uid == request.auth.uid)
                     || (resource.data.creator_uid is string && resource.data.creator_uid == request.resource.data.creator_uid);
 
-      // ── Delete Note ───────────────────────────────────────────────────────────
       allow delete: if (request.auth != null && resource.data.creator_uid == request.auth.uid);
     }
 
+    // ── Data Isolation: Creator Club collections are server-accessed only ──
+    match /creators/{id} {
+      allow read, write: if false;
+    }
+
+    match /creatorTiers/{id} {
+      allow read, write: if false;
+    }
+
+    match /coupons/{id} {
+      allow read, write: if false;
+    }
+
+    match /referralClicks/{id} {
+      allow read, write: if false;
+    }
+
+    match /orders/{id} {
+      allow read, write: if false;
+    }
+
+    match /commissions/{id} {
+      allow read, write: if false;
+    }
+
+    match /payouts/{id} {
+      allow read, write: if false;
+    }
+
+    match /creatorGifts/{id} {
+      allow read, write: if false;
+    }
   }
 }
+
