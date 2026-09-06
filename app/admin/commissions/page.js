@@ -10,6 +10,9 @@ export default function AdminCommissionsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+
   const loadData = async () => {
     if (!user) return;
     try {
@@ -32,6 +35,27 @@ export default function AdminCommissionsPage() {
   useEffect(() => {
     loadData();
   }, [user]);
+
+  const handleSyncCommissions = async () => {
+    setSyncing(true);
+    setSyncMessage('');
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/admin/commissions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sync failed');
+      setSyncMessage(`✓ Successfully credited ${data.syncedCount || 0} uncredited past order(s)!`);
+      loadData();
+      setTimeout(() => setSyncMessage(''), 4000);
+    } catch (err) {
+      setSyncMessage(`Error: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleUpdateStatus = async (commissionId, newStatus) => {
     try {
@@ -67,7 +91,29 @@ export default function AdminCommissionsPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={handleSyncCommissions}
+            disabled={syncing}
+            style={{
+              background: '#0284c7',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: syncing ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            {syncing ? '⏳ Syncing...' : '🔄 Sync Past Orders'}
+          </button>
+
+          <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
           {['all', 'pending', 'paid', 'reversed'].map((tab) => (
             <button
               key={tab}

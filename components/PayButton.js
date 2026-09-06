@@ -71,7 +71,15 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
         const verify = await fetch('/api/razorpay/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apologyId, couponCode: couponCode.trim(), free: true, amount: 0 })
+          body: JSON.stringify({
+            apologyId,
+            couponCode: couponCode.trim(),
+            couponId: order.couponId || null,
+            creatorId: order.creatorId || null,
+            attributionSource: order.attributionSource || null,
+            free: true,
+            amount: 0
+          })
         });
         if (!verify.ok) {
           const d = await verify.json().catch(() => ({}));
@@ -96,6 +104,9 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
             body: JSON.stringify({
               apologyId,
               couponCode: couponCode.trim(),
+              couponId: order.couponId || null,
+              creatorId: order.creatorId || null,
+              attributionSource: order.attributionSource || null,
               discountPercent: order.discountPercent || 0,
               amountPaid: order.amount,
               ...response

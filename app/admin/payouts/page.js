@@ -220,9 +220,10 @@ export default function AdminPayoutsPage() {
                     const pendingForC = commissions
                       .filter((comm) => comm.creator_id === c.id && comm.status === 'pending')
                       .reduce((sum, comm) => sum + (comm.commission_amount || 0), 0);
+                    const isThresholdReached = pendingForC >= 50000;
                     return (
                       <option key={c.id} value={c.id}>
-                        {c.name} — Pending: ₹{(pendingForC / 100).toFixed(2)}
+                        {isThresholdReached ? '⚡ ' : '🕒 '} {c.name} — Pending: ₹{(pendingForC / 100).toFixed(2)} {isThresholdReached ? '(Threshold Reached)' : '(Early Release)'}
                       </option>
                     );
                   })}
@@ -231,8 +232,13 @@ export default function AdminPayoutsPage() {
 
               {selectedCreatorId && (
                 <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                    Pending Commissions to Disburse: <strong>{creatorPendingCommissions.length}</strong>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      Pending Commissions: <strong>{creatorPendingCommissions.length}</strong>
+                    </span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: totalPendingAmount >= 50000 ? '#dcfce7' : '#fef3c7', color: totalPendingAmount >= 50000 ? '#15803d' : '#b45309' }}>
+                      {totalPendingAmount >= 50000 ? '✓ Reached ₹500 Threshold' : '🕒 Early Admin Release (< ₹500)'}
+                    </span>
                   </div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
                     Total: ₹{(totalPendingAmount / 100).toFixed(2)}

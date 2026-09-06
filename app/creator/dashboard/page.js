@@ -385,7 +385,16 @@ export default function CreatorDashboardPage() {
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#e11d48', marginTop: '4px' }}>
               ₹{((summary?.pending || 0) / 100).toFixed(2)}
             </div>
-            <small style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Paid out in next batch</small>
+            <div style={{ marginTop: '6px', fontSize: '0.75rem', fontWeight: 600, color: (summary?.pending || 0) >= 50000 ? '#059669' : '#6b7280' }}>
+              {(summary?.pending || 0) >= 50000 ? (
+                '✓ Reached ₹500 payout threshold'
+              ) : (
+                `Min payout threshold: ₹500 (₹${(500 - (summary?.pending || 0) / 100).toFixed(2)} remaining)`
+              )}
+            </div>
+            <small style={{ color: '#9ca3af', fontSize: '0.72rem', display: 'block', marginTop: '2px' }}>
+              Admin can also disburse early batches anytime.
+            </small>
           </div>
 
           <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid #f3f4f6', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
