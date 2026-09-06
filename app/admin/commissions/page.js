@@ -114,28 +114,45 @@ export default function AdminCommissionsPage() {
           </button>
 
           <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
-          {['all', 'pending', 'paid', 'reversed'].map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setFilter(tab)}
-              style={{
-                background: filter === tab ? '#fff' : 'transparent',
-                color: filter === tab ? '#0f172a' : '#64748b',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: filter === tab ? 700 : 500,
-                cursor: 'pointer',
-                textTransform: 'capitalize',
-              }}
-            >
-              {tab}
-            </button>
-          ))}
+            {['all', 'pending', 'paid', 'reversed'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilter(tab)}
+                style={{
+                  background: filter === tab ? '#fff' : 'transparent',
+                  color: filter === tab ? '#0f172a' : '#64748b',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: filter === tab ? 700 : 500,
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {syncMessage && (
+        <div
+          style={{
+            padding: '12px 16px',
+            marginBottom: '20px',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            background: syncMessage.startsWith('Error') ? '#fee2e2' : '#dcfce7',
+            color: syncMessage.startsWith('Error') ? '#b91c1c' : '#15803d',
+            border: `1px solid ${syncMessage.startsWith('Error') ? '#fca5a5' : '#86efac'}`,
+          }}
+        >
+          {syncMessage}
+        </div>
+      )}
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Loading commissions...</div>
