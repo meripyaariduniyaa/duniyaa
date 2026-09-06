@@ -7,7 +7,7 @@ import { useAuth } from '@/components/AuthProvider';
 
 export default function CreatorDashboardPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -147,9 +147,21 @@ export default function CreatorDashboardPage() {
           <div style={{ fontSize: '2.5rem', color: '#dc2626', marginBottom: '12px' }}>⚠️</div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Access Error</h2>
           <p style={{ color: '#6b7280', marginBottom: '20px' }}>{error}</p>
-          <Link href="/creators" style={{ background: '#e11d48', color: '#fff', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>
-            Join Creator Club
-          </Link>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <Link href="/creators" style={{ background: '#e11d48', color: '#fff', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>
+              Join Creator Club
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                router.push('/creator/login');
+              }}
+              style={{ background: '#f3f4f6', color: '#4b5563', border: 'none', padding: '10px 18px', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -164,9 +176,21 @@ export default function CreatorDashboardPage() {
           <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '24px' }}>
             You haven&apos;t applied to the Creator Club yet. Apply now to get your exclusive coupon code, custom referral link, and earn up to 18% commission.
           </p>
-          <Link href="/creators#apply" style={{ background: '#e11d48', color: '#fff', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(225,29,72,0.2)' }}>
-            Start Creator Application 🚀
-          </Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+            <Link href="/creators#apply" style={{ background: '#e11d48', color: '#fff', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(225,29,72,0.2)', width: '100%', maxWidth: '280px' }}>
+              Start Creator Application 🚀
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                router.push('/creator/login');
+              }}
+              style={{ background: 'transparent', color: '#6b7280', border: 'none', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', padding: '8px' }}
+            >
+              🚪 Sign Out ({user?.email})
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -183,11 +207,21 @@ export default function CreatorDashboardPage() {
           <p style={{ color: '#b45309', fontSize: '1rem', lineHeight: 1.6, marginBottom: '24px' }}>
             Hey <strong>{creator.name}</strong>! Your application for <code>lovelycrafts.in/c/{creator.slug}</code> has been received and is currently under review by our admin team.
           </p>
-          <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', textAlign: 'left', fontSize: '0.85rem', color: '#78350f', border: '1px dashed #fcd34d' }}>
+          <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', textAlign: 'left', fontSize: '0.85rem', color: '#78350f', border: '1px dashed #fcd34d', marginBottom: '20px' }}>
             <div>📌 Status: <strong>Pending Admin Approval</strong></div>
             <div>📬 Email: <strong>{creator.email}</strong></div>
             <div>🔗 Requested URL: <strong>lovelycrafts.in/c/{creator.slug}</strong></div>
           </div>
+          <button
+            type="button"
+            onClick={async () => {
+              await logout();
+              router.push('/creator/login');
+            }}
+            style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+          >
+            🚪 Sign Out
+          </button>
         </div>
       </main>
     );
@@ -201,7 +235,7 @@ export default function CreatorDashboardPage() {
       
       {/* CREATOR PORTAL TOPBAR */}
       <nav style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '12px 24px', position: 'sticky', top: 0, zIndex: 40, marginBottom: '32px' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
               <span style={{ fontSize: '1.3rem' }}>❤️</span> Lovely<span style={{ color: '#e11d48' }}>Crafts</span>
@@ -211,13 +245,38 @@ export default function CreatorDashboardPage() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
               {user?.email}
             </span>
             <Link href="/" style={{ fontSize: '0.85rem', color: '#4b5563', textDecoration: 'none', fontWeight: 600 }}>
               🏠 Main Site
             </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                router.push('/creator/login');
+              }}
+              style={{
+                background: '#fee2e2',
+                color: '#b91c1c',
+                border: '1px solid #fecaca',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = '#fecaca'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
+            >
+              🚪 Sign Out
+            </button>
           </div>
         </div>
       </nav>
