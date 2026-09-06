@@ -8,6 +8,7 @@ yarn-error.log*
 # Production or secret environment files
 .env
 .env.local
+.env.example
 .env.development.local
 .env.test.local
 .env.production.local
