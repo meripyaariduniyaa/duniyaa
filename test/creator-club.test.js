@@ -25,25 +25,29 @@ test('1. Normalization utilities', () => {
 
 test('2. Creator tiers and automatic commission scaling', () => {
   assert.equal(tierForOrders(0).id, 'starter');
-  assert.equal(tierForOrders(9).id, 'starter');
-  assert.equal(tierForOrders(10).id, 'rising');
-  assert.equal(tierForOrders(24).id, 'rising');
-  assert.equal(tierForOrders(25).id, 'creator');
-  assert.equal(tierForOrders(50).id, 'partner');
-  assert.equal(tierForOrders(100).id, 'elite');
+  assert.equal(tierForOrders(19).id, 'starter');
+  assert.equal(tierForOrders(20).id, 'rising');
+  assert.equal(tierForOrders(49).id, 'rising');
+  assert.equal(tierForOrders(50).id, 'creator');
+  assert.equal(tierForOrders(79).id, 'creator');
+  assert.equal(tierForOrders(80).id, 'partner');
+  assert.equal(tierForOrders(119).id, 'partner');
+  assert.equal(tierForOrders(120).id, 'elite');
   assert.equal(tierForOrders(500).id, 'elite');
 
   const next = nextTierForOrders(5);
   assert.equal(next?.id, 'rising');
-  assert.equal(nextTierForOrders(100), null);
+  assert.equal(nextTierForOrders(120), null);
 });
 
 test('3. Commission calculation on final paid amount', () => {
-  // Amount in paise: ₹199 = 19900 paise
-  // 15% of ₹199 (19900 paise) = 2985 paise (₹29.85)
-  assert.equal(commissionForAmount(19900, 15), 2985);
-  // 18% of ₹199 (19900 paise) = 3582 paise
-  assert.equal(commissionForAmount(19900, 18), 3582);
+  // Amount in paise: ₹219 = 21900 paise
+  // 10% of ₹219 (21900 paise) = 2190 paise (₹21.90)
+  assert.equal(commissionForAmount(21900, 10), 2190);
+  // 15% of ₹219 (21900 paise) = 3285 paise (₹32.85)
+  assert.equal(commissionForAmount(21900, 15), 3285);
+  // 18% of ₹219 (21900 paise) = 3942 paise
+  assert.equal(commissionForAmount(21900, 18), 3942);
   // 20% on ₹159 (15900 paise) = 3180 paise
   assert.equal(commissionForAmount(15900, 20), 3180);
   // 0% or negative checks
@@ -55,7 +59,7 @@ test('4. Admin overrides take precedence over calculated tier and rate', () => {
   const creatorNoOverride = { tier: 'starter' };
   const res1 = calculateEffectiveTierAndRate(creatorNoOverride, 5);
   assert.equal(res1.tierId, 'starter');
-  assert.equal(res1.commissionRate, 15);
+  assert.equal(res1.commissionRate, 10);
 
   const creatorWithTierOverride = { tier: 'starter', tier_override: 'elite' };
   const res2 = calculateEffectiveTierAndRate(creatorWithTierOverride, 2);

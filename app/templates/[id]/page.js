@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
 
   const canonicalUrl = `${SITE_URL}/templates/${template.id}`;
   const title = `${template.title} — Interactive Digital ${template.bestFor[0] || 'Gift'} Experience | ${SITE_NAME}`;
-  const description = `${template.description} Personalize with your own photos, heartfelt messages, and share a private link instantly on WhatsApp. Takes only 3 minutes to create. Starting at ₹${template.price || 199}.`;
+  const description = `${template.description} Personalize with your own photos, heartfelt messages, and share a private link instantly on WhatsApp. Takes only 3 minutes to create. Starting at ₹${template.price || 219}.`;
   const keywords = [
     ...template.bestFor,
     template.title,
@@ -99,7 +99,7 @@ export default async function TemplateDetailPage({ params }) {
     },
     offers: {
       '@type': 'Offer',
-      price: template.price || 199,
+      price: template.price || 219,
       priceCurrency: 'INR',
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,
@@ -151,7 +151,7 @@ export default async function TemplateDetailPage({ params }) {
               ⏱ {template.time} setup time
             </span>
             <span className="template-tag" style={{ fontSize: '0.85rem', padding: '0.3rem 0.75rem', background: '#fef3c7', color: '#b45309' }}>
-              🏷️ ₹{Math.floor((template.price || 199) / 2)} (50% Off)
+              🏷️ ₹{Math.floor((template.price || 219) / 2)} (50% Off)
             </span>
           </div>
 

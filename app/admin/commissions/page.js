@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { exportToExcel } from '@/lib/excel-export';
 
 export default function AdminCommissionsPage() {
   const { user } = useAuth();
@@ -12,6 +13,25 @@ export default function AdminCommissionsPage() {
 
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+
+  const handleExportExcel = () => {
+    const formatted = filteredCommissions.map((comm) => {
+      const creator = creators.find((c) => c.id === comm.creator_id);
+      return {
+        'Commission ID': comm.id,
+        'Order Reference': comm.order_id || comm.note_id || '',
+        'Creator Name': creator?.name || comm.creator_id,
+        'Creator Slug': creator?.slug || '',
+        'Order Value (₹)': ((comm.order_amount || 0) / 100).toFixed(2),
+        'Commission Rate (%)': `${comm.rate || 0}%`,
+        'Earned Commission (₹)': ((comm.commission_amount || 0) / 100).toFixed(2),
+        'Payout Status': comm.status || 'pending',
+        'Created Date': comm.created_at ? new Date(comm.created_at).toLocaleString() : '',
+        'Paid Out Date': comm.paid_at ? new Date(comm.paid_at).toLocaleString() : 'Unpaid',
+      };
+    });
+    exportToExcel(formatted, 'commissions_ledger', 'Commissions');
+  };
 
   const loadData = async () => {
     if (!user) return;
@@ -47,9 +67,12 @@ export default function AdminCommissionsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Sync failed');
-      setSyncMessage(`✓ Successfully credited ${data.syncedCount || 0} uncredited past order(s)!`);
+      const parts = [];
+      if ((data.syncedCount || 0) > 0) parts.push(`${data.syncedCount} new order(s) credited`);
+      if ((data.reconciledCount || 0) > 0) parts.push(`${data.reconciledCount} paid commission(s) reconciled`);
+      setSyncMessage(parts.length > 0 ? `✓ ${parts.join(' · ')}` : '✓ All commissions are up to date!');
       loadData();
-      setTimeout(() => setSyncMessage(''), 4000);
+      setTimeout(() => setSyncMessage(''), 6000);
     } catch (err) {
       setSyncMessage(`Error: ${err.message}`);
     } finally {
@@ -91,7 +114,30 @@ export default function AdminCommissionsPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || filteredCommissions.length === 0}
+            style={{
+              background: '#10b981',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: loading || filteredCommissions.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+            }}
+          >
+            <span>📥</span>
+            <span>Export Excel</span>
+          </button>
+
           <button
             type="button"
             onClick={handleSyncCommissions}
@@ -167,6 +213,7 @@ export default function AdminCommissionsPage() {
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Order Amount</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Rate &amp; Commission</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Paid / Payout</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
@@ -220,6 +267,24 @@ export default function AdminCommissionsPage() {
                           >
                             {c.status}
                           </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', fontSize: '0.75rem', color: '#64748b' }}>
+                          {c.status === 'paid' ? (
+                            <>
+                              <div style={{ fontWeight: 600, color: '#15803d' }}>
+                                {c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—'}
+                              </div>
+                              {c.payout_id && (
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}
+                                  title={`Payout ID: ${c.payout_id}`}
+                                >
+                                  Batch: {c.payout_id.substring(0, 8)}…
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>—</span>
+                          )}
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           {c.status === 'pending' && (

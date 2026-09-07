@@ -14,7 +14,7 @@ export async function POST(request) {
 
     const raw = snap.data();
     const customLinkSurcharge = raw.custom_slug ? 2900 : 0; // ₹29 for custom links
-    const baseAmount = 19900; // ₹199 base note price
+    const baseAmount = 21900; // ₹219 base note price
     const totalAmount = baseAmount + customLinkSurcharge;
     const templateId = raw.template || null;
 

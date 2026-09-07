@@ -29,7 +29,7 @@ export default function Footer() {
             <p className="footer-promo-desc">Personalize with photos, secret messages &amp; music in just 2 minutes.</p>
           </div>
           <Link href="/templates" className="btn-primary footer-promo-btn">
-            ✨ Craft a Surprise (₹199) →
+            ✨ Craft a Surprise (₹219) →
           </Link>
         </div>
 
@@ -111,14 +111,15 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Trust & Support */}
+          {/* Column 4: Creator Club & Support */}
           <div className="footer-col">
-            <h4 className="footer-heading">Support &amp; Legal</h4>
+            <h4 className="footer-heading">Creator Club</h4>
             <ul className="footer-list">
+              <li><Link href="/creators">👑 Join Creator Club</Link></li>
+              <li><Link href="/creator/login">🔑 Creator Login</Link></li>
               <li><Link href="/privacy">Privacy Policy</Link></li>
               <li><Link href="/terms">Terms of Service</Link></li>
               <li><a href="mailto:meri.pyaari.duniyaa@gmail.com">Help &amp; Support</a></li>
-              <li><Link href="/profile">Account Sign In</Link></li>
             </ul>
             <div className="footer-badge-payment">
               <span>🔒 256-Bit SSL Encrypted</span>
@@ -139,6 +140,8 @@ export default function Footer() {
             Made with <span>❤️</span> for the people who matter most.
           </p>
           <div className="footer-bottom-links">
+            <Link href="/creators">Creators</Link>
+            <span>•</span>
             <Link href="/privacy">Privacy</Link>
             <span>•</span>
             <Link href="/terms">Terms</Link>

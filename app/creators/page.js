@@ -6,6 +6,111 @@ import { signInWithGoogle } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 import { CREATOR_TIERS } from '@/lib/creator-club';
 
+const SHOWCASE_EXPERIENCES = [
+  {
+    id: 'birthday',
+    title: 'Virtual Birthday Bash',
+    icon: '🎂',
+    badge: 'Best Seller 🎉',
+    desc: '7-scene party link with microphone candle blowout, interactive balloon pops, wish wheel & memory gallery.',
+    previewUrl: '/templates/birthday',
+    tag: 'Celebration',
+  },
+  {
+    id: 'proposal',
+    title: 'The Perfect Proposal',
+    icon: '💍',
+    badge: 'Viral Favorite 💕',
+    desc: 'Interactive confession with a playful dodging "NO" button that runs away from the cursor until they click YES!',
+    previewUrl: '/templates/proposal',
+    tag: 'Romantic',
+  },
+  {
+    id: 'things-i-never-said',
+    title: 'Things I Never Said',
+    icon: '💌',
+    badge: 'Emotional 🥹',
+    desc: 'Wax seal envelope reveal, typewritten private thoughts, romantic background music & polaroid memories.',
+    previewUrl: '/templates/things-i-never-said',
+    tag: 'Love & Deep Feelings',
+  },
+  {
+    id: 'puzzle',
+    title: 'Photo Puzzle Reveal',
+    icon: '🧩',
+    badge: 'Gamified 🎮',
+    desc: 'Interactive scrambled photo puzzle game that reveals a special memory photo and hidden note upon completion.',
+    previewUrl: '/templates/puzzle',
+    tag: 'Interactive Fun',
+  },
+  {
+    id: 'emotional-apology',
+    title: 'Emotional Apology',
+    icon: '🥺',
+    badge: 'Heartfelt 💐',
+    desc: 'Tender apology experience with interactive forgiveness prompts, calm soothing music and personal voice note.',
+    previewUrl: '/templates/emotional-apology',
+    tag: 'Reconnection',
+  },
+  {
+    id: 'anniversary',
+    title: 'Romantic Anniversary',
+    icon: '🥂',
+    badge: 'Milestone ✨',
+    desc: 'Timeline journey of relationship memories, toast animations, date counter and custom love letter.',
+    previewUrl: '/templates/anniversary',
+    tag: 'Anniversary',
+  },
+];
+
+const CREATOR_CATEGORIES = [
+  { title: 'Couple & Romance Creators', emoji: '💑', desc: 'Share anniversary, proposal & cute relationship surprises' },
+  { title: 'Lifestyle & Aesthetic Creators', emoji: '✨', desc: 'Gift meaningful personalized web experiences to friends' },
+  { title: 'Comedy & Relatable Skits', emoji: '😂', desc: 'Feature the dodging NO button and funny birthday experiences' },
+  { title: 'College & Campus Creators', emoji: '🎓', desc: 'Affordable, instant surprises for besties and partners' },
+  { title: 'Vloggers & Storytellers', emoji: '📹', desc: 'Share genuine reactions and emotional keepsake links' },
+  { title: 'Art & Aesthetic Curators', emoji: '🎨', desc: 'Showcase vintage typography, wax seals & music experiences' },
+];
+
+const FAQS = [
+  {
+    q: 'Is joining the Creator Club free?',
+    a: 'Yes, 100% free. There are no upfront fees, hidden charges, or minimum follower counts required to apply.',
+  },
+  {
+    q: 'How much commission can I earn?',
+    a: 'You earn 10% to 18% commission on every qualifying paid referral. Your commission percentage starts at 10% (Starter tier) and increases automatically up to 18% (Elite tier) as your total successful referrals grow.',
+  },
+  {
+    q: 'What discount does my audience receive?',
+    a: 'Depending on your custom creator offer, your audience receives up to 20% OFF across all LovelyCrafts interactive experiences with your coupon.',
+  },
+  {
+    q: 'How do referrals and attribution work?',
+    a: 'You receive a personalized short link (lovelycrafts.in/c/yourname) and a branded coupon code. When viewers click your link or apply your code at checkout, the referral is automatically credited to your account.',
+  },
+  {
+    q: 'How long are referrals tracked?',
+    a: 'Referral clicks are tracked for 30 full days via secure cookies. If a viewer creates and purchases any gift experience within 30 days of clicking your link, you earn commission.',
+  },
+  {
+    q: 'When do I get paid?',
+    a: 'Payouts are processed directly to your UPI ID or bank account within 3–5 business days once your pending creator balance reaches the ₹500 threshold.',
+  },
+  {
+    q: 'Can I try LovelyCrafts before promoting it?',
+    a: 'Yes! All approved Creator Club members receive complimentary VIP Creator Experience Passes so you can craft and send your own surprise first.',
+  },
+  {
+    q: 'Can I promote LovelyCrafts on Instagram and YouTube?',
+    a: 'Absolutely! You can feature LovelyCrafts in Instagram Reels, Stories, bio links, YouTube Shorts, video descriptions, TikTok, or WhatsApp status.',
+  },
+  {
+    q: 'What happens if an order is refunded or cancelled?',
+    a: 'Since LovelyCrafts digital experiences are instant personalized online gifts with immediate access, all purchases are final and non-refundable. Your referral earnings on completed orders are locked and credited to your balance.',
+  },
+];
+
 export default function CreatorsLandingPage() {
   const { user } = useAuth();
   const [creators, setCreators] = useState([]);
@@ -26,6 +131,9 @@ export default function CreatorsLandingPage() {
   const [appStatus, setAppStatus] = useState(null); // null | 'pending' | 'active' | 'error'
   const [errorMessage, setErrorMessage] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+
+  // FAQ open/close state
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Load public creators
   useEffect(() => {
@@ -51,7 +159,7 @@ export default function CreatorsLandingPage() {
       // Check current application status
       user.getIdToken().then((token) => {
         fetch('/api/creator/me', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         })
           .then((res) => res.json())
           .then((data) => {
@@ -148,115 +256,481 @@ export default function CreatorsLandingPage() {
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: 'radial-gradient(circle at 50% 0%, #ffe4e6 0%, #fff1f2 40%, #fafafa 100%)', padding: '40px 16px 80px' }}>
+    <main style={{ minHeight: '100vh', background: 'radial-gradient(circle at 50% 0%, #ffe4e6 0%, #fff1f2 35%, #fafafa 100%)', padding: '40px 16px 100px' }}>
       <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
         
-        {/* HERO SECTION */}
-        <section style={{ textAlign: 'center', padding: '40px 0 60px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', background: '#ffe4e6', borderRadius: '999px', color: '#e11d48', fontWeight: 600, fontSize: '0.85rem', marginBottom: '20px', border: '1px solid #fecdd3' }}>
-            ✨ LovelyCrafts Creator Club
+        {/* =========================================================================
+            PRIORITY 2: HERO SECTION
+        ========================================================================= */}
+        <section style={{ textAlign: 'center', padding: '30px 0 50px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', background: '#ffe4e6', borderRadius: '999px', color: '#e11d48', fontWeight: 700, fontSize: '0.85rem', marginBottom: '20px', border: '1px solid #fecdd3' }}>
+            ✨ LovelyCrafts Creator Club ❤️
           </div>
-          <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', fontWeight: 800, color: '#1f2937', lineHeight: 1.2, margin: '0 auto 16px', maxWidth: '800px' }}>
-            Turn Your Romantic &amp; Aesthetic Content Into <span style={{ color: '#e11d48', background: 'linear-gradient(135deg, #e11d48, #be123c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Passive Income</span>
+          
+          <h1 style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)', fontWeight: 800, color: '#111827', lineHeight: 1.18, margin: '0 auto 18px', maxWidth: '880px', letterSpacing: '-0.02em' }}>
+            Share Something They&apos;ll Love.{' '}
+            <span style={{ color: '#e11d48', background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Earn When They Do. ❤️
+            </span>
           </h1>
-          <p style={{ fontSize: '1.15rem', color: '#4b5563', maxWidth: '650px', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Share personalized digital experiences with your followers. Get your own creator discount code, earn up to <strong>18% recurring commission</strong>, and receive complimentary VIP gift passes.
+
+          <p style={{ fontSize: 'clamp(1.05rem, 2.2vw, 1.25rem)', color: '#4b5563', maxWidth: '720px', margin: '0 auto 32px', lineHeight: 1.6 }}>
+            Join the LovelyCrafts Creator Club. Give your audience <strong>up to 20% OFF</strong> personalized digital surprises and earn <strong>up to 18% commission</strong> on successful referrals.
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <a href="#apply" style={{ background: '#e11d48', color: '#fff', padding: '14px 28px', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 20px rgba(225,29,72,0.25)', transition: 'all 0.2s' }}>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '40px' }}>
+            <a
+              href="#apply"
+              style={{
+                background: '#e11d48',
+                color: '#fff',
+                padding: '16px 32px',
+                borderRadius: '14px',
+                fontWeight: 700,
+                fontSize: '1.05rem',
+                textDecoration: 'none',
+                boxShadow: '0 8px 24px rgba(225,29,72,0.28)',
+                transition: 'all 0.2s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
               🚀 Join Creator Club
             </a>
-            <Link href="/creator/login" style={{ background: '#fff', color: '#374151', padding: '14px 24px', borderRadius: '12px', fontWeight: 600, textDecoration: 'none', border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-              🔑 Creator Dashboard Login
+            <Link
+              href="/creator/login"
+              style={{
+                background: '#fff',
+                color: '#374151',
+                padding: '16px 28px',
+                borderRadius: '14px',
+                fontWeight: 700,
+                fontSize: '1.05rem',
+                textDecoration: 'none',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              🔑 Already a Creator? Login
             </Link>
           </div>
-        </section>
 
-        {/* PERKS GRID */}
-        <section style={{ marginBottom: '60px' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '1.8rem', fontWeight: 700, color: '#1f2937', marginBottom: '32px' }}>
-            Why Top Creators Love Partnering With Us
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #f3f4f6', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🏷️</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Custom Discount Code</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                Offer your followers 20%–30% exclusive discounts on all personalized digital gifts with your branded coupon.
-              </p>
+          {/* Value Pillars Quick Bar */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', maxWidth: '880px', margin: '0 auto' }}>
+            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+              <span>🎁</span> Free experiences
             </div>
-            <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #f3f4f6', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🔗</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>30-Day Referral Tracking</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                Share your short link (<code style={{ color: '#e11d48' }}>/c/yourname</code>). Any customer purchase made within 30 days is automatically attributed to you.
-              </p>
+            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+              <span>🎟️</span> Your own discount code
             </div>
-            <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #f3f4f6', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>💸</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Generous Tiered Commissions</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                Earn 15% to 18% commission on net customer payments with transparent real-time analytics and fast UPI/bank payouts.
-              </p>
+            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+              <span>💰</span> 10–18% commission
             </div>
-            <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #f3f4f6', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎁</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Free Creator Gift Passes</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                Get complimentary 100% discount codes to create personalized gifts for your partner, best friends, or family.
-              </p>
+            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+              <span>🌐</span> Your own creator page
             </div>
           </div>
         </section>
 
-        {/* TIER BREAKDOWN TABLE */}
-        <section style={{ marginBottom: '60px', background: '#fff', borderRadius: '20px', padding: '32px', border: '1px solid #f3f4f6', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1f2937', marginBottom: '8px', textAlign: 'center' }}>
-            Creator Club Tiers &amp; Commission Scale
-          </h2>
-          <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '28px' }}>
-            As your referrals grow, your tier and commission rate increase automatically.
-          </p>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '500px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
-                  <th style={{ padding: '12px 16px', color: '#4b5563', fontSize: '0.9rem' }}>Tier</th>
-                  <th style={{ padding: '12px 16px', color: '#4b5563', fontSize: '0.9rem' }}>Requirement</th>
-                  <th style={{ padding: '12px 16px', color: '#4b5563', fontSize: '0.9rem' }}>Commission Rate</th>
-                  <th style={{ padding: '12px 16px', color: '#4b5563', fontSize: '0.9rem' }}>Perks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {CREATOR_TIERS.map((tier) => (
-                  <tr key={tier.id} style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: 700, color: '#111827' }}>
-                      <span style={{ marginRight: '8px' }}>{tier.emoji}</span>
-                      {tier.name}
-                    </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563' }}>
-                      {tier.minOrders === 0 ? 'Starting level' : `${tier.minOrders}+ delivered gifts`}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontWeight: 700, color: '#e11d48' }}>
-                      {tier.commissionRate}%
-                    </td>
-                    <td style={{ padding: '14px 16px', color: '#6b7280', fontSize: '0.9rem' }}>
-                      {tier.id === 'elite' ? '👑 VIP support + Custom perks' : tier.id === 'partner' ? '💜 Dedicated gifts + Priority payouts' : '✨ Custom Coupon & Live Dashboard'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* FEATURED CREATORS */}
-        {creators.length > 0 && (
-          <section style={{ marginBottom: '60px' }}>
-            <h2 style={{ textAlign: 'center', fontSize: '1.6rem', fontWeight: 700, color: '#1f2937', marginBottom: '24px' }}>
-              Meet Our Featured Creators
+        {/* =========================================================================
+            PRIORITY 3: SHOW THE PRODUCT MUCH EARLIER
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              The Content You Share
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.3rem)', fontWeight: 800, color: '#111827', margin: '6px 0 10px' }}>
+              What are you actually sharing?
             </h2>
+            <p style={{ color: '#6b7280', fontSize: '1.05rem', maxWidth: '640px', margin: '0 auto', lineHeight: 1.5 }}>
+              Instant interactive surprises your audience can personalize in 2 minutes and send privately on WhatsApp. Perfect for making authentic videos.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '22px' }}>
+            {SHOWCASE_EXPERIENCES.map((exp) => (
+              <div
+                key={exp.id}
+                style={{
+                  background: '#fff',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  border: '1px solid #f3f4f6',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '2.4rem' }}>{exp.icon}</div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#be123c', background: '#ffe4e6', padding: '3px 10px', borderRadius: '999px' }}>
+                      {exp.badge}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
+                    {exp.title}
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 16px' }}>
+                    {exp.desc}
+                  </p>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f3f4f6', paddingTop: '14px' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: 600 }}>{exp.tag}</span>
+                    <Link
+                      href={exp.previewUrl}
+                      target="_blank"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#e11d48',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Preview Experience ↗
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 4: CREATOR EXPERIENCE PASS (Try it before you share it)
+        ========================================================================= */}
+        <section
+          style={{
+            background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fecdd3 100%)',
+            borderRadius: '28px',
+            padding: '40px 32px',
+            border: '1px solid #fbcfe8',
+            marginBottom: '70px',
+            boxShadow: '0 12px 36px rgba(225,29,72,0.08)',
+          }}
+        >
+          <div style={{ maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#be123c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              🎁 Complimentary VIP Access
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.9rem, 4.2vw, 2.5rem)', fontWeight: 800, color: '#111827', margin: '8px 0 14px' }}>
+              Try it before you share it.
+            </h2>
+            <p style={{ color: '#4b5563', fontSize: '1.1rem', lineHeight: 1.6, maxWidth: '640px', margin: '0 auto 28px' }}>
+              We don&apos;t expect you to recommend something you&apos;ve never experienced. Every Creator Club member gets complimentary access to selected LovelyCrafts experiences so you can create your own surprise and see what makes it special.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '36px' }}>
+              <a
+                href={appStatus === 'active' ? '/creator/dashboard' : '#apply'}
+                style={{
+                  background: '#e11d48',
+                  color: '#fff',
+                  padding: '14px 28px',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '1rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 8px 20px rgba(225,29,72,0.25)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                🎁 Claim Your Free Experience Pass
+              </a>
+            </div>
+
+            {/* 4-Step Flow */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px', textAlign: 'left' }}>
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '16px', border: '1px solid rgba(225,29,72,0.1)' }}>
+                <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🎨</div>
+                <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '4px' }}>1. Create yours</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Pick a template and add your photos &amp; secrets.</small>
+              </div>
+
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '16px', border: '1px solid rgba(225,29,72,0.1)' }}>
+                <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>📲</div>
+                <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '4px' }}>2. Send it</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Send the private link to your partner or best friend.</small>
+              </div>
+
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '16px', border: '1px solid rgba(225,29,72,0.1)' }}>
+                <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🥹</div>
+                <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '4px' }}>3. See reaction</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Witness the genuine emotion and smile on their face.</small>
+              </div>
+
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '16px', border: '1px solid rgba(225,29,72,0.1)' }}>
+                <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🚀</div>
+                <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '4px' }}>4. Share authentic</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Share your genuine review and earn on every order.</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITIES 5 & 6: COMMISSION SYSTEM & REAL MONEY EXAMPLE
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          
+          {/* Priority 5: Tier Breakdown */}
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '32px', border: '1px solid #f3f4f6', boxShadow: '0 8px 24px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Simple &amp; Transparent
+            </span>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+              Earn more as you grow
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '0.92rem', marginBottom: '20px' }}>
+              Your commission increases automatically as your successful referrals grow.
+            </p>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+                    <th style={{ padding: '10px 12px', color: '#6b7280', fontSize: '0.85rem' }}>Successful Referrals</th>
+                    <th style={{ padding: '10px 12px', color: '#6b7280', fontSize: '0.85rem', textAlign: 'right' }}>Commission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>🌱 0–19 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>10%</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💚 20–49 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>15%</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💙 50–79 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>16%</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💜 80–119 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>17%</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '12px', fontWeight: 700, color: '#111827', fontSize: '0.95rem' }}>👑 120+ referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.15rem', textAlign: 'right' }}>18%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Priority 6: Real Money Example */}
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '32px', border: '1px solid #f3f4f6', boxShadow: '0 8px 24px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                How Much Do I Actually Make?
+              </span>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+                Example Earnings Math
+              </h2>
+              <p style={{ color: '#6b7280', fontSize: '0.92rem', marginBottom: '18px' }}>
+                Here is exactly what happens when your viewer purchases a standard surprise:
+              </p>
+
+              <div style={{ background: '#f9fafb', borderRadius: '16px', padding: '18px', border: '1px solid #f3f4f6', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#4b5563' }}>
+                  <span>Original Experience Price:</span>
+                  <strong>₹219.00</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#e11d48' }}>
+                  <span>With Your 20% Discount:</span>
+                  <strong>Viewer pays ₹175.20</strong>
+                </div>
+                <div style={{ height: '1px', background: '#e5e7eb', margin: '10px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
+                  <span>At 10% Starter Tier:</span>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹17.52</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
+                  <span>At 15% Rising Tier:</span>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹26.28</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#111827' }}>
+                  <span>At 18% Elite Tier:</span>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹31.54</strong>
+                </div>
+              </div>
+            </div>
+
+            <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
+              * Illustrative calculation based on standard ₹219 experience with a 20% coupon applied. Actual earnings depend on qualifying order value, applicable tier, and terms.
+            </p>
+          </div>
+
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 7: VISUAL REFERRAL TRACKING
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px', background: '#fff', borderRadius: '24px', padding: '36px', border: '1px solid #f3f4f6', boxShadow: '0 8px 24px rgba(0,0,0,0.03)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              How Tracking Works
+            </span>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+              Your personal LovelyCrafts link
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+              Seamless 30-day attribution that ensures you get credited for every viewer purchase.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', maxWidth: '850px', margin: '0 auto 24px' }}>
+            <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', minWidth: '150px' }}>
+              <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>🔗</span>
+              <code style={{ fontSize: '0.85rem', color: '#be123c', fontWeight: 700 }}>lovelycrafts.in/c/you</code>
+            </div>
+            <span style={{ color: '#e11d48', fontWeight: 800, fontSize: '1.2rem' }}>➔</span>
+
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', minWidth: '130px' }}>
+              <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>👆</span>
+              <span style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600 }}>Viewer Clicks</span>
+            </div>
+            <span style={{ color: '#9ca3af', fontWeight: 800, fontSize: '1.2rem' }}>➔</span>
+
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', minWidth: '130px' }}>
+              <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>✨</span>
+              <span style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600 }}>Creates Surprise</span>
+            </div>
+            <span style={{ color: '#9ca3af', fontWeight: 800, fontSize: '1.2rem' }}>➔</span>
+
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', minWidth: '130px' }}>
+              <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>💳</span>
+              <span style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600 }}>Purchases</span>
+            </div>
+            <span style={{ color: '#059669', fontWeight: 800, fontSize: '1.2rem' }}>➔</span>
+
+            <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '12px', padding: '12px 16px', textAlign: 'center', minWidth: '140px' }}>
+              <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>❤️</span>
+              <strong style={{ fontSize: '0.85rem', color: '#065f46' }}>You Earn ₹₹₹</strong>
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', background: '#fdf2f8', padding: '10px 20px', borderRadius: '999px', maxWidth: '420px', margin: '0 auto', fontSize: '0.85rem', color: '#be185d', fontWeight: 700 }}>
+            ⏳ Referrals are attributed for 30 full days from click.
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 8: GET YOUR OWN LOVELYCRAFTS PAGE
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px', background: '#fff', borderRadius: '24px', padding: '36px', border: '1px solid #f3f4f6', boxShadow: '0 8px 24px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', alignItems: 'center' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Your Custom Link In Bio
+              </span>
+              <h2 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.2rem)', fontWeight: 800, color: '#111827', margin: '6px 0 14px' }}>
+                🌟 Get your own LovelyCrafts page
+              </h2>
+              <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                Every selected Creator Club member gets a personal LovelyCrafts page where your audience can discover your favorite experiences and exclusive discount.
+              </p>
+              <div style={{ background: '#f9fafb', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'inline-block', marginBottom: '24px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '2px' }}>Example Creator URL:</span>
+                <code style={{ fontSize: '0.95rem', color: '#e11d48', fontWeight: 700 }}>lovelycrafts.in/creators/ananya</code>
+              </div>
+              <div>
+                <a href="#apply" style={{ background: '#111827', color: '#fff', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', fontSize: '0.95rem' }}>
+                  Claim Your Handle 🚀
+                </a>
+              </div>
+            </div>
+
+            {/* Visual Mockup of Creator Page */}
+            <div style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)', borderRadius: '20px', padding: '24px', border: '1px solid #fecdd3', boxShadow: '0 8px 24px rgba(225,29,72,0.08)' }}>
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#ffe4e6', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', border: '2px solid #fda4af' }}>
+                  👩‍🦰
+                </div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '2px 8px', borderRadius: '999px', display: 'inline-block', marginBottom: '6px' }}>
+                  ✓ Verified Creator
+                </div>
+                <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>Ananya Sharma</h4>
+                <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 14px' }}>&quot;My favorite interactive surprises to send on WhatsApp ✨&quot;</p>
+
+                <div style={{ background: '#fff1f2', border: '1px dashed #fb7185', borderRadius: '10px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ textAlign: 'left' }}>
+                    <small style={{ fontSize: '0.7rem', color: '#be123c', fontWeight: 700 }}>EXCLUSIVE CODE</small>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#881337', fontFamily: 'monospace' }}>ANANYA20</div>
+                  </div>
+                  <span style={{ background: '#e11d48', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '4px 8px', borderRadius: '6px' }}>
+                    20% OFF
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 14: SOCIAL PROOF / CATEGORY FIT
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Creator Community
+            </span>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+              Built for creators who love...
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+              No matter your niche, LovelyCrafts gives you an emotional, creative way to delight your audience.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+            {CREATOR_CATEGORIES.map((cat, idx) => (
+              <div key={idx} style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid #f3f4f6', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+                <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>{cat.emoji}</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{cat.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, lineHeight: 1.4 }}>{cat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 9: FEATURED CREATORS
+        ========================================================================= */}
+        {creators.length > 0 && (
+          <section style={{ marginBottom: '70px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Spotlight
+              </span>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+                ⭐ Meet the LovelyCrafts Creators
+              </h2>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
               {creators.map((c) => (
                 <Link
@@ -306,13 +780,105 @@ export default function CreatorsLandingPage() {
                       {c.bio}
                     </p>
                   )}
+                  <span style={{ marginTop: '12px', fontSize: '0.8rem', color: '#e11d48', fontWeight: 700 }}>
+                    Visit Creator Page →
+                  </span>
                 </Link>
               ))}
             </div>
           </section>
         )}
 
-        {/* APPLICATION SECTION */}
+
+        {/* =========================================================================
+            PRIORITY 10: FAQS
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Clear Answers
+            </span>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
+              Frequently Asked Questions
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+              Everything you need to know about joining, promoting, and getting paid.
+            </p>
+          </div>
+
+          <div style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {FAQS.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: '#fff',
+                    borderRadius: '16px',
+                    border: '1px solid #f3f4f6',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    style={{
+                      width: '100%',
+                      padding: '18px 22px',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: '#111827',
+                    }}
+                  >
+                    <span>{faq.q}</span>
+                    <span style={{ color: '#e11d48', fontSize: '1.2rem', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                      ▼
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div style={{ padding: '0 22px 18px', color: '#4b5563', fontSize: '0.92rem', lineHeight: 1.6, borderTop: '1px solid #f9fafb' }}>
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 11: CREATOR DISCLOSURE GUIDANCE
+        ========================================================================= */}
+        <section style={{ marginBottom: '70px', background: '#f8fafc', borderRadius: '20px', padding: '24px 30px', border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <span style={{ fontSize: '1.6rem' }}>⚖️</span>
+            <div>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', margin: '0 0 4px' }}>
+                Creator Disclosure Guidance
+              </h3>
+              <p style={{ color: '#475569', fontSize: '0.88rem', lineHeight: 1.5, margin: '0 0 10px' }}>
+                When sharing LovelyCrafts in your videos, posts, or stories, please clearly disclose your affiliate relationship (as required by ASCI / FTC guidelines).
+              </p>
+              <div style={{ background: '#fff', padding: '8px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', color: '#334155', fontFamily: 'monospace' }}>
+                &quot;I&apos;m partnered with LovelyCrafts, and you can use my code YOURCODE for up to 20% off at lovelycrafts.in/c/yourname&quot;
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* =========================================================================
+            PRIORITY 2: APPLICATION SECTION
+        ========================================================================= */}
         <section id="apply" style={{ background: '#fff', borderRadius: '24px', padding: '36px', border: '1px solid #fecdd3', boxShadow: '0 12px 32px rgba(225,29,72,0.06)' }}>
           <div style={{ maxWidth: '560px', margin: '0 auto' }}>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#111827', textAlign: 'center', marginBottom: '8px' }}>

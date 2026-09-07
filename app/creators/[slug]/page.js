@@ -251,7 +251,7 @@ export default function PublicCreatorPage() {
                         ₹{template.basePrice || 499}
                       </span>
                       <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
-                        ₹{template.price || 199}
+                        ₹{template.price || 219}
                       </span>
                     </div>
                     {creator.primaryCoupon && (

@@ -56,7 +56,7 @@ export function BentoGrid() {
           <div className="bento-card-footer">
             <div className="bento-price-tag">
               <del>₹499</del>
-              <span>₹199</span>
+              <span>₹219</span>
             </div>
             <span className="bento-cta">
               Create Now →

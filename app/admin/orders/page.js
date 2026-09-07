@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { exportToExcel } from '@/lib/excel-export';
 
 export default function AdminOrdersPage() {
   const { user } = useAuth();
@@ -23,15 +24,55 @@ export default function AdminOrdersPage() {
     });
   }, [user]);
 
+  const handleExportExcel = () => {
+    const formatted = orders.map((o) => ({
+      'Date': o.paid_at ? new Date(o.paid_at).toLocaleString() : 'Recent',
+      'Order / Note ID': o.note_id || o.id,
+      'Template Name': o.template_id || 'Standard',
+      'Gross Amount (₹)': ((o.final_amount || 0) / 100).toFixed(2),
+      'Coupon Code': o.coupon_code || 'None',
+      'Discount Applied (%)': o.discount_percent ? `${o.discount_percent}%` : '0%',
+      'Attributed Creator ID': o.creator_id || 'Direct / Organic',
+      'Payment Method': o.payment_method || 'Razorpay',
+      'Order Status': o.payment_status || 'Paid',
+    }));
+    exportToExcel(formatted, 'orders_ledger', 'Orders');
+  };
+
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
-          Customer Orders &amp; Attribution Snapshots
-        </h1>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-          Immutable ledger of paid and refunded orders with coupon code snapshots and creator tracking.
-        </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+            Customer Orders &amp; Attribution Snapshots
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+            Immutable ledger of paid and refunded orders with coupon code snapshots and creator tracking.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleExportExcel}
+          disabled={loading || orders.length === 0}
+          style={{
+            background: '#10b981',
+            color: '#fff',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            cursor: loading || orders.length === 0 ? 'not-allowed' : 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+          }}
+        >
+          <span>📥</span>
+          <span>Export Excel (.xlsx)</span>
+        </button>
       </div>
 
       {loading ? (

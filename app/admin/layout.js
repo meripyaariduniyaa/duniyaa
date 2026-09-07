@@ -9,12 +9,14 @@ import { signOut } from 'firebase/auth';
 
 const ADMIN_TABS = [
   { href: '/admin/dashboard', label: '📊 Overview' },
+  { href: '/admin/crm', label: '🎯 Creator CRM' },
   { href: '/admin/creators', label: '👥 Creators' },
   { href: '/admin/coupons', label: '🏷️ Coupons' },
   { href: '/admin/orders', label: '📦 Orders' },
   { href: '/admin/commissions', label: '💸 Commissions' },
   { href: '/admin/payouts', label: '💳 Payouts' },
   { href: '/admin/creator-gifts', label: '🎁 Creator Gifts' },
+  { href: '/admin/reports', label: '📥 Excel Reports' },
 ];
 
 export default function AdminLayout({ children }) {
@@ -109,7 +111,7 @@ export default function AdminLayout({ children }) {
         {/* NAVIGATION TABS */}
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px' }}>
           {ADMIN_TABS.map((tab) => {
-            const active = pathname === tab.href || (tab.href === '/admin/dashboard' && pathname === '/admin');
+            const active = pathname === tab.href || (tab.href === '/admin/dashboard' && pathname === '/admin') || (tab.href !== '/admin/dashboard' && pathname.startsWith(tab.href));
             return (
               <Link
                 key={tab.href}

@@ -2,7 +2,7 @@ import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 export const metadata = {
   title: 'Create a Personalized Digital Surprise \u2014 3 Minutes | LovelyCrafts',
-  description: 'Create your own interactive digital gift in 3 minutes. Choose from 18+ templates, add your photos and heartfelt message, set a custom link, and share instantly on WhatsApp. Starting at \u20b9199.',
+  description: 'Create your own interactive digital gift in 3 minutes. Choose from 18+ templates, add your photos and heartfelt message, set a custom link, and share instantly on WhatsApp. Starting at \u20b9219.',
   keywords: [
     'create personalized digital gift India',
     'make interactive birthday card online',
@@ -28,7 +28,7 @@ export const metadata = {
     site: '@lovelycraftsin',
     creator: '@lovelycraftsin',
     title: 'Create Your Personalized Digital Surprise | LovelyCrafts',
-    description: 'Make a personalized digital gift in 3 minutes. Share on WhatsApp instantly from \u20b9199.',
+    description: 'Make a personalized digital gift in 3 minutes. Share on WhatsApp instantly from \u20b9219.',
     images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },

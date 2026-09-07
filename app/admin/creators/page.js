@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { CREATOR_TIERS } from '@/lib/creator-club';
 import { templates } from '@/lib/templates';
+import { exportToExcel } from '@/lib/excel-export';
 
 export default function AdminCreatorsPage() {
   const { user } = useAuth();
@@ -14,6 +15,25 @@ export default function AdminCreatorsPage() {
   const [editForm, setEditForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+
+  const handleExportExcel = () => {
+    const formatted = creators.map((c) => ({
+      'Creator Name': c.name || 'Unnamed',
+      'Email': c.email || '',
+      'Slug Handle': c.slug || '',
+      'Public URL': `https://lovelycrafts.in/c/${c.slug}`,
+      'Tier': (c.tier || 'Starter').toUpperCase(),
+      'Commission Rate (%)': `${c.commission_rate || 10}%`,
+      'Assigned Coupon': c.coupon_code || 'Pending',
+      'Phone / WhatsApp': c.phone || '',
+      'Instagram URL': c.instagram_url || '',
+      'YouTube URL': c.youtube_url || '',
+      'Application Status': c.status || 'active',
+      'Featured Status': c.featured ? 'Yes' : 'No',
+      'Joined Date': c.created_at ? new Date(c.created_at).toLocaleDateString() : '',
+    }));
+    exportToExcel(formatted, 'creators_registry', 'Creators');
+  };
 
   const loadCreators = async () => {
     if (!user) return;
@@ -120,28 +140,53 @@ export default function AdminCreatorsPage() {
           </p>
         </div>
 
-        {/* STATUS FILTER PILLS */}
-        <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
-          {['all', 'pending', 'active', 'suspended'].map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setFilter(tab)}
-              style={{
-                background: filter === tab ? '#fff' : 'transparent',
-                color: filter === tab ? '#0f172a' : '#64748b',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: filter === tab ? 700 : 500,
-                cursor: 'pointer',
-                textTransform: 'capitalize',
-              }}
-            >
-              {tab} {tab === 'pending' && creators.filter((c) => c.status === 'pending').length > 0 && `(${creators.filter((c) => c.status === 'pending').length})`}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* STATUS FILTER PILLS */}
+          <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
+            {['all', 'pending', 'active', 'suspended'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilter(tab)}
+                style={{
+                  background: filter === tab ? '#fff' : 'transparent',
+                  color: filter === tab ? '#0f172a' : '#64748b',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: filter === tab ? 700 : 500,
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {tab} {tab === 'pending' && creators.filter((c) => c.status === 'pending').length > 0 && `(${creators.filter((c) => c.status === 'pending').length})`}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || creators.length === 0}
+            style={{
+              background: '#10b981',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: loading || creators.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+            }}
+          >
+            <span>📥</span>
+            <span>Export Excel</span>
+          </button>
         </div>
       </div>
 

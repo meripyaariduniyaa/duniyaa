@@ -134,7 +134,7 @@ export default function LiveTemplatePreviewModal({ templateId, onClose }) {
               whiteSpace: 'nowrap',
             }}
           >
-            ✨ Customize This (₹199)
+            ✨ Customize This (₹219)
           </Link>
           <button
             type="button"

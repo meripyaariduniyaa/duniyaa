@@ -83,7 +83,7 @@ function PreviewContent() {
 
   const hasCustomSlug = Boolean(apology?.custom_slug);
   const selectedTemplate = templates.find((template) => template.id === apology?.template);
-  const basePrice = selectedTemplate?.price || 199;
+  const basePrice = selectedTemplate?.price || 219;
   const customLinkFee = hasCustomSlug ? 29 : 0;
   const totalBeforeCoupon = basePrice + customLinkFee;
 

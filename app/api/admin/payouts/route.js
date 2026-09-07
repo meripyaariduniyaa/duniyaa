@@ -39,13 +39,24 @@ export async function POST(request) {
     const payoutRef = db.collection('payouts').doc();
     const batch = db.batch();
 
+    let targetCommissionIds = Array.isArray(commission_ids) ? [...commission_ids] : [];
+
+    // If commission IDs were not provided, automatically find pending commissions for this creator
+    if (targetCommissionIds.length === 0) {
+      const pendingSnap = await db.collection('commissions')
+        .where('creator_id', '==', creator_id)
+        .where('status', '==', 'pending')
+        .get();
+      targetCommissionIds = pendingSnap.docs.map((d) => d.id);
+    }
+
     const payoutData = {
       creator_id,
       amount: Number(amount),
       method: method || 'UPI',
       reference: reference || '',
       notes: notes || '',
-      commission_ids: Array.isArray(commission_ids) ? commission_ids : [],
+      commission_ids: targetCommissionIds,
       status: 'paid',
       created_by: admin.email,
       created_at: FieldValue.serverTimestamp(),
@@ -54,19 +65,20 @@ export async function POST(request) {
 
     batch.set(payoutRef, payoutData);
 
-    // If commission IDs provided, update their status to paid and link payout_id
-    if (Array.isArray(commission_ids) && commission_ids.length > 0) {
-      for (const commId of commission_ids) {
+    // Update all target commissions to status 'paid', setting paid_at and linking payout_id
+    if (targetCommissionIds.length > 0) {
+      for (const commId of targetCommissionIds) {
         batch.update(db.collection('commissions').doc(commId), {
           status: 'paid',
           payout_id: payoutRef.id,
+          paid_at: FieldValue.serverTimestamp(),
           updated_at: FieldValue.serverTimestamp(),
         });
       }
     }
 
     await batch.commit();
-    return NextResponse.json({ ok: true, id: payoutRef.id });
+    return NextResponse.json({ ok: true, id: payoutRef.id, updatedCommissionsCount: targetCommissionIds.length });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Could not record payout.' }, { status: 403 });
   }

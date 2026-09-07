@@ -69,7 +69,7 @@ export default function StickyCtaBar() {
               Craft an Interactive Surprise
             </p>
             <p style={{ margin: 0, fontSize: '0.7rem', color: '#be185d', fontWeight: 700 }}>
-              ⚡ Ready in 2 mins • <span style={{ color: '#16a34a' }}>₹199 only</span>
+              ⚡ Ready in 2 mins • <span style={{ color: '#16a34a' }}>₹219 only</span>
             </p>
           </div>
         </div>

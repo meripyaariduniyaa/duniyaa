@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { exportToExcel } from '@/lib/excel-export';
 
 export default function AdminPayoutsPage() {
   const { user } = useAuth();
@@ -18,6 +19,25 @@ export default function AdminPayoutsPage() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+
+  const handleExportExcel = () => {
+    const formatted = payouts.map((p) => {
+      const matchedCreator = creators.find((cr) => cr.id === p.creator_id);
+      return {
+        'Payout Batch ID': p.id,
+        'Creator Name': matchedCreator?.name || p.creator_id,
+        'Creator Slug': matchedCreator?.slug || '',
+        'Amount Paid (₹)': ((p.amount || 0) / 100).toFixed(2),
+        'Payment Method': p.method || 'UPI',
+        'UTR / Bank Reference': p.reference || '—',
+        'Orders Count': p.order_ids?.length || p.commissions_count || 0,
+        'Processed Date': p.paid_at ? new Date(p.paid_at).toLocaleString() : '',
+        'Admin Notes': p.notes || '',
+        'Status': p.status || 'Paid',
+      };
+    });
+    exportToExcel(formatted, 'payouts_history', 'Payouts');
+  };
 
   const loadData = async () => {
     if (!user) return;
@@ -110,13 +130,38 @@ export default function AdminPayoutsPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => { setIsCreating(true); setMessage(''); }}
-          style={{ background: '#059669', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5,150,105,0.2)' }}
-        >
-          + Process Payout Batch
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || payouts.length === 0}
+            style={{
+              background: '#10b981',
+              color: '#fff',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: loading || payouts.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+            }}
+          >
+            <span>📥</span>
+            <span>Export Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setIsCreating(true); setMessage(''); }}
+            style={{ background: '#059669', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5,150,105,0.2)' }}
+          >
+            + Process Payout Batch
+          </button>
+        </div>
       </div>
 
       {message && (

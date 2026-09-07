@@ -12,7 +12,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
   // After coupon is applied, we store the resolved order details here
   const [resolvedOrder, setResolvedOrder] = useState(null);
 
-  const basePrice = displayAmount || 199;
+  const basePrice = displayAmount || 219;
 
   /* ── Step 1: Validate coupon & preview final price ── */
   async function applyCoupon() {

@@ -15,7 +15,7 @@ const SPOTLIGHT_BESTSELLERS = [
     badge: '🔥 #1 BESTSELLER',
     tagline: 'Interactive Cake & Party',
     desc: 'Blow out real candles, slice the cake, trigger confetti bursts, and play their favorite song.',
-    price: '₹199',
+    price: '₹219',
     originalPrice: '₹499',
     rating: '4.9 ★ (Top Favorite)',
     gradient: 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
@@ -28,7 +28,7 @@ const SPOTLIGHT_BESTSELLERS = [
     badge: '👑 COUPLES CHOICE',
     tagline: 'Gamified Love Proposal',
     desc: 'An emotional journey with cute promises, photo slideshow, and the unforgettable question.',
-    price: '₹199',
+    price: '₹219',
     originalPrice: '₹499',
     rating: '5.0 ★ (Couples Favorite)',
     gradient: 'linear-gradient(135deg, #fdf2f8, #fce7f3)',
@@ -41,7 +41,7 @@ const SPOTLIGHT_BESTSELLERS = [
     badge: '✨ VIRAL UNBOXING',
     tagline: '3D Tap-to-Unbox',
     desc: 'They tap to untie the ribbon, open the secret 3D gift box, and uncover heartfelt memories.',
-    price: '₹199',
+    price: '₹219',
     originalPrice: '₹499',
     rating: '4.9 ★ (Viral Hit)',
     gradient: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
@@ -54,7 +54,7 @@ const SPOTLIGHT_BESTSELLERS = [
     badge: '❤️ DEEP EMOTION',
     tagline: 'Heartfelt Wax-Sealed Letter',
     desc: 'For the words left unsaid. A vintage sealed envelope with background music & voice note.',
-    price: '₹199',
+    price: '₹219',
     originalPrice: '₹499',
     rating: '4.9 ★ (Deep Emotional)',
     gradient: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
@@ -110,7 +110,7 @@ const FAQS = [
 
 export const metadata = {
   title: 'LovelyCrafts — Interactive Digital Gifts & Personalized Surprises India',
-  description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, romantic proposals, apology notes, anniversary gifts, and 18+ emotional experiences — personalized with your photos & message. Starting at ₹199. Share instantly on WhatsApp.',
+  description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, romantic proposals, apology notes, anniversary gifts, and 18+ emotional experiences — personalized with your photos & message. Starting at ₹219. Share instantly on WhatsApp.',
   keywords: [
     'personalized digital gift India',
     'interactive birthday card India',
@@ -134,17 +134,17 @@ export const metadata = {
     type: 'website',
     siteName: SITE_NAME,
     title: 'LovelyCrafts — Interactive Digital Gifts & Personalized Surprises India',
-    description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, proposals, apology notes, anniversary gifts, and 18+ emotional experiences — starting at ₹199.',
+    description: 'Create stunning interactive digital surprises in 3 minutes. Birthday cards, proposals, apology notes, anniversary gifts, and 18+ emotional experiences — starting at ₹219.',
     url: SITE_URL,
     locale: 'en_IN',
-    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'LovelyCrafts — Personalized Digital Surprises from ₹199' }],
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'LovelyCrafts — Personalized Digital Surprises from ₹219' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@lovelycraftsin',
     creator: '@lovelycraftsin',
     title: 'LovelyCrafts — Interactive Digital Gifts & Surprises India',
-    description: 'Birthday cards, proposals, apology notes & 18+ emotional digital experiences starting at ₹199. Share on WhatsApp in seconds.',
+    description: 'Birthday cards, proposals, apology notes & 18+ emotional digital experiences starting at ₹219. Share on WhatsApp in seconds.',
     images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
@@ -181,7 +181,7 @@ export default function Home() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.4rem 1.1rem', borderRadius: '99px', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)', color: '#831843', fontWeight: 700, marginBottom: '1.5rem' }}>
             <span>🎉 Launch Pricing:</span>
             <del style={{ color: '#9ca3af', fontWeight: 400 }}>₹499</del>
-            <span style={{ color: '#16a34a', fontWeight: 800 }}>₹199 only (60% OFF)</span>
+            <span style={{ color: '#16a34a', fontWeight: 800 }}>₹219 only (56% OFF)</span>
           </div>
 
           {/* Quick Pill Navigation */}
@@ -189,7 +189,7 @@ export default function Home() {
 
           <div className="hero-actions" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
             <Link href="/templates" className="btn-primary" style={{ padding: 'clamp(0.8rem, 2.5vw, 1rem) clamp(1.6rem, 4vw, 2.4rem)', fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', fontWeight: 800, boxShadow: '0 8px 24px rgba(244,63,94,0.3)' }}>
-              ✨ Craft a Surprise Now (₹199)
+              ✨ Craft a Surprise Now (₹219)
             </Link>
             <a href="#bestsellers" className="btn-secondary" style={{ padding: 'clamp(0.8rem, 2.5vw, 1rem) clamp(1.3rem, 3.5vw, 1.8rem)', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)', fontWeight: 700 }}>
               🔥 View Best Sellers ↓
@@ -539,7 +539,7 @@ export default function Home() {
                 display: 'inline-block'
               }}
             >
-              ✨ Choose an Experience &amp; Start (₹199) →
+              ✨ Choose an Experience &amp; Start (₹219) →
             </Link>
           </div>
 

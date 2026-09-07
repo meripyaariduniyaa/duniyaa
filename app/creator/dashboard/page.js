@@ -28,6 +28,24 @@ export default function CreatorDashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState(false);
+  const [copiedDisclosure, setCopiedDisclosure] = useState(false);
+  const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('lc_creator_welcome_v1');
+      if (dismissed === 'true') {
+        setShowWelcomeGuide(false);
+      }
+    }
+  }, []);
+
+  const dismissWelcomeGuide = () => {
+    setShowWelcomeGuide(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lc_creator_welcome_v1', 'true');
+    }
+  };
 
   const loadDashboard = async () => {
     if (!user) return;
@@ -318,6 +336,77 @@ export default function CreatorDashboardPage() {
           </div>
         </div>
 
+        {/* ONBOARDING CHECKLIST / WELCOME GUIDE (Priority 15) */}
+        {showWelcomeGuide ? (
+          <div style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #fff 100%)', borderRadius: '20px', padding: '24px 28px', border: '1px solid #fecdd3', marginBottom: '24px', boxShadow: '0 8px 24px rgba(225,29,72,0.06)', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#be123c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  🚀 Quick-Start Guide
+                </span>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#111827', margin: '4px 0 0' }}>
+                  🎉 Welcome to the LovelyCrafts Creator Club!
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={dismissWelcomeGuide}
+                style={{ background: '#fff', color: '#6b7280', border: '1px solid #e5e7eb', padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Dismiss Guide ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 1</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Complete Profile</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Add your bio, social channels &amp; custom photo.</small>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 2</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Get Creator Code</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Your audience gets up to 20% OFF with your coupon.</small>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 3</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Try Free Experience</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Redeem your 100% complimentary VIP gift pass below.</small>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 4</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Share Creator Link</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Place your 30-day link in your YouTube/Instagram bio.</small>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 5</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Watch Referrals Grow</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Track clicks, paid conversions &amp; commissions in real-time.</small>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 6</div>
+                <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Unlock Higher Tiers</strong>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Advance from 15% to 18% automatically with more orders.</small>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={() => setShowWelcomeGuide(true)}
+              style={{ background: 'transparent', border: 'none', color: '#e11d48', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              📖 View Creator Onboarding Checklist
+            </button>
+          </div>
+        )}
+
         {/* EDIT PROFILE MODAL / DRAWER */}
         {editingProfile && (
           <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', border: '1px solid #fecdd3', marginBottom: '24px', boxShadow: '0 8px 24px rgba(225,29,72,0.06)' }}>
@@ -548,6 +637,33 @@ export default function CreatorDashboardPage() {
                 Admin will assign your custom coupon code shortly.
               </div>
             )}
+          </div>
+
+          {/* DISCLOSURE GUIDANCE CARD (Priority 11) */}
+          <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid #f3f4f6', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.4rem' }}>📢</span>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', margin: 0 }}>Affiliate Disclosure Template</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '12px', lineHeight: 1.5 }}>
+              When promoting LovelyCrafts on Instagram, YouTube, or TikTok, please include a clear affiliate disclosure (as required by ASCI / FTC guidelines). Here is an approved sample caption:
+            </p>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+              <code style={{ fontSize: '0.85rem', color: '#334155', flex: 1, fontFamily: 'monospace' }}>
+                {`"I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for up to 20% off at lovelycrafts.in/c/${creator.slug}"`}
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(`I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for up to 20% off at https://lovelycrafts.in/c/${creator.slug}`);
+                  setCopiedDisclosure(true);
+                  setTimeout(() => setCopiedDisclosure(false), 2000);
+                }}
+                style={{ background: copiedDisclosure ? '#059669' : '#334155', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '8px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                {copiedDisclosure ? '✓ Copied' : 'Copy Caption'}
+              </button>
+            </div>
           </div>
         </div>
 

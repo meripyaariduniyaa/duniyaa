@@ -7,7 +7,7 @@ import PreviewDemoButton from '@/components/PreviewDemoButton';
 
 export const metadata = {
   title: 'Browse All Interactive Digital Gift Templates — 18 Experiences | LovelyCrafts',
-  description: 'Explore 18+ personalized interactive digital gift experiences: birthday surprises, romantic proposals, anniversary cards, apology notes, Get Well Soon, Father\'s Day letter, Raksha Bandhan, wedding invitations, and more. Share any on WhatsApp in minutes — from ₹199.',
+  description: 'Explore 18+ personalized interactive digital gift experiences: birthday surprises, romantic proposals, anniversary cards, apology notes, Get Well Soon, Father\'s Day letter, Raksha Bandhan, wedding invitations, and more. Share any on WhatsApp in minutes — from ₹219.',
   keywords: [
     'interactive digital gift templates India',
     'personalized digital card templates',
@@ -29,7 +29,7 @@ export const metadata = {
   alternates: { canonical: `${SITE_URL}/templates` },
   openGraph: {
     title: 'Browse 18+ Interactive Digital Gift Templates | LovelyCrafts',
-    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day, Raksha Bandhan, weddings & more — personalized interactive digital cards from ₹199.',
+    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day, Raksha Bandhan, weddings & more — personalized interactive digital cards from ₹219.',
     url: `${SITE_URL}/templates`,
     type: 'website',
     siteName: SITE_NAME,
@@ -41,7 +41,7 @@ export const metadata = {
     site: '@lovelycraftsin',
     creator: '@lovelycraftsin',
     title: 'Browse 18+ Interactive Digital Gift Templates | LovelyCrafts',
-    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day & more from ₹199. Share on WhatsApp in minutes.',
+    description: 'Birthday surprises, proposals, apologies, Get Well Soon, Father\'s Day & more from ₹219. Share on WhatsApp in minutes.',
     images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
