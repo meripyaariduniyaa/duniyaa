@@ -289,7 +289,7 @@ export default function AdminCreatorGiftsPage() {
                               color: g.claimed ? '#64748b' : '#15803d',
                             }}
                           >
-                            {g.claimed ? '✓ Claimed' : '● Available (100% Free)'}
+                            {g.claimed ? '✓ Claimed (Used)' : '⚡ Active Pass (1-Time Use)'}
                           </span>
                         </td>
                       </tr>
