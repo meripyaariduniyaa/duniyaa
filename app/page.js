@@ -4,6 +4,7 @@ import EmotionFinder from '@/components/EmotionFinder';
 import LiveActivityTicker from '@/components/LiveActivityTicker';
 import GoogleAd from '@/components/GoogleAd';
 import PreviewDemoButton from '@/components/PreviewDemoButton';
+import FeaturedCreatorsSection from '@/components/FeaturedCreatorsSection';
 
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
@@ -153,32 +154,75 @@ export const metadata = {
 export default function Home() {
   return (
     <main className="shell">
-      <div className="main-content">
+      <div className="main-content" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2rem, 4.5vw, 3.5rem)', padding: '0 0 2.5rem' }}>
 
-        {/* Live Social Proof Activity Ticker */}
-        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <LiveActivityTicker />
-        </div>
+        {/* Top Hero Area with Activity Ticker */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.25rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <LiveActivityTicker />
+          </div>
 
-        {/* Hero Section */}
-        <section className="hero-section text-center mt-1 mb-6" style={{ background: '#ffffff', borderRadius: 'clamp(20px, 5vw, 32px)', padding: 'clamp(1.75rem, 5vw, 3.25rem) clamp(1rem, 4vw, 2rem)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.03)' }}>
-          
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', border: '1px solid #fecdd3', padding: '0.35rem 0.95rem', borderRadius: '99px', fontSize: 'clamp(0.72rem, 1.8vw, 0.8rem)', color: '#be185d', fontWeight: 800, marginBottom: '1rem' }}>
+          {/* Hero Section */}
+          <section className="hero-section text-center" style={{
+            background: '#ffffff',
+            borderRadius: 'clamp(20px, 4vw, 28px)',
+            padding: 'clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.75rem)',
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 16px 36px rgba(0,0,0,0.03)',
+          }}>
+            
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.28rem 0.8rem',
+              borderRadius: '99px',
+              fontSize: 'clamp(0.7rem, 1.6vw, 0.76rem)',
+              color: '#be185d',
+              fontWeight: 800,
+              marginBottom: '0.65rem',
+            }}>
             <span>⭐ HIGHLY RATED DIGITAL GIFTS</span>
             <span>•</span>
             <span>Instant 1-Click WhatsApp Surprises</span>
           </div>
 
-          <h1 style={{ fontSize: 'clamp(1.85rem, 6.5vw, 3.6rem)', lineHeight: 1.15, fontWeight: 800, color: '#1c1917', marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <h1 style={{
+            fontSize: 'clamp(1.8rem, 5.5vw, 3.2rem)',
+            lineHeight: 1.15,
+            fontWeight: 800,
+            color: '#1c1917',
+            margin: '0 auto 0.75rem',
+            letterSpacing: '-0.03em',
+          }}>
             Craft unforgettable<br />
             <em className="cursive" style={{ fontSize: '1.05em', color: 'var(--accent-primary)' }}>interactive digital surprises.</em>
           </h1>
 
-          <p className="hero-copy text-muted" style={{ maxWidth: '640px', margin: '0 auto 1.5rem', fontSize: 'clamp(0.92rem, 2.5vw, 1.08rem)', lineHeight: 1.6 }}>
+          <p className="hero-copy text-muted" style={{
+            maxWidth: '640px',
+            margin: '0 auto 1rem',
+            fontSize: 'clamp(0.92rem, 2.2vw, 1.05rem)',
+            lineHeight: 1.55,
+          }}>
             Say goodbye to boring text messages &amp; greeting cards. Turn special photos, heartfelt letters, and music into gamified digital moments they open right on their phone in seconds.
           </p>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.4rem 1.1rem', borderRadius: '99px', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)', color: '#831843', fontWeight: 700, marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: '#fdf2f8',
+            border: '1px solid #fbcfe8',
+            padding: '0.35rem 0.95rem',
+            borderRadius: '99px',
+            fontSize: 'clamp(0.78rem, 1.8vw, 0.86rem)',
+            color: '#831843',
+            fontWeight: 700,
+            marginBottom: '1.15rem',
+          }}>
             <span>🎉 Launch Pricing:</span>
             <del style={{ color: '#9ca3af', fontWeight: 400 }}>₹499</del>
             <span style={{ color: '#16a34a', fontWeight: 800 }}>₹219 only (56% OFF)</span>
@@ -187,18 +231,19 @@ export default function Home() {
           {/* Quick Pill Navigation */}
           <HeroPills />
 
-          <div className="hero-actions" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
-            <Link href="/templates" className="btn-primary" style={{ padding: 'clamp(0.8rem, 2.5vw, 1rem) clamp(1.6rem, 4vw, 2.4rem)', fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', fontWeight: 800, boxShadow: '0 8px 24px rgba(244,63,94,0.3)' }}>
+          <div className="hero-actions" style={{ marginTop: '1.15rem', display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+            <Link href="/templates" className="btn-primary" style={{ padding: 'clamp(0.75rem, 2.2vw, 0.95rem) clamp(1.5rem, 3.5vw, 2.2rem)', fontSize: 'clamp(0.92rem, 1.8vw, 1.02rem)', fontWeight: 800, boxShadow: '0 8px 24px rgba(244,63,94,0.3)' }}>
               ✨ Craft a Surprise Now (₹219)
             </Link>
-            <a href="#bestsellers" className="btn-secondary" style={{ padding: 'clamp(0.8rem, 2.5vw, 1rem) clamp(1.3rem, 3.5vw, 1.8rem)', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)', fontWeight: 700 }}>
+            <a href="#bestsellers" className="btn-secondary" style={{ padding: 'clamp(0.75rem, 2.2vw, 0.95rem) clamp(1.2rem, 3vw, 1.6rem)', fontSize: 'clamp(0.88rem, 1.8vw, 0.95rem)', fontWeight: 700 }}>
               🔥 View Best Sellers ↓
             </a>
           </div>
         </section>
+        </div>
 
         {/* Spotlight Best Sellers Section */}
-        <section id="bestsellers" style={{ marginBottom: '3.5rem' }}>
+        <section id="bestsellers">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{
               background: 'linear-gradient(135deg, #f43f5e, #be185d)',
@@ -296,16 +341,19 @@ export default function Home() {
           </div>
         </section>
 
-        <div id="feelings"><EmotionFinder /></div>
+        {/* Emotion Finder Interactivity */}
+        <div id="feelings">
+          <EmotionFinder />
+        </div>
 
-        {/* Bento Grid: Something for Every Moment */}
+        {/* Bento Grid: Catalog */}
         <section className="bento-section" id="experiences">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
               COMPLETE CATALOG
             </span>
-            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', marginTop: '0.35rem', fontWeight: 600, color: '#1c1917' }}>
-              Something for every moment
+            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', marginTop: '0.35rem', fontWeight: 800, color: '#1c1917' }}>
+              Something for Every Moment
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.35rem' }}>
               Choose a gamified interactive template and personalize it in 2 minutes.
@@ -315,6 +363,11 @@ export default function Home() {
           <BentoGrid />
         </section>
 
+        {/* Top Performing Creators Section */}
+        <div id="creators">
+          <FeaturedCreatorsSection />
+        </div>
+
         {/* Why Choose LovelyCrafts Comparison Matrix */}
         <section style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #fffbfb 100%)',
@@ -322,7 +375,6 @@ export default function Home() {
           padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem)',
           border: '1px solid #fecdd3',
           boxShadow: '0 12px 36px rgba(190, 24, 93, 0.05)',
-          marginBottom: '3.5rem'
         }}>
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#be185d' }}>
@@ -387,13 +439,13 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section className="how-it-works-section" style={{ marginBottom: '3.5rem' }}>
-          <div className="text-center">
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
+        <section className="how-it-works-section">
+          <div className="text-center" style={{ marginBottom: '2rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
               SIMPLE 3-STEP PROCESS
             </span>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.25rem)', marginTop: '0.25rem', fontWeight: 600, color: '#1c1917' }}>
-              How it works
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.25rem)', marginTop: '0.25rem', fontWeight: 800, color: '#1c1917' }}>
+              How It Works
             </h2>
           </div>
 
@@ -417,7 +469,7 @@ export default function Home() {
         </section>
 
         {/* Real Customer Stories & Reviews */}
-        <section style={{ marginBottom: '3.5rem' }}>
+        <section>
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{
               background: '#fef3c7',
@@ -477,7 +529,6 @@ export default function Home() {
           borderRadius: '28px',
           padding: 'clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-          marginBottom: '3.5rem'
         }}>
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#be185d' }}>
@@ -513,7 +564,6 @@ export default function Home() {
           padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2rem)',
           textAlign: 'center',
           boxShadow: '0 16px 40px rgba(244,63,94,0.15)',
-          marginBottom: '2rem'
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💝 ✨ 🚀</div>
           
@@ -556,4 +606,3 @@ export default function Home() {
     </main>
   );
 }
-

@@ -3,11 +3,11 @@ import { SITE_URL, SITE_NAME, CONTACT_EMAIL } from '@/lib/seo';
 
 export const metadata = {
   title: 'Privacy Policy — How We Protect Your Data | LovelyCrafts',
-  description: 'Read the LovelyCrafts Privacy Policy to understand how we collect, store, and protect your personal data, uploaded photos, and user-generated content on our digital gifting platform.',
+  description: 'Read the LovelyCrafts Privacy Policy to understand how we collect, store, and protect your personal data, uploaded photos, user-generated content, and Creator Club affiliate data.',
   alternates: { canonical: `${SITE_URL}/privacy` },
   openGraph: {
     title: 'Privacy Policy | LovelyCrafts',
-    description: 'Read how LovelyCrafts collects, uses, and protects your personal data when you create and share personalized digital gift experiences.',
+    description: 'Read how LovelyCrafts collects, uses, and protects your personal data when you create, share personalized digital gift experiences, or participate in the Creator Club.',
     url: `${SITE_URL}/privacy`,
     type: 'website',
     siteName: SITE_NAME,
@@ -17,12 +17,12 @@ export const metadata = {
     card: 'summary',
     site: '@lovelycraftsin',
     title: 'Privacy Policy | LovelyCrafts',
-    description: 'How LovelyCrafts protects your personal data and user-generated content.',
+    description: 'How LovelyCrafts protects your personal data, user-generated content, and Creator Club details.',
   },
   robots: { index: true, follow: true },
 };
 
-const EFFECTIVE_DATE = 'August 9, 2026';
+const EFFECTIVE_DATE = 'September 8, 2026';
 
 export default function PrivacyPolicyPage() {
   return (
@@ -45,104 +45,94 @@ export default function PrivacyPolicyPage() {
             <strong>Platform:</strong> {SITE_NAME} ({SITE_URL})
           </p>
           <div style={{ marginTop: '1rem', padding: '1rem 1.25rem', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: '0.75rem', fontSize: '0.9rem', color: '#78350f' }}>
-            ⚠️ <strong>Important:</strong> Please read this policy carefully before using {SITE_NAME}. By accessing or using our service, you agree to the practices described below.
+            ⚠️ <strong>Important:</strong> Please read this policy carefully before using {SITE_NAME} or applying for the Creator Club. By accessing or using our service, you agree to the practices described below.
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
           <Section title="1. Who We Are">
-            <p>{SITE_NAME} (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) is a digital gifting platform operated from India. We allow users (&ldquo;you&rdquo;) to create personalized, interactive digital gift experiences for personal use and share them with recipients via a private link.</p>
+            <p>{SITE_NAME} (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) is a digital gifting and interactive surprise platform operated from India. We empower users (&ldquo;you&rdquo;) to create personalized, interactive digital gift experiences for personal use, share them with recipients via private links, and provide a partner program (&ldquo;Creator Club&rdquo;) for creative collaborators.</p>
             <p style={{ marginTop: '0.75rem' }}>For privacy-related queries, contact us at: <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#ec4899' }}>{CONTACT_EMAIL}</a></p>
           </Section>
 
           <Section title="2. Information We Collect">
-            <SubHeading>2.1 Information You Provide</SubHeading>
+            <SubHeading>2.1 Information You Provide as a Gift Creator</SubHeading>
             <ul>
-              <li><strong>Account Information:</strong> If you sign in via Google OAuth, we collect your name, email address, and Google profile picture as provided by Google.</li>
-              <li><strong>Gift Content:</strong> Recipient names, custom messages, promises, event details, and other text you enter when creating a gift experience.</li>
-              <li><strong>Photos:</strong> Images you upload are stored on Cloudinary, our third-party media storage provider.</li>
-              <li><strong>Payment Information:</strong> Payment transactions are processed by Razorpay. We do not store your card details or banking information on our servers.</li>
-              <li><strong>Custom Link Slugs:</strong> If you create a custom shareable link, we store the slug you choose.</li>
+              <li><strong>Account Information:</strong> When you sign in via Google OAuth, we collect your name, email address, and Google profile picture provided by Google.</li>
+              <li><strong>Gift Content:</strong> Recipient names, custom messages, promises, event dates, and other personal text entered into our templates.</li>
+              <li><strong>Photos & Media:</strong> Images you upload to personalize gifts are securely stored on Cloudinary, our third-party media delivery infrastructure.</li>
+              <li><strong>Voice Notes:</strong> Audio recordings optionally added to surprises are stored securely for interactive playback by your recipient.</li>
+              <li><strong>Payment Information:</strong> Transactions are securely processed via Razorpay. We do not store credit/debit card numbers or net banking credentials on our servers.</li>
+              <li><strong>Custom Share Links:</strong> Any customized short link or slug you choose for your note.</li>
             </ul>
 
-            <SubHeading>2.2 Information Collected Automatically</SubHeading>
+            <SubHeading>2.2 Information Collected for the Creator Club (Affiliates & Partners)</SubHeading>
             <ul>
-              <li><strong>Device Identifier:</strong> We generate and store an anonymous device ID in your browser&apos;s local storage to associate unpaid notes with your device for up to 90 days.</li>
-              <li><strong>Usage Data:</strong> Standard server logs including IP address, browser type, referring URL, and pages visited may be retained for security and analytical purposes.</li>
-              <li><strong>Cookies & Advertising:</strong> We use cookies for session management, analytics, and serving non-intrusive advertisements via Google AdSense on public pages. Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to your website or other websites. You can opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899' }}>Google Ads Settings</a>.</li>
+              <li><strong>Creator Profile Data:</strong> Creator name, handle, public Instagram / YouTube URLs, follower counts, and bio submitted in applications.</li>
+              <li><strong>Payout & Financial Details:</strong> UPI ID (e.g. name@upi) or bank account details submitted by approved creators exclusively for processing commission payouts.</li>
+              <li><strong>Referral Performance Data:</strong> Click counts, coupon redemption counts, commission earnings, and payout transaction history.</li>
             </ul>
-          </Section>
 
-          <Section title="3. How We Use Your Information">
+            <SubHeading>2.3 Information Collected Automatically & Cookies</SubHeading>
             <ul>
-              <li>To create, store, and deliver your personalized digital gift experiences.</li>
-              <li>To process payments and verify subscription/unlock status via Razorpay.</li>
-              <li>To authenticate you via Google Sign-In (Firebase Authentication).</li>
-              <li>To send transactional communications (e.g., payment confirmations) to your registered email.</li>
-              <li>To improve our platform, fix bugs, and enhance user experience.</li>
-              <li>To enforce our Terms of Service and prevent abuse or fraud.</li>
-            </ul>
-            <p style={{ marginTop: '0.75rem', color: '#374151' }}>We <strong>do not</strong> sell, rent, or trade your personal data to any third party for marketing purposes.</p>
-          </Section>
-
-          <Section title="4. Data Retention">
-            <ul>
-              <li><strong>Gift Notes:</strong> All created notes are automatically deleted after <strong>90 days</strong> from creation, regardless of paid status, unless renewed.</li>
-              <li><strong>Unpaid Drafts:</strong> Notes that are not paid for within 90 days are permanently deleted.</li>
-              <li><strong>Account Data:</strong> If you sign in with Google, your user profile is retained until you request deletion.</li>
-              <li><strong>Uploaded Images:</strong> Photos uploaded to Cloudinary may persist beyond the note expiry. You may request deletion by contacting us.</li>
-              <li><strong>Payment Records:</strong> Transaction records are retained as required by Indian financial regulations (minimum 5 years).</li>
+              <li><strong>Referral & Attribution Cookie (<code>lp_ref</code>):</strong> When a user visits via a creator referral link (e.g. <code>/c/creatorname</code>), a secure tracking cookie with a 30-day lifespan is stored to attribute qualifying purchases to that creator.</li>
+              <li><strong>Device Identifier:</strong> An anonymous token in browser local storage associates unpaid drafts with your device for up to 90 days.</li>
+              <li><strong>Usage & Server Logs:</strong> Standard server logs including IP address, browser user-agent, referring URL, and page interactions for fraud prevention and performance monitoring.</li>
+              <li><strong>Google AdSense & Cookies:</strong> Non-intrusive ads may be served on public discovery pages. You can customize ad settings at <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899' }}>Google Ads Settings</a>.</li>
             </ul>
           </Section>
 
-          <Section title="5. Third-Party Services">
-            <p>We use the following trusted third-party services. Each operates under their own privacy policy:</p>
+          <Section title="3. AI Assistant & Message Generator">
+            <p>Our platform includes optional AI-assisted writing tools to help draft romantic, apology, or birthday messages. The prompts you input into the AI assistant are processed in real-time to generate text suggestions. We <strong>do not</strong> use your private personal messages or photos to train third-party foundation models.</p>
+          </Section>
+
+          <Section title="4. How We Use Your Information">
+            <ul>
+              <li>To create, host, encrypt, and deliver your interactive digital surprise experiences.</li>
+              <li>To process payments and verify unlock status via Razorpay.</li>
+              <li>To track creator referrals, calculate tiered commissions (10% to 18%), and disburse payouts.</li>
+              <li>To authenticate users and creators via Google Sign-In (Firebase Authentication).</li>
+              <li>To maintain platform security, prevent fraudulent multi-accounting, and enforce terms.</li>
+            </ul>
+            <p style={{ marginTop: '0.75rem', color: '#374151' }}>We <strong>never</strong> sell, rent, or trade personal data or private gift contents to third parties for external marketing purposes.</p>
+          </Section>
+
+          <Section title="5. Data Retention & Expiry">
+            <ul>
+              <li><strong>Gift Notes:</strong> Created gift experiences remain accessible via their private link for <strong>90 days</strong> from creation unless renewed or permanently saved.</li>
+              <li><strong>Unpaid Drafts:</strong> Notes not unlocked within 90 days are automatically purged.</li>
+              <li><strong>Creator Accounts:</strong> Creator Club profiles and referral records are maintained while the creator remains active in the program.</li>
+              <li><strong>Financial & Payment Records:</strong> Transaction logs are retained in compliance with Indian financial and tax laws (minimum 5 years).</li>
+            </ul>
+          </Section>
+
+          <Section title="6. Third-Party Service Providers">
+            <p>We work with industry-leading third-party services that comply with strict data security standards:</p>
             <Table rows={[
-              ['Google AdSense', 'Ad serving and monetization', 'https://policies.google.com/technologies/ads'],
-              ['Firebase (Google)', 'Authentication, Firestore database', 'https://firebase.google.com/support/privacy'],
-              ['Cloudinary', 'Image storage and delivery', 'https://cloudinary.com/privacy'],
-              ['Razorpay', 'Payment processing (India)', 'https://razorpay.com/privacy/'],
-              ['Vercel / Hosting Provider', 'Web hosting and CDN', 'https://vercel.com/legal/privacy-policy'],
+              ['Razorpay', 'Payment processing and UPI verification', 'https://razorpay.com/privacy/'],
+              ['Firebase (Google)', 'Authentication and cloud database', 'https://firebase.google.com/support/privacy'],
+              ['Cloudinary', 'Encrypted media storage & CDN delivery', 'https://cloudinary.com/privacy'],
+              ['Google AdSense', 'Monetization on public pages', 'https://policies.google.com/technologies/ads'],
+              ['Vercel', 'Edge hosting and compute infrastructure', 'https://vercel.com/legal/privacy-policy'],
             ]} />
           </Section>
 
-          <Section title="6. Data Security">
-            <p>We implement industry-standard security measures to protect your data:</p>
+          <Section title="7. Data Security">
+            <p>We apply robust technical and organizational security measures:</p>
             <ul>
-              <li>All data is transmitted over HTTPS/TLS encryption.</li>
-              <li>Firebase Firestore security rules restrict access to note data by owner device ID or authenticated UID.</li>
-              <li>Payment data never touches our servers — it is handled entirely by Razorpay&apos;s PCI-DSS-compliant infrastructure.</li>
-              <li>Uploaded images are stored on Cloudinary&apos;s secure CDN with restricted access settings.</li>
+              <li>All web traffic is transmitted strictly over HTTPS/TLS 1.3 encryption.</li>
+              <li>Access to private notes is gated by Firebase Firestore security rules and unique unguessable slugs.</li>
+              <li>Payment credentials never touch our servers; all transactions are encrypted through Razorpay&apos;s PCI-DSS compliant infrastructure.</li>
             </ul>
-            <p style={{ marginTop: '0.75rem', color: '#6b7280', fontSize: '0.9rem' }}>No method of transmission or storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.</p>
           </Section>
 
-          <Section title="7. Your Rights">
-            <p>Under applicable Indian data protection law and as a matter of good practice, you have the right to:</p>
-            <ul>
-              <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
-              <li><strong>Correction:</strong> Request correction of inaccurate personal information.</li>
-              <li><strong>Deletion:</strong> Request deletion of your account and associated data.</li>
-              <li><strong>Withdraw Consent:</strong> Disconnect your Google account from {SITE_NAME} at any time through your Google account settings.</li>
-            </ul>
-            <p style={{ marginTop: '0.75rem' }}>To exercise any of these rights, email us at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#ec4899' }}>{CONTACT_EMAIL}</a>. We will respond within 30 days.</p>
+          <Section title="8. Your Rights">
+            <p>Under Indian data protection standards, you have the right to request access to your personal data, request correction of inaccurate data, or request complete deletion of your account and notes by writing to <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#ec4899' }}>{CONTACT_EMAIL}</a>.</p>
           </Section>
 
-          <Section title="8. Children's Privacy">
-            <p>{SITE_NAME} is intended for users aged <strong>13 and above</strong>. We do not knowingly collect personal data from children under 13. If you believe a child under 13 has submitted data to us, please contact us immediately and we will delete it promptly.</p>
-          </Section>
-
-          <Section title="9. Links to Third-Party Sites">
-            <p>Our platform may include links to third-party websites (e.g., Google Maps venue links in wedding invitations). We are not responsible for the privacy practices of those sites. Please review their respective privacy policies before sharing personal information.</p>
-          </Section>
-
-          <Section title="10. Changes to This Policy">
-            <p>We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you by updating the &ldquo;Effective Date&rdquo; at the top of this page. Continued use of {SITE_NAME} after changes constitutes acceptance of the revised policy.</p>
-          </Section>
-
-          <Section title="11. Contact Us">
-            <p>If you have any questions, concerns, or complaints about this Privacy Policy, please contact:</p>
+          <Section title="9. Contact Us">
+            <p>If you have any questions or feedback regarding this Privacy Policy, please contact our privacy desk:</p>
             <div style={{ background: '#f9fafb', padding: '1.25rem', borderRadius: '0.75rem', marginTop: '0.75rem', fontSize: '0.95rem', lineHeight: 1.8, border: '1px solid #e5e7eb' }}>
               <strong>LovelyCrafts</strong><br />
               📧 Email: <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#ec4899' }}>{CONTACT_EMAIL}</a><br />

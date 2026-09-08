@@ -4,11 +4,21 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/creator-auth';
 import { normalizeCode } from '@/lib/creator-club';
 
+function handleApiError(error, defaultMsg) {
+  console.error('Creator Gifts API Error:', error);
+  const msg = error?.message || defaultMsg;
+  const isAuthErr = msg.includes('Sign in required') || msg.includes('Admin access required');
+  const status = isAuthErr ? 403 : 500;
+  return NextResponse.json({ error: msg }, { status });
+}
+
 export async function GET(request) {
   try {
     await requireAdmin(request);
     const db = getAdminDb();
-    const snap = await db.collection('creatorGifts').orderBy('created_at', 'desc').limit(100).get();
+    
+    // Fetch creator gifts safely
+    const snap = await db.collection('creatorGifts').get();
 
     const gifts = snap.docs.map((doc) => {
       const data = doc.data();
@@ -20,9 +30,16 @@ export async function GET(request) {
       };
     });
 
-    return NextResponse.json({ gifts });
+    // Sort in memory by created_at descending
+    gifts.sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return NextResponse.json({ gifts: gifts.slice(0, 200) });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Admin access required.' }, { status: 403 });
+    return handleApiError(error, 'Admin access required.');
   }
 }
 
@@ -30,19 +47,35 @@ export async function POST(request) {
   try {
     await requireAdmin(request);
     const body = await request.json();
-    const { creator_id, template_id, custom_code, note } = body;
+    const { creator_id, crm_prospect_id, target_type = 'creator', template_id, custom_code, note } = body;
 
-    if (!creator_id || !template_id) {
-      return NextResponse.json({ error: 'Creator ID and template ID are required.' }, { status: 400 });
+    if ((!creator_id && !crm_prospect_id) || !template_id) {
+      return NextResponse.json({ error: 'A creator or prospect and a template are required.' }, { status: 400 });
     }
 
     const db = getAdminDb();
-    const creatorDoc = await db.collection('creators').doc(creator_id).get();
-    if (!creatorDoc.exists) {
-      return NextResponse.json({ error: 'Creator not found.' }, { status: 404 });
+    let targetName = 'Creator';
+    let targetId = creator_id || null;
+    let prospectId = crm_prospect_id || null;
+
+    if (target_type === 'prospect' || (!creator_id && crm_prospect_id)) {
+      const prospectDoc = await db.collection('crm_prospects').doc(crm_prospect_id).get();
+      if (!prospectDoc.exists) {
+        return NextResponse.json({ error: 'CRM Prospect not found.' }, { status: 404 });
+      }
+      targetName = prospectDoc.data().name || 'CRM Prospect';
+      prospectId = crm_prospect_id;
+      targetId = null;
+    } else {
+      const creatorDoc = await db.collection('creators').doc(creator_id).get();
+      if (!creatorDoc.exists) {
+        return NextResponse.json({ error: 'Creator not found.' }, { status: 404 });
+      }
+      targetName = creatorDoc.data().name || 'Creator';
+      targetId = creator_id;
+      prospectId = creatorDoc.data().crm_prospect_id || null;
     }
 
-    const creatorName = creatorDoc.data().name || 'Creator';
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const code = normalizeCode(custom_code || `GIFT-${template_id.substring(0, 4).toUpperCase()}-${randomSuffix}`);
 
@@ -56,13 +89,14 @@ export async function POST(request) {
     const giftRef = db.collection('creatorGifts').doc();
     const batch = db.batch();
 
-    // 1. Create 100% 1-use coupon restricted to this creator and template
+    // 1. Create 100% 1-use coupon restricted to this experience
     batch.set(couponRef, {
       code,
-      creator_id,
+      creator_id: targetId,
+      crm_prospect_id: prospectId,
       type: 'gift',
       discount_percent: 100,
-      label: `VIP Gift Pass for ${creatorName} (${template_id})`,
+      label: `VIP Free Pass for ${targetName} (${template_id})`,
       active: true,
       expires_at: null,
       max_uses: 1,
@@ -75,8 +109,10 @@ export async function POST(request) {
 
     // 2. Create record in creatorGifts
     batch.set(giftRef, {
-      creator_id,
-      creator_name: creatorName,
+      creator_id: targetId,
+      crm_prospect_id: prospectId,
+      creator_name: targetName,
+      target_type: target_type || (prospectId && !targetId ? 'prospect' : 'creator'),
       template_id,
       coupon_id: couponRef.id,
       code,
@@ -87,9 +123,18 @@ export async function POST(request) {
       claimed_at: null,
     });
 
+    // 3. If tied to a CRM prospect, mark free_pass_issued: true
+    if (prospectId) {
+      const prospectRef = db.collection('crm_prospects').doc(prospectId);
+      batch.update(prospectRef, {
+        free_pass_issued: true,
+        updated_at: FieldValue.serverTimestamp(),
+      });
+    }
+
     await batch.commit();
     return NextResponse.json({ ok: true, id: giftRef.id, code, coupon_id: couponRef.id });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Could not issue gift pass.' }, { status: 403 });
+    return handleApiError(error, 'Could not issue gift pass.');
   }
 }

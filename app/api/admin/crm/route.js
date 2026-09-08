@@ -14,6 +14,14 @@ function serializeProspect(doc) {
   return obj;
 }
 
+function handleApiError(error, defaultMsg) {
+  console.error('CRM API Error:', error);
+  const msg = error?.message || defaultMsg;
+  const isAuthErr = msg.includes('Sign in required') || msg.includes('Admin access required');
+  const status = isAuthErr ? 403 : 500;
+  return NextResponse.json({ error: msg }, { status });
+}
+
 export async function GET(request) {
   try {
     await requireAdmin(request);
@@ -22,17 +30,20 @@ export async function GET(request) {
     const statusFilter = searchParams.get('status');
     const dueToday = searchParams.get('due_today') === '1';
 
-    let query = db.collection('crm_prospects').where('deleted', '==', false).orderBy('updated_at', 'desc');
+    // Fetch without complex compound queries to avoid composite index requirements
+    const snap = await db.collection('crm_prospects').where('deleted', '==', false).get();
+    let prospects = snap.docs.map(serializeProspect);
+
+    // Sort in JS memory by updated_at descending
+    prospects.sort((a, b) => {
+      const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      return dateB - dateA;
+    });
 
     if (statusFilter) {
-      query = db.collection('crm_prospects')
-        .where('deleted', '==', false)
-        .where('status', '==', statusFilter)
-        .orderBy('updated_at', 'desc');
+      prospects = prospects.filter((p) => p.status === statusFilter);
     }
-
-    const snap = await query.limit(500).get();
-    let prospects = snap.docs.map(serializeProspect);
 
     if (dueToday) {
       const today = new Date();
@@ -41,9 +52,9 @@ export async function GET(request) {
       prospects = prospects.filter((p) => p.next_followup && p.next_followup <= todayStr);
     }
 
-    return NextResponse.json({ prospects });
+    return NextResponse.json({ prospects: prospects.slice(0, 500) });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Admin access required.' }, { status: 403 });
+    return handleApiError(error, 'Admin access required.');
   }
 }
 
@@ -100,7 +111,7 @@ export async function POST(request) {
     await ref.set(data);
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Could not create prospect.' }, { status: 403 });
+    return handleApiError(error, 'Could not create prospect.');
   }
 }
 
@@ -152,7 +163,7 @@ export async function PATCH(request) {
     await ref.update(update);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Could not update prospect.' }, { status: 403 });
+    return handleApiError(error, 'Could not update prospect.');
   }
 }
 
@@ -171,6 +182,6 @@ export async function DELETE(request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Could not delete prospect.' }, { status: 403 });
+    return handleApiError(error, 'Could not delete prospect.');
   }
 }

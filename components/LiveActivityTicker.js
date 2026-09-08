@@ -42,7 +42,7 @@ export default function LiveActivityTicker() {
         boxShadow: '0 4px 14px rgba(244, 63, 94, 0.08)',
         fontSize: 'clamp(0.75rem, 2vw, 0.84rem)',
         color: '#374151',
-        margin: '0 auto 1.5rem',
+        margin: '0 auto 0.4rem',
         maxWidth: '92%',
         transition: 'opacity 0.3s ease, transform 0.3s ease',
         opacity: fade ? 1 : 0,
