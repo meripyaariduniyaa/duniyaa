@@ -3,6 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { exportToExcel, exportMultiSheetExcel } from '@/lib/excel-export';
+import {
+  ReportsIcon,
+  DownloadIcon,
+  OrdersIcon,
+  CreatorsIcon,
+  CommissionsIcon,
+  PayoutsIcon,
+  CouponsIcon,
+  RefreshIcon
+} from '@/components/admin/AdminIcons';
 
 export default function AdminReportsPage() {
   const { user } = useAuth();
@@ -160,225 +170,326 @@ export default function AdminReportsPage() {
         { sheetName: 'Orders Ledger', data: getFormattedOrders() },
         { sheetName: 'Creators Registry', data: getFormattedCreators() },
         { sheetName: 'Commissions', data: getFormattedCommissions() },
-        { sheetName: 'Payouts History', data: getFormattedPayouts() },
-        { sheetName: 'Coupons Registry', data: getFormattedCoupons() },
+        { sheetName: 'Payout Batches', data: getFormattedPayouts() },
+        { sheetName: 'Coupons & Promo', data: getFormattedCoupons() },
       ];
-      exportMultiSheetExcel(sheets, `lovelycrafts_business_master_${dateFilter}`);
+      exportMultiSheetExcel(sheets, `lovelycrafts_master_report_${dateFilter}`);
+    } catch (e) {
+      console.error(e);
+      alert('Export failed: ' + e.message);
     } finally {
       setExporting(false);
     }
   };
 
+  const exportSingle = (name, getter, defaultSheet = 'Sheet1') => {
+    const data = getter();
+    exportToExcel(data, `${name}_${dateFilter}`, defaultSheet);
+  };
+
+  const currentFilteredOrders = filterByDate(orders, 'paid_at');
+  const currentFilteredCommissions = filterByDate(commissions, 'created_at');
+  const currentFilteredPayouts = filterByDate(payouts, 'paid_at');
+
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+      
+      {/* HEADER & MASTER EXPORT */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
-            📊 Excel Reports &amp; Data Export Hub
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            Excel Analytics &amp; Reports Hub
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-            Generate structured, audit-ready .xlsx Excel spreadsheets for financial bookkeeping, tax filings, and creator payouts.
+            Generate multi-sheet XLSX spreadsheets and individual audit ledgers for offline reconciliation.
           </p>
         </div>
 
-        {/* Date Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '6px 12px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>📅 Filter Range:</span>
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            style={{ border: 'none', background: 'transparent', fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', outline: 'none', cursor: 'pointer' }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={fetchAllData}
+            title="Refresh Data"
+            style={{
+              padding: '10px',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              color: '#475569',
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+            }}
           >
-            <option value="all">All Time Records</option>
-            <option value="30">Last 30 Days</option>
-            <option value="90">Last 90 Days</option>
-            <option value="month">Current Month</option>
-          </select>
+            <RefreshIcon size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportMaster}
+            disabled={loading || exporting}
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: loading || exporting ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+              opacity: loading || exporting ? 0.6 : 1,
+            }}
+          >
+            <DownloadIcon size={16} />
+            <span>{exporting ? 'Generating Excel...' : 'Export Master Workbook (.xlsx)'}</span>
+          </button>
         </div>
       </div>
 
-      {/* MASTER WORKBOOK BANNER */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-          color: '#fff',
-          borderRadius: '20px',
-          padding: '32px',
-          marginBottom: '32px',
-          boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '20px',
-        }}
-      >
+      {/* DATE RANGE FILTER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: '#ffffff', padding: '16px 20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
         <div>
-          <span style={{ background: '#0284c7', color: '#fff', fontSize: '0.75rem', fontWeight: 800, padding: '3px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Full Business Workbook (.xlsx)
-          </span>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '8px 0 6px' }}>
-            Complete Business Master Excel Report
-          </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '580px', margin: 0, lineHeight: 1.5 }}>
-            Includes 5 tabbed worksheets: <strong>Orders Ledger</strong>, <strong>Creators Registry</strong>, <strong>Commissions</strong>, <strong>Payouts History</strong>, and <strong>Coupons Performance</strong>.
-          </p>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Date Range Scope:</span>
+          <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '8px' }}>Applies to Orders, Commissions, and Payouts datasets</span>
         </div>
 
-        <button
-          type="button"
-          onClick={handleExportMaster}
-          disabled={loading || exporting}
-          style={{
-            background: '#10b981',
-            color: '#fff',
-            border: 'none',
-            padding: '14px 28px',
-            borderRadius: '12px',
-            fontSize: '1rem',
-            fontWeight: 800,
-            cursor: loading || exporting ? 'not-allowed' : 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
-            transition: 'transform 0.1s',
-          }}
-        >
-          <span>📥</span>
-          <span>{exporting ? 'Generating Excel...' : 'Download Master Report (.xlsx)'}</span>
-        </button>
+        <div style={{ display: 'flex', gap: '4px', background: '#f8fafc', padding: '4px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+          {[
+            { id: 'all', label: 'All-Time' },
+            { id: 'month', label: 'This Month' },
+            { id: '30', label: 'Past 30 Days' },
+            { id: '90', label: 'Past 90 Days' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setDateFilter(tab.id)}
+              style={{
+                background: dateFilter === tab.id ? '#0f172a' : 'transparent',
+                color: dateFilter === tab.id ? '#ffffff' : '#64748b',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* INDIVIDUAL REPORTS GRID */}
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b', marginBottom: '16px' }}>
-        Single-Sheet Dedicated Reports
-      </h2>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+      {/* INDIVIDUAL DATASET CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
         
-        {/* 1. Orders Report */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Orders */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📦</div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
-              Customer Orders Ledger
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 16px' }}>
-              Detailed transaction list with amounts, coupon deductions, Razorpay references, and creator attribution.
-            </p>
-            <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700, marginBottom: '16px' }}>
-              {orders.length} total recorded orders
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <OrdersIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{currentFilteredOrders.length} records</span>
             </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>Orders Ledger</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Includes date, customer note ID, sales channel (organic/creator), gross amounts, and coupons.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={() => exportToExcel(getFormattedOrders(), 'orders_ledger', 'Orders')}
-            disabled={loading || orders.length === 0}
-            style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '10px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            onClick={() => exportSingle('orders_ledger', getFormattedOrders, 'Orders')}
+            disabled={loading || currentFilteredOrders.length === 0}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || currentFilteredOrders.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
-            📥 Export Orders (.xlsx)
+            <DownloadIcon size={14} />
+            <span>Download Orders (.xlsx)</span>
           </button>
         </div>
 
-        {/* 2. Creators Report */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Creators */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👥</div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
-              Creators Performance Registry
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 16px' }}>
-              Creator roster with handles, tiers, commission rates, lifetime orders, contact info, and pending balances.
-            </p>
-            <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700, marginBottom: '16px' }}>
-              {creators.length} registered creators
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreatorsIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{creators.length} partners</span>
             </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>Creators Directory</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Partner database with tier standings, custom vanity URLs, phone/email, and lifetime order counts.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={() => exportToExcel(getFormattedCreators(), 'creators_registry', 'Creators')}
+            onClick={() => exportSingle('creators_registry', getFormattedCreators, 'Creators')}
             disabled={loading || creators.length === 0}
-            style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '10px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || creators.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
-            📥 Export Creators (.xlsx)
+            <DownloadIcon size={14} />
+            <span>Download Creators (.xlsx)</span>
           </button>
         </div>
 
-        {/* 3. Commissions Report */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Commissions */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💸</div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
-              Commissions Audit Trail
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 16px' }}>
-              Granular log of every earned commission with order amounts, commission rates, and payment statuses.
-            </p>
-            <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700, marginBottom: '16px' }}>
-              {commissions.length} commission entries
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CommissionsIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{currentFilteredCommissions.length} records</span>
             </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>Commissions Ledger</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Line-by-line affiliate commission earnings, order references, rates, and reconciliation statuses.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={() => exportToExcel(getFormattedCommissions(), 'commissions_report', 'Commissions')}
-            disabled={loading || commissions.length === 0}
-            style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '10px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            onClick={() => exportSingle('commissions_ledger', getFormattedCommissions, 'Commissions')}
+            disabled={loading || currentFilteredCommissions.length === 0}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || currentFilteredCommissions.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
-            📥 Export Commissions (.xlsx)
+            <DownloadIcon size={14} />
+            <span>Download Commissions (.xlsx)</span>
           </button>
         </div>
 
-        {/* 4. Payouts Report */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Payouts */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💳</div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
-              Disbursed Payouts History
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 16px' }}>
-              Log of all bank &amp; UPI payouts disbursed to creators, including UTR reference numbers and dates.
-            </p>
-            <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700, marginBottom: '16px' }}>
-              {payouts.length} payout transactions
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#fff1f2', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PayoutsIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{currentFilteredPayouts.length} batches</span>
             </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>Payout Batches</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Banking audit trail with UTR numbers, transfer methods, disbursed amounts, and timestamps.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={() => exportToExcel(getFormattedPayouts(), 'payouts_history', 'Payouts')}
-            disabled={loading || payouts.length === 0}
-            style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '10px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            onClick={() => exportSingle('payouts_history', getFormattedPayouts, 'Payouts')}
+            disabled={loading || currentFilteredPayouts.length === 0}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || currentFilteredPayouts.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
-            📥 Export Payouts (.xlsx)
+            <DownloadIcon size={14} />
+            <span>Download Payouts (.xlsx)</span>
           </button>
         </div>
 
-        {/* 5. Coupons Report */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Coupons */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🏷️</div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
-              Coupons &amp; Campaign Stats
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 16px' }}>
-              Registry of all active &amp; historical coupon codes with discount percentages, usage counters, and limits.
-            </p>
-            <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700, marginBottom: '16px' }}>
-              {coupons.length} coupon codes
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f0f9ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CouponsIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{coupons.length} codes</span>
             </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>Coupons &amp; Promo Codes</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Active and legacy promo codes with discount rates, redemption counts, and creator associations.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={() => exportToExcel(getFormattedCoupons(), 'coupons_performance', 'Coupons')}
+            onClick={() => exportSingle('coupons_registry', getFormattedCoupons, 'Coupons')}
             disabled={loading || coupons.length === 0}
-            style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '10px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || coupons.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
-            📥 Export Coupons (.xlsx)
+            <DownloadIcon size={14} />
+            <span>Download Coupons (.xlsx)</span>
           </button>
         </div>
 
       </div>
+
     </div>
   );
 }

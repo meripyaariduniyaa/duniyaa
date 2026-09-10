@@ -5,19 +5,36 @@ import { useAuth } from '@/components/AuthProvider';
 import { CREATOR_TIERS } from '@/lib/creator-club';
 import { templates } from '@/lib/templates';
 import { exportToExcel } from '@/lib/excel-export';
+import {
+  CreatorsIcon,
+  DownloadIcon,
+  SearchIcon,
+  EditIcon,
+  CheckIcon,
+  CloseIcon,
+  ExternalLinkIcon,
+  CouponsIcon,
+  ShieldIcon,
+  SparklesIcon
+} from '@/components/admin/AdminIcons';
+
+function initials(name) {
+  return (name || '?').split(' ').map((w) => w[0]).join('').substring(0, 2).toUpperCase();
+}
 
 export default function AdminCreatorsPage() {
   const { user } = useAuth();
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [selectedCreator, setSelectedCreator] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleExportExcel = () => {
-    const formatted = creators.map((c) => ({
+    const formatted = filteredCreators.map((c) => ({
       'Creator Name': c.name || 'Unnamed',
       'Email': c.email || '',
       'Slug Handle': c.slug || '',
@@ -96,7 +113,7 @@ export default function AdminCreatorsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update creator');
 
-      setMessage('✓ Creator updated successfully!');
+      setMessage('Creator updated successfully!');
       loadCreators();
       setTimeout(() => setSelectedCreator(null), 1200);
     } catch (err) {
@@ -124,169 +141,260 @@ export default function AdminCreatorsPage() {
   };
 
   const filteredCreators = creators.filter((c) => {
-    if (filter === 'all') return true;
-    return c.status === filter;
+    const matchFilter = filter === 'all' || c.status === filter;
+    if (!matchFilter) return false;
+    if (!search.trim()) return true;
+    const term = search.toLowerCase();
+    const name = (c.name || '').toLowerCase();
+    const email = (c.email || '').toLowerCase();
+    const slug = (c.slug || '').toLowerCase();
+    const coupon = (c.coupon_code || '').toLowerCase();
+    return name.includes(term) || email.includes(term) || slug.includes(term) || coupon.includes(term);
   });
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+      
+      {/* HEADER & ACTIONS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
-            Creator Management
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            Creator Partners Directory
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-            Approve applications, adjust commission rates, and select recommended templates.
+            Audit partner accounts, commission percentages, assigned promo codes, and storefront showcases.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          {/* STATUS FILTER PILLS */}
-          <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
-            {['all', 'pending', 'active', 'suspended'].map((tab) => (
+        <button
+          type="button"
+          onClick={handleExportExcel}
+          disabled={loading || creators.length === 0}
+          style={{
+            background: '#0f172a',
+            color: '#ffffff',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontWeight: 600,
+            fontSize: '0.85rem',
+            cursor: loading || creators.length === 0 ? 'not-allowed' : 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+            opacity: loading || creators.length === 0 ? 0.6 : 1,
+            transition: 'all 0.15s'
+          }}
+        >
+          <DownloadIcon size={16} />
+          <span>Export Excel (.xlsx)</span>
+        </button>
+      </div>
+
+      {/* FILTER TABS & SEARCH */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        
+        {/* STATUS PILLS */}
+        <div style={{ display: 'flex', gap: '4px', background: '#ffffff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          {['all', 'pending', 'active', 'suspended'].map((tab) => {
+            const count = tab === 'pending' ? creators.filter((c) => c.status === 'pending').length : 0;
+            return (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setFilter(tab)}
                 style={{
-                  background: filter === tab ? '#fff' : 'transparent',
-                  color: filter === tab ? '#0f172a' : '#64748b',
+                  background: filter === tab ? '#0f172a' : 'transparent',
+                  color: filter === tab ? '#ffffff' : '#64748b',
                   border: 'none',
-                  padding: '6px 14px',
+                  padding: '7px 16px',
                   borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: filter === tab ? 700 : 500,
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
                   cursor: 'pointer',
                   textTransform: 'capitalize',
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
               >
-                {tab} {tab === 'pending' && creators.filter((c) => c.status === 'pending').length > 0 && `(${creators.filter((c) => c.status === 'pending').length})`}
+                <span>{tab}</span>
+                {count > 0 && (
+                  <span style={{ background: '#ef4444', color: '#fff', borderRadius: '999px', padding: '1px 6px', fontSize: '0.7rem', fontWeight: 800 }}>
+                    {count}
+                  </span>
+                )}
               </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            disabled={loading || creators.length === 0}
-            style={{
-              background: '#10b981',
-              color: '#fff',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '10px',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: loading || creators.length === 0 ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
-            }}
-          >
-            <span>📥</span>
-            <span>Export Excel</span>
-          </button>
+            );
+          })}
         </div>
+
+        {/* SEARCH INPUT */}
+        <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex' }}>
+            <SearchIcon size={16} />
+          </span>
+          <input
+            type="text"
+            placeholder="Search creator, email, slug, code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px 12px 8px 36px',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              background: '#ffffff',
+              fontSize: '0.82rem',
+              color: '#0f172a',
+              outline: 'none',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+            }}
+          />
+        </div>
+
       </div>
 
+      {/* DATA TABLE */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Loading creators...</div>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#0284c7', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Loading creators registry...</p>
+        </div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Creator</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>URL / Coupon</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Tier &amp; Rate</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Creator Partner</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Custom URL &amp; Code</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tier &amp; Commission</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCreators.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
-                      No creators found matching &quot;{filter}&quot;.
+                    <td colSpan={5} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>No creator partners found</div>
+                      <div style={{ fontSize: '0.8rem' }}>Try adjusting your search criteria or filter selection.</div>
                     </td>
                   </tr>
                 ) : (
-                  filteredCreators.map((c) => (
-                    <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#ffe4e6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', border: '1px solid #fecdd3', overflow: 'hidden', flexShrink: 0 }}>
-                            {c.profile_image ? (
-                              <img src={c.profile_image} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : (
-                              '💖'
+                  filteredCreators.map((c) => {
+                    const statusColor = c.status === 'active' ? '#15803d' : c.status === 'pending' ? '#b45309' : '#b91c1c';
+                    const statusBg = c.status === 'active' ? '#dcfce7' : c.status === 'pending' ? '#fef3c7' : '#fee2e2';
+                    const statusBorder = c.status === 'active' ? '#bbf7d0' : c.status === 'pending' ? '#fde68a' : '#fecaca';
+
+                    return (
+                      <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.1s ease' }}>
+                        
+                        {/* CREATOR INFO */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', border: '1px solid #e2e8f0', overflow: 'hidden', flexShrink: 0 }}>
+                              {c.profile_image ? (
+                                <img src={c.profile_image} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                initials(c.name)
+                              )}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>{c.name}</span>
+                                {c.featured && (
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 700, background: '#fef3c7', color: '#b45309', padding: '1px 6px', borderRadius: '4px' }}>Featured</span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{c.email}</div>
+                              {c.phone && <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>{c.phone}</div>}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* STORE LINK & COUPON */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <a
+                            href={`https://lovelycrafts.in/c/${c.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: '#0284c7', fontFamily: 'monospace', fontWeight: 600, textDecoration: 'none' }}
+                          >
+                            <span>/c/{c.slug}</span>
+                            <ExternalLinkIcon size={12} />
+                          </a>
+                          {c.coupon_code && (
+                            <div style={{ marginTop: '4px' }}>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                {c.coupon_code}
+                              </span>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* TIER & COMMISSION */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', textTransform: 'capitalize' }}>
+                            {c.tier_override ? `${c.tier_override} (Override)` : c.tier || 'Starter'}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                            Commission: <strong style={{ color: '#0f172a' }}>{c.commission_rate_override !== null && c.commission_rate_override !== undefined ? `${c.commission_rate_override}%` : 'Standard Tier'}</strong>
+                          </div>
+                        </td>
+
+                        {/* STATUS */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '3px 10px',
+                              borderRadius: '999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              textTransform: 'capitalize',
+                              background: statusBg,
+                              color: statusColor,
+                              border: `1px solid ${statusBorder}`,
+                            }}
+                          >
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: statusColor }} />
+                            <span>{c.status || 'active'}</span>
+                          </span>
+                        </td>
+
+                        {/* ACTIONS */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            {c.status === 'pending' && (
+                              <button
+                                type="button"
+                                onClick={() => handleApprove(c)}
+                                style={{ background: '#15803d', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                <CheckIcon size={14} />
+                                <span>Approve</span>
+                              </button>
                             )}
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 700, color: '#0f172a' }}>{c.name}</div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{c.email}</div>
-                            {c.phone && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>📱 {c.phone}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ fontSize: '0.85rem', color: '#0284c7', fontFamily: 'monospace' }}>
-                          /c/{c.slug}
-                        </div>
-                        {c.coupon_code && (
-                          <div style={{ fontSize: '0.75rem', color: '#e11d48', fontWeight: 700, marginTop: '2px' }}>
-                            Code: {c.coupon_code}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', textTransform: 'capitalize' }}>
-                          {c.tier_override ? `👑 ${c.tier_override} (Override)` : c.tier}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                          Commission: {c.commission_rate_override !== null && c.commission_rate_override !== undefined ? `${c.commission_rate_override}% (Override)` : 'Auto'}
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '3px 10px',
-                            borderRadius: '999px',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            textTransform: 'capitalize',
-                            background: c.status === 'active' ? '#dcfce7' : c.status === 'pending' ? '#fef3c7' : '#fee2e2',
-                            color: c.status === 'active' ? '#15803d' : c.status === 'pending' ? '#b45309' : '#b91c1c',
-                          }}
-                        >
-                          {c.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          {c.status === 'pending' && (
                             <button
                               type="button"
-                              onClick={() => handleApprove(c)}
-                              style={{ background: '#16a34a', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                              onClick={() => openEdit(c)}
+                              style={{ background: '#ffffff', color: '#0f172a', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
                             >
-                              ✓ Approve
+                              <EditIcon size={14} />
+                              <span>Configure</span>
                             </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => openEdit(c)}
-                            style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-                          >
-                            ⚙️ Edit / Override
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                          </div>
+                        </td>
+
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -294,31 +402,36 @@ export default function AdminCreatorsPage() {
         </div>
       )}
 
-      {/* EDIT MODAL / DRAWER */}
+      {/* EDIT MODAL */}
       {selectedCreator && editForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                Configure Creator: {selectedCreator.name}
-              </h2>
-              <button type="button" onClick={() => setSelectedCreator(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}>✕</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11, 15, 25, 0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: '#fff', borderRadius: '20px', padding: '32px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.18)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 2px', letterSpacing: '-0.01em' }}>
+                  Configure Creator: {selectedCreator.name}
+                </h2>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>Override tier assignments, commission rates, and featured templates.</p>
+              </div>
+              <button type="button" onClick={() => setSelectedCreator(null)} style={{ background: '#f1f5f9', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer', color: '#64748b' }}>
+                <CloseIcon size={18} />
+              </button>
             </div>
 
             {message && (
-              <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', background: message.startsWith('✓') ? '#dcfce7' : '#fee2e2', color: message.startsWith('✓') ? '#15803d' : '#b91c1c' }}>
+              <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', background: message.startsWith('Error') ? '#fee2e2' : '#f0fdf4', color: message.startsWith('Error') ? '#991b1b' : '#15803d', border: message.startsWith('Error') ? '1px solid #fecaca' : '1px solid #bbf7d0' }}>
                 {message}
               </div>
             )}
 
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Status</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Account Status</label>
                   <select
                     value={editForm.status}
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', outline: 'none' }}
                   >
                     <option value="active">Active / Approved</option>
                     <option value="pending">Pending Review</option>
@@ -328,82 +441,82 @@ export default function AdminCreatorsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Featured on Landing Page?</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Featured Showcase</label>
                   <select
                     value={editForm.featured ? 'yes' : 'no'}
                     onChange={(e) => setEditForm({ ...editForm, featured: e.target.value === 'yes' })}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', outline: 'none' }}
                   >
-                    <option value="no">No</option>
-                    <option value="yes">Yes (Show in featured grid)</option>
+                    <option value="no">Standard Listing</option>
+                    <option value="yes">Showcase in Featured Grid</option>
                   </select>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Assigned Coupon Code</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Assigned Promo Code</label>
                   <input
                     type="text"
-                    placeholder="e.g. MAYA20 (Auto-created if empty)"
+                    placeholder="e.g. MAYA20"
                     value={editForm.coupon_code}
                     onChange={(e) => setEditForm({ ...editForm, coupon_code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '') })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontWeight: 700, fontFamily: 'monospace' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontWeight: 700, fontFamily: 'monospace', background: '#f8fafc', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Customer Discount % (1–100%)</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Customer Discount (%)</label>
                   <input
                     type="number"
                     min="1"
                     max="100"
                     value={editForm.discount_rate}
                     onChange={(e) => setEditForm({ ...editForm, discount_rate: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tier Override (Optional)</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Tier Override (Optional)</label>
                   <select
                     value={editForm.tier_override}
                     onChange={(e) => setEditForm({ ...editForm, tier_override: e.target.value })}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', outline: 'none' }}
                   >
-                    <option value="">No Override (Auto-calculated)</option>
+                    <option value="">Auto-calculated by Volume</option>
                     {CREATOR_TIERS.map((t) => (
-                      <option key={t.id} value={t.id}>{t.emoji} {t.name} ({t.commissionRate}%)</option>
+                      <option key={t.id} value={t.id}>{t.name} ({t.commissionRate}%)</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Commission % Override</label>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Commission % Override</label>
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    placeholder="e.g. 20 (leave blank for tier default)"
+                    placeholder="Leave blank for tier default"
                     value={editForm.commission_rate_override}
                     onChange={(e) => setEditForm({ ...editForm, commission_rate_override: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
-              {/* RECOMMENDED TEMPLATES (SELECT UP TO 4) */}
+              {/* RECOMMENDED TEMPLATES */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                  Recommended Experiences (Select up to 4 for creator page)
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.04em' }}>
+                  Recommended Storefront Templates (Up to 4)
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px', maxHeight: '160px', overflowY: 'auto', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px', maxHeight: '160px', overflowY: 'auto', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '10px', background: '#f8fafc' }}>
                   {templates.slice(0, 14).map((t) => {
                     const isSelected = editForm.recommended_template_ids.includes(t.id);
                     return (
-                      <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', cursor: 'pointer', background: isSelected ? '#fdf2f8' : '#fff', padding: '4px 6px', borderRadius: '4px', border: isSelected ? '1px solid #f472b6' : '1px solid #f1f5f9' }}>
+                      <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', cursor: 'pointer', background: isSelected ? '#ffffff' : 'transparent', padding: '6px 8px', borderRadius: '6px', border: isSelected ? '1px solid #0284c7' : '1px solid transparent', color: '#0f172a' }}>
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -418,8 +531,9 @@ export default function AdminCreatorsPage() {
                               setEditForm({ ...editForm, recommended_template_ids: editForm.recommended_template_ids.filter((id) => id !== t.id) });
                             }
                           }}
+                          style={{ accentColor: '#0f172a' }}
                         />
-                        <span>{t.icon || '🎁'} {t.title}</span>
+                        <span>{t.title}</span>
                       </label>
                     );
                   })}
@@ -430,14 +544,14 @@ export default function AdminCreatorsPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedCreator(null)}
-                  style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '10px 18px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+                  style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', padding: '10px 18px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
+                  style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
                 >
                   {saving ? 'Saving...' : 'Save Configuration'}
                 </button>

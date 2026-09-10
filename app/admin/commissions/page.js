@@ -3,6 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { exportToExcel } from '@/lib/excel-export';
+import {
+  CommissionsIcon,
+  DownloadIcon,
+  RefreshIcon,
+  SearchIcon,
+  RupeeIcon,
+  CheckIcon
+} from '@/components/admin/AdminIcons';
 
 export default function AdminCommissionsPage() {
   const { user } = useAuth();
@@ -10,6 +18,7 @@ export default function AdminCommissionsPage() {
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
 
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
@@ -70,7 +79,7 @@ export default function AdminCommissionsPage() {
       const parts = [];
       if ((data.syncedCount || 0) > 0) parts.push(`${data.syncedCount} new order(s) credited`);
       if ((data.reconciledCount || 0) > 0) parts.push(`${data.reconciledCount} paid commission(s) reconciled`);
-      setSyncMessage(parts.length > 0 ? `✓ ${parts.join(' · ')}` : '✓ All commissions are up to date!');
+      setSyncMessage(parts.length > 0 ? `${parts.join(' · ')}` : 'All commissions are up to date!');
       loadData();
       setTimeout(() => setSyncMessage(''), 6000);
     } catch (err) {
@@ -98,43 +107,50 @@ export default function AdminCommissionsPage() {
   };
 
   const filteredCommissions = commissions.filter((item) => {
-    if (filter === 'all') return true;
-    return item.status === filter;
+    const matchFilter = filter === 'all' || item.status === filter;
+    if (!matchFilter) return false;
+    if (!search.trim()) return true;
+    const term = search.toLowerCase();
+    const creator = (creators.find((c) => c.id === item.creator_id)?.name || '').toLowerCase();
+    const orderId = (item.order_id || item.note_id || '').toLowerCase();
+    return creator.includes(term) || orderId.includes(term);
   });
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+      
+      {/* HEADER & ACTIONS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
             Commission Ledger
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-            Track pending, paid, and reversed affiliate earnings per order.
+            Audit pending, paid, and reversed affiliate earnings per referred customer purchase.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={loading || filteredCommissions.length === 0}
             style={{
-              background: '#10b981',
-              color: '#fff',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontWeight: 700,
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#0f172a',
+              padding: '10px 16px',
+              borderRadius: '10px',
+              fontWeight: 600,
               fontSize: '0.85rem',
               cursor: loading || filteredCommissions.length === 0 ? 'not-allowed' : 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+              opacity: loading || filteredCommissions.length === 0 ? 0.6 : 1,
             }}
           >
-            <span>📥</span>
+            <DownloadIcon size={16} />
             <span>Export Excel</span>
           </button>
 
@@ -143,44 +159,23 @@ export default function AdminCommissionsPage() {
             onClick={handleSyncCommissions}
             disabled={syncing}
             style={{
-              background: '#0284c7',
+              background: '#0f172a',
               color: '#fff',
               border: 'none',
-              padding: '8px 16px',
-              borderRadius: '8px',
+              padding: '10px 18px',
+              borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
               cursor: syncing ? 'not-allowed' : 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)'
             }}
           >
-            {syncing ? '⏳ Syncing...' : '🔄 Sync Past Orders'}
+            <RefreshIcon size={16} />
+            <span>{syncing ? 'Syncing...' : 'Sync Orders'}</span>
           </button>
-
-          <div style={{ display: 'flex', gap: '6px', background: '#e2e8f0', padding: '4px', borderRadius: '10px' }}>
-            {['all', 'pending', 'paid', 'reversed'].map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setFilter(tab)}
-                style={{
-                  background: filter === tab ? '#fff' : 'transparent',
-                  color: filter === tab ? '#0f172a' : '#64748b',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: filter === tab ? 700 : 500,
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -188,115 +183,181 @@ export default function AdminCommissionsPage() {
         <div
           style={{
             padding: '12px 16px',
-            marginBottom: '20px',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            background: syncMessage.startsWith('Error') ? '#fee2e2' : '#dcfce7',
-            color: syncMessage.startsWith('Error') ? '#b91c1c' : '#15803d',
-            border: `1px solid ${syncMessage.startsWith('Error') ? '#fca5a5' : '#86efac'}`,
+            borderRadius: '10px',
+            fontSize: '0.85rem',
+            background: syncMessage.startsWith('Error') ? '#fee2e2' : '#f0fdf4',
+            color: syncMessage.startsWith('Error') ? '#991b1b' : '#15803d',
+            border: `1px solid ${syncMessage.startsWith('Error') ? '#fecaca' : '#bbf7d0'}`,
           }}
         >
           {syncMessage}
         </div>
       )}
 
+      {/* FILTER TABS & SEARCH */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        
+        {/* STATUS PILLS */}
+        <div style={{ display: 'flex', gap: '4px', background: '#ffffff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          {['all', 'pending', 'paid', 'reversed'].map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setFilter(tab)}
+              style={{
+                background: filter === tab ? '#0f172a' : 'transparent',
+                color: filter === tab ? '#ffffff' : '#64748b',
+                border: 'none',
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                textTransform: 'capitalize',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* SEARCH BAR */}
+        <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex' }}>
+            <SearchIcon size={16} />
+          </span>
+          <input
+            type="text"
+            placeholder="Search creator or order reference..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', background: '#fff' }}
+          />
+        </div>
+
+      </div>
+
+      {/* TABLE */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Loading commissions...</div>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#0284c7', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Loading commissions ledger...</p>
+        </div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '850px' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Date</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Creator</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Order Amount</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Rate &amp; Commission</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Paid / Payout</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Creator Partner</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Reference</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Value</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Commission Earned</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
-                      No commissions found matching &quot;{filter}&quot;.
+                    <td colSpan={6} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>No commission records found</div>
+                      <div style={{ fontSize: '0.8rem' }}>Sync orders or adjust your search filter.</div>
                     </td>
                   </tr>
                 ) : (
-                  filteredCommissions.map((c) => {
-                    const matchedCreator = creators.find((cr) => cr.id === c.creator_id);
+                  filteredCommissions.map((comm) => {
+                    const creator = creators.find((c) => c.id === comm.creator_id);
+                    const statusColor = comm.status === 'paid' ? '#15803d' : comm.status === 'pending' ? '#b45309' : '#b91c1c';
+                    const statusBg = comm.status === 'paid' ? '#dcfce7' : comm.status === 'pending' ? '#fef3c7' : '#fee2e2';
+                    const statusBorder = comm.status === 'paid' ? '#bbf7d0' : comm.status === 'pending' ? '#fde68a' : '#fecaca';
+
                     return (
-                      <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#334155' }}>
-                          {c.created_at ? new Date(c.created_at).toLocaleDateString() : 'Recent'}
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                            {matchedCreator?.name || `ID: ${c.creator_id?.substring(0, 8)}...`}
+                      <tr key={comm.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.1s ease' }}>
+                        
+                        {/* CREATOR */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
+                            {creator?.name || 'Creator'}
                           </div>
-                          {matchedCreator?.slug && (
-                            <div style={{ fontSize: '0.75rem', color: '#0284c7' }}>
-                              /c/{matchedCreator.slug}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                            ₹{((c.order_amount || 0) / 100).toFixed(2)}
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>
+                            {comm.creator_id?.substring(0, 14)}...
                           </div>
                         </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontWeight: 800, color: '#e11d48', fontSize: '0.95rem' }}>
-                            ₹{((c.commission_amount || 0) / 100).toFixed(2)}
+
+                        {/* ORDER REF */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', background: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>
+                            {comm.order_id || comm.note_id || 'Direct'}
+                          </span>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                            {comm.created_at ? new Date(comm.created_at).toLocaleDateString([], { dateStyle: 'medium' }) : ''}
                           </div>
-                          <small style={{ color: '#64748b', fontSize: '0.75rem' }}>({c.commission_rate}% rate)</small>
                         </td>
-                        <td style={{ padding: '14px 16px' }}>
+
+                        {/* ORDER VALUE */}
+                        <td style={{ padding: '16px 20px', fontSize: '0.88rem', fontWeight: 600, color: '#475569' }}>
+                          ₹{((comm.order_amount || 0) / 100).toFixed(2)}
+                        </td>
+
+                        {/* COMMISSION */}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+                            ₹{((comm.commission_amount || 0) / 100).toFixed(2)}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>
+                            {comm.rate || 0}% rate
+                          </div>
+                        </td>
+
+                        {/* STATUS */}
+                        <td style={{ padding: '16px 20px' }}>
                           <span
                             style={{
-                              padding: '3px 8px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '3px 10px',
                               borderRadius: '999px',
                               fontSize: '0.75rem',
                               fontWeight: 700,
                               textTransform: 'capitalize',
-                              background: c.status === 'paid' ? '#dcfce7' : c.status === 'pending' ? '#fef3c7' : '#fee2e2',
-                              color: c.status === 'paid' ? '#15803d' : c.status === 'pending' ? '#b45309' : '#b91c1c',
+                              background: statusBg,
+                              color: statusColor,
+                              border: `1px solid ${statusBorder}`,
                             }}
                           >
-                            {c.status}
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: statusColor }} />
+                            <span>{comm.status || 'pending'}</span>
                           </span>
                         </td>
-                        <td style={{ padding: '14px 16px', fontSize: '0.75rem', color: '#64748b' }}>
-                          {c.status === 'paid' ? (
-                            <>
-                              <div style={{ fontWeight: 600, color: '#15803d' }}>
-                                {c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—'}
-                              </div>
-                              {c.payout_id && (
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}
-                                  title={`Payout ID: ${c.payout_id}`}
-                                >
-                                  Batch: {c.payout_id.substring(0, 8)}…
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <span style={{ color: '#94a3b8' }}>—</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          {c.status === 'pending' && (
+
+                        {/* ACTIONS */}
+                        <td style={{ padding: '16px 20px' }}>
+                          {comm.status === 'pending' && (
                             <button
                               type="button"
-                              onClick={() => handleUpdateStatus(c.id, 'cancelled')}
-                              style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+                              onClick={() => handleUpdateStatus(comm.id, 'paid')}
+                              style={{
+                                background: '#15803d',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
                             >
-                              Cancel
+                              Mark Paid
                             </button>
                           )}
+                          {comm.status === 'paid' && (
+                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Reconciled</span>
+                          )}
                         </td>
+
                       </tr>
                     );
                   })
@@ -306,6 +367,7 @@ export default function AdminCommissionsPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

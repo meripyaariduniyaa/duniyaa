@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
+import {
+  RupeeIcon,
+  TrendingUpIcon,
+  OrdersIcon,
+  CreatorsIcon,
+  BuildingBankIcon,
+  ReportsIcon,
+  CrmIcon,
+  CouponsIcon,
+  PayoutsIcon,
+  GiftsIcon,
+  ChevronRightIcon,
+  RefreshIcon
+} from '@/components/admin/AdminIcons';
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -10,274 +24,438 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  const fetchMetrics = () => {
     if (!user) return;
+    setLoading(true);
+    setError('');
     user.getIdToken().then((token) => {
       fetch('/api/admin/overview', {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then((res) => {
-          if (!res.ok) throw new Error('Could not load metrics');
+          if (!res.ok) throw new Error('Could not load executive metrics');
           return res.json();
         })
         .then((data) => setStats(data))
         .catch((err) => setError(err.message))
         .finally(() => setLoading(false));
     });
+  };
+
+  useEffect(() => {
+    fetchMetrics();
   }, [user]);
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
-        <div style={{ fontSize: '2.5rem', animation: 'bounce 1s infinite' }}>📊</div>
-        <p style={{ marginTop: '12px', fontWeight: 600 }}>Loading Store &amp; Creator Analytics...</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '12px', color: '#64748b' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#0284c7', animation: 'spin 0.8s linear infinite' }} />
+        <p style={{ fontWeight: 600, fontSize: '0.85rem', color: '#64748b', margin: 0 }}>Compiling store analytics...</p>
+        <style jsx>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '20px', borderRadius: '12px', color: '#b91c1c' }}>
-        Error: {error}
+      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '16px 20px', borderRadius: '10px', color: '#991b1b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h3 style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '0.9rem' }}>Failed to Load Dashboard Metrics</h3>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: '#b91c1c' }}>{error}</p>
+        </div>
+        <button
+          type="button"
+          onClick={fetchMetrics}
+          style={{ background: '#b91c1c', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
+  const totalOrders = stats?.totalOrders || 0;
+  const organicOrders = stats?.organicOrdersCount || 0;
+  const creatorOrders = stats?.creatorOrdersCount || 0;
+  const organicPercent = totalOrders ? Math.round((organicOrders / totalOrders) * 100) : 0;
+  const creatorPercent = totalOrders ? Math.round((creatorOrders / totalOrders) * 100) : 0;
+
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      
+      {/* PAGE HEADER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
-            📊 Store &amp; Creator Executive Overview
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#0284c7' }}>
+              Executive Metrics
+            </span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+              Real-time sync {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+          <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
+            Store &amp; Creator Executive Overview
           </h1>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0 }}>
-            Complete view of total product sales (organic direct &amp; creator-referred), revenue, and creator partnerships.
-          </p>
         </div>
 
-        <Link
-          href="/admin/reports"
-          style={{
-            background: '#10b981',
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '10px 20px',
-            borderRadius: '12px',
-            fontWeight: 800,
-            fontSize: '0.9rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
-          }}
-        >
-          <span>📥</span>
-          <span>Excel Reports Hub (.xlsx)</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={fetchMetrics}
+            title="Refresh Data"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '7px 10px',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#475569',
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+            }}
+          >
+            <RefreshIcon size={15} />
+          </button>
+
+          <Link
+            href="/admin/reports"
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              textDecoration: 'none',
+              padding: '7px 14px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.1)',
+            }}
+          >
+            <ReportsIcon size={14} />
+            <span>Excel Reports Hub</span>
+          </Link>
+        </div>
       </div>
 
-      {/* PRIMARY METRICS: TOTAL REVENUE & ORDERS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      {/* FORMAL COMPACT METRICS GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px' }}>
+        
         {/* Total Gross Revenue */}
-        <div style={{ background: '#fff', padding: '22px', borderRadius: '16px', border: '2px solid #0284c7', boxShadow: '0 4px 16px rgba(2,132,199,0.08)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            💵 Total Gross Revenue (All Sales)
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginTop: '6px' }}>
-            ₹{((stats?.revenue || 0) / 100).toFixed(2)}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                Gross Revenue
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#f0f9ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <RupeeIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              ₹{((stats?.revenue || 0) / 100).toFixed(2)}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.8rem', color: '#64748b' }}>
-            <span>🍃 Organic: <strong>₹{((stats?.organicRevenue || 0) / 100).toFixed(0)}</strong></span>
-            <span>•</span>
-            <span>🎯 Creator: <strong>₹{((stats?.creatorRevenue || 0) / 100).toFixed(0)}</strong></span>
-          </div>
-        </div>
-
-        {/* Net Revenue after Razorpay Fees */}
-        <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', padding: '22px', borderRadius: '16px', border: '2px solid #22c55e', boxShadow: '0 4px 16px rgba(34,197,94,0.12)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#15803d', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            ✅ Net Revenue (After Razorpay Fees)
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#15803d', marginTop: '6px' }}>
-            ₹{((stats?.netRevenue || 0) / 100).toFixed(2)}
-          </div>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.8rem', color: '#166534' }}>
-            <span>🍃 ₹{((stats?.netOrganicRevenue || 0) / 100).toFixed(0)}</span>
-            <span>•</span>
-            <span>🎯 ₹{((stats?.netCreatorRevenue || 0) / 100).toFixed(0)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.68rem', color: '#64748b' }}>
+            <span>Org: <strong>₹{((stats?.organicRevenue || 0) / 100).toFixed(0)}</strong></span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span>Ref: <strong>₹{((stats?.creatorRevenue || 0) / 100).toFixed(0)}</strong></span>
           </div>
         </div>
 
-        {/* Razorpay Fees Deducted */}
-        <div style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', padding: '22px', borderRadius: '16px', border: '1px solid #fb923c', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#c2410c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            🏦 Razorpay Service Charges
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#c2410c', marginTop: '6px' }}>
-            −₹{((stats?.razorpayFeeTotal || 0) / 100).toFixed(2)}
+        {/* Net Margin */}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #bbf7d0', boxShadow: '0 1px 2px rgba(34,197,94,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#15803d' }}>
+                Net Margin
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TrendingUpIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#15803d', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              ₹{((stats?.netRevenue || 0) / 100).toFixed(2)}
+            </div>
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#9a3412', marginTop: '8px', fontWeight: 600 }}>
-            2% + 18% GST per txn (2.36%)
-          </div>
-        </div>
-
-        {/* Total Orders */}
-        <div style={{ background: '#fff', padding: '22px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-            🛍️ Total Paid Product Orders
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginTop: '6px' }}>
-            {stats?.totalOrders || 0}
-          </div>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.8rem', color: '#64748b' }}>
-            <span style={{ color: '#16a34a', fontWeight: 600 }}>🍃 {stats?.organicOrdersCount || 0} organic</span>
-            <span>•</span>
-            <span style={{ color: '#7c3aed', fontWeight: 600 }}>🎯 {stats?.creatorOrdersCount || 0} sponsored</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f0fdf4', fontSize: '0.68rem', color: '#166534' }}>
+            <span>After gateway cut</span>
+            <span style={{ fontWeight: 700, background: '#dcfce7', padding: '1px 5px', borderRadius: '3px', fontSize: '0.62rem' }}>Net</span>
           </div>
         </div>
 
-        {/* Total Creators */}
-        <div style={{ background: '#fff', padding: '22px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-            👥 Creator Club Network
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginTop: '6px' }}>
-            {stats?.totalCreators || 0}
+        {/* Gateway Processing Fees */}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#c2410c' }}>
+                Gateway Charges
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BuildingBankIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#c2410c', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              −₹{((stats?.razorpayFeeTotal || 0) / 100).toFixed(2)}
+            </div>
           </div>
-          <small style={{ color: '#16a34a', fontWeight: 700 }}>{stats?.activeCreators || 0} active creators</small>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.68rem', color: '#9a3412' }}>
+            <span>2.36% (inc. GST)</span>
+            <span>{stats?.totalOrders || 0} txns</span>
+          </div>
+        </div>
+
+        {/* Paid Orders */}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                Paid Orders
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <OrdersIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              {totalOrders}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.68rem', color: '#64748b' }}>
+            <span>Direct: <strong>{organicOrders}</strong></span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span>Ref: <strong>{creatorOrders}</strong></span>
+          </div>
+        </div>
+
+        {/* Creator Partners */}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                Creators
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreatorsIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              {stats?.totalCreators || 0}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.68rem' }}>
+            <span style={{ color: '#16a34a', fontWeight: 600 }}>{stats?.activeCreators || 0} active</span>
+            <Link href="/admin/creators" style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'none' }}>Directory →</Link>
+          </div>
         </div>
 
         {/* Pending Commissions */}
-        <div style={{ background: '#fff', padding: '22px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <span style={{ fontSize: '0.78rem', color: '#e11d48', fontWeight: 700, textTransform: 'uppercase' }}>
-            ⏳ Pending Commissions
-          </span>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#e11d48', marginTop: '6px' }}>
-            ₹{((stats?.pending || 0) / 100).toFixed(2)}
+        <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#e11d48' }}>
+                Pending Payouts
+              </span>
+              <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: '#fff1f2', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PayoutsIcon size={12} />
+              </div>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#e11d48', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+              ₹{((stats?.pending || 0) / 100).toFixed(2)}
+            </div>
           </div>
-          <small style={{ color: '#64748b' }}>Disbursed: ₹{((stats?.paidPayouts || 0) / 100).toFixed(2)}</small>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.68rem', color: '#64748b' }}>
+            <span>Paid: ₹{((stats?.paidPayouts || 0) / 100).toFixed(0)}</span>
+            <Link href="/admin/payouts" style={{ color: '#e11d48', fontWeight: 600, textDecoration: 'none' }}>Process →</Link>
+          </div>
         </div>
+
       </div>
 
-      {/* SALES SOURCE BREAKDOWN CARD */}
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+      {/* SALES CHANNEL ATTRIBUTION */}
+      <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '14px 16px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
-              📈 Sales Breakdown: Organic vs Creator Sponsorship
+            <h2 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: '0 0 2px' }}>
+              Sales Channel Attribution
             </h2>
-            <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-              Tracking direct website customers vs creator referral conversions.
+            <p style={{ color: '#64748b', fontSize: '0.72rem', margin: 0 }}>
+              Performance breakdown between direct organic customers and creator referrals.
             </p>
           </div>
 
-          <Link href="/admin/orders" style={{ padding: '8px 16px', borderRadius: '10px', background: '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
-            View All Orders Ledger →
+          <Link
+            href="/admin/orders"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '5px 10px',
+              borderRadius: '6px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.72rem',
+              textDecoration: 'none',
+            }}
+          >
+            <span>Orders Ledger</span>
+            <ChevronRightIcon size={11} />
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        {/* VISUAL SHARE BAR */}
+        {totalOrders > 0 && (
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ height: '6px', width: '100%', borderRadius: '999px', overflow: 'hidden', display: 'flex', background: '#f1f5f9' }}>
+              <div style={{ width: `${organicPercent}%`, background: '#10b981' }} title={`Organic: ${organicPercent}%`} />
+              <div style={{ width: `${creatorPercent}%`, background: '#8b5cf6' }} title={`Creator: ${creatorPercent}%`} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.68rem', color: '#64748b' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#10b981' }} />
+                Organic Direct ({organicPercent}%)
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8b5cf6' }} />
+                Creator Referrals ({creatorPercent}%)
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* COMPARISON CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+          
           {/* Organic Sales */}
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '1.4rem' }}>🍃</span>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#166534' }}>Organic / Direct Website Users</div>
-                <div style={{ fontSize: '0.75rem', color: '#15803d' }}>Customers finding RetroNote directly</div>
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TrendingUpIcon size={11} />
               </div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>Organic Direct Customers</div>
             </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#15803d' }}>
+
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
               ₹{((stats?.organicRevenue || 0) / 100).toFixed(2)}
-              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>gross</span>
+              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, marginLeft: '4px' }}>gross</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#065f46', marginTop: '4px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#15803d', marginTop: '2px' }}>
               Net: ₹{((stats?.netOrganicRevenue || 0) / 100).toFixed(2)}
-              <span style={{ fontSize: '0.75rem', color: '#c2410c', marginLeft: '8px' }}>−₹{((stats?.razorpayFeeOrganic || 0) / 100).toFixed(2)} fees</span>
+              <span style={{ fontSize: '0.65rem', color: '#c2410c', marginLeft: '4px' }}>−₹{((stats?.razorpayFeeOrganic || 0) / 100).toFixed(2)} fees</span>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#166534', marginTop: '4px', fontWeight: 600 }}>
-              📦 {stats?.organicOrdersCount || 0} Orders ({stats?.totalOrders ? Math.round(((stats.organicOrdersCount || 0) / stats.totalOrders) * 100) : 0}% of sales)
+            <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e2e8f0' }}>
+              {organicOrders} Orders ({organicPercent}% share)
             </div>
           </div>
 
-          {/* Creator Referral Sales */}
-          <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '1.4rem' }}>🎯</span>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#6b21a8' }}>Creator Club Referrals</div>
-                <div style={{ fontSize: '0.75rem', color: '#7e22ce' }}>Referred via creator links &amp; coupons</div>
+          {/* Creator Sales */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#ede9fe', color: '#6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreatorsIcon size={11} />
               </div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>Creator Referrals</div>
             </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#7e22ce' }}>
+
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
               ₹{((stats?.creatorRevenue || 0) / 100).toFixed(2)}
-              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>gross</span>
+              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, marginLeft: '4px' }}>gross</span>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#4c1d95', marginTop: '4px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6d28d9', marginTop: '2px' }}>
               Net: ₹{((stats?.netCreatorRevenue || 0) / 100).toFixed(2)}
-              <span style={{ fontSize: '0.75rem', color: '#c2410c', marginLeft: '8px' }}>−₹{((stats?.razorpayFeeCreator || 0) / 100).toFixed(2)} fees</span>
+              <span style={{ fontSize: '0.65rem', color: '#c2410c', marginLeft: '4px' }}>−₹{((stats?.razorpayFeeCreator || 0) / 100).toFixed(2)} fees</span>
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#6b21a8', marginTop: '4px', fontWeight: 600 }}>
-              📦 {stats?.creatorOrdersCount || 0} Orders ({stats?.totalOrders ? Math.round(((stats.creatorOrdersCount || 0) / stats.totalOrders) * 100) : 0}% of sales)
+            <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e2e8f0' }}>
+              {creatorOrders} Orders ({creatorPercent}% share)
             </div>
           </div>
 
-          {/* Razorpay Fee Summary */}
-          <div style={{ background: '#fff7ed', border: '1px solid #fb923c', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '1.4rem' }}>🏦</span>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#9a3412' }}>Razorpay Gateway Fees</div>
-                <div style={{ fontSize: '0.75rem', color: '#c2410c' }}>2% + 18% GST = 2.36% per transaction</div>
-              </div>
-            </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#c2410c' }}>
-              −₹{((stats?.razorpayFeeTotal || 0) / 100).toFixed(2)}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#9a3412', marginTop: '4px', fontWeight: 600 }}>
-              Across {stats?.totalOrders || 0} transactions
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* CRM PIPELINE CARD */}
+      {/* CRM PIPELINE STATUS */}
       {(stats?.crmTotal > 0 || stats?.dueTodayCount > 0) && (
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '14px 16px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>🎯 Creator CRM Pipeline</h2>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>{stats.crmTotal} creator{stats.crmTotal !== 1 ? 's' : ''} in acquisition funnel</p>
+              <h2 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: '0 0 2px' }}>
+                Creator CRM Pipeline
+              </h2>
+              <p style={{ color: '#64748b', fontSize: '0.72rem', margin: 0 }}>
+                {stats.crmTotal} creator{stats.crmTotal !== 1 ? 's' : ''} actively tracked
+              </p>
             </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               {stats?.dueTodayCount > 0 && (
-                <Link href="/admin/crm?view=today"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', background: '#fef2f2', color: '#dc2626', fontWeight: 800, fontSize: '0.85rem', textDecoration: 'none', border: '1px solid #fecaca' }}>
-                  🔔 {stats.dueTodayCount} Follow-up{stats.dueTodayCount > 1 ? 's' : ''} Due Today
+                <Link
+                  href="/admin/crm?view=today"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 8px',
+                    borderRadius: '5px',
+                    background: '#fef2f2',
+                    color: '#dc2626',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    textDecoration: 'none',
+                    border: '1px solid #fecaca'
+                  }}
+                >
+                  <span>{stats.dueTodayCount} Due Today</span>
                 </Link>
               )}
-              <Link href="/admin/crm"
-                style={{ padding: '8px 16px', borderRadius: '10px', background: '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
-                Open CRM →
+              
+              <Link
+                href="/admin/crm"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.72rem',
+                  textDecoration: 'none'
+                }}
+              >
+                <span>Open CRM</span>
+                <ChevronRightIcon size={11} />
               </Link>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(85px, 1fr))', gap: '6px' }}>
             {[
-              { stage: 'Discovered', color: '#6d28d9' },
-              { stage: 'Shortlisted', color: '#7c3aed' },
-              { stage: 'Contacted', color: '#1d4ed8' },
-              { stage: 'Replied', color: '#0e7490' },
-              { stage: 'Interested', color: '#047857' },
-              { stage: 'Approved', color: '#065f46' },
-              { stage: 'Active', color: '#15803d' },
-              { stage: 'Converted', color: '#166534' },
-            ].map(({ stage, color }) => {
+              { stage: 'Discovered', color: '#64748b', bg: '#f1f5f9' },
+              { stage: 'Shortlisted', color: '#7c3aed', bg: '#f5f3ff' },
+              { stage: 'Contacted', color: '#2563eb', bg: '#eff6ff' },
+              { stage: 'Replied', color: '#0891b2', bg: '#ecfeff' },
+              { stage: 'Interested', color: '#059669', bg: '#ecfdf5' },
+              { stage: 'Approved', color: '#047857', bg: '#d1fae5' },
+              { stage: 'Active', color: '#16a34a', bg: '#dcfce7' },
+              { stage: 'Converted', color: '#15803d', bg: '#bbf7d0' },
+            ].map(({ stage, color, bg }) => {
               const count = stats?.crmByStatus?.[stage] || 0;
               if (count === 0) return null;
               return (
-                <div key={stage} style={{ background: '#f8fafc', borderRadius: '10px', padding: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color }}>{count}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '2px' }}>{stage}</div>
+                <div key={stage} style={{ background: bg, borderRadius: '6px', padding: '6px 4px', textAlign: 'center', border: '1px solid rgba(0,0,0,0.03)' }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color, lineHeight: 1.1 }}>{count}</div>
+                  <div style={{ fontSize: '0.62rem', color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', marginTop: '2px' }}>{stage}</div>
                 </div>
               );
             })}
@@ -285,57 +463,82 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* QUICK ACTIONS GRID */}
-      <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: '16px' }}>
-        Quick Management Controls
-      </h2>
+      {/* QUICK MANAGEMENT GRID */}
+      <div>
+        <h2 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', marginBottom: '10px' }}>
+          Management Shortcuts
+        </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-        <Link
-          href="/admin/orders"
-          style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', transition: 'box-shadow 0.2s' }}
-        >
-          <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>📦</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Customer Orders Ledger</h3>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>View all paid customer orders, filter organic vs creator referrals, and check gross revenue.</p>
-        </Link>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+          
+          <Link
+            href="/admin/orders"
+            style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f1f5f9', color: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <OrdersIcon size={14} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.82rem', fontWeight: 700, margin: 0 }}>Customer Orders</h3>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '2px 0 0' }}>Audit orders &amp; margins</p>
+            </div>
+          </Link>
 
-        <Link
-          href="/admin/creators"
-          style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', transition: 'box-shadow 0.2s' }}
-        >
-          <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>👥</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Manage Creators</h3>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Review applications, override tiers, adjust commission rates, and select recommended templates.</p>
-        </Link>
+          <Link
+            href="/admin/creators"
+            style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CreatorsIcon size={14} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.82rem', fontWeight: 700, margin: 0 }}>Creator Partners</h3>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '2px 0 0' }}>Tiers, rates &amp; links</p>
+            </div>
+          </Link>
 
-        <Link
-          href="/admin/coupons"
-          style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', transition: 'box-shadow 0.2s' }}
-        >
-          <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>🏷️</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Custom Coupon Manager</h3>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Create, edit, toggle, and permanently delete creator and campaign promo codes.</p>
-        </Link>
+          <Link
+            href="/admin/coupons"
+            style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CouponsIcon size={14} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.82rem', fontWeight: 700, margin: 0 }}>Promo Coupons</h3>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '2px 0 0' }}>Discount codes &amp; status</p>
+            </div>
+          </Link>
 
-        <Link
-          href="/admin/payouts"
-          style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', transition: 'box-shadow 0.2s' }}
-        >
-          <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>💳</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Process Payout Batches</h3>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Review pending commissions and record UPI/Bank transfer payouts.</p>
-        </Link>
+          <Link
+            href="/admin/payouts"
+            style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#fff1f2', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <PayoutsIcon size={14} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.82rem', fontWeight: 700, margin: 0 }}>Payout Batches</h3>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '2px 0 0' }}>Reconcile &amp; clear payout</p>
+            </div>
+          </Link>
 
-        <Link
-          href="/admin/creator-gifts"
-          style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', transition: 'box-shadow 0.2s' }}
-        >
-          <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>🎁</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Issue Creator &amp; CRM Gifts</h3>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Generate 100% complimentary VIP passes for specific creators or CRM pipeline prospects.</p>
-        </Link>
+          <Link
+            href="/admin/creator-gifts"
+            style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <GiftsIcon size={14} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.82rem', fontWeight: 700, margin: 0 }}>VIP Gift Passes</h3>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '2px 0 0' }}>Generate free gift passes</p>
+            </div>
+          </Link>
+
+        </div>
       </div>
+
     </div>
   );
 }

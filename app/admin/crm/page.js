@@ -3,6 +3,22 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { exportToExcel } from '@/lib/excel-export';
+import {
+  CrmIcon,
+  PlusIcon,
+  DownloadIcon,
+  SearchIcon,
+  FilterIcon,
+  BellIcon,
+  GiftsIcon,
+  CheckIcon,
+  CloseIcon,
+  TrashIcon,
+  ExternalLinkIcon,
+  CouponsIcon,
+  TrendingUpIcon,
+  ChevronRightIcon
+} from '@/components/admin/AdminIcons';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -14,25 +30,25 @@ const PIPELINE_STAGES = [
 ];
 
 const STAGE_COLORS = {
-  'Discovered':    { bg: '#f1f5f9', text: '#475569' },
-  'Shortlisted':   { bg: '#ede9fe', text: '#6d28d9' },
-  'Contacted':     { bg: '#dbeafe', text: '#1d4ed8' },
-  'Follow-up 1':   { bg: '#fef3c7', text: '#b45309' },
-  'Follow-up 2':   { bg: '#fed7aa', text: '#c2410c' },
-  'Replied':       { bg: '#cffafe', text: '#0e7490' },
-  'Interested':    { bg: '#d1fae5', text: '#047857' },
-  'Approved':      { bg: '#a7f3d0', text: '#065f46' },
-  'Free Pass Sent':{ bg: '#fbcfe8', text: '#9d174d' },
-  'First Content': { bg: '#fce7f3', text: '#be185d' },
-  'Active':        { bg: '#dcfce7', text: '#15803d' },
-  'Converted':     { bg: '#bbf7d0', text: '#166534' },
-  'Rejected':      { bg: '#fee2e2', text: '#b91c1c' },
+  'Discovered':    { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' },
+  'Shortlisted':   { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
+  'Contacted':     { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' },
+  'Follow-up 1':   { bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+  'Follow-up 2':   { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
+  'Replied':       { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' },
+  'Interested':    { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' },
+  'Approved':      { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
+  'Free Pass Sent':{ bg: '#fdf2f8', text: '#9d174d', border: '#fbcfe8' },
+  'First Content': { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' },
+  'Active':        { bg: '#dcfce7', text: '#15803d', border: '#86efac' },
+  'Converted':     { bg: '#bbf7d0', text: '#166534', border: '#4ade80' },
+  'Rejected':      { bg: '#fef2f2', text: '#991b1b', border: '#fecaca' },
 };
 
 const PRIORITY_CONFIG = {
-  A: { label: '🔥 A', bg: '#fef2f2', text: '#dc2626', border: '#fca5a5' },
-  B: { label: '🟡 B', bg: '#fefce8', text: '#ca8a04', border: '#fde047' },
-  C: { label: '⚪ C', bg: '#f8fafc', text: '#64748b', border: '#cbd5e1' },
+  A: { label: 'Tier A', bg: '#fef2f2', text: '#dc2626', border: '#fca5a5', dot: '#ef4444' },
+  B: { label: 'Tier B', bg: '#fffbeb', text: '#b45309', border: '#fde68a', dot: '#f59e0b' },
+  C: { label: 'Tier C', bg: '#f8fafc', text: '#64748b', border: '#cbd5e1', dot: '#94a3b8' },
 };
 
 const CREATOR_TYPES = ['Nano', 'Micro', 'Macro', 'Mega'];
@@ -58,7 +74,7 @@ function initials(name) {
   return (name || '?').split(' ').map((w) => w[0]).join('').substring(0, 2).toUpperCase();
 }
 
-const avatarColors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#0ea5e9', '#10b981'];
+const avatarColors = ['#0284c7', '#7c3aed', '#db2777', '#ea580c', '#059669', '#4f46e5'];
 function avatarColor(name) {
   let h = 0;
   for (const c of name || '') h = (h * 31 + c.charCodeAt(0)) & 0xffff;
@@ -68,17 +84,21 @@ function avatarColor(name) {
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
 function StagePill({ status }) {
-  const cfg = STAGE_COLORS[status] || { bg: '#f1f5f9', text: '#475569' };
+  const cfg = STAGE_COLORS[status] || { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' };
   return (
     <span style={{
-      display: 'inline-block',
-      padding: '2px 10px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '5px',
+      padding: '2px 8px',
       borderRadius: '999px',
       fontSize: '0.72rem',
-      fontWeight: 700,
+      fontWeight: 600,
       background: cfg.bg,
       color: cfg.text,
+      border: `1px solid ${cfg.border}`,
     }}>
+      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: cfg.text }} />
       {status}
     </span>
   );
@@ -88,7 +108,9 @@ function PriorityBadge({ priority }) {
   const cfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG['C'];
   return (
     <span style={{
-      display: 'inline-block',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px',
       padding: '2px 8px',
       borderRadius: '6px',
       fontSize: '0.72rem',
@@ -97,26 +119,27 @@ function PriorityBadge({ priority }) {
       color: cfg.text,
       border: `1px solid ${cfg.border}`,
     }}>
+      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: cfg.dot }} />
       {cfg.label}
     </span>
   );
 }
 
-function Avatar({ name, size = 36 }) {
+function Avatar({ name, size = 32 }) {
   const color = avatarColor(name);
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%',
       background: color, color: '#fff',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size < 36 ? '0.65rem' : '0.85rem', fontWeight: 800, flexShrink: 0,
+      fontSize: size < 32 ? '0.65rem' : '0.8rem', fontWeight: 800, flexShrink: 0,
     }}>
       {initials(name)}
     </div>
   );
 }
 
-// ─── FORM PANEL ───────────────────────────────────────────────────────────────
+// ─── FORM MODAL ───────────────────────────────────────────────────────────────
 
 function ProspectForm({ onSave, onClose, token }) {
   const [form, setForm] = useState({
@@ -149,22 +172,27 @@ function ProspectForm({ onSave, onClose, token }) {
   };
 
   const inputStyle = {
-    width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
+    width: '100%', padding: '9px 12px', border: '1px solid #e2e8f0',
     borderRadius: '8px', fontSize: '0.85rem', color: '#0f172a',
     background: '#f8fafc', outline: 'none', boxSizing: 'border-box',
   };
-  const labelStyle = { fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '4px' };
-  const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' };
+  const labelStyle = { fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.04em' };
+  const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11, 15, 25, 0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', boxShadow: '0 25px 60px rgba(0,0,0,0.18)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Add New Creator Prospect</h2>
-          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+          <div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 2px', letterSpacing: '-0.01em' }}>Add Creator Lead</h2>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>Enter creator discovery profile to begin outreach pipeline.</p>
+          </div>
+          <button type="button" onClick={onClose} style={{ background: '#f1f5f9', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer', color: '#64748b' }}>
+            <CloseIcon size={18} />
+          </button>
         </div>
 
-        {err && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{err}</div>}
+        {err && <div style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{err}</div>}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
@@ -180,7 +208,7 @@ function ProspectForm({ onSave, onClose, token }) {
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Handle / @username</label>
+              <label style={labelStyle}>Handle / Username</label>
               <input style={inputStyle} value={form.handle} onChange={set('handle')} placeholder="@username" />
             </div>
           </div>
@@ -208,7 +236,7 @@ function ProspectForm({ onSave, onClose, token }) {
             </div>
             <div>
               <label style={labelStyle}>Niche</label>
-              <input style={inputStyle} value={form.niche} onChange={set('niche')} placeholder="e.g. Couple / Romantic" />
+              <input style={inputStyle} value={form.niche} onChange={set('niche')} placeholder="e.g. Couples, Lifestyle" />
             </div>
           </div>
 
@@ -218,7 +246,7 @@ function ProspectForm({ onSave, onClose, token }) {
               <input style={inputStyle} type="number" value={form.followers} onChange={set('followers')} placeholder="e.g. 45000" />
             </div>
             <div>
-              <label style={labelStyle}>Creator Type</label>
+              <label style={labelStyle}>Creator Tier</label>
               <select style={inputStyle} value={form.creator_type} onChange={set('creator_type')}>
                 {CREATOR_TYPES.map((t) => <option key={t}>{t}</option>)}
               </select>
@@ -231,11 +259,11 @@ function ProspectForm({ onSave, onClose, token }) {
               <input style={inputStyle} type="number" min="1" max="10" value={form.fit_score} onChange={set('fit_score')} />
             </div>
             <div>
-              <label style={labelStyle}>Priority</label>
+              <label style={labelStyle}>Priority Level</label>
               <select style={inputStyle} value={form.priority} onChange={set('priority')}>
-                <option value="A">🔥 A — Hot Lead</option>
-                <option value="B">🟡 B — Good Fit</option>
-                <option value="C">⚪ C — Monitor</option>
+                <option value="A">Tier A — High Impact</option>
+                <option value="B">Tier B — Good Potential</option>
+                <option value="C">Tier C — Normal</option>
               </select>
             </div>
           </div>
@@ -248,14 +276,14 @@ function ProspectForm({ onSave, onClose, token }) {
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Public Business Email</label>
+              <label style={labelStyle}>Business Email</label>
               <input style={inputStyle} type="email" value={form.public_email} onChange={set('public_email')} placeholder="creator@email.com" />
             </div>
           </div>
 
           <div style={row2}>
             <div>
-              <label style={labelStyle}>Status</label>
+              <label style={labelStyle}>Initial Stage</label>
               <select style={inputStyle} value={form.status} onChange={set('status')}>
                 {PIPELINE_STAGES.map((s) => <option key={s}>{s}</option>)}
               </select>
@@ -267,21 +295,16 @@ function ProspectForm({ onSave, onClose, token }) {
           </div>
 
           <div>
-            <label style={labelStyle}>Pitch Angle</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: '64px' }} value={form.pitch_angle} onChange={set('pitch_angle')} placeholder="Why LovelyCrafts fits this creator..." />
+            <label style={labelStyle}>Pitch Angle / Notes</label>
+            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: '56px' }} value={form.pitch_angle} onChange={set('pitch_angle')} placeholder="Why LovelyCrafts fits this creator..." />
           </div>
 
-          <div>
-            <label style={labelStyle}>Personalization Notes</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: '48px' }} value={form.personalization_notes} onChange={set('personalization_notes')} placeholder="Message personalization ideas..." />
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontWeight: 700, cursor: 'pointer' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>
               Cancel
             </button>
-            <button type="submit" disabled={saving} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: saving ? '#94a3b8' : '#e11d48', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer' }}>
-              {saving ? 'Saving...' : '+ Add Creator Prospect'}
+            <button type="submit" disabled={saving} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: 'none', background: saving ? '#94a3b8' : '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: saving ? 'not-allowed' : 'pointer' }}>
+              {saving ? 'Saving...' : 'Add Lead to Pipeline'}
             </button>
           </div>
         </form>
@@ -317,48 +340,51 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '480px', padding: '32px', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>✅ Approve Creator</h2>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 24px' }}>
-          This will create a Creator Club account, generate a coupon code, and activate the referral link for <strong>{prospect.name}</strong>.
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11, 15, 25, 0.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '480px', padding: '32px', boxShadow: '0 25px 60px rgba(0,0,0,0.18)' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>Approve Creator Lead</h2>
+        <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 20px', lineHeight: 1.5 }}>
+          Creates a permanent Creator Club partner account, assigns coupon code, and enables partner commission tracking for <strong>{prospect.name}</strong>.
         </p>
 
-        {err && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{err}</div>}
+        {err && <div style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{err}</div>}
 
         {result ? (
-          <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-            <div style={{ fontWeight: 800, color: '#15803d', marginBottom: '12px', fontSize: '1rem' }}>🎉 Creator Approved Successfully!</div>
-            <div style={{ fontSize: '0.85rem', color: '#166534', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div>🏷️ Coupon Code: <strong>{result.coupon_code}</strong></div>
-              <div>🔗 Referral Link: <strong style={{ wordBreak: 'break-all' }}>{result.referral_link}</strong></div>
-              {result.gift_code && <div>🎁 Gift Pass Code: <strong>{result.gift_code}</strong></div>}
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '20px', marginBottom: '20px' }}>
+            <div style={{ fontWeight: 800, color: '#15803d', marginBottom: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CheckIcon size={18} />
+              <span>Partner Account Activated!</span>
+            </div>
+            <div style={{ fontSize: '0.82rem', color: '#166534', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div>Coupon Code: <strong style={{ fontFamily: 'monospace', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px' }}>{result.coupon_code}</strong></div>
+              <div>Referral Link: <strong style={{ wordBreak: 'break-all', color: '#0f172a' }}>{result.referral_link}</strong></div>
+              {result.gift_code && <div>Gift Pass Code: <strong style={{ fontFamily: 'monospace', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px' }}>{result.gift_code}</strong></div>}
             </div>
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Audience Discount %</label>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '6px', letterSpacing: '0.04em' }}>Audience Discount %</label>
                 <select value={discountRate} onChange={(e) => setDiscountRate(Number(e.target.value))}
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', background: '#f8fafc' }}>
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', background: '#f8fafc', color: '#0f172a', outline: 'none' }}>
                   {[10, 15, 20].map((r) => <option key={r} value={r}>{r}% off for audience</option>)}
                 </select>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '10px', background: issuePass ? '#f0fdf4' : '#f8fafc' }}>
-                <input type="checkbox" checked={issuePass} onChange={(e) => setIssuePass(e.target.checked)} style={{ width: 18, height: 18 }} />
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', padding: '14px', border: '1px solid #e2e8f0', borderRadius: '12px', background: issuePass ? '#f0fdf4' : '#f8fafc', transition: 'all 0.15s ease' }}>
+                <input type="checkbox" checked={issuePass} onChange={(e) => setIssuePass(e.target.checked)} style={{ width: 18, height: 18, marginTop: '2px', accentColor: '#0f172a' }} />
                 <div>
-                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>🎁 Issue Free Experience Pass</div>
-                  <div style={{ color: '#64748b', fontSize: '0.8rem' }}>Send a complimentary 100% off pass so they can try the product</div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>Issue 100% Free Experience Pass</div>
+                  <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '2px' }}>Generate a complimentary VIP pass so creator can test the premium template live</div>
                 </div>
               </label>
 
               {issuePass && (
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Experience Template</label>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '6px', letterSpacing: '0.04em' }}>Experience Template</label>
                   <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', background: '#f8fafc' }}>
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', background: '#f8fafc', color: '#0f172a', outline: 'none' }}>
                     <option value="proposal">Love Proposal</option>
                     <option value="apology">Heartfelt Apology</option>
                     <option value="birthday">Birthday Surprise</option>
@@ -369,16 +395,16 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}>Cancel</button>
-              <button type="button" onClick={handleApprove} disabled={loading} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: loading ? '#94a3b8' : '#16a34a', color: '#fff', fontWeight: 800, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer' }}>
-                {loading ? 'Approving...' : '✅ Approve & Activate'}
+              <button type="button" onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>Cancel</button>
+              <button type="button" onClick={handleApprove} disabled={loading} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: 'none', background: loading ? '#94a3b8' : '#15803d', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: loading ? 'not-allowed' : 'pointer' }}>
+                {loading ? 'Activating...' : 'Approve & Activate'}
               </button>
             </div>
           </>
         )}
 
         {result && (
-          <button type="button" onClick={onClose} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 700, cursor: 'pointer', marginTop: '8px' }}>
+          <button type="button" onClick={onClose} style={{ width: '100%', padding: '10px', borderRadius: '10px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 700, cursor: 'pointer', marginTop: '8px' }}>
             Done
           </button>
         )}
@@ -420,7 +446,7 @@ function ProfileDrawer({ prospect, onClose, onUpdated, token }) {
 
   const handleSaveNextAction = () => {
     patch({ next_followup: p.next_followup });
-    setMsg('✓ Saved');
+    setMsg('Saved');
     setTimeout(() => setMsg(''), 2000);
   };
 
@@ -431,161 +457,144 @@ function ProfileDrawer({ prospect, onClose, onUpdated, token }) {
     setAddingOutreach(false);
   };
 
-  const fieldStyle = { width: '100%', padding: '7px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.82rem', color: '#0f172a', background: '#f8fafc', boxSizing: 'border-box' };
-  const labelStyle = { fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '3px' };
+  const fieldStyle = { width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.82rem', color: '#0f172a', background: '#f8fafc', boxSizing: 'border-box', outline: 'none' };
+  const labelStyle = { fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '4px', letterSpacing: '0.04em' };
 
   return (
     <>
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 900 }} onClick={onClose} />
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(11, 15, 25, 0.5)', zIndex: 900, backdropFilter: 'blur(3px)' }} onClick={onClose} />
       <div style={{
-        position: 'fixed', right: 0, top: 0, bottom: 0, width: '480px', maxWidth: '100%',
+        position: 'fixed', right: 0, top: 0, bottom: 0, width: '500px', maxWidth: '100%',
         background: '#fff', zIndex: 950, overflowY: 'auto', boxShadow: '-4px 0 40px rgba(0,0,0,0.15)',
         display: 'flex', flexDirection: 'column',
       }}>
         {/* Header */}
-        <div style={{ padding: '24px', background: '#0f172a', color: '#fff', flexShrink: 0 }}>
+        <div style={{ padding: '24px', background: '#0b0f19', color: '#fff', flexShrink: 0, borderBottom: '1px solid #1e293b' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Avatar name={p.name} size={52} />
+              <Avatar name={p.name} size={48} />
               <div>
-                <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{p.name}</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>{p.niche} · {p.creator_type} · {formatFollowers(p.followers)}</div>
-                <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ fontWeight: 800, fontSize: '1.15rem', color: '#f8fafc' }}>{p.name}</div>
+                <div style={{ color: '#94a3b8', fontSize: '0.78rem', marginTop: '2px' }}>{p.niche} · {p.creator_type} · {formatFollowers(p.followers)}</div>
+                <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   <PriorityBadge priority={p.priority} />
                   <StagePill status={p.status} />
                 </div>
               </div>
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.4rem', cursor: 'pointer' }}>✕</button>
+            <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}>
+              <CloseIcon size={20} />
+            </button>
           </div>
         </div>
 
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
           {/* Status & Priority */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div>
-              <label style={labelStyle}>Pipeline Status</label>
+              <label style={labelStyle}>Pipeline Stage</label>
               <select style={fieldStyle} value={p.status} onChange={(e) => handleStatusChange(e.target.value)}>
                 {PIPELINE_STAGES.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Priority</label>
+              <label style={labelStyle}>Priority Level</label>
               <select style={fieldStyle} value={p.priority || 'B'}
                 onChange={(e) => { setEditing((ed) => ({ ...ed, priority: e.target.value })); patch({ priority: e.target.value }); }}>
-                <option value="A">🔥 A — Hot Lead</option>
-                <option value="B">🟡 B — Good Fit</option>
-                <option value="C">⚪ C — Monitor</option>
+                <option value="A">Tier A — High</option>
+                <option value="B">Tier B — Medium</option>
+                <option value="C">Tier C — Normal</option>
               </select>
             </div>
           </div>
 
           {/* Next Follow-up */}
-          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '14px', border: '1px solid #e2e8f0' }}>
-            <label style={labelStyle}>📅 Next Follow-up Date</label>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+            <label style={labelStyle}>Next Follow-up Date</label>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               <input type="date" style={{ ...fieldStyle, flex: 1 }}
                 value={editing.next_followup !== undefined ? editing.next_followup : (p.next_followup || '')}
                 onChange={(e) => setEditing((ed) => ({ ...ed, next_followup: e.target.value }))} />
-              <button onClick={handleSaveNextAction} style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
-                {saving ? '…' : msg || 'Save'}
+              <button onClick={handleSaveNextAction} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>
+                {saving ? '...' : msg || 'Save'}
               </button>
             </div>
             {p.last_contacted && (
-              <div style={{ color: '#64748b', fontSize: '0.75rem', marginTop: '6px' }}>Last contacted: {p.last_contacted}</div>
+              <div style={{ color: '#64748b', fontSize: '0.75rem', marginTop: '8px' }}>Last contact date: {p.last_contacted}</div>
             )}
           </div>
 
           {/* Contact Details */}
           <div>
-            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem', marginBottom: '10px' }}>📬 Contact</div>
+            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem', marginBottom: '10px' }}>Contact Channels</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem', color: '#475569' }}>
-              {p.public_email && <div>✉️ <a href={`mailto:${p.public_email}`} style={{ color: '#0284c7' }}>{p.public_email}</a></div>}
-              {p.handle && <div>🏷️ {p.platform}: <strong>@{p.handle.replace(/^@/, '')}</strong></div>}
-              {p.instagram_url && <div>📸 <a href={p.instagram_url} target="_blank" rel="noopener noreferrer" style={{ color: '#e11d48' }}>{p.instagram_url}</a></div>}
-              {p.youtube_url && <div>▶️ <a href={p.youtube_url} target="_blank" rel="noopener noreferrer" style={{ color: '#dc2626' }}>{p.youtube_url}</a></div>}
-              <div>📞 Contact route: <strong>{p.contact_route}</strong></div>
+              {p.public_email && <div>Email: <a href={`mailto:${p.public_email}`} style={{ color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>{p.public_email}</a></div>}
+              {p.handle && <div>{p.platform}: <strong>@{p.handle.replace(/^@/, '')}</strong></div>}
+              {p.instagram_url && <div>Instagram: <a href={p.instagram_url} target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'none' }}>{p.instagram_url}</a></div>}
+              {p.youtube_url && <div>YouTube: <a href={p.youtube_url} target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'none' }}>{p.youtube_url}</a></div>}
+              <div>Route: <strong>{p.contact_route}</strong></div>
             </div>
           </div>
 
           {/* Audience Details */}
-          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '14px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem', marginBottom: '10px' }}>👥 Audience</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.82rem', color: '#475569' }}>
-              <div>📍 {p.state}{p.city ? `, ${p.city}` : ''}</div>
-              <div>🗣️ {p.language}</div>
-              <div>👣 {formatFollowers(p.followers)} followers</div>
-              <div>🎯 Fit Score: <strong>{p.fit_score}/10</strong></div>
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem', marginBottom: '10px' }}>Audience &amp; Reach</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.82rem', color: '#475569' }}>
+              <div>Location: <strong>{p.state || 'India'}</strong></div>
+              <div>Language: <strong>{p.language}</strong></div>
+              <div>Followers: <strong>{formatFollowers(p.followers)}</strong></div>
+              <div>Fit Score: <strong>{p.fit_score}/10</strong></div>
             </div>
           </div>
 
-          {/* Pitch */}
-          {(p.pitch_angle || p.personalization_notes) && (
-            <div>
-              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem', marginBottom: '8px' }}>📝 Notes</div>
-              {p.pitch_angle && <div style={{ fontSize: '0.82rem', color: '#475569', marginBottom: '6px' }}><strong>Pitch angle:</strong> {p.pitch_angle}</div>}
-              {p.personalization_notes && <div style={{ fontSize: '0.82rem', color: '#475569' }}><strong>Personalization:</strong> {p.personalization_notes}</div>}
-            </div>
-          )}
-
-          {/* Creator Club info if approved */}
-          {p.linked_creator_id && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '12px', padding: '14px' }}>
-              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.85rem', marginBottom: '8px' }}>✅ Creator Club Member</div>
-              <div style={{ fontSize: '0.82rem', color: '#166534', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div>🆔 Creator ID: <code style={{ fontSize: '0.75rem' }}>{p.linked_creator_id}</code></div>
-                {p.free_pass_issued && <div>🎁 Free pass issued</div>}
-              </div>
-            </div>
-          )}
-
           {/* Outreach History */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>📨 Outreach History</div>
-              <button onClick={() => setAddingOutreach(true)} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', cursor: 'pointer' }}>
-                + Add Contact
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Outreach History</div>
+              <button onClick={() => setAddingOutreach(true)} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '0.75rem', fontWeight: 600, color: '#0284c7', cursor: 'pointer' }}>
+                + Record Contact
               </button>
             </div>
 
             {addingOutreach && (
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div>
                     <label style={labelStyle}>Date</label>
                     <input type="date" style={fieldStyle} value={outreachForm.date} onChange={(e) => setOutreachForm((f) => ({ ...f, date: e.target.value }))} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Method</label>
+                    <label style={labelStyle}>Channel</label>
                     <select style={fieldStyle} value={outreachForm.method} onChange={(e) => setOutreachForm((f) => ({ ...f, method: e.target.value }))}>
                       {['DM', 'Email', 'WhatsApp', 'Call'].map((m) => <option key={m}>{m}</option>)}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Message / Pitch</label>
-                  <textarea style={{ ...fieldStyle, resize: 'vertical', minHeight: '48px' }} value={outreachForm.message} onChange={(e) => setOutreachForm((f) => ({ ...f, message: e.target.value }))} placeholder="Pitch #1 / Follow-up..." />
+                  <label style={labelStyle}>Message / Pitch Summary</label>
+                  <textarea style={{ ...fieldStyle, resize: 'vertical', minHeight: '48px' }} value={outreachForm.message} onChange={(e) => setOutreachForm((f) => ({ ...f, message: e.target.value }))} placeholder="Pitch sent / follow-up discussion..." />
                 </div>
                 <div>
-                  <label style={labelStyle}>Response</label>
-                  <input style={fieldStyle} value={outreachForm.response} onChange={(e) => setOutreachForm((f) => ({ ...f, response: e.target.value }))} placeholder="No response / Interested / etc." />
+                  <label style={labelStyle}>Response Received</label>
+                  <input style={fieldStyle} value={outreachForm.response} onChange={(e) => setOutreachForm((f) => ({ ...f, response: e.target.value }))} placeholder="Interested / positive / no reply..." />
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setAddingOutreach(false)} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', fontWeight: 700, color: '#64748b', cursor: 'pointer', fontSize: '0.8rem' }}>Cancel</button>
-                  <button onClick={handleAddOutreach} style={{ flex: 2, padding: '8px', borderRadius: '8px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Save Contact</button>
+                  <button onClick={() => setAddingOutreach(false)} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontWeight: 600, color: '#64748b', cursor: 'pointer', fontSize: '0.8rem' }}>Cancel</button>
+                  <button onClick={handleAddOutreach} style={{ flex: 2, padding: '8px', borderRadius: '8px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>Save Log</button>
                 </div>
               </div>
             )}
 
             {(prospect.outreach_history || []).length === 0 && !addingOutreach ? (
-              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>No outreach recorded yet.</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>No outreach interactions logged yet.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[...(prospect.outreach_history || [])].reverse().map((entry, i) => (
-                  <div key={i} style={{ borderLeft: '3px solid #e11d48', paddingLeft: '12px', fontSize: '0.8rem' }}>
+                  <div key={i} style={{ borderLeft: '3px solid #0284c7', paddingLeft: '12px', fontSize: '0.8rem' }}>
                     <div style={{ fontWeight: 700, color: '#0f172a' }}>{entry.date} · {entry.method}</div>
                     {entry.message && <div style={{ color: '#475569', marginTop: '2px' }}>{entry.message}</div>}
-                    {entry.response && <div style={{ color: '#16a34a', marginTop: '2px', fontWeight: 600 }}>↩ {entry.response}</div>}
+                    {entry.response && <div style={{ color: '#15803d', marginTop: '2px', fontWeight: 600 }}>↩ {entry.response}</div>}
                   </div>
                 ))}
               </div>
@@ -593,22 +602,23 @@ function ProfileDrawer({ prospect, onClose, onUpdated, token }) {
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
             {!p.linked_creator_id && (
-              <button onClick={() => setShowApprove(true)} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: 'none', background: '#16a34a', color: '#fff', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer' }}>
-                ✅ Approve → Activate Creator Club
+              <button onClick={() => setShowApprove(true)} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#15803d', color: '#fff', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer' }}>
+                Approve &amp; Activate Partner Account
               </button>
             )}
             <button
               onClick={async () => {
-                if (!confirm('Remove this prospect from the CRM?')) return;
+                if (!confirm('Remove this prospect from the CRM pipeline?')) return;
                 await fetch(`/api/admin/crm?id=${prospect.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
                 onUpdated(); onClose();
               }}
-              style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #fecaca', background: '#fff', color: '#b91c1c', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-              🗑 Remove from CRM
+              style={{ width: '100%', padding: '9px', borderRadius: '10px', border: '1px solid #fecaca', background: '#fff', color: '#b91c1c', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}>
+              Remove Lead
             </button>
           </div>
+
         </div>
       </div>
 
@@ -634,43 +644,62 @@ const KANBAN_STAGES = [
 function KanbanView({ prospects, onSelectProspect }) {
   return (
     <div style={{ overflowX: 'auto', paddingBottom: '16px' }}>
-      <div style={{ display: 'flex', gap: '12px', minWidth: 'max-content' }}>
+      <div style={{ display: 'flex', gap: '14px', minWidth: 'max-content' }}>
         {KANBAN_STAGES.map((stage) => {
           const cards = prospects.filter((p) => p.status === stage);
-          const cfg = STAGE_COLORS[stage];
+          const cfg = STAGE_COLORS[stage] || { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' };
           return (
-            <div key={stage} style={{ width: '200px', flexShrink: 0 }}>
+            <div key={stage} style={{ width: '230px', flexShrink: 0 }}>
+              
+              {/* STAGE HEADER */}
               <div style={{
-                padding: '8px 12px', borderRadius: '8px 8px 0 0',
-                background: cfg.bg, color: cfg.text, fontWeight: 700, fontSize: '0.78rem',
+                padding: '10px 14px', borderRadius: '12px 12px 0 0',
+                background: cfg.bg, color: cfg.text, fontWeight: 700, fontSize: '0.8rem',
+                border: `1px solid ${cfg.border}`, borderBottom: 'none',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               }}>
-                <span>{stage}</span>
-                <span style={{ background: 'rgba(0,0,0,0.12)', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem' }}>
+                <span style={{ letterSpacing: '-0.01em' }}>{stage}</span>
+                <span style={{ background: 'rgba(0,0,0,0.08)', borderRadius: '999px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700 }}>
                   {cards.length}
                 </span>
               </div>
-              <div style={{ background: '#f8fafc', border: `1px solid ${cfg.bg}`, borderTop: 'none', borderRadius: '0 0 10px 10px', minHeight: '80px', padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+              {/* STAGE COLUMN */}
+              <div style={{ background: '#f8fafc', border: `1px solid ${cfg.border}`, borderTop: 'none', borderRadius: '0 0 12px 12px', minHeight: '140px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {cards.map((p) => {
                   const todayStr = new Date().toISOString().split('T')[0];
                   const overdue = p.next_followup && p.next_followup <= todayStr;
                   return (
                     <div key={p.id} onClick={() => onSelectProspect(p)}
                       style={{
-                        background: '#fff', borderRadius: '8px', padding: '10px', cursor: 'pointer',
+                        background: '#fff', borderRadius: '10px', padding: '12px', cursor: 'pointer',
                         border: overdue ? '1px solid #fca5a5' : '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                        transition: 'box-shadow 0.15s',
-                      }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                        <Avatar name={p.name} size={24} />
-                        <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#0f172a', lineHeight: 1.2 }}>{p.name}</span>
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        transition: 'all 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)'; }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <Avatar name={p.name} size={28} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#0f172a', lineHeight: 1.2, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {p.name}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{p.niche || 'General'}</span>
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{p.niche || '—'}</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
                         <PriorityBadge priority={p.priority} />
-                        {overdue && <span style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: 700 }}>⏰ Due</span>}
+                        <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>{formatFollowers(p.followers)}</span>
                       </div>
+
+                      {overdue && (
+                        <div style={{ marginTop: '6px', fontSize: '0.68rem', color: '#dc2626', fontWeight: 700, background: '#fef2f2', padding: '2px 6px', borderRadius: '4px', textAlign: 'center' }}>
+                          Follow-up Due
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -683,7 +712,7 @@ function KanbanView({ prospects, onSelectProspect }) {
   );
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+// ─── MAIN CRM PAGE ────────────────────────────────────────────────────────────
 
 export default function AdminCRMPage() {
   const { user } = useAuth();
@@ -767,7 +796,7 @@ export default function AdminCRMPage() {
   };
 
   const statCards = [
-    { label: 'Total in Pipeline', value: prospects.length, color: '#0f172a' },
+    { label: 'Total in Funnel', value: prospects.length, color: '#0f172a' },
     { label: 'Discovered', value: byStatus['Discovered'] || 0, color: '#6d28d9' },
     { label: 'Contacted', value: (byStatus['Contacted'] || 0) + (byStatus['Follow-up 1'] || 0) + (byStatus['Follow-up 2'] || 0), color: '#1d4ed8' },
     { label: 'Interested', value: byStatus['Interested'] || 0, color: '#047857' },
@@ -776,176 +805,207 @@ export default function AdminCRMPage() {
   ];
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+      
+      {/* HEADER & ACTIONS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>🎯 Creator CRM</h1>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            Creator CRM Pipeline
+          </h1>
           <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-            Full acquisition pipeline from discovery to first sale.
+            Lead generation and partnership funnel tracking from initial discovery to active sales.
           </p>
         </div>
+
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           {dueTodayCount > 0 && (
             <button onClick={() => setView('today')}
-              style={{ padding: '8px 14px', borderRadius: '10px', border: 'none', background: '#fef2f2', color: '#dc2626', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#dc2626' }} />
-              🔔 {dueTodayCount} Follow-up{dueTodayCount > 1 ? 's' : ''} Due Today
+              style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#dc2626' }} />
+              <span>{dueTodayCount} Follow-up{dueTodayCount > 1 ? 's' : ''} Due Today</span>
             </button>
           )}
+
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={loading || filtered.length === 0}
             style={{
-              padding: '10px 18px', borderRadius: '10px', border: 'none',
-              background: loading || filtered.length === 0 ? '#e2e8f0' : '#10b981',
-              color: loading || filtered.length === 0 ? '#94a3b8' : '#fff',
-              fontWeight: 700, fontSize: '0.85rem',
+              padding: '10px 16px', borderRadius: '10px', border: '1px solid #e2e8f0',
+              background: '#ffffff', color: '#0f172a',
+              fontWeight: 600, fontSize: '0.85rem',
               cursor: loading || filtered.length === 0 ? 'not-allowed' : 'pointer',
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              boxShadow: filtered.length > 0 ? '0 2px 8px rgba(16,185,129,0.25)' : 'none',
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              opacity: loading || filtered.length === 0 ? 0.6 : 1,
               transition: 'all 0.15s',
             }}
           >
-            <span>📥</span>
-            <span>Export Excel{filtered.length > 0 ? ` (${filtered.length})` : ''}</span>
+            <DownloadIcon size={16} />
+            <span>Export Excel</span>
           </button>
+
           <button onClick={() => setShowAddForm(true)}
-            style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: '#e11d48', color: '#fff', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(225, 29, 72, 0.3)' }}>
-            ＋ Add Creator
+            style={{ padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#0f172a', color: '#fff', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)' }}>
+            <PlusIcon size={16} />
+            <span>Add Creator Lead</span>
           </button>
         </div>
-
       </div>
 
-      {/* Pipeline Stat Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+      {/* PIPELINE STAT TILES */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
         {statCards.map((s) => (
-          <div key={s.label} style={{ background: '#fff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginTop: '2px' }}>{s.label}</div>
+          <div key={s.label} style={{ background: '#fff', padding: '18px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: s.color, letterSpacing: '-0.02em' }}>{s.value}</div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* View Toggle */}
-      <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '10px', padding: '4px', width: 'fit-content', marginBottom: '20px' }}>
-        {[
-          { key: 'list', label: '☰ List' },
-          { key: 'kanban', label: '⬛ Kanban' },
-          { key: 'today', label: `🔔 Today${dueTodayCount > 0 ? ` (${dueTodayCount})` : ''}` },
-        ].map((v) => (
-          <button key={v.key} onClick={() => setView(v.key)}
-            style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: view === v.key ? '#fff' : 'transparent', color: view === v.key ? '#0f172a' : '#64748b', fontWeight: view === v.key ? 700 : 500, fontSize: '0.85rem', cursor: 'pointer', boxShadow: view === v.key ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.15s' }}>
-            {v.label}
-          </button>
-        ))}
+      {/* VIEW TOGGLE & SEARCH */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        
+        {/* VIEW BUTTONS */}
+        <div style={{ display: 'flex', gap: '4px', background: '#ffffff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          {[
+            { key: 'list', label: 'List Ledger' },
+            { key: 'kanban', label: 'Kanban Board' },
+            { key: 'today', label: `Today's Action${dueTodayCount > 0 ? ` (${dueTodayCount})` : ''}` },
+          ].map((v) => (
+            <button key={v.key} onClick={() => setView(v.key)}
+              style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: view === v.key ? '#0f172a' : 'transparent', color: view === v.key ? '#fff' : '#64748b', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s' }}>
+              {v.label}
+            </button>
+          ))}
+        </div>
+
+        {/* SEARCH & FILTERS */}
+        {view !== 'kanban' && (
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ position: 'relative', width: '280px', maxWidth: '100%' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex' }}>
+                <SearchIcon size={16} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search name, niche, email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', outline: 'none', background: '#fff' }}
+              />
+            </div>
+
+            {view === 'list' && (
+              <>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{ padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.82rem', background: '#fff', color: '#0f172a', outline: 'none' }}>
+                  <option value="all">All Stages</option>
+                  {PIPELINE_STAGES.map((s) => <option key={s}>{s}</option>)}
+                </select>
+
+                <div style={{ display: 'flex', gap: '4px', background: '#ffffff', padding: '3px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  {['all', 'A', 'B', 'C'].map((p) => (
+                    <button key={p} onClick={() => setPriorityFilter(p)}
+                      style={{ padding: '5px 10px', borderRadius: '6px', border: 'none', background: priorityFilter === p ? '#0f172a' : 'transparent', color: priorityFilter === p ? '#fff' : '#64748b', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer' }}>
+                      {p === 'all' ? 'All Tiers' : `Tier ${p}`}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Filters (list/today only) */}
-      {view !== 'kanban' && (
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="Search name, niche, email, handle..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: '8px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.85rem', minWidth: '240px', outline: 'none', flex: 1, maxWidth: '360px' }}
-          />
-          {view === 'list' && (
-            <>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                style={{ padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.85rem', background: '#fff' }}>
-                <option value="all">All Stages</option>
-                {PIPELINE_STAGES.map((s) => <option key={s}>{s}</option>)}
-              </select>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {['all', 'A', 'B', 'C'].map((p) => (
-                  <button key={p} onClick={() => setPriorityFilter(p)}
-                    style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: priorityFilter === p ? '#0f172a' : '#fff', color: priorityFilter === p ? '#fff' : '#64748b', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
-                    {p === 'all' ? 'All' : PRIORITY_CONFIG[p].label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Loading */}
+      {/* CONTENT: KANBAN OR TABLE */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎯</div>
-          Loading creator pipeline...
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#0284c7', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Loading CRM lead records...</p>
         </div>
       ) : view === 'kanban' ? (
         <KanbanView prospects={prospects} onSelectProspect={setSelectedProspect} />
       ) : (
-        /* LIST / TODAY TABLE */
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '950px' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                   {['Creator', 'Platform / Handle', 'Location', 'Niche & Type', 'Followers', 'Fit', 'Priority', 'Status', 'Next Follow-up'].map((h) => (
-                    <th key={h} style={{ padding: '12px 14px', fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} style={{ padding: '14px 16px', fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                      {view === 'today' ? '🎉 No follow-ups due today!' : 'No creator prospects found.'}
+                    <td colSpan={9} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>
+                        {view === 'today' ? 'All caught up! No follow-ups scheduled for today.' : 'No creator leads found.'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem' }}>Try changing the search query or stage filters.</div>
                     </td>
                   </tr>
                 ) : filtered.map((p) => {
                   const overdue = p.next_followup && p.next_followup <= todayStr;
                   return (
                     <tr key={p.id} onClick={() => setSelectedProspect(p)}
-                      style={{ borderBottom: '1px solid #f1f5f9', cursor: 'pointer', transition: 'background 0.1s' }}
+                      style={{ borderBottom: '1px solid #f1f5f9', cursor: 'pointer', transition: 'background 0.1s ease' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Avatar name={p.name} size={30} />
-                          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>{p.name}</div>
+                      
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <Avatar name={p.name} size={32} />
+                          <div>
+                            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>{p.name}</div>
+                            {p.public_email && <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{p.public_email}</div>}
+                          </div>
                         </div>
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', color: '#0284c7' }}>
-                        {p.platform}<br />
-                        {p.handle && <span style={{ color: '#64748b' }}>@{p.handle.replace(/^@/, '')}</span>}
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#0284c7' }}>
+                        <div style={{ fontWeight: 600 }}>{p.platform}</div>
+                        {p.handle && <div style={{ color: '#64748b', fontSize: '0.75rem' }}>@{p.handle.replace(/^@/, '')}</div>}
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', color: '#475569' }}>
-                        {p.state}<br />
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#475569' }}>
+                        <div>{p.state || 'India'}</div>
                         <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{p.language}</span>
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', color: '#475569' }}>
-                        {p.niche}<br />
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#475569' }}>
+                        <div>{p.niche || 'General'}</div>
                         <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{p.creator_type}</span>
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
                         {formatFollowers(p.followers)}
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', textAlign: 'center' }}>
-                        <span style={{ fontWeight: 700, color: p.fit_score >= 8 ? '#16a34a' : p.fit_score >= 6 ? '#ca8a04' : '#dc2626' }}>
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 700, color: p.fit_score >= 8 ? '#15803d' : p.fit_score >= 6 ? '#b45309' : '#dc2626' }}>
                           {p.fit_score}/10
                         </span>
                       </td>
-                      <td style={{ padding: '12px 14px' }}>
+
+                      <td style={{ padding: '14px 16px' }}>
                         <PriorityBadge priority={p.priority} />
                       </td>
-                      <td style={{ padding: '12px 14px' }}>
+
+                      <td style={{ padding: '14px 16px' }}>
                         <StagePill status={p.status} />
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.8rem' }}>
+
+                      <td style={{ padding: '14px 16px', fontSize: '0.8rem' }}>
                         {p.next_followup ? (
                           <span style={{ color: overdue ? '#dc2626' : '#475569', fontWeight: overdue ? 700 : 400 }}>
-                            {overdue && '⏰ '}{p.next_followup}
+                            {p.next_followup}
                           </span>
                         ) : <span style={{ color: '#94a3b8' }}>—</span>}
                       </td>
+
                     </tr>
                   );
                 })}

@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { auth, signInWithGoogle } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
+import { ShieldIcon } from '@/components/admin/AdminIcons';
 
 function AdminLoginContent() {
   const router = useRouter();
@@ -63,30 +64,35 @@ function AdminLoginContent() {
   };
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', padding: '24px' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b0f19', padding: '24px' }}>
       <div
         style={{
-          background: '#1e293b',
+          background: '#0f172a',
           maxWidth: '420px',
           width: '100%',
           padding: '40px',
           borderRadius: '24px',
-          border: '1px solid #334155',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          border: '1px solid #1e293b',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
           textAlign: 'center',
-          color: '#fff',
+          color: '#f8fafc',
         }}
       >
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛡️</div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 8px 20px rgba(2, 132, 199, 0.35)' }}>
+            <ShieldIcon size={28} />
+          </div>
+        </div>
+
+        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.02em', color: '#f8fafc' }}>
           Admin Authentication
         </h1>
-        <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0 0 28px', lineHeight: 1.5 }}>
-          Sign in with an allowlisted Google account to access Creator Club administration.
+        <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 28px', lineHeight: 1.5 }}>
+          Sign in with an allowlisted Google administrator account to access the LovelyCrafts portal.
         </p>
 
         {error && (
-          <div style={{ color: '#f87171', background: '#450a0a', border: '1px solid #7f1d1d', padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', marginBottom: '20px', textAlign: 'left' }}>
+          <div style={{ color: '#f87171', background: '#450a0a', border: '1px solid #7f1d1d', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', textAlign: 'left', lineHeight: 1.4 }}>
             {error}
           </div>
         )}
@@ -101,15 +107,16 @@ function AdminLoginContent() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '12px',
-            background: '#fff',
+            background: '#ffffff',
             color: '#0f172a',
             border: 'none',
             padding: '12px 20px',
             borderRadius: '12px',
             fontWeight: 700,
-            fontSize: '0.95rem',
+            fontSize: '0.9rem',
             cursor: signingIn ? 'not-allowed' : 'pointer',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            transition: 'all 0.15s ease'
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24">
@@ -118,7 +125,7 @@ function AdminLoginContent() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          {signingIn ? 'Authenticating...' : 'Sign in as Admin'}
+          <span>{signingIn ? 'Authenticating...' : 'Continue with Google'}</span>
         </button>
       </div>
     </main>
@@ -127,9 +134,8 @@ function AdminLoginContent() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0f172a' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0f19' }} />}>
       <AdminLoginContent />
     </Suspense>
   );
 }
-
