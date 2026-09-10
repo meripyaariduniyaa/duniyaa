@@ -393,7 +393,7 @@ export default function CreatorTermsModal({ creatorName, creatorEmail, onAccept 
                   'Share your coupon code on coupon-aggregator websites, deal forums, or discount platforms (e.g. CouponDunia, GrabOn)',
                   'Impersonate the Company or claim to be an employee, officer, or representative of the Company',
                   'Create content that is defamatory, obscene, sexually explicit, hateful, discriminatory, or unlawful',
-                  'Promote competing digital gifting or emotional note platforms simultaneously using RetroNote brand assets',
+                  'Promote competing digital gifting or emotional note platforms simultaneously using Lovely Crafts brand assets',
                   'Conduct activities that could harm the brand reputation, goodwill, or intellectual property of the Company',
                   'Offer additional discounts, cash-back, or incentives to customers beyond the authorised coupon code discount',
                 ]} />
@@ -437,7 +437,7 @@ export default function CreatorTermsModal({ creatorName, creatorEmail, onAccept 
                 <Clause>Acceptable disclosure formats include:</Clause>
                 <SubList items={[
                   '"Ad", "#ad", or "#sponsored" prominently in the caption or title of the content',
-                  '"Paid Partnership with RetroNote" label (where the platform supports it, e.g. Instagram)',
+                  '"Paid Partnership with Lovely Crafts" label (where the platform supports it, e.g. Instagram)',
                   'A clear spoken or on-screen disclosure at the beginning of video content',
                 ]} />
                 <Clause>
