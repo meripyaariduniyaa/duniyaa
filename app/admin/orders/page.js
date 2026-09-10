@@ -34,23 +34,34 @@ export default function AdminOrdersPage() {
     ? creatorOrders
     : orders;
 
+  // Razorpay: 2% + 18% GST = 2.36%, capped at ₹2500 (250000 paise)
+  const calcRazorpayFee = (amountPaise) => Math.min(Math.ceil((amountPaise || 0) * 0.0236), 250000);
+
   const totalRevenuePaise = orders.reduce((sum, o) => sum + (o.final_amount || 0), 0);
+  const totalFeePaise = orders.reduce((sum, o) => sum + calcRazorpayFee(o.final_amount || 0), 0);
+  const totalNetPaise = totalRevenuePaise - totalFeePaise;
+
   const organicRevenuePaise = organicOrders.reduce((sum, o) => sum + (o.final_amount || 0), 0);
   const creatorRevenuePaise = creatorOrders.reduce((sum, o) => sum + (o.final_amount || 0), 0);
 
   const handleExportExcel = () => {
-    const formatted = filteredOrders.map((o) => ({
-      'Date': o.paid_at ? new Date(o.paid_at).toLocaleString() : 'Recent',
-      'Order / Note ID': o.note_id || o.id,
-      'Sales Channel': o.creator_id ? 'Creator Referral' : 'Organic / Direct User',
-      'Template Name': o.template_id || 'Standard',
-      'Gross Amount (₹)': ((o.final_amount || 0) / 100).toFixed(2),
-      'Coupon Code': o.coupon_code || 'None',
-      'Discount Applied (%)': o.discount_percent ? `${o.discount_percent}%` : '0%',
-      'Attributed Creator ID': o.creator_id || 'Direct / Organic Customer',
-      'Payment Method': o.payment_method || 'Razorpay',
-      'Order Status': o.payment_status || 'Paid',
-    }));
+    const formatted = filteredOrders.map((o) => {
+      const fee = calcRazorpayFee(o.final_amount || 0);
+      return {
+        'Date': o.paid_at ? new Date(o.paid_at).toLocaleString() : 'Recent',
+        'Order / Note ID': o.note_id || o.id,
+        'Sales Channel': o.creator_id ? 'Creator Referral' : 'Organic / Direct User',
+        'Template Name': o.template_id || 'Standard',
+        'Gross Amount (₹)': ((o.final_amount || 0) / 100).toFixed(2),
+        'Razorpay Fee (₹)': (fee / 100).toFixed(2),
+        'Net Amount (₹)': (((o.final_amount || 0) - fee) / 100).toFixed(2),
+        'Coupon Code': o.coupon_code || 'None',
+        'Discount Applied (%)': o.discount_percent ? `${o.discount_percent}%` : '0%',
+        'Attributed Creator ID': o.creator_id || 'Direct / Organic Customer',
+        'Payment Method': o.payment_method || 'Razorpay',
+        'Order Status': o.payment_status || 'Paid',
+      };
+    });
     exportToExcel(formatted, `orders_ledger_${filter}`, 'Orders');
   };
 
@@ -94,11 +105,27 @@ export default function AdminOrdersPage() {
       {/* SALES SUMMARY CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '24px' }}>
         <div style={{ background: '#fff', padding: '18px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Total Revenue (All Sales)</span>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Total Gross Revenue</span>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', marginTop: '4px' }}>
             ₹{(totalRevenuePaise / 100).toFixed(2)}
           </div>
           <small style={{ color: '#64748b' }}>{orders.length} total paid orders</small>
+        </div>
+
+        <div style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', padding: '18px', borderRadius: '14px', border: '2px solid #22c55e' }}>
+          <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700, textTransform: 'uppercase' }}>✅ Net Revenue (After Fees)</span>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#15803d', marginTop: '4px' }}>
+            ₹{(totalNetPaise / 100).toFixed(2)}
+          </div>
+          <small style={{ color: '#166534', fontWeight: 600 }}>Your actual take-home</small>
+        </div>
+
+        <div style={{ background: 'linear-gradient(135deg, #fff7ed, #ffedd5)', padding: '18px', borderRadius: '14px', border: '1px solid #fb923c' }}>
+          <span style={{ fontSize: '0.75rem', color: '#c2410c', fontWeight: 700, textTransform: 'uppercase' }}>🏦 Razorpay Fees Paid</span>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#c2410c', marginTop: '4px' }}>
+            −₹{(totalFeePaise / 100).toFixed(2)}
+          </div>
+          <small style={{ color: '#9a3412', fontWeight: 600 }}>2% + 18% GST = 2.36%</small>
         </div>
 
         <div style={{ background: '#f0fdf4', padding: '18px', borderRadius: '14px', border: '1px solid #bbf7d0' }}>
@@ -183,8 +210,10 @@ export default function AdminOrdersPage() {
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Date &amp; Order ID</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Sales Channel</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Template</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Amount Paid</th>
-                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Coupon Applied</th>
+                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Gross</th>
+                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#c2410c', textTransform: 'uppercase' }}>RZP Fee</th>
+                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#15803d', textTransform: 'uppercase' }}>Net Amount</th>
+                  <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Coupon</th>
                   <th style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
                 </tr>
               </thead>
@@ -198,6 +227,8 @@ export default function AdminOrdersPage() {
                 ) : (
                   filteredOrders.map((o) => {
                     const isOrganic = !o.creator_id;
+                    const fee = calcRazorpayFee(o.final_amount || 0);
+                    const net = (o.final_amount || 0) - fee;
                     return (
                       <tr key={o.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '14px 16px' }}>
@@ -232,13 +263,28 @@ export default function AdminOrdersPage() {
                         <td style={{ padding: '14px 16px', fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
                           {o.template_id || 'Proposal'}
                         </td>
+                        {/* Gross */}
                         <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
+                          <div style={{ fontWeight: 700, color: '#475569', fontSize: '0.9rem' }}>
                             ₹{((o.final_amount || 0) / 100).toFixed(2)}
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                             via {o.payment_method || 'razorpay'}
                           </div>
+                        </td>
+                        {/* Razorpay Fee */}
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ fontWeight: 700, color: '#c2410c', fontSize: '0.9rem' }}>
+                            −₹{(fee / 100).toFixed(2)}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#9a3412' }}>2.36%</div>
+                        </td>
+                        {/* Net Amount */}
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ fontWeight: 900, color: '#15803d', fontSize: '0.95rem' }}>
+                            ₹{(net / 100).toFixed(2)}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#166534' }}>take-home</div>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           {o.coupon_code ? (

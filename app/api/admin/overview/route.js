@@ -33,6 +33,15 @@ export async function GET(request) {
     const creatorRevenue = creatorOrders.reduce((sum, item) => sum + (item.final_amount || 0), 0);
     const organicRevenue = organicOrders.reduce((sum, item) => sum + (item.final_amount || 0), 0);
 
+    // Razorpay fee: 2% + 18% GST on fee = 2.36% per transaction, capped at ₹2500 (250000 paise)
+    const calcRazorpayFee = (amountPaise) => Math.min(Math.ceil(amountPaise * 0.0236), 250000);
+    const razorpayFeeTotal = orderData.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);
+    const razorpayFeeOrganic = organicOrders.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);
+    const razorpayFeeCreator = creatorOrders.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);
+    const netRevenue = totalRevenue - razorpayFeeTotal;
+    const netOrganicRevenue = organicRevenue - razorpayFeeOrganic;
+    const netCreatorRevenue = creatorRevenue - razorpayFeeCreator;
+
     // CRM pipeline stats
     const todayStr = new Date().toISOString().split('T')[0];
     const crmByStatus = {};
@@ -55,6 +64,12 @@ export async function GET(request) {
       organicRevenue,
       creatorOrdersCount: creatorOrders.length,
       creatorRevenue,
+      razorpayFeeTotal,
+      razorpayFeeOrganic,
+      razorpayFeeCreator,
+      netRevenue,
+      netOrganicRevenue,
+      netCreatorRevenue,
       commissions: commissionData.reduce((sum, item) => sum + (item.commission_amount || 0), 0),
       pending: commissionData.filter((item) => item.status === 'pending').reduce((sum, item) => sum + (item.commission_amount || 0), 0),
       paidPayouts: payouts.docs.filter((d) => d.data().status === 'paid').reduce((sum, d) => sum + (d.data().amount || 0), 0),

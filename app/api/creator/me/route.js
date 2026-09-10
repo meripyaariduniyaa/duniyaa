@@ -75,7 +75,7 @@ export async function PATCH(request) {
   try {
     const user = await requireUser(request);
     const body = await request.json();
-    const allowed = ['name', 'bio', 'instagram_url', 'youtube_url', 'profile_image', 'phone'];
+    const allowed = ['name', 'bio', 'instagram_url', 'youtube_url', 'profile_image', 'phone', 'terms_accepted_at', 'terms_version'];
     const update = {};
 
     allowed.forEach((key) => {

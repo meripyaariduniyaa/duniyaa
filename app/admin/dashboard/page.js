@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
         {/* Total Gross Revenue */}
         <div style={{ background: '#fff', padding: '22px', borderRadius: '16px', border: '2px solid #0284c7', boxShadow: '0 4px 16px rgba(2,132,199,0.08)' }}>
           <span style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            💵 Total Store Revenue (All Sales)
+            💵 Total Gross Revenue (All Sales)
           </span>
           <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginTop: '6px' }}>
             ₹{((stats?.revenue || 0) / 100).toFixed(2)}
@@ -90,6 +90,34 @@ export default function AdminDashboardPage() {
             <span>🍃 Organic: <strong>₹{((stats?.organicRevenue || 0) / 100).toFixed(0)}</strong></span>
             <span>•</span>
             <span>🎯 Creator: <strong>₹{((stats?.creatorRevenue || 0) / 100).toFixed(0)}</strong></span>
+          </div>
+        </div>
+
+        {/* Net Revenue after Razorpay Fees */}
+        <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', padding: '22px', borderRadius: '16px', border: '2px solid #22c55e', boxShadow: '0 4px 16px rgba(34,197,94,0.12)' }}>
+          <span style={{ fontSize: '0.78rem', color: '#15803d', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            ✅ Net Revenue (After Razorpay Fees)
+          </span>
+          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#15803d', marginTop: '6px' }}>
+            ₹{((stats?.netRevenue || 0) / 100).toFixed(2)}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.8rem', color: '#166534' }}>
+            <span>🍃 ₹{((stats?.netOrganicRevenue || 0) / 100).toFixed(0)}</span>
+            <span>•</span>
+            <span>🎯 ₹{((stats?.netCreatorRevenue || 0) / 100).toFixed(0)}</span>
+          </div>
+        </div>
+
+        {/* Razorpay Fees Deducted */}
+        <div style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', padding: '22px', borderRadius: '16px', border: '1px solid #fb923c', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <span style={{ fontSize: '0.78rem', color: '#c2410c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            🏦 Razorpay Service Charges
+          </span>
+          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#c2410c', marginTop: '6px' }}>
+            −₹{((stats?.razorpayFeeTotal || 0) / 100).toFixed(2)}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#9a3412', marginTop: '8px', fontWeight: 600 }}>
+            2% + 18% GST per txn (2.36%)
           </div>
         </div>
 
@@ -155,11 +183,16 @@ export default function AdminDashboardPage() {
               <span style={{ fontSize: '1.4rem' }}>🍃</span>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#166534' }}>Organic / Direct Website Users</div>
-                <div style={{ fontSize: '0.75rem', color: '#15803d' }}>Customers finding LovelyCrafts directly</div>
+                <div style={{ fontSize: '0.75rem', color: '#15803d' }}>Customers finding RetroNote directly</div>
               </div>
             </div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#15803d' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#15803d' }}>
               ₹{((stats?.organicRevenue || 0) / 100).toFixed(2)}
+              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>gross</span>
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#065f46', marginTop: '4px' }}>
+              Net: ₹{((stats?.netOrganicRevenue || 0) / 100).toFixed(2)}
+              <span style={{ fontSize: '0.75rem', color: '#c2410c', marginLeft: '8px' }}>−₹{((stats?.razorpayFeeOrganic || 0) / 100).toFixed(2)} fees</span>
             </div>
             <div style={{ fontSize: '0.8rem', color: '#166534', marginTop: '4px', fontWeight: 600 }}>
               📦 {stats?.organicOrdersCount || 0} Orders ({stats?.totalOrders ? Math.round(((stats.organicOrdersCount || 0) / stats.totalOrders) * 100) : 0}% of sales)
@@ -175,11 +208,33 @@ export default function AdminDashboardPage() {
                 <div style={{ fontSize: '0.75rem', color: '#7e22ce' }}>Referred via creator links &amp; coupons</div>
               </div>
             </div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#7e22ce' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#7e22ce' }}>
               ₹{((stats?.creatorRevenue || 0) / 100).toFixed(2)}
+              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>gross</span>
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#4c1d95', marginTop: '4px' }}>
+              Net: ₹{((stats?.netCreatorRevenue || 0) / 100).toFixed(2)}
+              <span style={{ fontSize: '0.75rem', color: '#c2410c', marginLeft: '8px' }}>−₹{((stats?.razorpayFeeCreator || 0) / 100).toFixed(2)} fees</span>
             </div>
             <div style={{ fontSize: '0.8rem', color: '#6b21a8', marginTop: '4px', fontWeight: 600 }}>
               📦 {stats?.creatorOrdersCount || 0} Orders ({stats?.totalOrders ? Math.round(((stats.creatorOrdersCount || 0) / stats.totalOrders) * 100) : 0}% of sales)
+            </div>
+          </div>
+
+          {/* Razorpay Fee Summary */}
+          <div style={{ background: '#fff7ed', border: '1px solid #fb923c', borderRadius: '12px', padding: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.4rem' }}>🏦</span>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#9a3412' }}>Razorpay Gateway Fees</div>
+                <div style={{ fontSize: '0.75rem', color: '#c2410c' }}>2% + 18% GST = 2.36% per transaction</div>
+              </div>
+            </div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#c2410c' }}>
+              −₹{((stats?.razorpayFeeTotal || 0) / 100).toFixed(2)}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#9a3412', marginTop: '4px', fontWeight: 600 }}>
+              Across {stats?.totalOrders || 0} transactions
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
+import CreatorTermsModal, { CREATOR_TERMS_VERSION } from '@/components/CreatorTermsModal';
 
 export default function CreatorDashboardPage() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function CreatorDashboardPage() {
   const [copiedCoupon, setCopiedCoupon] = useState(false);
   const [copiedDisclosure, setCopiedDisclosure] = useState(false);
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
+  const [termsAccepted, setTermsAccepted] = useState(true); // optimistic default until data loads
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -67,6 +69,11 @@ export default function CreatorDashboardPage() {
           youtube_url: result.creator.youtube_url || '',
           profile_image: result.creator.profile_image || '',
         });
+        // Check if this creator has accepted the current T&C version
+        const hasAccepted =
+          result.creator.terms_accepted_at &&
+          result.creator.terms_version === CREATOR_TERMS_VERSION;
+        setTermsAccepted(hasAccepted);
       }
     } catch (err) {
       setError(err.message);
@@ -144,6 +151,28 @@ export default function CreatorDashboardPage() {
       alert(err.message);
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleAcceptTerms = async () => {
+    try {
+      const token = await user.getIdToken();
+      const acceptedAt = new Date().toISOString();
+      const res = await fetch('/api/creator/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          terms_accepted_at: acceptedAt,
+          terms_version: CREATOR_TERMS_VERSION,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to record acceptance');
+      setTermsAccepted(true);
+    } catch (err) {
+      alert('Could not record your acceptance. Please refresh and try again.');
     }
   };
 
@@ -250,6 +279,15 @@ export default function CreatorDashboardPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#fafafa', padding: '0 0 80px' }}>
+
+      {/* LEGAL T&C GATE — blocks all dashboard content until accepted */}
+      {data && !termsAccepted && (
+        <CreatorTermsModal
+          creatorName={data.creator?.name}
+          creatorEmail={user?.email}
+          onAccept={handleAcceptTerms}
+        />
+      )}
       
       {/* CREATOR PORTAL TOPBAR */}
       <nav style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '12px 24px', position: 'sticky', top: 0, zIndex: 40, marginBottom: '32px' }}>
