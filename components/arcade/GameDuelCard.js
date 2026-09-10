@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { WhatsAppIcon, LinkIcon } from '@/components/AppIcons';
 
 export default function GameDuelCard({
   gameId,
@@ -131,20 +132,22 @@ export default function GameDuelCard({
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
                 boxShadow: '0 4px 12px rgba(37,211,102,0.3)'
               }}
             >
-              📲 Send on WhatsApp
+              <WhatsAppIcon size={18} color="#ffffff" />
+              <span>Send on WhatsApp</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopy}
               className="btn-secondary"
-              style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', fontWeight: 700 }}
+              style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              {copied ? '✓ Link Copied!' : '🔗 Copy Link'}
+              <LinkIcon size={16} />
+              <span>{copied ? '✓ Link Copied!' : 'Copy Link'}</span>
             </button>
           </div>
         </div>

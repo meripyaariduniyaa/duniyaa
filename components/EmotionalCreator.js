@@ -243,7 +243,7 @@ export default function EmotionalCreator({ templateId }) {
         </>}
         {error && <p style={{ color: '#be123c', fontWeight: 700, marginTop: 16 }}>{error}</p>}
         {step === 4 && <><h2>Ready for your private preview</h2><p className="text-muted">Your complete experience with Wax Seal entrance, background music, WhatsApp instant sender, and forever keepsake poster are ready on the next page.</p></>}
-        <div className="emotional-creator-actions">{step > 1 && <button className="btn-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 4 ? <button className="btn-primary" onClick={advance}>Continue</button> : <button className="btn-primary" disabled={busy} onClick={save}>{busy ? 'Creating…' : `Preview & payment · ₹${template.price}`}</button>}</div>
+        <div className="emotional-creator-actions">{step > 1 && <button className="btn-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 4 ? <button className="btn-primary" onClick={advance}>Continue</button> : <button className="btn-primary" disabled={busy} onClick={save}>{busy ? 'Creating…' : 'Preview & Continue →'}</button>}</div>
       </section></div></main>;
 }
 

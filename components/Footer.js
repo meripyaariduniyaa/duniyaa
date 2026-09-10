@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import GoogleAd from '@/components/GoogleAd';
+import LovelyCraftsLogo from '@/components/Logo';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -29,7 +30,7 @@ export default function Footer() {
             <p className="footer-promo-desc">Personalize with photos, secret messages &amp; music in just 2 minutes.</p>
           </div>
           <Link href="/templates" className="btn-primary footer-promo-btn">
-            ✨ Craft a Surprise (₹219) →
+            ✨ Craft a Surprise →
           </Link>
         </div>
 
@@ -38,9 +39,9 @@ export default function Footer() {
           
           {/* Brand Column */}
           <div className="footer-col-brand">
-            <Link href="/" className="logo footer-logo" style={{ textDecoration: 'none' }}>
-              <span>❤️</span> Lovely<span>Crafts</span>
-            </Link>
+            <div style={{ marginBottom: '14px' }}>
+              <LovelyCraftsLogo size={40} textColor="#ffffff" accentColor="#fda4af" />
+            </div>
             <p className="footer-tagline">
               Turning the feelings that are hard to say into private, interactive digital surprises they can open anywhere on WhatsApp.
             </p>
@@ -103,6 +104,7 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-list">
+              <li><Link href="/blog">📝 Blog &amp; Gift Guides</Link></li>
               <li><Link href="/templates">All 18+ Gift Templates</Link></li>
               <li><Link href="/#feelings">Filter by Mood</Link></li>
               <li><Link href="/arcade/heart-rush">⚡ Heart Rush Game</Link></li>
@@ -140,6 +142,8 @@ export default function Footer() {
             Made with <span>❤️</span> for the people who matter most.
           </p>
           <div className="footer-bottom-links">
+            <Link href="/blog">Blog</Link>
+            <span>•</span>
             <Link href="/creators">Creators</Link>
             <span>•</span>
             <Link href="/privacy">Privacy</Link>

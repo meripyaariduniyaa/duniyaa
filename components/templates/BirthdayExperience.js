@@ -1,7 +1,22 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import BirthdayCurtain from '@/components/templates/birthday/BirthdayCurtain';
+import FloatingNotes from '@/components/templates/birthday/FloatingNotes';
+import LoveGallery from '@/components/templates/birthday/LoveGallery';
+
+// StellarGallery uses Three.js — always client-only, loaded lazily
+const StellarGallery = dynamic(
+  () => import('@/components/templates/birthday/StellarGallery'),
+  { ssr: false, loading: () => (
+    <div style={{ position:'absolute', inset:0, background:'#000', display:'flex',
+      alignItems:'center', justifyContent:'center' }}>
+      <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.85rem' }}>Loading galaxy…</span>
+    </div>
+  )}
+);
 
 /* ─────────────────────────────────────────────────────────────
    DESIGN TOKENS (easy to swap out)
@@ -34,9 +49,12 @@ const SCENES = [
   'candle-wish',
   'bouquet',
   'bouquet-messages',
+  'butterfly-notes',    // NEW: flying butterfly love notes
   'letter-intro',
   'letter',
+  'love-gallery',       // NEW: draggable polaroid photo cards
   'memories',
+  'stellar-gallery',    // NEW: 3D starfield photo galaxy
   'gift-intro',
   'final',
 ];
@@ -176,6 +194,7 @@ export default function BirthdayExperience({ note, isPreview = false }) {
   const [letterOpen, setLetterOpen] = useState(false);
   const [giftOpen, setGiftOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [memIdx, setMemIdx] = useState(0);
   const [noPos, setNoPos] = useState({ top: '60%', left: '55%' });
 
   const currentScene = SCENES[sceneIndex];
@@ -186,6 +205,9 @@ export default function BirthdayExperience({ note, isPreview = false }) {
   const senderName     = note?.custom_details?.sender_name || note?.sender_name || 'Me';
   const customMessage  = note?.custom_message || 'Happy birthday to someone truly special. You are my safe place, and every moment with you is precious. I hope this year brings you all the happiness you deserve.';
   const photos         = (note?.image_urls && note.image_urls.length > 0) ? note.image_urls : [];
+
+  // Birthday date for the curtain countdown (ISO string from Firestore)
+  const birthdayDate   = note?.custom_details?.birthday_date || null;
 
   // Relationship context for personalised copy
   const relation       = note?.custom_details?.birthday_relation || '';
@@ -208,6 +230,27 @@ export default function BirthdayExperience({ note, isPreview = false }) {
     note?.custom_details?.bouquet_msg_4 || 'Happy Birthday! 🌸',
     note?.custom_details?.bouquet_msg_5 || 'My favourite person',
     note?.custom_details?.bouquet_msg_6 || 'Sending all my love ❤️',
+  ];
+
+  // Butterfly note texts — 5 personalised flying notes
+  const butterflyNotes = [
+    { id:'n1', title:'01', text: note?.custom_details?.butterfly_note_1 || 'Every butterfly escapes... except me. I\'ve been happily stuck with you since day one. 🤍', accent:'#D98E7E' },
+    { id:'n2', title:'02', text: note?.custom_details?.butterfly_note_2 || 'Like a butterfly finding its flower, I always find my way back to you. 🫶', accent:'#C9A15E' },
+    { id:'n3', title:'03', text: note?.custom_details?.butterfly_note_3 || 'You caught my attention like a butterfly in a garden — beautiful, graceful, impossible to ignore. 😭❤️', accent:'#7E9C68' },
+    { id:'n4', title:'04', text: note?.custom_details?.butterfly_note_4 || 'You\'re really good at catching hearts... no wonder you caught mine so easily. ❤️', accent:'#B27A94' },
+    { id:'n5', title:'05', text: note?.custom_details?.butterfly_note_5 || 'This butterfly landed for just a moment... my heart chose to stay with you forever. 🦋', accent:'#7C8FA6' },
+  ];
+
+  // Photo captions for the LoveGallery polaroids
+  const galleryCaptions = [
+    note?.custom_details?.gallery_caption_1 || 'Our memory 🥹',
+    note?.custom_details?.gallery_caption_2 || 'Beautiful ✨',
+    note?.custom_details?.gallery_caption_3 || 'My favourite 💕',
+    note?.custom_details?.gallery_caption_4 || 'Pure joy 😊',
+    note?.custom_details?.gallery_caption_5 || 'Sunshine ☀️',
+    note?.custom_details?.gallery_caption_6 || 'Magical 🌸',
+    note?.custom_details?.gallery_caption_7 || 'Forever 💫',
+    note?.custom_details?.gallery_caption_8 || 'Love you 🤍',
   ];
 
   const nextScene = () => {
@@ -585,7 +628,6 @@ export default function BirthdayExperience({ note, isPreview = false }) {
   );
 
   // SCENE 11 — Memories / photos
-  const [memIdx, setMemIdx] = useState(0);
   const hasPhotos = photos.length > 0;
   const SceneMemories = (
     <motion.div key="memories" variants={sceneVariants} initial="initial" animate="animate" exit="exit"
@@ -726,6 +768,78 @@ export default function BirthdayExperience({ note, isPreview = false }) {
     </motion.div>
   );
 
+  // ── NEW SCENE: Butterfly Flying Notes ──────────────────────
+  const SceneButterflyNotes = (
+    <motion.div key="butterfly-notes" variants={sceneVariants} initial="initial" animate="animate" exit="exit"
+      style={{ ...sceneWrap({ background: '#fdf8f0', padding: 0 }), position: 'relative' }}>
+      <FloatingNotes notes={butterflyNotes} />
+      {/* Instruction overlay at top */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, padding:'1.25rem',
+        textAlign:'center', zIndex:10, pointerEvents:'none' }}>
+        <p style={{ fontFamily:T.fontUI, fontSize:'0.72rem', letterSpacing:'0.14em',
+          color:T.pink700, textTransform:'uppercase', opacity:0.7, margin:0 }}>
+          Tap a butterfly to read a note 🦋
+        </p>
+      </div>
+      {/* Continue button pinned to bottom */}
+      <div style={{ position:'absolute', bottom:'2rem', left:0, right:0,
+        display:'flex', justifyContent:'center', zIndex:10 }}>
+        <motion.button
+          whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
+          onClick={nextScene}
+          style={primaryBtn}
+        >
+          Continue 💌
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+
+  // ── NEW SCENE: Love Gallery (draggable polaroids) ──────────
+  const SceneLoveGallery = (
+    <motion.div key="love-gallery" variants={sceneVariants} initial="initial" animate="animate" exit="exit"
+      style={{ ...sceneWrap({ padding: 0 }), position: 'relative' }}>
+      <LoveGallery photos={photos} captions={galleryCaptions} />
+      <div style={{ position:'absolute', top:0, left:0, right:0, padding:'1rem',
+        textAlign:'center', zIndex:10, pointerEvents:'none',
+        background:'linear-gradient(to bottom, rgba(217,211,199,0.9) 0%, transparent 100%)' }}>
+        <p style={{ fontFamily:T.fontUI, fontSize:'0.72rem', letterSpacing:'0.14em',
+          color:'#4a3828', textTransform:'uppercase', opacity:0.8, margin:0 }}>
+          Drag the memories around 📸
+        </p>
+      </div>
+      <div style={{ position:'absolute', bottom:'2rem', left:0, right:0,
+        display:'flex', justifyContent:'center', zIndex:10 }}>
+        <motion.button
+          whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
+          onClick={nextScene}
+          style={primaryBtn}
+        >
+          Continue ✨
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+
+  // ── NEW SCENE: Stellar 3D Gallery ─────────────────────────
+  const SceneStellarGallery = (
+    <motion.div key="stellar-gallery" variants={sceneVariants} initial="initial" animate="animate" exit="exit"
+      style={{ ...sceneWrap({ padding: 0 }), position: 'relative' }}>
+      <StellarGallery photos={photos} recipientName={recipientName} />
+      <div style={{ position:'absolute', bottom:'2rem', left:0, right:0,
+        display:'flex', justifyContent:'center', zIndex:20 }}>
+        <motion.button
+          whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
+          onClick={nextScene}
+          style={{ ...primaryBtn, backdropFilter:'blur(8px)',
+            background:'rgba(219,39,119,0.85)' }}
+        >
+          One more thing… 🎁
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+
   const renderScene = () => {
     switch (currentScene) {
       case 'opening':          return SceneOpening;
@@ -736,9 +850,12 @@ export default function BirthdayExperience({ note, isPreview = false }) {
       case 'candle-wish':      return SceneCandleWish;
       case 'bouquet':          return SceneBouquet;
       case 'bouquet-messages': return SceneBouquetMessages;
+      case 'butterfly-notes':  return SceneButterflyNotes;
       case 'letter-intro':     return SceneLetterIntro;
       case 'letter':           return SceneLetter;
+      case 'love-gallery':     return SceneLoveGallery;
       case 'memories':         return SceneMemories;
+      case 'stellar-gallery':  return SceneStellarGallery;
       case 'gift-intro':       return SceneGiftIntro;
       case 'final':            return SceneFinal;
       default:                 return SceneOpening;
@@ -746,40 +863,39 @@ export default function BirthdayExperience({ note, isPreview = false }) {
   };
 
   return (
-    /* ── Outer dark stage ── */
-    <div className={isPreview ? 'birthday-experience birthday-experience--preview' : 'birthday-experience'} style={{
-      display:'flex', alignItems:'center', justifyContent:'center',
-      minHeight:'100dvh', width:'100%',
-      background:'radial-gradient(circle at center, #211526, #09070c)',
-      padding: '0',
-    }}>
-      {/* ── Phone container ── */}
-      <div className="birthday-experience__frame" style={{
-        position:'relative',
-        width: 'min(100vw, 430px)',
-        height: 'min(100dvh, 860px)',
-        borderRadius: 'clamp(0px, 5vw, 38px)',
-        overflow:'hidden',
-        border: '2.5px solid rgba(255,190,220,.65)',
-        boxShadow: '0 0 45px rgba(255,100,180,.18), inset 0 0 24px rgba(255,255,255,.12)',
-        background: `linear-gradient(180deg, ${T.pink50} 0%, ${T.pink100} 52%, ${T.pink200} 100%)`,
+    <BirthdayCurtain
+      targetDate={isPreview ? null : birthdayDate}
+      recipientName={recipientName}
+      marqueeSub={recipientName ? `a birthday surprise for ${recipientName}` : 'a birthday surprise, just for you'}
+      tickerText={`HAPPY BIRTHDAY ${recipientName ? recipientName.toUpperCase() : ''} · SAVE THE DATE ·`}
+      songSrc={note?.custom_details?.audio_url || note?.audio_url || "/birthday-song.mp3"}
+      showPreviewButton={false}
+      allowSkip={true}
+    >
+      {/* ── Outer dark stage ── */}
+      <div className={isPreview ? 'birthday-experience birthday-experience--preview' : 'birthday-experience'} style={{
+        display:'flex', alignItems:'center', justifyContent:'center',
+        minHeight:'100dvh', width:'100%',
+        background:'radial-gradient(circle at center, #211526, #09070c)',
+        padding: '0',
       }}>
-        {/* Notch */}
-        <div style={{
-          position:'absolute', top:0, left:'50%', transform:'translateX(-50%)',
-          width:'32%', height:34,
-          background: T.pink50,
-          borderRadius:'0 0 24px 24px',
-          zIndex:30,
-          boxShadow:'0 2px 8px rgba(0,0,0,0.06)',
-          display: 'none',  // hidden on mobile, override with media query via class
-        }} className="bd-notch" />
-
-        {/* Scene renderer */}
-        <AnimatePresence mode="wait">
-          {renderScene()}
-        </AnimatePresence>
+        {/* ── Phone frame — full screen on mobile, card shape on desktop ── */}
+        <div className="birthday-experience__frame" style={{
+          position:'relative',
+          width: 'min(100vw, 430px)',
+          height: 'min(100dvh, 860px)',
+          borderRadius: 'clamp(0px, 5vw, 38px)',
+          overflow:'hidden',
+          border: '2.5px solid rgba(255,190,220,.65)',
+          boxShadow: '0 0 45px rgba(255,100,180,.18), inset 0 0 24px rgba(255,255,255,.12)',
+          background: `linear-gradient(180deg, ${T.pink50} 0%, ${T.pink100} 52%, ${T.pink200} 100%)`,
+        }}>
+          {/* Scene renderer */}
+          <AnimatePresence mode="wait">
+            {renderScene()}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </BirthdayCurtain>
   );
 }

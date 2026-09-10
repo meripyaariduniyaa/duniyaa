@@ -10,6 +10,7 @@ import LoveQuizGame from '@/components/arcade/LoveQuizGame';
 import WordScrambleGame from '@/components/arcade/WordScrambleGame';
 import GameDuelCard from '@/components/arcade/GameDuelCard';
 import ArcadeAdBanner from '@/components/ArcadeAdBanner';
+import { WhatsAppIcon } from '@/components/AppIcons';
 
 const GAME_INFO = {
   'heart-rush': {
@@ -347,10 +348,15 @@ function GameRunner() {
                   padding: '0.7rem 1.4rem',
                   fontSize: '0.9rem',
                   fontWeight: 800,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(37,211,102,0.3)'
                 }}
               >
-                📲 Share Duel Result
+                <WhatsAppIcon size={18} color="#ffffff" />
+                <span>Share Duel Result</span>
               </button>
             </div>
           </div>

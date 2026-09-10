@@ -15,10 +15,17 @@ const fields = {
   sorry: [['promise_1','Promise #1 you will keep'],['promise_2','Promise #2 for the future'],['promise_3','Promise #3 for rebuilding trust']],
   birthday: [
     ['sender_name','Your Name (Sender) — Appears on sign-off'],
+    ['birthday_relation','Relation / Nickname (e.g. Bestie, Princess, Soulmate)'],
+    ['birthday_date','Birthday Date YYYY-MM-DD (For Live Cinema Countdown)'],
     ['balloon_word_1','Balloon Word #1 (e.g. You)'],
     ['balloon_word_2','Balloon Word #2 (e.g. are)'],
     ['balloon_word_3','Balloon Word #3 (e.g. so)'],
     ['balloon_word_4','Balloon Word #4 (e.g. special!)'],
+    ['butterfly_note_1','Butterfly Note #1 (Escaping love note)'],
+    ['butterfly_note_2','Butterfly Note #2 (Sweet memory)'],
+    ['butterfly_note_3','Butterfly Note #3 (Cute compliment)'],
+    ['butterfly_note_4','Butterfly Note #4 (Heartfelt line)'],
+    ['butterfly_note_5','Butterfly Note #5 (Forever note)'],
     ['bouquet_msg_1','Bouquet Floating Note #1 (e.g. Forever yours 💕)'],
     ['bouquet_msg_2','Bouquet Floating Note #2 (e.g. My sunshine ☀️)'],
     ['bouquet_msg_3','Bouquet Floating Note #3 (e.g. Lucky to have you)'],
@@ -331,5 +338,5 @@ export default function LegacyCreator({ templateId }) {
     </>}
     {step === 4 && <><h2>Ready for your private preview</h2><p className="text-muted">You will review the live experience with wax seal entrance, background music, and download options next.</p></>}
     {error && <p style={{ color: '#be123c', fontWeight: 700, marginTop: 16 }}>{error}</p>}
-    <div className="emotional-creator-actions">{step > 1 && <button className="btn-secondary" onClick={() => setStep(step - 1)}>Back</button>}{step < 4 ? <button className="btn-primary" onClick={advance}>Continue</button> : <button className="btn-primary" disabled={busy} onClick={save}>{busy ? 'Creating…' : `Preview & payment · ₹${template.price}`}</button>}</div></section></div></main>;
+    <div className="emotional-creator-actions">{step > 1 && <button className="btn-secondary" onClick={() => setStep(step - 1)}>Back</button>}{step < 4 ? <button className="btn-primary" onClick={advance}>Continue</button> : <button className="btn-primary" disabled={busy} onClick={save}>{busy ? 'Creating…' : 'Preview & Continue →'}</button>}</div></section></div></main>;
 }

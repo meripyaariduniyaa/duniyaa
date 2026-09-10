@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
+import LovelyCraftsLogo from '@/components/Logo';
+
 export default function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -41,10 +43,7 @@ export default function Header() {
     <>
       <nav className="topbar" id="site-header">
         <div className="topbar-inner">
-          <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-            <span className="logo-heart">❤️</span>
-            <span className="logo-text">Lovely<span className="logo-accent">Crafts</span></span>
-          </Link>
+          <LovelyCraftsLogo size={40} />
 
           {/* Desktop Navigation */}
           <div className="nav-links desktop-nav">
@@ -52,14 +51,14 @@ export default function Header() {
               href="/#feelings"
               className={`nav-link ${pathname === '/#feelings' ? 'active' : ''}`}
             >
-              💖 By feeling
+              💖 Feelings
             </Link>
 
             <Link
               href="/templates"
               className={`nav-link ${pathname === '/templates' ? 'active' : ''}`}
             >
-              🎁 All gifts
+              🎁 Gifts
             </Link>
 
             <Link
@@ -74,6 +73,13 @@ export default function Header() {
               className={`nav-link ${pathname?.startsWith('/creators') || pathname?.startsWith('/creator') ? 'active' : ''}`}
             >
               👑 Creators
+            </Link>
+
+            <Link
+              href="/blog"
+              className={`nav-link ${pathname?.startsWith('/blog') ? 'active' : ''}`}
+            >
+              📝 Blog
             </Link>
 
             <Link
@@ -127,9 +133,9 @@ export default function Header() {
       {/* Mobile Navigation Drawer */}
       <div className={`mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-drawer-header">
-          <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-            <span className="logo-heart">❤️</span> Lovely<span className="logo-accent">Crafts</span>
-          </Link>
+          <div onClick={() => setMobileMenuOpen(false)}>
+            <LovelyCraftsLogo size={36} />
+          </div>
           <button
             type="button"
             className="mobile-drawer-close"
@@ -186,6 +192,18 @@ export default function Header() {
             <div>
               <strong>LovelyCrafts Creator Club</strong>
               <small>Earn up to 18% commission &amp; custom coupons</small>
+            </div>
+          </Link>
+
+          <Link
+            href="/blog"
+            className="mobile-nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-nav-icon">📝</span>
+            <div>
+              <strong>Blog &amp; Guides</strong>
+              <small>Surprise ideas, relationship stories &amp; tips</small>
             </div>
           </Link>
 

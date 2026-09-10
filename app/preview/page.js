@@ -11,6 +11,7 @@ import TemplateRenderer from '@/components/templates/TemplateRenderer';
 import VoiceNotePlayer from '@/components/VoiceNotePlayer';
 import { templates } from '@/lib/templates';
 import { createKeepsakePoster } from '@/components/KeepsakePoster';
+import { WhatsAppIcon, LinkIcon } from '@/components/AppIcons';
 
 export default function PreviewPage() {
   return (
@@ -230,16 +231,18 @@ function PreviewContent() {
                       fontSize: '15px'
                     }}
                   >
-                    <span>💬 Send on WhatsApp</span>
+                    <WhatsAppIcon size={20} color="#ffffff" />
+                    <span>Send on WhatsApp</span>
                   </a>
 
                   {/* Copy Link Button */}
                   <button
                     className="btn-secondary w-full"
                     onClick={copyLink}
-                    style={{ marginBottom: '0.75rem' }}
+                    style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
-                    {copied ? '✓ Link Copied!' : '📋 Copy Private Link'}
+                    <LinkIcon size={16} />
+                    <span>{copied ? '✓ Link Copied!' : 'Copy Private Link'}</span>
                   </button>
 
                   {/* Download Forever Keepsake Poster */}

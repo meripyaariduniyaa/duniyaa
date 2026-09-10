@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { templates } from '@/lib/templates';
+import { getAdminDb } from '@/lib/firebase-admin';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
@@ -14,7 +15,7 @@ const enInAlternates = (path: string) => ({
   },
 });
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -29,6 +30,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
       alternates: enInAlternates('/templates'),
+    },
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+      alternates: enInAlternates('/blog'),
     },
     {
       url: `${SITE_URL}/create`,
@@ -77,5 +85,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: enInAlternates(`/templates/${encodeURIComponent(template.id)}`),
     }));
 
-  return [...staticPages, ...templatePages];
+  let blogPages: MetadataRoute.Sitemap = [];
+  try {
+    const db = getAdminDb();
+    const snap = await db.collection('blogs').where('status', '==', 'published').get();
+    blogPages = snap.docs.map((doc) => {
+      const data = doc.data();
+      const lastMod = data.updatedAt?.toDate?.() || data.publishedAt?.toDate?.() || new Date();
+      return {
+        url: `${SITE_URL}/blog/${encodeURIComponent(data.slug)}`,
+        lastModified: lastMod,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+        alternates: enInAlternates(`/blog/${encodeURIComponent(data.slug)}`),
+      };
+    });
+  } catch (err) {
+    // If during build time db cannot be contacted, fallback to seed blog slugs
+    const seedSlugs = [
+      '10-creative-virtual-birthday-surprises',
+      'how-to-write-an-emotional-apology-letter',
+      'modern-proposal-ideas-interactive-story',
+    ];
+    blogPages = seedSlugs.map((slug) => ({
+      url: `${SITE_URL}/blog/${slug}`,
+      lastModified: new Date('2026-09-01'),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+      alternates: enInAlternates(`/blog/${slug}`),
+    }));
+  }
+
+  return [...staticPages, ...templatePages, ...blogPages];
 }

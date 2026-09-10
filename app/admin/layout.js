@@ -9,6 +9,7 @@ import { signOut } from 'firebase/auth';
 
 const ADMIN_TABS = [
   { href: '/admin/dashboard', label: '📊 Overview' },
+  { href: '/admin/blog', label: '📝 Blog' },
   { href: '/admin/crm', label: '🎯 Creator CRM' },
   { href: '/admin/creators', label: '👥 Creators' },
   { href: '/admin/coupons', label: '🏷️ Coupons' },

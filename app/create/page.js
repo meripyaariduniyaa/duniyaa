@@ -632,22 +632,59 @@ function CreateNoteContent() {
               )}
 
               {/* ───────────────────────────────────────────
-                  BIRTHDAY — Sender name + balloon words + bouquet messages
+              {/* ───────────────────────────────────────────
+                  BIRTHDAY — Cinema Countdown + Butterfly Notes + Polaroid Gallery + Bouquet
               ─────────────────────────────────────────── */}
               {(selectedTemplateId === 'birthday' || selectedTemplateId === 'birthday-surprise') && (
                 <div className="form-group" style={{ background: 'linear-gradient(135deg,#fff5fb,#fce7f3)', border: '2px dashed #ec4899', borderRadius: '16px', padding: '1.25rem' }}>
-                  <label className="form-label" style={{ color: '#881337' }}>🎂 Birthday Experience Details</label>
+                  <label className="form-label" style={{ color: '#881337', fontWeight: 'bold' }}>🎂 Birthday Experience Customization</label>
 
-                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>✍️ Your Name (Sender) — Appears on the letter sign-off</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.sender_name || ''}
-                    onChange={(e) => updateDetail('sender_name', e.target.value)}
-                    placeholder="e.g. Rohan, Your Secret Admirer"
-                    maxLength={80}
-                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.82rem' }}>✍️ Your Name (Sender)</label>
+                      <input
+                        className="form-input"
+                        value={customDetails.sender_name || ''}
+                        onChange={(e) => updateDetail('sender_name', e.target.value)}
+                        placeholder="e.g. Rohan"
+                        maxLength={80}
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.82rem' }}>💖 Relation / Nickname</label>
+                      <input
+                        className="form-input"
+                        value={customDetails.birthday_relation || ''}
+                        onChange={(e) => updateDetail('birthday_relation', e.target.value)}
+                        placeholder="e.g. Bestie, Princess, Soulmate"
+                        maxLength={60}
+                      />
+                    </div>
+                  </div>
 
-                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎈 4 Balloon Words — Revealed one by one as they pop each balloon</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.82rem' }}>📅 Birthday Date (For Live Cinema Countdown)</label>
+                      <input
+                        type="date"
+                        className="form-input"
+                        value={customDetails.birthday_date || ''}
+                        onChange={(e) => updateDetail('birthday_date', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.82rem' }}>🎁 Age / Milestone (Optional)</label>
+                      <input
+                        className="form-input"
+                        value={customDetails.age_milestone || ''}
+                        onChange={(e) => updateDetail('age_milestone', e.target.value)}
+                        placeholder="e.g. Turning 25! • The Big 3-0"
+                        maxLength={60}
+                      />
+                    </div>
+                  </div>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>🎈 4 Balloon Words — Revealed one by one as they pop each balloon</label>
                   <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Default: You · are · so · special!</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     {[1, 2, 3, 4].map(i => (
@@ -662,28 +699,55 @@ function CreateNoteContent() {
                     ))}
                   </div>
 
-                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>💐 6 Bouquet Messages — Float around the rose bouquet</label>
-                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Short sweet notes — keep them under 25 characters each.</p>
-                  {[1, 2, 3, 4, 5, 6].map(i => (
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>🦋 5 Butterfly Flying Love Notes</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Delightful notes released when they catch floating butterflies.</p>
+                  {[
+                    'Every butterfly escapes... except me. I\'ve been happily stuck with you since day one. 🤍',
+                    'Like a butterfly finding its flower, I always find my way back to you. 🫶',
+                    'You caught my attention like a butterfly in a garden — beautiful, graceful, impossible to ignore. 😭❤️',
+                    'You\'re really good at catching hearts... no wonder you caught mine so easily. ❤️',
+                    'This butterfly landed for just a moment... my heart chose to stay with you forever. 🦋'
+                  ].map((defaultText, idx) => (
                     <input
-                      key={i}
+                      key={idx + 1}
                       className="form-input"
-                      value={customDetails[`bouquet_msg_${i}`] || ''}
-                      onChange={(e) => updateDetail(`bouquet_msg_${i}`, e.target.value)}
-                      placeholder={['Forever yours 💕', 'My sunshine ☀️', 'Lucky to have you', 'Happy Birthday 🌸', 'My fav person', 'Sending all love ❤️'][i - 1]}
-                      maxLength={40}
+                      value={customDetails[`butterfly_note_${idx + 1}`] || ''}
+                      onChange={(e) => updateDetail(`butterfly_note_${idx + 1}`, e.target.value)}
+                      placeholder={`Butterfly Note #${idx + 1}: ${defaultText}`}
+                      maxLength={180}
                       style={{ marginBottom: '0.4rem' }}
                     />
                   ))}
 
-                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '0.75rem' }}>🎁 Age / Milestone (Optional)</label>
-                  <input
-                    className="form-input"
-                    value={customDetails.age_milestone || ''}
-                    onChange={(e) => updateDetail('age_milestone', e.target.value)}
-                    placeholder="e.g. Turning 25! • The Big 3-0 • Sweet 16"
-                    maxLength={60}
-                  />
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>💐 6 Bouquet Messages — Float around the rose bouquet</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Short sweet notes (under 30 characters each).</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <input
+                        key={i}
+                        className="form-input"
+                        value={customDetails[`bouquet_msg_${i}`] || ''}
+                        onChange={(e) => updateDetail(`bouquet_msg_${i}`, e.target.value)}
+                        placeholder={['Forever yours 💕', 'My sunshine ☀️', 'Lucky to have you', 'Happy Birthday 🌸', 'My fav person', 'Sending all love ❤️'][i - 1]}
+                        maxLength={40}
+                      />
+                    ))}
+                  </div>
+
+                  <label className="form-label" style={{ fontSize: '0.82rem', marginTop: '1rem' }}>📸 Polaroid Photo Gallery Captions (Optional)</label>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Captions displayed at the bottom of each draggable polaroid memory photo.</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <input
+                        key={i}
+                        className="form-input"
+                        value={customDetails[`gallery_caption_${i}`] || ''}
+                        onChange={(e) => updateDetail(`gallery_caption_${i}`, e.target.value)}
+                        placeholder={`Photo ${i} Caption (e.g. Memory #${i})`}
+                        maxLength={40}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -1029,7 +1093,7 @@ function CreateNoteContent() {
                   <p className="slug-status slug-status--taken">✗ Link is already taken, try another.</p>
                 )}
                 <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#be185d' }}>
-                  Custom links are ₹29 extra. 💡 <em>Note: Coupons apply to your total amount at checkout!</em>
+                  Custom links add a personalized vanity URL. 💡 <em>Note: Coupons apply to your total amount at checkout!</em>
                 </p>
               </div>
 

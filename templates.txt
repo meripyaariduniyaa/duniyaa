@@ -1,0 +1,65 @@
+================================================================================
+                         RETRONOTE - ALL TEMPLATES LIST
+================================================================================
+Total Templates: 10 (3 Emotional Experiences + 7 Interactive / Special Templates)
+
+--------------------------------------------------------------------------------
+1. EMOTIONAL EXPERIENCES (3)
+--------------------------------------------------------------------------------
+
+1. Things I Never Said (ID: things-i-never-said)
+   Icon: 💌
+   Description: Turn the words you held back into a gentle reveal.
+   Best For: Partner, Friend, Family
+
+2. I Miss You (ID: i-miss-you)
+   Icon: 🫂
+   Description: A long-distance memory journey made for one person.
+   Best For: Partner, Friend, Family
+
+3. I'm Sorry (ID: emotional-apology)
+   Icon: 🥺
+   Description: A sincere apology that gives them room to feel.
+   Best For: Partner, Friend, Family
+
+
+--------------------------------------------------------------------------------
+2. INTERACTIVE & SPECIAL OCCASION TEMPLATES (7)
+--------------------------------------------------------------------------------
+
+4. The Perfect Proposal (ID: proposal)
+   Icon: 💕
+   Description: A "yes/no" confession link where the NO button playfully dodges away, forcing a YES! Includes celebratory animations on success.
+   Best For: Proposals, Valentine's Day, Confessions
+
+5. Virtual Birthday Bash (ID: birthday)
+   Icon: 🎂
+   Description: A 7-scene cinematic birthday journey! Featuring interactive balloon popping, a memory photo gallery, a real microphone candle blowout, a spin-the-wheel wish generator, and a typewritten heartfelt letter.
+   Best For: Birthdays, Milestone Years, Midnight Reveals
+
+6. Friendship Day Experience (ID: friendship)
+   Icon: 👯
+   Description: A multimedia "Museum of Us" with interactive memory swipes, a photo reveal curtain, a mini word-search, and a final Friendship Contract.
+   Best For: Best Friends, Friendship Day, Long Distance Besties
+
+7. Mother's Day Reveal (ID: mothers-day)
+   Icon: 💐
+   Description: A tender animated sequence of three scenes revealing your letter, accented with floating sticky-note memories of her.
+   Best For: Mother's Day, Mom's Birthday, Gratitude
+
+8. Anniversary Special (ID: anniversary)
+   Icon: 🥂
+   Description: Fill a virtual love meter, seal a pinky promise, blow out a celebration candle, and read a handwritten letter with floating promises.
+   Best For: Anniversaries, Romantic Milestones, Couples
+
+9. Surprise Reveal Box (ID: surprise-reveal-box)
+   Icon: 🎁
+   Description: Interactive 3D gift box with ribbon untie, lid pop, confetti burst, and multi-layer sequential surprise reveals.
+   Best For: Proposals, Reveal Moments, Big-Day Surprises
+
+10. A Letter to Dad / Father's Day (ID: fathers-day)
+    Icon: 👔
+    Description: A deeply moving tribute to Dad: vintage pocket watch animation, life lessons checklist, childhood memory frame, and heartfelt gratitude letter.
+    Best For: Father's Day, Dad's Birthday, Family, Gratitude
+
+================================================================================

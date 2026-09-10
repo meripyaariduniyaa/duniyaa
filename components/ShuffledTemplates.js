@@ -53,11 +53,7 @@ export function BentoGrid() {
             <p className="bento-card-desc">{t.description}</p>
           </div>
 
-          <div className="bento-card-footer">
-            <div className="bento-price-tag">
-              <del>₹499</del>
-              <span>₹219</span>
-            </div>
+          <div className="bento-card-footer" style={{ justifyContent: 'flex-end' }}>
             <span className="bento-cta">
               Create Now →
             </span>

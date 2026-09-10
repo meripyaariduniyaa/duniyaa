@@ -3,10 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { emotionChoices, recommendEmotionalTemplates } from '@/lib/emotionalTemplates';
+import { trackUserSignal } from '@/lib/personalization';
 
 export default function EmotionFinder() {
   const [emotion, setEmotion] = useState('loved');
   const recommendations = recommendEmotionalTemplates(emotion);
+
+  function handleEmotionChange(id) {
+    setEmotion(id);
+    trackUserSignal('chosenEmotion', id);
+  }
 
   return (
     <section style={{
@@ -39,7 +45,7 @@ export default function EmotionFinder() {
           <button
             key={choice.id}
             type="button"
-            onClick={() => setEmotion(choice.id)}
+            onClick={() => handleEmotionChange(choice.id)}
             style={{
               border: '1px solid #f9a8d4',
               borderRadius: '999px',
@@ -95,7 +101,7 @@ export default function EmotionFinder() {
               </p>
             </div>
             <span style={{ color: '#be185d', fontWeight: 800, fontSize: '0.85rem' }}>
-              Create · ₹{template.price}
+              Create Now →
             </span>
           </Link>
         ))}
@@ -103,7 +109,7 @@ export default function EmotionFinder() {
 
       <div style={{ marginTop: '1.5rem' }}>
         <Link href="/templates" className="btn-secondary" style={{ padding: '0.65rem 1.4rem', fontSize: '0.88rem' }}>
-          Browse all 18 templates ➔
+          Browse all templates ➔
         </Link>
       </div>
     </section>

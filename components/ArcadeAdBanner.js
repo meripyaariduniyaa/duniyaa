@@ -78,7 +78,7 @@ export default function ArcadeAdBanner({ slot = process.env.NEXT_PUBLIC_ADSENSE_
         </span>
         <div>
           <strong style={{ fontSize: '0.88rem', color: '#881337', display: 'block' }}>
-            ✨ Unlock Full Customized Experiences for ₹219
+            ✨ Unlock Full Customized Experiences
           </strong>
           <span style={{ fontSize: '0.78rem', color: '#9f1239' }}>
             Personal music, photos, wax seal, and 1-click WhatsApp delivery.

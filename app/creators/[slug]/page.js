@@ -245,21 +245,13 @@ export default function PublicCreatorPage() {
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
-                    <div>
-                      <span style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'line-through', marginRight: '6px' }}>
-                        ₹{template.basePrice || 499}
-                      </span>
-                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
-                        ₹{template.price || 219}
+                  {creator.primaryCoupon && (
+                    <div style={{ marginBottom: '14px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
+                      <span style={{ fontSize: '0.75rem', background: '#ffe4e6', color: '#e11d48', padding: '3px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                        🏷️ Special Discount Code: {creator.primaryCoupon.code} (-{creator.primaryCoupon.discount_percent}%)
                       </span>
                     </div>
-                    {creator.primaryCoupon && (
-                      <span style={{ fontSize: '0.75rem', background: '#ffe4e6', color: '#e11d48', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                        -{creator.primaryCoupon.discount_percent}% with {creator.primaryCoupon.code}
-                      </span>
-                    )}
-                  </div>
+                  )}
 
                   <Link
                     href={`/create?template=${template.id}${creator.primaryCoupon ? `&coupon=${creator.primaryCoupon.code}` : ''}`}
