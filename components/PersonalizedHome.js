@@ -34,26 +34,6 @@ const ALL_BESTSELLERS = [
     borderColor: '#fbcfe8',
   },
   {
-    id: 'surprise-reveal-box',
-    title: 'Surprise Reveal Box',
-    icon: '🎁✨',
-    badge: '✨ VIRAL UNBOXING',
-    tagline: '3D Tap-to-Unbox',
-    desc: 'They tap to untie the ribbon, open the secret 3D gift box, and uncover heartfelt memories.',
-    rating: '4.9 ★ (Viral Hit)',
-    borderColor: '#e9d5ff',
-  },
-  {
-    id: 'things-i-never-said',
-    title: 'Things I Never Said',
-    icon: '💌🕊️',
-    badge: '❤️ DEEP EMOTION',
-    tagline: 'Heartfelt Wax-Sealed Letter',
-    desc: 'For the words left unsaid. A vintage sealed envelope with background music & voice note.',
-    rating: '4.9 ★ (Deep Emotional)',
-    borderColor: '#a7f3d0',
-  },
-  {
     id: 'i-miss-you',
     title: 'I Miss You',
     icon: '🫂',
@@ -65,23 +45,13 @@ const ALL_BESTSELLERS = [
   },
   {
     id: 'anniversary',
-    title: 'Anniversary Scrapbook',
-    icon: '📸💑',
+    title: 'Anniversary Special',
+    icon: '🥂✨',
     badge: '💕 COUPLES CLASSIC',
     tagline: 'Photo Memory Journey',
-    desc: 'Relive your most beautiful shared memories in a stunning interactive scrapbook.',
+    desc: 'Fill a virtual love meter, seal a pinky promise, blow out a celebration candle, and read promises.',
     rating: '4.9 ★ (Anniversary Hit)',
     borderColor: '#fed7aa',
-  },
-  {
-    id: 'friendship',
-    title: 'Friendship Experience',
-    icon: '🤝🎉',
-    badge: '✨ BEST FRIENDS',
-    tagline: 'Celebrate Your Bond',
-    desc: 'A gamified journey through your best shared memories with your bestie.',
-    rating: '4.8 ★ (Friend Fave)',
-    borderColor: '#bbf7d0',
   },
   {
     id: 'emotional-apology',
@@ -93,29 +63,9 @@ const ALL_BESTSELLERS = [
     rating: '4.7 ★ (Reconciliation)',
     borderColor: '#e9d5ff',
   },
-  {
-    id: 'mothers-day',
-    title: "Mother's Day Tribute",
-    icon: '🌸💐',
-    badge: '💝 MOM SPECIAL',
-    tagline: 'Celebrate Your Mom',
-    desc: "A beautiful tribute to your mom filled with love, memories, and gratitude.",
-    rating: '4.9 ★ (Mom Favorite)',
-    borderColor: '#fbcfe8',
-  },
-  {
-    id: 'fathers-day',
-    title: 'Letter to Dad',
-    icon: '👔💙',
-    badge: "👨 FATHER'S DAY",
-    tagline: "Heartfelt Father's Tribute",
-    desc: 'A touching letter to your father that expresses gratitude, love, and shared memories.',
-    rating: '4.8 ★ (Dad Tribute)',
-    borderColor: '#bfdbfe',
-  },
 ];
 
-const DEFAULT_FEATURED_IDS = ['birthday', 'proposal', 'surprise-reveal-box', 'things-i-never-said'];
+const DEFAULT_FEATURED_IDS = ['birthday', 'proposal', 'anniversary', 'i-miss-you'];
 
 const DEFAULT_HERO = {
   title: 'Craft unforgettable',

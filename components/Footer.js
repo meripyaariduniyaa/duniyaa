@@ -80,9 +80,9 @@ export default function Footer() {
             <ul className="footer-list">
               <li><Link href="/templates/birthday">🎂 Virtual Birthday Bash</Link></li>
               <li><Link href="/templates/proposal">💍 The Perfect Proposal</Link></li>
-              <li><Link href="/templates/surprise-reveal-box">🎁 Surprise Reveal Box</Link></li>
-              <li><Link href="/templates/puzzle">🧩 Photo Puzzle Reveal</Link></li>
               <li><Link href="/templates/anniversary">🥂 Romantic Anniversary</Link></li>
+              <li><Link href="/templates/i-miss-you">🫂 I Miss You</Link></li>
+              <li><Link href="/templates/emotional-apology">🥺 I&apos;m Sorry</Link></li>
               <li><Link href="/arcade">🎮 Couple Mini Arcade</Link></li>
             </ul>
           </div>
@@ -91,12 +91,11 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-heading">By Feeling</h4>
             <ul className="footer-list">
-              <li><Link href="/templates/things-i-never-said">💌 Things I Never Said</Link></li>
-              <li><Link href="/templates/youre-my-person">💖 You&apos;re My Person</Link></li>
-              <li><Link href="/templates/i-miss-you">🥺 I Miss You</Link></li>
-              <li><Link href="/templates/open-when">✉️ Open When…</Link></li>
-              <li><Link href="/templates/emotional-apology">💐 Emotional Apology</Link></li>
-              <li><Link href="/templates/just-because">✨ Just Because</Link></li>
+              <li><Link href="/templates/i-miss-you">🫂 Long Distance</Link></li>
+              <li><Link href="/templates/emotional-apology">🥺 Heartfelt Apology</Link></li>
+              <li><Link href="/templates/proposal">💕 Love &amp; Romance</Link></li>
+              <li><Link href="/templates/birthday">🎂 Celebration &amp; Joy</Link></li>
+              <li><Link href="/templates/anniversary">🥂 Forever Together</Link></li>
             </ul>
           </div>
 

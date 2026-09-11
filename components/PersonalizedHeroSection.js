@@ -31,26 +31,26 @@ const ALL_BESTSELLERS = [
     borderColor: '#fbcfe8',
   },
   {
-    id: 'surprise-reveal-box',
-    title: 'Surprise Reveal Box',
-    icon: '🎁✨',
-    badge: '✨ VIRAL UNBOXING',
-    tagline: '3D Tap-to-Unbox',
-    desc: 'They tap to untie the ribbon, open the secret 3D gift box, and uncover heartfelt memories.',
-    rating: '4.9 ★ (Viral Hit)',
-    gradient: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
-    borderColor: '#e9d5ff',
+    id: 'i-miss-you',
+    title: 'I Miss You',
+    icon: '🫂💙',
+    badge: '💙 LONG DISTANCE',
+    tagline: 'Emotional Memory Journey',
+    desc: 'Send a heartfelt message across the miles with a personalized photo journey & letter.',
+    rating: '4.9 ★ (Long Distance)',
+    gradient: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+    borderColor: '#bfdbfe',
   },
   {
-    id: 'things-i-never-said',
-    title: 'Things I Never Said',
-    icon: '💌🕊️',
-    badge: '❤️ DEEP EMOTION',
-    tagline: 'Heartfelt Wax-Sealed Letter',
-    desc: 'For the words left unsaid. A vintage sealed envelope with background music & voice note.',
-    rating: '4.9 ★ (Deep Emotional)',
-    gradient: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
-    borderColor: '#a7f3d0',
+    id: 'anniversary',
+    title: 'Anniversary Special',
+    icon: '🥂✨',
+    badge: '💕 COUPLES CLASSIC',
+    tagline: 'Pinky Promise & Love Letter',
+    desc: 'Fill a virtual love meter, seal a pinky promise, blow out a celebration candle, and read promises.',
+    rating: '4.9 ★ (Romantic Hit)',
+    gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
+    borderColor: '#fed7aa',
   },
 ];
 
@@ -76,7 +76,7 @@ export default function PersonalizedHeroSection() {
       });
   }, []);
 
-  const featuredIds = personalization.featuredIds || ['birthday', 'proposal', 'surprise-reveal-box', 'things-i-never-said'];
+  const featuredIds = personalization.featuredIds || ['birthday', 'proposal', 'anniversary', 'i-miss-you'];
   const spotlightItems = featuredIds
     .map((id) => ALL_BESTSELLERS.find((b) => b.id === id))
     .filter(Boolean);

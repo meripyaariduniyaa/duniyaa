@@ -6,8 +6,8 @@ import PreviewDemoButton from '@/components/PreviewDemoButton';
 
 
 export const metadata = {
-  title: 'Browse All Interactive Digital Gift Templates — 10 Experiences | LovelyCrafts',
-  description: 'Explore personalized interactive digital gift experiences: birthday surprises, romantic proposals, anniversary cards, apology notes, Father\'s Day letter, Mother\'s Day reveal, and more. Share any on WhatsApp in minutes — from ₹219.',
+  title: 'Browse Interactive Digital Gift Templates | LovelyCrafts',
+  description: 'Explore personalized interactive digital gift experiences: birthday surprises, romantic proposals, anniversary celebrations, apology notes, and long-distance memory journeys. Share on WhatsApp in minutes — from ₹219.',
   keywords: [
     'interactive digital gift templates India',
     'personalized digital card templates',
@@ -15,16 +15,14 @@ export const metadata = {
     'proposal website template',
     'anniversary digital card',
     'apology card online India',
-    "father's day digital letter India",
     'i miss you digital card',
-    'friendship day digital card India',
     'emotional digital experience India',
     'LovelyCrafts templates',
   ],
   alternates: { canonical: `${SITE_URL}/templates` },
   openGraph: {
     title: 'Browse Interactive Digital Gift Templates | LovelyCrafts',
-    description: 'Birthday surprises, proposals, apologies, Father\'s Day, Mother\'s Day, anniversaries & more — personalized interactive digital cards from ₹219.',
+    description: 'Birthday surprises, proposals, apologies, anniversaries & more — personalized interactive digital cards from ₹219.',
     url: `${SITE_URL}/templates`,
     type: 'website',
     siteName: SITE_NAME,
@@ -36,7 +34,7 @@ export const metadata = {
     site: '@lovelycraftsin',
     creator: '@lovelycraftsin',
     title: 'Browse Interactive Digital Gift Templates | LovelyCrafts',
-    description: 'Birthday surprises, proposals, apologies, Father\'s Day & more from ₹219. Share on WhatsApp in minutes.',
+    description: 'Birthday surprises, proposals, apologies, anniversaries & more from ₹219. Share on WhatsApp in minutes.',
     images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
