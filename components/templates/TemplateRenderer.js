@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import BirthdayExperience from './BirthdayExperience';
+import BirthdayExperience from './birthday/BirthdayExperience';
 import EmotionalExperience from './EmotionalExperience';
+import ProposalExperience from './proposal/ProposalExperience';
+import AnniversaryExperience from './anniversary/AnniversaryExperience';
+import IMissYouExperience from './imissyou/IMissYouExperience';
+import ApologyExperience from './apology/ApologyExperience';
 
-export default function TemplateRenderer({ note, isPreview = false }) {
+export default function TemplateRenderer({ note, isPreview = false, onReachEnd }) {
   if (!note) return null;
 
   const templateId = note.template || 'default';
@@ -12,50 +16,49 @@ export default function TemplateRenderer({ note, isPreview = false }) {
   let experience;
 
   switch (templateId) {
-    case 'just-because':
-    case 'things-i-never-said':
-    case 'i-miss-you':
-    case 'open-when':
-    case 'emotional-apology':
-    case 'youre-my-person':
-      experience = <EmotionalExperience note={note} isPreview={isPreview} />; break;
-    case 'sorry':
-    case 'apology':
-      experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />; break;
-    case 'birthday':
-    case 'birthday-surprise':
-      experience = <BirthdayExperience note={note} isPreview={isPreview} />; break;
-    case 'anniversary':
-    case 'love-letter':
-      experience = <LoveLetterTemplate note={note} isPreview={isPreview} />; break;
-    case 'mothers-day':
-    case 'letter-for-mom':
-      experience = <LetterForMomTemplate note={note} isPreview={isPreview} />; break;
     case 'proposal':
     case 'be-my-valentine':
-      experience = <BeMyValentineTemplate note={note} isPreview={isPreview} />; break;
+      experience = <ProposalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'anniversary':
+    case 'love-letter':
+      experience = <AnniversaryExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'i-miss-you':
+      experience = <IMissYouExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'emotional-apology':
+    case 'sorry':
+    case 'apology':
+      experience = <ApologyExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'birthday':
+    case 'birthday-surprise':
+      experience = <BirthdayExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'just-because':
+    case 'things-i-never-said':
+    case 'open-when':
+    case 'youre-my-person':
+      experience = <EmotionalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
+    case 'mothers-day':
+    case 'letter-for-mom':
+      experience = <LetterForMomTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'puzzle':
-      // Basic placeholder for now, ideally an interactive puzzle component
-      experience = <PuzzleTemplate note={note} isPreview={isPreview} />; break;
+      experience = <PuzzleTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'friendship':
-      // Basic placeholder for now, ideally a friendship experience component
-      experience = <FriendshipTemplate note={note} isPreview={isPreview} />; break;
+      experience = <FriendshipTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'wedding-invitation':
-      experience = <WeddingInvitationTemplate note={note} isPreview={isPreview} />; break;
+      experience = <WeddingInvitationTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'surprise-reveal-box':
-      experience = <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} />; break;
+      experience = <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'a-rose-for-someone-special':
-      experience = <RoseSpecialTemplate note={note} isPreview={isPreview} />; break;
+      experience = <RoseSpecialTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'rakshabandhan':
-      experience = <RakshabandhanTemplate note={note} isPreview={isPreview} />; break;
+      experience = <RakshabandhanTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'fathers-day':
     case 'letter-for-dad':
-      experience = <LetterForDadTemplate note={note} isPreview={isPreview} />; break;
+      experience = <LetterForDadTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'get-well-soon':
     case 'warm-hug':
-      experience = <GetWellSoonTemplate note={note} isPreview={isPreview} />; break;
+      experience = <GetWellSoonTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     default:
-      experience = <InteractiveApologyFlowTemplate note={note} isPreview={isPreview} />;
+      experience = <ProposalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />;
   }
   return <div className={`experience-vibe experience-vibe--${vibe}`}>
     {!isPreview && <ImmersiveAtmosphere vibe={vibe} />}

@@ -14,6 +14,9 @@ export default function StickyCtaBar() {
       pathname?.startsWith('/admin') ||
       pathname?.startsWith('/creator/') ||
       pathname === '/creator' ||
+      pathname === '/create' ||
+      pathname?.startsWith('/create/') ||
+      pathname === '/preview' ||
       pathname?.startsWith('/arcade/')
     ) {
       setShow(false);

@@ -13,6 +13,9 @@ export default function Footer() {
     pathname?.startsWith('/admin') ||
     pathname?.startsWith('/creator/') ||
     pathname === '/creator' ||
+    pathname === '/create' ||
+    pathname?.startsWith('/create/') ||
+    pathname === '/preview' ||
     (pathname?.startsWith('/arcade/') && pathname !== '/arcade')
   ) {
     return null;

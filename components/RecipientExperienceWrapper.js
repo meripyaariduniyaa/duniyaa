@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import TemplateRenderer from '@/components/templates/TemplateRenderer';
 import PasscodeLock from '@/components/PasscodeLock';
 import WaxSealEnvelope from '@/components/WaxSealEnvelope';
@@ -14,6 +16,8 @@ export default function RecipientExperienceWrapper({ note }) {
   
   const [isUnlocked, setIsUnlocked] = useState(!hasPasscode);
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
+  const [isAtEnd, setIsAtEnd] = useState(false);
+  const [replayHandler, setReplayHandler] = useState(null);
 
   // Track view event once per session
   useEffect(() => {
@@ -28,6 +32,21 @@ export default function RecipientExperienceWrapper({ note }) {
       }).catch((e) => console.warn('Could not record view', e));
     }
   }, [note?.id]);
+
+  const handleReachEnd = (ended, onReplay) => {
+    setIsAtEnd(Boolean(ended));
+    if (onReplay) {
+      setReplayHandler(() => onReplay);
+    }
+  };
+
+  const handleReplayClick = () => {
+    setIsAtEnd(false);
+    if (typeof replayHandler === 'function') {
+      replayHandler();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // If locked with passcode, show Passcode Lock first
   if (!isUnlocked) {
@@ -66,10 +85,143 @@ export default function RecipientExperienceWrapper({ note }) {
       )}
 
       {/* Main Experience Template */}
-      <TemplateRenderer note={note} isPreview={false} />
+      <TemplateRenderer 
+        note={note} 
+        isPreview={false} 
+        onReachEnd={handleReachEnd}
+      />
 
-      {/* Recipient Interactive Reaction & Reply Back */}
-      <RecipientReactionBox noteId={note.id} recipientName={note.recipient_name} />
+      {/* Recipient Interactive Reaction & Reply Back + Replay + Create CTA — ONLY after last scene */}
+      <AnimatePresence>
+        {isAtEnd && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="experience-completion-section"
+          >
+            {/* VIP Action Row: Replay Experience & Create Surprise */}
+            <div className="completion-actions-bar">
+              {replayHandler && (
+                <button
+                  type="button"
+                  onClick={handleReplayClick}
+                  className="completion-replay-btn"
+                  id="replay-experience-btn"
+                >
+                  <span className="btn-icon">↺</span>
+                  <span>Replay Experience</span>
+                </button>
+              )}
+
+              <Link
+                href={`/create?template=${encodeURIComponent(note.template || 'proposal')}`}
+                className="completion-create-btn"
+                id="create-same-surprise-btn"
+              >
+                <span className="btn-icon">✨</span>
+                <span>Create a Surprise Like This →</span>
+              </Link>
+            </div>
+
+            {/* Recipient Interactive Reaction & Reply Back */}
+            <RecipientReactionBox noteId={note.id} recipientName={note.recipient_name} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx>{`
+        .recipient-experience-container {
+          position: relative;
+          min-height: 100vh;
+          width: 100%;
+        }
+
+        .experience-completion-section {
+          width: 100%;
+          max-width: 680px;
+          margin: 0 auto;
+          padding: 1.5rem 1rem 4rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+          z-index: 20;
+          position: relative;
+        }
+
+        .completion-actions-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+
+        .completion-replay-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 13px 24px;
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #ffffff;
+          border-radius: 999px;
+          font-weight: 700;
+          font-size: 0.95rem;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+          transition: all 0.25s ease;
+        }
+
+        .completion-replay-btn:hover {
+          background: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .completion-create-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 13px 28px;
+          background: linear-gradient(135deg, #f43f5e, #be185d);
+          border: 1px solid rgba(244, 63, 94, 0.5);
+          color: #ffffff;
+          border-radius: 999px;
+          font-weight: 800;
+          font-size: 0.95rem;
+          text-decoration: none;
+          cursor: pointer;
+          box-shadow: 0 8px 25px rgba(244, 63, 94, 0.4);
+          transition: all 0.25s ease;
+        }
+
+        .completion-create-btn:hover {
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 12px 30px rgba(244, 63, 94, 0.55);
+        }
+
+        .btn-icon {
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+          .completion-actions-bar {
+            flex-direction: column;
+            width: 100%;
+          }
+          .completion-replay-btn,
+          .completion-create-btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

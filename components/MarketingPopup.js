@@ -55,6 +55,8 @@ export default function MarketingPopup() {
       pathname?.startsWith('/admin') ||
       pathname?.startsWith('/creator/') ||
       pathname === '/creator' ||
+      pathname === '/create' ||
+      pathname?.startsWith('/create/') ||
       pathname?.startsWith('/preview') ||
       pathname?.startsWith('/share') ||
       pathname?.startsWith('/arcade')

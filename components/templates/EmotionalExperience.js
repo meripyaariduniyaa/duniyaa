@@ -253,7 +253,7 @@ function MendHeartGame({ onComplete }) {
 // -------------------------------------------------------------
 // MAIN EMOTIONAL EXPERIENCE COMPONENT
 // -------------------------------------------------------------
-export default function EmotionalExperience({ note, isPreview = false }) {
+export default function EmotionalExperience({ note, isPreview = false, onReachEnd }) {
   const [stage, setStage] = useState(0);
   const [opened, setOpened] = useState({});
   const [miniGameDone, setMiniGameDone] = useState(false);
@@ -268,6 +268,14 @@ export default function EmotionalExperience({ note, isPreview = false }) {
   useEffect(() => {
     setMiniGameDone(false);
   }, [stage]);
+
+  useEffect(() => {
+    const isEnd = stage >= (scenes?.length || 1) - 1;
+    onReachEnd?.(isEnd, () => {
+      setStage(0);
+      setOpened({});
+    });
+  }, [stage, scenes, onReachEnd]);
 
   if (!scene) return null;
 

@@ -1,40 +1,128 @@
 ================================================================================
-                         RETRONOTE - ALL TEMPLATES LIST
+                    RETRONOTE / LOVELYCRAFTS — ALL TEMPLATES LIST
 ================================================================================
-Total Templates: 5 (2 Emotional Experiences + 3 Interactive / Special Templates)
+Total Active Templates: 5 Cinematic VIP Journey Experiences
+All experiences feature 60fps canvas particle physics, custom SVG vector badges,
+3D interactive polaroids, wholesome animated meme stickers, and zero raw emojis.
 
---------------------------------------------------------------------------------
-1. EMOTIONAL EXPERIENCES (2)
---------------------------------------------------------------------------------
+================================================================================
+1. THE PERFECT PROPOSAL (ID: proposal)
+================================================================================
+Category: Interactive Romantic Odyssey (4 Chapters)
+Emblem: Diamond Ring & Royal Crown
+Best For: Proposals, Valentine's Day, Romantic Confessions
 
-1. I Miss You (ID: i-miss-you)
-   Icon: 🫂
-   Description: A long-distance memory journey made for one person.
-   Best For: Partner, Friend, Family
+Chapter Breakdown & Scenes:
+  • Chapter 1: Royal Wax-Sealed Invitation
+    - Obsidian & rose-gold card with embossed typography and royal crown crest.
+    - Soft drifting rose petal particle engine with ambient glow.
 
-2. I'm Sorry (ID: emotional-apology)
-   Icon: 🥺
-   Description: A sincere apology that gives them room to feel.
-   Best For: Partner, Friend, Family
+  • Chapter 2: "Exhibit of Us" — Memes & 3D Polaroid Stack
+    - Draggable, interactive 3D tilting polaroid frames with lighting sheen.
+    - Wholesome curated couple stickers (e.g. "Exhibit A: Food Bandit", "Exhibit B: 3 AM Sleepy Talks").
+
+  • Chapter 3: The Dodging "NO" Game 2.0
+    - Playful dodging NO button with comedic panic animations & speech bubbles.
+    - Dynamically expanding, pulsating golden YES button with shockwave rings.
+
+  • Chapter 4: 3D Velvet Jewelry Ring Box & Letter
+    - Interactive velvet jewelry box opens with realistic hinge physics and diamond sparkle.
+    - Handcrafted parchment letter with 3D wax seal break and special date plan card.
 
 
---------------------------------------------------------------------------------
-2. INTERACTIVE & SPECIAL OCCASION TEMPLATES (3)
---------------------------------------------------------------------------------
+================================================================================
+2. VIRTUAL BIRTHDAY BASH (ID: birthday)
+================================================================================
+Category: Interactive Midnight Gala Journey (7 Scenes)
+Emblem: Birthday Cake & Celebration Crown
+Best For: Birthdays, Milestone Celebrations, Midnight Surprises
 
-3. The Perfect Proposal (ID: proposal)
-   Icon: 💕
-   Description: A "yes/no" confession link where the NO button playfully dodges away, forcing a YES! Includes celebratory animations on success.
-   Best For: Proposals, Valentine's Day, Confessions
+Chapter Breakdown & Scenes:
+  • Scene 1: Red Carpet & Velvet Curtain Opening
+    - Velvet theater curtain opening with fabric ripple physics and gold embers.
 
-4. Virtual Birthday Bash (ID: birthday)
-   Icon: 🎂
-   Description: A 7-scene cinematic birthday journey! Featuring interactive balloon popping, a memory photo gallery, a real microphone candle blowout, a spin-the-wheel wish generator, and a typewritten heartfelt letter.
-   Best For: Birthdays, Milestone Years, Midnight Reveals
+  • Scene 2: Welcome Sparkler & Celebration Portal
+    - Real-time interactive canvas: recipient draws on screen to ignite blazing golden sparkler trails.
 
-5. Anniversary Special (ID: anniversary)
-   Icon: 🥂
-   Description: Fill a virtual love meter, seal a pinky promise, blow out a celebration candle, and read a handwritten letter with floating promises.
-   Best For: Anniversaries, Romantic Milestones, Couples
+  • Scene 3: 3D Helium Balloon Pop Game
+    - Floating pastel balloons that bob with physics; tapping pops each with particle bursts and word reveals.
+
+  • Scene 4: 3-Tier Cake & Microphone Candle Blowout
+    - Realistic luxury birthday cake with dynamic flickering candle flame.
+    - Extinguishes via microphone audio detection or tap with rising smoke wisps.
+
+  • Scene 5: Hanging Polaroid Memory String
+    - Illuminated polaroid photo frames swinging gently on fairy light strings with bokeh.
+
+  • Scene 6: Golden Typewritten Parchment Letter
+    - Vintage gold-leaf linen letter with live typewriter sound and calligraphy ink reveal.
+
+  • Scene 7: Dual-Cannon Confetti Gala & Keepsake Pass
+    - Final golden confetti shower and personalized WhatsApp VIP pass card.
+
+
+================================================================================
+3. ANNIVERSARY SPECIAL (ID: anniversary)
+================================================================================
+Category: Interactive Love Museum (4 Chapters)
+Emblem: Champagne Toast Flutes & Golden Sparkle
+Best For: Anniversaries, Romantic Milestones, Long-Term Couples
+
+Chapter Breakdown & Scenes:
+  • Chapter 1: Astronomical Relationship Time Counter
+    - Live digital counter calculating exact Days, Hours, and Minutes together.
+    - Rising champagne effervescence bubble physics.
+
+  • Chapter 2: 5 Sacred 3D Golden Vow Tablets
+    - Metallic gold-leaf vow tablets that flip 180° on tap with realistic 3D shadows and wax seal unlocks.
+
+  • Chapter 3: Our Quirks & Wholesome Couple Meme Stack
+    - Interactive slide deck of funny, relatable relationship moments and couple polaroids.
+
+  • Chapter 4: Candlelight Toast & Handcrafted Letter
+    - Animated clinking champagne glasses, anniversary candle wish, and wax-sealed letter on frosted parchment.
+
+
+================================================================================
+4. I MISS YOU (ID: i-miss-you)
+================================================================================
+Category: Celestial Memory Bridge (4 Chapters)
+Emblem: Distance Compass & Cassette Tape
+Best For: Long-Distance Relationships, Friends Far Away, Loved Ones Travelling
+
+Chapter Breakdown & Scenes:
+  • Chapter 1: Orbital Distance Radar & Trajectory
+    - Interactive glowing flight path connecting Origin City → Destination City with live distance beacon.
+    - Deep midnight celestial stardust background.
+
+  • Chapter 2: 5 Tactile Cassette Memory Tapes
+    - Vintage audio cassette tapes that slide out smoothly on tap with sound-wave vibration bars.
+
+  • Chapter 3: 10,000 km Virtual Hug Transmitter
+    - Interactive "Hold to Send Hug" button that charges up a radiant golden heartbeat wave across the screen.
+
+  • Chapter 4: Unsent Letter Across Miles & Polaroids
+    - Frosted glass parchment letter with audio waveform visualizer and shared memories polaroid stack.
+
+
+================================================================================
+5. I'M SORRY (ID: emotional-apology)
+================================================================================
+Category: Sincere Heartfelt Sanctuary (4 Chapters)
+Emblem: Origami Crane & Calm Raindrop
+Best For: Reconciliations, Sincere Apologies, Repairing Trust
+
+Chapter Breakdown & Scenes:
+  • Chapter 1: Raindrop Window Reflection
+    - Calming ambient rain-on-glass window with running water droplet physics and gentle acoustic piano.
+
+  • Chapter 2: 3 Unfolded Regret Paper Envelopes
+    - 3 tactile paper envelopes that unfold layer by layer with origami creases, sharing honest thoughts without excuses.
+
+  • Chapter 3: Blooming Origami Crane Commitment
+    - Interactive origami crane that unfurls to reveal the sender's sincere commitments and promises.
+
+  • Chapter 4: Sincere Letter & Zero-Pressure Reaction
+    - Handcrafted linen parchment letter with gentle, pressure-free recipient reaction choices ("I appreciate your apology", "I need time", "Let's talk soon").
 
 ================================================================================

@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import BirthdayCurtain from '@/components/templates/birthday/BirthdayCurtain';
 import FloatingNotes from '@/components/templates/birthday/FloatingNotes';
 import LoveGallery from '@/components/templates/birthday/LoveGallery';
+import GoldBadge from '@/components/templates/common/GoldBadge';
+import WholesomeMemeSticker from '@/components/templates/common/WholesomeMemeSticker';
 
 // StellarGallery uses Three.js — always client-only, loaded lazily
 const StellarGallery = dynamic(
@@ -276,22 +278,22 @@ export default function BirthdayExperience({ note, isPreview = false }) {
       <FloatingHearts />
       <motion.div
         animate={{ y:[0,-12,0] }} transition={{ repeat:Infinity, duration:2, ease:'easeInOut' }}
-        style={{ fontSize: 52, marginBottom: 24, position:'relative', zIndex:1 }}
+        style={{ marginBottom: 20, position:'relative', zIndex:1 }}
       >
-        ❤️
+        <GoldBadge name="crown" size={64} />
       </motion.div>
-      <h2 style={{ fontFamily: T.fontHandwritten, fontSize: '2rem', color: T.pink800, margin:'0 0 8px', position:'relative', zIndex:1 }}>
-        A surprise for {relationLabel}
+      <h2 style={{ fontFamily: T.fontHandwritten, fontSize: '2.4rem', color: T.pink800, margin:'0 0 8px', position:'relative', zIndex:1 }}>
+        A surprise for {relation ? `your ${relation}` : recipientName}
       </h2>
-      <p style={{ fontFamily: T.fontSerif, color: T.pink700, opacity: 0.8, margin:'0 0 40px', position:'relative', zIndex:1 }}>
-        Tap to open your special birthday gift 🎁
+      <p style={{ fontFamily: T.fontSerif, color: T.pink700, opacity: 0.85, margin:'0 0 40px', position:'relative', zIndex:1 }}>
+        ✦ Tap below to unwrap your VIP birthday gala ✦
       </p>
       <motion.button
         whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
         onClick={nextScene}
         style={{ ...primaryBtn, position:'relative', zIndex:1 }}
       >
-        Open 🎀
+        Enter Birthday Gala →
       </motion.button>
     </motion.div>
   );
@@ -301,14 +303,14 @@ export default function BirthdayExperience({ note, isPreview = false }) {
     <motion.div key="welcome" variants={sceneVariants} initial="initial" animate="animate" exit="exit"
       style={sceneWrap()}>
       <FloatingHearts />
-      <h1 style={{ fontFamily: T.fontHandwritten, fontSize: '2.8rem', color: T.pink700, lineHeight:1.2, margin:'0 0 24px', position:'relative', zIndex:1 }}>
-        Happy Birthday,<br/>{recipientName} 🎂
+      <h1 style={{ fontFamily: T.fontHandwritten, fontSize: '2.8rem', color: T.pink700, lineHeight:1.2, margin:'0 0 20px', position:'relative', zIndex:1 }}>
+        Happy Birthday,<br/>{recipientName}
       </h1>
-      <div style={{ fontSize: 72, marginBottom: 28, position:'relative', zIndex:1, filter:'drop-shadow(0 6px 16px rgba(219,39,119,0.25))' }}>
-        🥳
+      <div style={{ marginBottom: 24, position:'relative', zIndex:1 }}>
+        <GoldBadge name="cake" size={72} />
       </div>
       <p style={{ fontFamily: T.fontSerif, fontSize:'1.1rem', color: T.pink900, margin:'0 0 36px', position:'relative', zIndex:1 }}>
-        {relation ? `A little birthday surprise made just for ${relation === 'Mom' || relation === 'Dad' ? 'you' : 'your ' + relation} ${relationEmoji}` : 'Are you excited for what\'s next?'}
+        {relation ? `A VIP birthday experience crafted just for you.` : 'Are you ready for your birthday celebration?'}
       </p>
       {/* Yes button */}
       <motion.button
@@ -316,7 +318,7 @@ export default function BirthdayExperience({ note, isPreview = false }) {
         onClick={nextScene}
         style={{ ...primaryBtn, position:'relative', zIndex:2 }}
       >
-        Yes! 🎉
+        Yes! Absolutely →
       </motion.button>
       {/* Teasing No button */}
       <motion.button
@@ -337,7 +339,7 @@ export default function BirthdayExperience({ note, isPreview = false }) {
           backdropFilter:'blur(4px)',
         }}
       >
-        No 😶
+        Not yet
       </motion.button>
     </motion.div>
   );
