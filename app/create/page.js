@@ -31,8 +31,9 @@ function CreateNoteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateIdParam = searchParams.get('template');
+  const defaultTemplateId = templates[0]?.id || 'proposal';
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState(templateIdParam || 'sorry');
+  const [selectedTemplateId, setSelectedTemplateId] = useState(templateIdParam || defaultTemplateId);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   useEffect(() => {

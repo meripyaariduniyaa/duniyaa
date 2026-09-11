@@ -209,6 +209,23 @@ export default function LegacyCreator({ templateId }) {
         }
         docId = customSlug;
       }
+      
+      const customDetailsData = {
+        ...details,
+        vibe,
+        audio_preset: audioPreset,
+        ...(template.id === 'birthday' ? { birthday_relation: birthdayRelation || 'Friend' } : {}),
+        passcode: enablePasscode && passcode.trim() ? passcode.trim() : null,
+        secret_question: enablePasscode && secretQuestion.trim() ? secretQuestion.trim() : null,
+      };
+
+      // Strip any undefined keys to prevent Firestore crashes
+      Object.keys(customDetailsData).forEach((k) => {
+        if (customDetailsData[k] === undefined) {
+          delete customDetailsData[k];
+        }
+      });
+
       await setDoc(doc(db, 'notes', docId), {
         creator_uid: deviceId,
         recipient_name: recipient.trim(),
@@ -216,14 +233,7 @@ export default function LegacyCreator({ templateId }) {
         voice_note_url: voiceNoteUrl || null,
         image_urls: images,
         shagun_qr_url: null,
-        custom_details: {
-          ...details,
-          vibe,
-          audio_preset: audioPreset,
-          birthday_relation: template.id === 'birthday' ? (birthdayRelation || 'Friend') : undefined,
-          passcode: enablePasscode && passcode.trim() ? passcode.trim() : null,
-          secret_question: enablePasscode && secretQuestion.trim() ? secretQuestion.trim() : null,
-        },
+        custom_details: customDetailsData,
         is_paid: false,
         template: template.id,
         custom_slug: customSlug && customSlug.length >= 3 ? customSlug : null,

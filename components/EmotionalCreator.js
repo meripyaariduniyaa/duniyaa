@@ -67,18 +67,18 @@ export default function EmotionalCreator({ templateId }) {
   const update = (key, value) => setDetails((current) => ({ ...current, [key]: value }));
   const valid = recipient.trim() && message.trim();
   const personalizationComplete = () => {
-    if (template.id === 'things-i-never-said') return details.unsaid.filter(Boolean).length >= 3 && Boolean(details.memory?.trim());
-    if (template.id === 'i-miss-you') return Boolean(details.from_location?.trim() && details.to_location?.trim() && details.favorite_memory?.trim()) && details.missed_things.filter(Boolean).length === 5;
-    if (template.id === 'open-when') return details.envelopes.length >= 4 && details.envelopes.every((item) => item.title?.trim() && item.message?.trim());
-    if (template.id === 'emotional-apology') return Boolean(details.what_happened?.trim() && details.promise?.trim()) && details.regrets.filter(Boolean).length === 3;
-    if (template.id === 'youre-my-person') return details.reasons.filter(Boolean).length === 5 && Boolean(details.inside_joke?.trim());
-    return Boolean(details.small_detail?.trim());
+    if (template.id === 'things-i-never-said') return details.unsaid.some((u) => u?.trim()) || Boolean(details.memory?.trim());
+    if (template.id === 'i-miss-you') return Boolean(details.from_location?.trim() || details.to_location?.trim() || details.favorite_memory?.trim() || details.missed_things.some((m) => m?.trim()));
+    if (template.id === 'open-when') return details.envelopes.some((e) => e.title?.trim() && e.message?.trim());
+    if (template.id === 'emotional-apology') return Boolean(details.what_happened?.trim() || details.promise?.trim() || details.regrets.some((r) => r?.trim()));
+    if (template.id === 'youre-my-person') return details.reasons.some((r) => r?.trim()) || Boolean(details.inside_joke?.trim());
+    return true;
   };
   const advance = () => {
     setError('');
     if (step === 1 && !recipient.trim()) { setError('Add their name to continue.'); return; }
-    if (step === 2 && !personalizationComplete()) { setError('Complete all personalisation fields.'); return; }
-    if (step === 3 && !message.trim()) { setError('Write your final message.'); return; }
+    if (step === 2 && !personalizationComplete()) { setError('Please fill in at least one personal memory or prompt to continue.'); return; }
+    if (step === 3 && !message.trim()) { setError('Write your final message before continuing.'); return; }
     setStep((current) => current + 1);
   };
   const fillWithAi = async () => {
@@ -114,6 +114,24 @@ export default function EmotionalCreator({ templateId }) {
       }
       let deviceId = localStorage.getItem('note_device_id');
       if (!deviceId) { deviceId = nanoid(32); localStorage.setItem('note_device_id', deviceId); }
+
+      const customDetailsData = {
+        ...details,
+        relationship,
+        vibe,
+        audio_preset: audioPreset,
+        passcode: enablePasscode && passcode.trim() ? passcode.trim() : null,
+        secret_question: enablePasscode && secretQuestion.trim() ? secretQuestion.trim() : null,
+        experience_version: 2
+      };
+
+      // Strip any undefined keys to prevent Firestore crashes
+      Object.keys(customDetailsData).forEach((k) => {
+        if (customDetailsData[k] === undefined) {
+          delete customDetailsData[k];
+        }
+      });
+
       await setDoc(doc(db, 'notes', docId), {
         creator_uid: deviceId,
         recipient_name: recipient.trim(),
@@ -121,15 +139,7 @@ export default function EmotionalCreator({ templateId }) {
         voice_note_url: voiceNoteUrl || null,
         image_urls: images,
         shagun_qr_url: null,
-        custom_details: {
-          ...details,
-          relationship,
-          vibe,
-          audio_preset: audioPreset,
-          passcode: enablePasscode && passcode.trim() ? passcode.trim() : null,
-          secret_question: enablePasscode && secretQuestion.trim() ? secretQuestion.trim() : null,
-          experience_version: 2
-        },
+        custom_details: customDetailsData,
         is_paid: false,
         template: template.id,
         custom_slug: customSlug && customSlug.length >= 3 ? customSlug : null,
