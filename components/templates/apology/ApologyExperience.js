@@ -11,18 +11,26 @@ import PolaroidStack from '../common/PolaroidStack';
 
 /**
  * 🌧️ I'M SORRY (ID: emotional-apology)
- * 7-Chapter Vulnerable Apology & Healing Journey
- * Chapter 1: The Rainy Window Reflection
- * Chapter 2: The "What I Did" Accountable Card
- * Chapter 3: The 3 Regret Envelopes
- * Chapter 4: The Sacred Memory
- * Chapter 5: The Origami Promise Crane (Interactive 3D Fold)
- * Chapter 6: The Zero-Pressure Respect Choice
- * Chapter 7: The Sincere Letter & Sanctuary
+ * 7-Chapter Full-Bleed Sincere Healing Journey
  */
 export default function ApologyExperience({ note, isPreview = false, onReachEnd }) {
   const [chapter, setChapter] = useState(1);
   const [unlockedSecrets, setUnlockedSecrets] = useState([true, false, false]);
+
+  // Chapter 1: Window wiping
+  const [isWindowCleared, setIsWindowCleared] = useState(false);
+
+  // Chapter 3: Regret envelopes
+  const [openedRegrets, setOpenedRegrets] = useState({});
+
+  // Chapter 6: User choice
+  const [forgiveChoice, setForgiveChoice] = useState(null);
+
+  const recipient = note?.recipient_name || 'Someone I Hurt';
+  const customMsg = note?.custom_message || 'I am deeply sorry for how my actions affected you. You mean more to me than words can say, and I want to take full responsibility, listen without defending myself, and make things right in your own time.';
+  const whatHappened = note?.custom_details?.what_happened || 'I allowed frustration and poor communication to cloud my judgment, and in doing so, I made you feel unheard and hurt.';
+  const specialMemory = note?.custom_details?.special_memory || 'The quiet evenings where we used to sit and talk with complete peace and trust.';
+  const photos = note?.image_urls || [];
 
   useEffect(() => {
     onReachEnd?.(chapter === 7, () => {
@@ -31,25 +39,10 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
     });
   }, [chapter, onReachEnd]);
 
-  // Chapter 1: Window wiping
-  const [isWindowCleared, setIsWindowCleared] = useState(false);
-
-  // Chapter 3: Regret envelopes
-  const [openedRegrets, setOpenedRegrets] = useState({});
-
-  // Chapter 6: Choice chosen
-  const [selectedResponse, setSelectedResponse] = useState(null);
-
-  const recipient = note?.recipient_name || 'My Dear Friend';
-  const customMsg = note?.custom_message || 'I am deeply sorry for how I acted and the hurt I caused. You mean far too much to me for me to let my mistakes go unaddressed. I take full responsibility and promise to do better.';
-  const whatHappened = note?.custom_details?.what_happened || 'I let my impatience get the better of me and failed to listen to your feelings when you needed me most.';
-  const specialMemory = note?.custom_details?.special_memory || 'The laughter and effortless comfort we have always shared. I never want to jeopardize that.';
-  const photos = note?.image_urls || [];
-
   const regrets = [
-    { id: 'r1', title: 'The Words I Regret', desc: 'Speaking before understanding the weight my words carry on your heart.', icon: 'candle' },
-    { id: 'r2', title: 'The Moment I Realized', desc: 'Seeing the disappointment in your eyes and knowing I let down the person I respect most.', icon: 'heart' },
-    { id: 'r3', title: 'What You Truly Mean To Me', desc: 'Our bond is a sanctuary I will never take for granted ever again.', icon: 'crane' },
+    { id: 'r1', title: 'Not Listening Deeply', desc: 'I was too caught up in my own reaction instead of understanding how you felt.' },
+    { id: 'r2', title: 'Taking You For Granted', desc: 'You always bring so much grace and patience to us, and I failed to match it.' },
+    { id: 'r3', title: 'Breaking Your Peace', desc: 'The last thing I ever want to be in your life is a source of stress or pain.' },
   ];
 
   const handleOpenRegret = (id) => {
@@ -58,14 +51,6 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
     if (Object.keys(updated).length >= 2) {
       setUnlockedSecrets([true, true, unlockedSecrets[2]]);
     }
-  };
-
-  const handleResponseSelect = (option) => {
-    setSelectedResponse(option);
-    setUnlockedSecrets([true, true, true]);
-    setTimeout(() => {
-      setChapter(7);
-    }, 1200);
   };
 
   return (
@@ -93,60 +78,79 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
     >
       {/* ── CHAPTER 1: RAINY WINDOW REFLECTION ── */}
       {chapter === 1 && (
-        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="glass-card"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
             style={{
-              padding: '3.5rem 2rem',
-              borderRadius: '28px',
-              border: '2px solid rgba(148, 163, 184, 0.3)',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
-              maxWidth: '560px',
-              margin: '0 auto',
-              background: 'radial-gradient(circle, rgba(30,41,59,0.85) 0%, rgba(15,23,42,0.95) 100%)',
+              padding: 'clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 5vw, 3.5rem)',
+              borderRadius: '32px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(45, 212, 191, 0.25)',
+              backdropFilter: 'blur(30px)',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(45, 212, 191, 0.12)',
             }}
           >
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(148, 163, 184, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
-              <GoldBadge name="crane" size={54} />
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(45, 212, 191, 0.12)', borderRadius: '50%', marginBottom: '1.5rem', border: '1px solid rgba(45, 212, 191, 0.3)' }}>
+              <GoldBadge name="heart" size={60} />
             </div>
 
-            <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
-              A Vulnerable & Sincere Apology
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#5eead4', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'block', marginBottom: '1rem' }}>
+              ✦ Sincere Apology ✦
             </span>
 
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.2rem, 5.5vw, 3.4rem)',
+                fontSize: 'clamp(2.4rem, 6vw, 4.2rem)',
                 color: '#fff',
-                margin: '0 0 1.5rem',
+                margin: '0 0 1.25rem',
+                textShadow: '0 0 30px rgba(45, 212, 191, 0.35)',
               }}
             >
-              For {recipient}
+              I Am Truly Sorry, {recipient}
             </h1>
 
-            <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-              I know I hurt you. There are no excuses, no deflections, and no shortcuts. I just want to speak to you with complete honesty from the bottom of my heart.
+            <p style={{ color: '#cbd5e1', fontSize: '1.15rem', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 2.5rem' }}>
+              I know I hurt you, and I am not here to make excuses. I built this quiet sanctuary because what we share matters too much to leave unaddressed.
             </p>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setChapter(2)}
+            {/* Interactive Fogged Glass */}
+            <div
+              onClick={() => setIsWindowCleared(true)}
               style={{
-                background: 'linear-gradient(135deg, #64748b, #475569)',
-                color: '#fff',
-                padding: '14px 36px',
-                borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                fontWeight: 700,
-                fontSize: '1.05rem',
+                maxWidth: '480px',
+                margin: '0 auto 2.5rem',
+                padding: '1.5rem',
+                borderRadius: '24px',
+                background: isWindowCleared ? 'rgba(45, 212, 191, 0.15)' : 'rgba(15, 23, 42, 0.6)',
+                border: isWindowCleared ? '1px solid #2dd4bf' : '1px dashed rgba(255,255,255,0.2)',
                 cursor: 'pointer',
+                transition: 'all 0.4s ease',
               }}
             >
-              Listen With Me &rarr;
+              <p style={{ color: isWindowCleared ? '#5eead4' : '#94a3b8', fontSize: '0.95rem', margin: 0, fontWeight: 600 }}>
+                {isWindowCleared ? '✓ Mist cleared. My heart is open.' : '🌧️ Tap to wipe the rainy condensation away…'}
+              </p>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setChapter(2)}
+              style={{
+                background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+                color: '#000',
+                padding: '16px 42px',
+                borderRadius: '999px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
+              }}
+            >
+              Take Responsibility &rarr;
             </motion.button>
           </motion.div>
         </div>
@@ -154,33 +158,34 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
 
       {/* ── CHAPTER 2: ACCOUNTABILITY CARD ── */}
       {chapter === 2 && (
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5eead4', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Chapter II: Accountability
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              What I Did & Why I Was Wrong
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              What I Did &amp; Why I Was Wrong
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Owning my mistake completely.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Owning my mistake completely without defense.
             </p>
           </div>
 
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(148, 163, 184, 0.3)',
-              borderRadius: '24px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(45, 212, 191, 0.25)',
+              borderRadius: '28px',
               padding: '2.5rem 2rem',
-              marginBottom: '2rem',
+              marginBottom: '2.5rem',
+              backdropFilter: 'blur(20px)',
             }}
           >
             <div style={{ marginBottom: '1.5rem' }}>
-              <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#f87171', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.5rem' }}>
                 Where I Failed You
               </span>
-              <p style={{ color: '#e2e8f0', fontSize: '1rem', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ color: '#e2e8f0', fontSize: '1.1rem', lineHeight: 1.8, margin: 0 }}>
                 {whatHappened}
               </p>
             </div>
@@ -188,10 +193,10 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
             <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.1)', margin: '1.5rem 0' }} />
 
             <div>
-              <span style={{ color: '#38bdf8', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#5eead4', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.5rem' }}>
                 What I Have Realized
               </span>
-              <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>
+              <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: 1.8, margin: 0 }}>
                 Your feelings are valid. You deserved calmness, understanding, and care, not frustration or thoughtlessness.
               </p>
             </div>
@@ -199,17 +204,19 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(3)}
               style={{
-                background: 'linear-gradient(135deg, #64748b, #475569)',
-                color: '#fff',
-                padding: '14px 34px',
-                borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                fontWeight: 700,
+                background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+                color: '#000',
+                padding: '16px 40px',
+                borderRadius: '999px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
               }}
             >
               Open Unspoken Regrets &rarr;
@@ -220,50 +227,52 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
 
       {/* ── CHAPTER 3: 3 REGRET ENVELOPES ── */}
       {chapter === 3 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5eead4', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Chapter III: Deep Reflection
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
               Three Unspoken Regrets
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Tap each note to read the reflections I carry.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Tap each tablet to read the reflections I carry.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
             {regrets.map((r) => {
               const isOpen = openedRegrets[r.id];
               return (
                 <motion.div
                   key={r.id}
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   onClick={() => handleOpenRegret(r.id)}
                   style={{
-                    background: isOpen ? 'rgba(148, 163, 184, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    border: isOpen ? '2px solid #94a3b8' : '1px dashed rgba(255, 255, 255, 0.2)',
-                    borderRadius: '20px',
-                    padding: '1.75rem 1.25rem',
+                    background: isOpen ? 'rgba(45, 212, 191, 0.14)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isOpen ? '1px solid rgba(45, 212, 191, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '24px',
+                    padding: '2rem',
                     textAlign: 'center',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(20px)',
+                    minHeight: '200px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  <div style={{ display: 'inline-flex', padding: '12px', background: 'rgba(148, 163, 184, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                    <GoldBadge name={r.icon} size={32} />
-                  </div>
-                  <h3 style={{ color: '#fff', fontSize: '1.05rem', margin: '0 0 0.5rem' }}>{r.title}</h3>
-                  {isOpen ? (
-                    <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.5, margin: 0 }}>
-                      {r.desc}
+                  <div>
+                    <div style={{ display: 'inline-flex', padding: '14px', background: 'rgba(45, 212, 191, 0.12)', borderRadius: '50%', marginBottom: '1rem' }}>
+                      <GoldBadge name="heart" size={30} />
+                    </div>
+                    <h3 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+                      {r.title}
+                    </h3>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                      {isOpen ? r.desc : 'Tap to reveal thought.'}
                     </p>
-                  ) : (
-                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>
-                      Tap to Unfold
-                    </span>
-                  )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -271,195 +280,221 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(4)}
               style={{
-                background: 'linear-gradient(135deg, #64748b, #475569)',
-                color: '#fff',
-                padding: '14px 34px',
-                borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                fontWeight: 700,
+                background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+                color: '#000',
+                padding: '16px 40px',
+                borderRadius: '999px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
               }}
             >
-              The Sacred Memory &rarr;
+              Inspect Sacred Memory &rarr;
             </motion.button>
           </div>
         </div>
       )}
 
-      {/* ── CHAPTER 4: THE SACRED MEMORY ── */}
+      {/* ── CHAPTER 4: SACRED MEMORY ── */}
       {chapter === 4 && (
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5eead4', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Chapter IV: What Matters Most
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              A Bond Worth Preserving
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              The Bond We Built
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Remembering who we are when things are good.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              A reminder of why you are irreplaceable to me.
             </p>
           </div>
 
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(148, 163, 184, 0.3)',
-              borderRadius: '24px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(45, 212, 191, 0.25)',
+              borderRadius: '28px',
               padding: '2.5rem 2rem',
-              marginBottom: '2rem',
-              textAlign: 'center',
+              marginBottom: '3rem',
+              backdropFilter: 'blur(20px)',
             }}
           >
-            <GoldBadge name="heart" size={48} />
-            <p style={{ color: '#e2e8f0', fontSize: '1.05rem', lineHeight: 1.7, marginTop: '1rem' }}>
+            <p style={{ color: '#e2e8f0', fontSize: '1.15rem', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto' }}>
               {specialMemory}
             </p>
           </div>
 
           {photos.length > 0 && (
-            <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ marginBottom: '3rem' }}>
               <PolaroidStack photos={photos} />
             </div>
           )}
 
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setChapter(5)}
-              style={{
-                background: 'linear-gradient(135deg, #64748b, #475569)',
-                color: '#fff',
-                padding: '14px 34px',
-                borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Fold Origami Promise Crane &rarr;
-            </motion.button>
-          </div>
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setChapter(5)}
+            style={{
+              background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+              color: '#000',
+              padding: '16px 42px',
+              borderRadius: '999px',
+              border: 'none',
+              fontWeight: 800,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
+            }}
+          >
+            Fold The Promise Crane &rarr;
+          </motion.button>
         </div>
       )}
 
-      {/* ── CHAPTER 5: ORIGAMI PROMISE CRANE ── */}
+      {/* ── CHAPTER 5: 3D ORIGAMI PROMISE CRANE ── */}
       {chapter === 5 && (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter V: Concrete Commitments
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5eead4', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter V: Golden Peace
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', color: '#fff', margin: '0.35rem 0' }}>
               The Origami Promise Crane
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Tap each wing to fold a permanent commitment to do better.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              An ancient symbol of healing, patience, and lifelong respect.
             </p>
           </div>
 
-          <div style={{ marginBottom: '2.5rem' }}>
-            <OrigamiCrane onComplete={() => setUnlockedSecrets([true, true, true])} />
+          <div style={{ marginBottom: '3rem' }}>
+            <OrigamiCrane onFoldComplete={() => {}} />
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => setChapter(6)}
             style={{
-              background: 'linear-gradient(135deg, #64748b, #475569)',
-              color: '#fff',
-              padding: '14px 36px',
-              borderRadius: '50px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              fontWeight: 700,
+              background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+              color: '#000',
+              padding: '16px 42px',
+              borderRadius: '999px',
+              border: 'none',
+              fontWeight: 800,
               fontSize: '1.05rem',
               cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
             }}
           >
-            Your Space & Pace &rarr;
+            Your Space, Your Pace &rarr;
           </motion.button>
         </div>
       )}
 
       {/* ── CHAPTER 6: ZERO-PRESSURE CHOICE ── */}
       {chapter === 6 && (
-        <div style={{ maxWidth: '580px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter VI: No Obligations
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#5eead4', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter VI: Absolute Freedom
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              How Would You Like To Proceed?
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', color: '#fff', margin: '0.35rem 0' }}>
+              Zero Pressure, Only Respect
             </h2>
-            <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6 }}>
-              There is zero expectation for an instant response. Choose whatever option feels right for your heart.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Whatever you feel right now, I honor and respect your boundaries unconditionally.
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
             {[
-              { id: 'time', text: 'I need some time and space to process this.', icon: 'candle' },
-              { id: 'talk', text: 'Let us have a calm conversation when ready.', icon: 'sparkle' },
-              { id: 'forgive', text: 'I appreciate your honesty. Let us move forward together.', icon: 'heart' },
+              { id: 'c1', label: 'I accept your apology & let\'s talk', icon: 'heart', sub: 'I\'m ready to reconnect.' },
+              { id: 'c2', label: 'I need a little more time & space', icon: 'compass', sub: 'Thank you for acknowledging it.' },
+              { id: 'c3', label: 'I appreciate you making this effort', icon: 'sparkle', sub: 'Let\'s take it one step at a time.' },
             ].map((opt) => (
               <motion.button
                 key={opt.id}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleResponseSelect(opt.text)}
+                onClick={() => setForgiveChoice(opt.id)}
                 style={{
-                  background: selectedResponse === opt.text ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                  border: selectedResponse === opt.text ? '2px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '16px',
-                  padding: '1.25rem',
-                  color: '#fff',
-                  fontSize: '1rem',
-                  fontWeight: 600,
+                  background: forgiveChoice === opt.id ? 'rgba(45, 212, 191, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  border: forgiveChoice === opt.id ? '1.5px solid #2dd4bf' : '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '24px',
+                  padding: '2rem',
                   cursor: 'pointer',
+                  textAlign: 'center',
+                  backdropFilter: 'blur(20px)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '12px',
-                  textAlign: 'left',
                 }}
               >
-                <GoldBadge name={opt.icon} size={20} />
-                <span>{opt.text}</span>
+                <div style={{ display: 'inline-flex', padding: '12px', background: 'rgba(45, 212, 191, 0.12)', borderRadius: '50%', marginBottom: '1rem' }}>
+                  <GoldBadge name={opt.icon} size={28} />
+                </div>
+                <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+                  {opt.label}
+                </h4>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0 }}>
+                  {opt.sub}
+                </p>
               </motion.button>
             ))}
           </div>
+
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setChapter(7)}
+            style={{
+              background: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
+              color: '#000',
+              padding: '16px 42px',
+              borderRadius: '999px',
+              border: 'none',
+              fontWeight: 800,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(45, 212, 191, 0.35)',
+            }}
+          >
+            Read Final Sincere Letter &rarr;
+          </motion.button>
         </div>
       )}
 
       {/* ── CHAPTER 7: SINCERE LETTER & SANCTUARY ── */}
       {chapter === 7 && (
-        <div>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '50%', marginBottom: '1rem' }}>
-              <GoldBadge name="crane" size={54} />
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(45, 212, 191, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
+              <GoldBadge name="heart" size={56} />
             </div>
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 3.8rem)',
+                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
                 color: '#fff',
                 margin: '0 0 0.5rem',
               }}
             >
-              With Sincerity & Respect
+              With Sincere Regret, {recipient}
             </h1>
-            <p style={{ color: '#94a3b8', fontSize: '1.1rem', fontWeight: 600 }}>
+            <p style={{ color: '#5eead4', fontSize: '1.15rem', fontWeight: 600 }}>
               Whatever you decide, I value and respect you completely.
             </p>
           </div>
 
           {/* Letter */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <WaxSealLetter
               title={`A Letter of Sincere Apology to ${recipient}`}
               content={customMsg}
@@ -469,7 +504,7 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <WholesomeMemeSticker type="bearHug" size={80} caption="Always here for you." />
+            <WholesomeMemeSticker caption="Always here for you in sincerity" />
           </div>
         </div>
       )}

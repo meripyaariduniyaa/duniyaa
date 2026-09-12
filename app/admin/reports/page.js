@@ -11,6 +11,7 @@ import {
   CommissionsIcon,
   PayoutsIcon,
   CouponsIcon,
+  CrmIcon,
   RefreshIcon
 } from '@/components/admin/AdminIcons';
 
@@ -25,6 +26,7 @@ export default function AdminReportsPage() {
   const [commissions, setCommissions] = useState([]);
   const [payouts, setPayouts] = useState([]);
   const [coupons, setCoupons] = useState([]);
+  const [crmProspects, setCrmProspects] = useState([]);
   const [overview, setOverview] = useState(null);
 
   // Date range filter
@@ -41,12 +43,13 @@ export default function AdminReportsPage() {
       const token = await user.getIdToken();
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [ordersRes, creatorsRes, commissionsRes, payoutsRes, couponsRes, overviewRes] = await Promise.all([
+      const [ordersRes, creatorsRes, commissionsRes, payoutsRes, couponsRes, crmRes, overviewRes] = await Promise.all([
         fetch('/api/admin/orders', { headers }).then((r) => r.json()).catch(() => ({ orders: [] })),
         fetch('/api/admin/creators', { headers }).then((r) => r.json()).catch(() => ({ creators: [] })),
         fetch('/api/admin/commissions', { headers }).then((r) => r.json()).catch(() => ({ commissions: [] })),
         fetch('/api/admin/payouts', { headers }).then((r) => r.json()).catch(() => ({ payouts: [] })),
         fetch('/api/admin/coupons', { headers }).then((r) => r.json()).catch(() => ({ coupons: [] })),
+        fetch('/api/admin/crm', { headers }).then((r) => r.json()).catch(() => ({ prospects: [] })),
         fetch('/api/admin/overview', { headers }).then((r) => r.json()).catch(() => ({ metrics: null })),
       ]);
 
@@ -55,6 +58,7 @@ export default function AdminReportsPage() {
       setCommissions(commissionsRes.commissions || []);
       setPayouts(payoutsRes.payouts || []);
       setCoupons(couponsRes.coupons || []);
+      setCrmProspects(crmRes.prospects || []);
       setOverview(overviewRes.metrics || null);
     } catch (err) {
       console.error('Failed to fetch admin data for reports:', err);
@@ -106,7 +110,7 @@ export default function AdminReportsPage() {
       'Creator Name': c.name || 'Unnamed',
       'Email': c.email || '',
       'Slug Handle': c.slug || '',
-      'Public URL': `https://lovelycrafts.in/c/${c.slug}`,
+      'Public URL': `https://lovelycrafts.in/creators/${c.slug}`,
       'Tier': (c.tier || 'Starter').toUpperCase(),
       'Commission Rate (%)': `${c.commission_rate || 10}%`,
       'Assigned Coupon': c.coupon_code || 'Pending',
@@ -161,6 +165,32 @@ export default function AdminReportsPage() {
     }));
   };
 
+  const getFormattedCrmProspects = () => {
+    return filterByDate(crmProspects, 'created_at').map((p) => ({
+      'Lead Name': p.name || '',
+      'Pipeline Status': p.status || 'Discovered',
+      'Priority Tier': p.priority ? `Tier ${p.priority}` : 'Tier B',
+      'Platform': p.platform || 'Instagram',
+      'Handle': p.handle || '',
+      'Followers': p.followers || 0,
+      'Creator Type': p.creator_type || 'Micro',
+      'Niche': p.niche || '',
+      'Fit Score (1-10)': p.fit_score || 5,
+      'Email': p.public_email || p.signing_email || '',
+      'Phone / WhatsApp': p.phone || '',
+      'State': p.state || '',
+      'City': p.city || '',
+      'Language': p.language || '',
+      'Contact Route': p.contact_route || 'DM',
+      'Next Follow-up Date': p.next_followup || '',
+      'Last Contacted Date': p.last_contacted || '',
+      'Pitch Angle / Notes': p.pitch_angle || '',
+      'Partner ID (Approved)': p.linked_creator_id || 'Pending',
+      'Free Pass Sent': p.free_pass_issued ? 'Yes' : 'No',
+      'Date Added': p.created_at ? new Date(p.created_at).toLocaleDateString() : '',
+    }));
+  };
+
   /* ── Export Handlers ── */
 
   const handleExportMaster = () => {
@@ -169,6 +199,7 @@ export default function AdminReportsPage() {
       const sheets = [
         { sheetName: 'Orders Ledger', data: getFormattedOrders() },
         { sheetName: 'Creators Registry', data: getFormattedCreators() },
+        { sheetName: 'CRM Pipeline Leads', data: getFormattedCrmProspects() },
         { sheetName: 'Commissions', data: getFormattedCommissions() },
         { sheetName: 'Payout Batches', data: getFormattedPayouts() },
         { sheetName: 'Coupons & Promo', data: getFormattedCoupons() },
@@ -190,6 +221,7 @@ export default function AdminReportsPage() {
   const currentFilteredOrders = filterByDate(orders, 'paid_at');
   const currentFilteredCommissions = filterByDate(commissions, 'created_at');
   const currentFilteredPayouts = filterByDate(payouts, 'paid_at');
+  const currentFilteredCrm = filterByDate(crmProspects, 'created_at');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
@@ -253,7 +285,7 @@ export default function AdminReportsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: '#ffffff', padding: '16px 20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
         <div>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Date Range Scope:</span>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '8px' }}>Applies to Orders, Commissions, and Payouts datasets</span>
+          <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '8px' }}>Applies to Orders, CRM Leads, Commissions, and Payouts datasets</span>
         </div>
 
         <div style={{ display: 'flex', gap: '4px', background: '#f8fafc', padding: '4px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
@@ -288,6 +320,46 @@ export default function AdminReportsPage() {
       {/* INDIVIDUAL DATASET CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
         
+        {/* CRM Leads & Pipeline */}
+        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CrmIcon size={18} />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{currentFilteredCrm.length} prospects</span>
+            </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>CRM Pipeline &amp; Leads</h3>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+              Complete outreach pipeline database with handles, follower counts, stages, emails, phone numbers, and follow-ups.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => exportSingle('crm_pipeline_leads', getFormattedCrmProspects, 'CRM Pipeline')}
+            disabled={loading || currentFilteredCrm.length === 0}
+            style={{
+              marginTop: '20px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: loading || currentFilteredCrm.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
+          >
+            <DownloadIcon size={14} />
+            <span>Download CRM Leads (.xlsx)</span>
+          </button>
+        </div>
+
         {/* Orders */}
         <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div>

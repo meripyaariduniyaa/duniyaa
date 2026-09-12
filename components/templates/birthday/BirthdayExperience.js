@@ -11,29 +11,12 @@ import WaxSealLetter from '../common/WaxSealLetter';
 
 /**
  * 🎂 VIRTUAL BIRTHDAY BASH (ID: birthday)
- * 8-Scene VIP Cinematic Celebration
- * Scene 1: The Midnight 3-2-1 Countdown
- * Scene 2: The Spotlight Grand Entrance
- * Scene 3: The Sky Sparkler Signature (Interactive Canvas)
- * Scene 4: The 5 Floating Mystery Balloons
- * Scene 5: The Birthday Awards Ceremony
- * Scene 6: The Memory Cinema (Vintage Polaroids)
- * Scene 7: The Candle Blowout & Fireworks
- * Scene 8: The Finale Letter & VIP Lifetime Pass
+ * 8-Scene Full-Bleed VIP Cinematic Celebration
  */
 export default function BirthdayExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
   const [countdown, setCountdown] = useState(3);
   const [unlockedSecrets, setUnlockedSecrets] = useState([true, false, false]);
-
-  useEffect(() => {
-    onReachEnd?.(scene === 8, () => {
-      setScene(1);
-      setCountdown(3);
-      setPoppedBalloons({});
-      setCandlesBlown(false);
-    });
-  }, [scene, onReachEnd]);
 
   // Scene 4: Balloon popping
   const [poppedBalloons, setPoppedBalloons] = useState({});
@@ -47,12 +30,29 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
   const giftClue = note?.custom_details?.gift_clue || 'Your biggest surprise is waiting in real life!';
   const photos = note?.image_urls || [];
 
+  useEffect(() => {
+    onReachEnd?.(scene === 8, () => {
+      setScene(1);
+      setCountdown(3);
+      setPoppedBalloons({});
+      setCandlesBlown(false);
+    });
+  }, [scene, onReachEnd]);
+
+  // Countdown timer for Scene 1
+  useEffect(() => {
+    if (scene === 1 && countdown > 0) {
+      const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [scene, countdown]);
+
   const balloons = [
-    { id: 'b1', title: 'A Secret Compliment', text: 'Your positive energy lights up every single room you step into.', color: '#f59e0b' },
-    { id: 'b2', title: 'The Unfiltered Truth', text: 'You are genuinely one of the most reliable and caring humans on Earth.', color: '#ec4899' },
-    { id: 'b3', title: 'An Inside Joke', text: specialMemory, color: '#8b5cf6' },
-    { id: 'b4', title: 'A Year Wish', text: 'May this year bring massive breakthroughs and unmatched peace.', color: '#3b82f6' },
-    { id: 'b5', title: 'Gift Clue', text: giftClue, color: '#10b981' },
+    { id: 'b1', title: 'Infinite Laughs', desc: 'Guaranteed 365 days of unhinged laughter and spontaneous fun.' },
+    { id: 'b2', title: 'Wild Adventures', desc: 'Unlocking new trips, delicious food quests, and road trips.' },
+    { id: 'b3', title: 'Career Breakthroughs', desc: 'Watching every single goal you set fall into place effortlessly.' },
+    { id: 'b4', title: 'Unconditional Love', desc: 'Never forgetting that you are deeply loved and cherished.' },
+    { id: 'b5', title: 'A Secret Surprise', desc: giftClue }
   ];
 
   const handlePopBalloon = (id) => {
@@ -63,18 +63,11 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
     }
   };
 
-  const handleBlowCandles = () => {
-    setCandlesBlown(true);
-    setUnlockedSecrets([true, true, true]);
-    setTimeout(() => {
-      setScene(8);
-    }, 2400);
-  };
-
   const awards = [
-    { title: 'The Golden Human Award', category: 'Best Energy & Kindness', icon: 'crown' },
-    { title: 'Chief Food Connoisseur', category: 'Master of Snacking & Good Taste', icon: 'toast' },
-    { title: 'Supreme Laugh Inducer', category: 'Turn Any Dull Moment Chaotic', icon: 'sparkle' },
+    { title: 'The World\'s Best Energy', category: 'Grand Trophy', icon: 'crown' },
+    { title: 'Master of Spontaneous Chaos', category: 'Golden Medal', icon: 'sparkle' },
+    { title: 'Always Having Our Back', category: 'Diamond Honor', icon: 'heart' },
+    { title: 'Unmatched Taste & Vibe', category: 'Hall of Fame', icon: 'toast' }
   ];
 
   return (
@@ -98,133 +91,144 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
           ? 'Blow The Candles'
           : 'VIP Keepsake'
       }
-      particleMode={candlesBlown || scene === 8 ? 'confetti' : 'stardust'}
+      particleMode="gold_confetti"
       theme="festive"
       unlockedSecrets={unlockedSecrets}
     >
       {/* ── SCENE 1: MIDNIGHT COUNTDOWN ── */}
       {scene === 1 && (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+        <div style={{ width: '100%', maxWidth: '780px', margin: '0 auto', textAlign: 'center', padding: '2rem 1rem' }}>
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="glass-card"
-            style={{
-              padding: '3.5rem 2rem',
-              borderRadius: '28px',
-              border: '2px solid rgba(245, 158, 11, 0.4)',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 35px rgba(245, 158, 11, 0.25)',
-              maxWidth: '520px',
-              margin: '0 auto',
-            }}
+            transition={{ duration: 0.6 }}
           >
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-              <GoldBadge name="sparkle" size={54} />
-            </div>
-
-            <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              VIP Birthday Premiere
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'block', marginBottom: '1.5rem' }}>
+              ✦ Live Birthday Broadcast ✦
             </span>
 
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.2rem, 5.5vw, 3.4rem)',
-                color: '#fff',
-                margin: '0 0 1.25rem',
-              }}
-            >
-              Ready For The Show, {recipient}?
-            </h1>
-
-            <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-              The theater lights are dimming. A personalized multi-stage celebration has been crafted exclusively for your special day.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.06, boxShadow: '0 0 35px rgba(245, 158, 11, 0.7)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setScene(2)}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '16px 40px',
-                borderRadius: '50px',
-                border: 'none',
-                fontSize: '1.15rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}
-            >
-              <GoldBadge name="crown" size={20} />
-              Start The Celebration
-            </motion.button>
+            <div style={{ margin: '2rem 0' }}>
+              <AnimatePresence mode="wait">
+                {countdown > 0 ? (
+                  <motion.div
+                    key={countdown}
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1.2, opacity: 1 }}
+                    exit={{ scale: 1.8, opacity: 0 }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    style={{
+                      fontFamily: '"Playfair Display", Georgia, serif',
+                      fontSize: 'clamp(5.5rem, 16vw, 10rem)',
+                      fontWeight: 900,
+                      color: '#fbbf24',
+                      textShadow: '0 0 50px rgba(251, 191, 36, 0.7), 0 0 100px rgba(245, 158, 11, 0.4)',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {countdown}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <h1
+                      style={{
+                        fontFamily: 'var(--font-dancing)',
+                        fontSize: 'clamp(3rem, 8vw, 5.5rem)',
+                        color: '#ffffff',
+                        textShadow: '0 0 35px rgba(251, 191, 36, 0.8)',
+                        margin: '0 0 1.5rem',
+                      }}
+                    >
+                      IT&apos;S YOUR BIRTHDAY!
+                    </h1>
+                    <p style={{ color: '#cbd5e1', fontSize: '1.2rem', maxWidth: '520px', margin: '0 auto 2.5rem' }}>
+                      The universe has been waiting 365 days for this exact celebration.
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.05, boxShadow: '0 0 45px rgba(245, 158, 11, 0.8)' }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setScene(2)}
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        color: '#000000',
+                        padding: '18px 46px',
+                        borderRadius: '999px',
+                        border: 'none',
+                        fontWeight: 800,
+                        fontSize: '1.15rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 10px 30px rgba(245, 158, 11, 0.4)',
+                      }}
+                    >
+                      Step Into The Spotlight &rarr;
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         </div>
       )}
 
       {/* ── SCENE 2: SPOTLIGHT GRAND ENTRANCE ── */}
       {scene === 2 && (
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 30 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="glass-card"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
-              padding: '3.5rem 2rem',
-              borderRadius: '28px',
-              border: '2px solid rgba(245, 158, 11, 0.4)',
-              background: 'radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.15) 0%, rgba(0,0,0,0.7) 100%)',
+              padding: 'clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 3rem)',
+              borderRadius: '32px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              backdropFilter: 'blur(30px)',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(245, 158, 11, 0.15)',
             }}
           >
-            <motion.div
-              animate={{ rotate: [0, -10, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-              style={{ display: 'inline-flex', marginBottom: '1.5rem' }}
-            >
-              <GoldBadge name="crown" size={68} />
-            </motion.div>
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.5rem' }}>
+              <GoldBadge name="crown" size={60} />
+            </div>
 
-            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f59e0b', letterSpacing: '0.25em', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
-              All Eyes On The Star
+            <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '1rem' }}>
+              VIP Guest of Honor
             </span>
 
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.6rem, 6vw, 3.8rem)',
+                fontSize: 'clamp(2.5rem, 6vw, 4.2rem)',
                 color: '#fff',
-                margin: '0 0 1rem',
-                textShadow: '0 0 25px rgba(245, 158, 11, 0.6)',
+                margin: '0 0 1.25rem',
+                textShadow: '0 0 30px rgba(251, 191, 36, 0.4)',
               }}
             >
               Happy Birthday, {recipient}!
             </h1>
 
-            <p style={{ color: '#cbd5e1', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
-              Today is the one day every year dedicated completely to celebrating your existence and the joy you bring to everyone.
+            <p style={{ color: '#cbd5e1', fontSize: '1.1rem', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 2.5rem' }}>
+              Tonight is entirely dedicated to your laughter, your dreams, and all the brilliance you effortlessly bring into our lives.
             </p>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setScene(3)}
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                color: '#000000',
+                padding: '16px 42px',
+                borderRadius: '999px',
                 border: 'none',
+                fontWeight: 800,
                 fontSize: '1.05rem',
-                fontWeight: 700,
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
               }}
             >
-              Ignite Birthday Sparkler
+              Write Your Sky Sparkler Wish &rarr;
             </motion.button>
           </motion.div>
         </div>
@@ -232,97 +236,94 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
 
       {/* ── SCENE 3: SKY SPARKLER SIGNATURE ── */}
       {scene === 3 && (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Scene III: Make A Wish
+        <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Scene III: Interactive Sky Sparkler
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              Golden Sparkler Canvas
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              Draw Your Midnight Wish
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Drag or touch across the dark sky to write your birthday wish in shimmering sparks.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Drag your finger or cursor on the night sky canvas to light glowing gold sparkler trails.
             </p>
           </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <SparklerCanvas />
+          <div style={{ marginBottom: '2.5rem' }}>
+            <SparklerCanvas onDraw={() => {}} />
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => setScene(4)}
             style={{
               background: 'linear-gradient(135deg, #f59e0b, #d97706)',
               color: '#000',
-              padding: '14px 34px',
-              borderRadius: '50px',
+              padding: '16px 40px',
+              borderRadius: '999px',
               border: 'none',
-              fontWeight: 700,
+              fontWeight: 800,
+              fontSize: '1.05rem',
               cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
             }}
           >
-            Wish Recorded &rarr; Pop Balloons
+            Pop The Mystery Balloons &rarr;
           </motion.button>
         </div>
       )}
 
-      {/* ── SCENE 4: 5 FLOATING MYSTERY BALLOONS ── */}
+      {/* ── SCENE 4: FLOATING MYSTERY BALLOONS ── */}
       {scene === 4 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Scene IV: Interactive Revelations
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Scene IV: Golden Surprises
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              Pop The Celebration Balloons
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              Pop The 5 Mystery Balloons
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Tap each floating balloon to pop it and reveal secret birthday messages.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Tap each floating golden balloon to pop it and reveal what destiny holds for you this year.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
-            {balloons.map((b) => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            {balloons.map((b, idx) => {
               const isPopped = poppedBalloons[b.id];
               return (
                 <motion.div
                   key={b.id}
-                  whileHover={!isPopped ? { scale: 1.06, y: -6 } : {}}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   onClick={() => handlePopBalloon(b.id)}
                   style={{
-                    background: isPopped ? 'rgba(255, 255, 255, 0.06)' : `radial-gradient(circle at 30% 30%, ${b.color}88 0%, rgba(20,20,20,0.8) 100%)`,
-                    border: isPopped ? '1px solid rgba(255, 255, 255, 0.15)' : `2px solid ${b.color}`,
+                    background: isPopped ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isPopped ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
                     borderRadius: '24px',
-                    padding: '1.5rem',
-                    textAlign: 'center',
+                    padding: '2rem',
                     cursor: 'pointer',
-                    minHeight: '160px',
+                    backdropFilter: 'blur(20px)',
+                    minHeight: '200px',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    boxShadow: isPopped ? 'none' : `0 10px 25px ${b.color}33`,
-                    transition: 'all 0.3s ease',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  {!isPopped ? (
-                    <>
-                      <div style={{ width: '44px', height: '54px', background: b.color, borderRadius: '50% 50% 50% 50% / 40% 40% 60% 60%', margin: '0 auto 0.75rem', boxShadow: 'inset -5px -5px 10px rgba(0,0,0,0.3)' }} />
-                      <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>{b.title}</div>
-                      <span style={{ fontSize: '0.75rem', color: '#fbbf24', marginTop: '4px' }}>Tap to Pop!</span>
-                    </>
-                  ) : (
-                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
-                        {b.title}
-                      </div>
-                      <p style={{ color: '#fff', fontSize: '0.9rem', lineHeight: 1.4, margin: 0 }}>
-                        {b.text}
-                      </p>
-                    </motion.div>
-                  )}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <GoldBadge name="sparkle" size={26} />
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isPopped ? '#4ade80' : '#fbbf24', letterSpacing: '0.1em' }}>
+                        {isPopped ? '💥 POPPED!' : '🎈 TAP TO POP'}
+                      </span>
+                    </div>
+                    <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+                      {b.title}
+                    </h3>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                      {isPopped ? b.desc : 'Pop balloon to inspect secret wish.'}
+                    </p>
+                  </div>
                 </motion.div>
               );
             })}
@@ -330,20 +331,22 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setScene(5)}
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '16px 40px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
               }}
             >
-              Proceed to Awards Ceremony
+              Enter Official Awards &rarr;
             </motion.button>
           </div>
         </div>
@@ -351,61 +354,60 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
 
       {/* ── SCENE 5: BIRTHDAY AWARDS ── */}
       {scene === 5 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Scene V: Official Honors
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              The 2026 Birthday Honors
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              The Official VIP Honors
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Unanimously voted by everyone who knows and loves you.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Unanimously voted by everyone who knows and cherishes you.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
             {awards.map((aw, idx) => (
               <motion.div
                 key={idx}
                 whileHover={{ y: -6, scale: 1.02 }}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  borderRadius: '20px',
-                  padding: '1.75rem 1.25rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                  borderRadius: '24px',
+                  padding: '2rem 1.5rem',
                   textAlign: 'center',
+                  backdropFilter: 'blur(20px)',
                 }}
               >
-                <div style={{ display: 'inline-flex', padding: '14px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1rem' }}>
-                  <GoldBadge name={aw.icon} size={36} />
+                <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.12)', borderRadius: '50%', marginBottom: '1.25rem' }}>
+                  <GoldBadge name={aw.icon} size={40} />
                 </div>
-                <h3 style={{ color: '#fff', fontSize: '1.15rem', margin: '0 0 0.5rem' }}>{aw.title}</h3>
-                <p style={{ color: '#fbbf24', fontSize: '0.85rem', margin: 0, fontWeight: 600 }}>{aw.category}</p>
+                <h3 style={{ color: '#fff', fontSize: '1.2rem', margin: '0 0 0.5rem', fontWeight: 700 }}>{aw.title}</h3>
+                <p style={{ color: '#fbbf24', fontSize: '0.85rem', margin: 0, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{aw.category}</p>
               </motion.div>
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-            <WholesomeMemeSticker type="stolenFries" size={80} caption="Officially certified VIP!" />
-          </div>
-
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setScene(6)}
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '16px 40px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
               }}
             >
-              Enter The Memory Cinema
+              Enter The Memory Cinema &rarr;
             </motion.button>
           </div>
         </div>
@@ -413,224 +415,206 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
 
       {/* ── SCENE 6: MEMORY CINEMA ── */}
       {scene === 6 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Scene VI: Nostalgic Reel
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
               The Memory Cinema
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Framed moments of pure happiness, laughs, and friendship.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Swipe through our shared scrapbook of adventures and laughter.
             </p>
           </div>
 
-          {photos.length > 0 ? (
-            <div style={{ marginBottom: '2.5rem' }}>
-              <PolaroidStack photos={photos} />
-            </div>
-          ) : (
-            <div
+          <div style={{ marginBottom: '3rem' }}>
+            <PolaroidStack photos={photos.length > 0 ? photos : ['/images/sample1.jpg', '/images/sample2.jpg']} />
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setScene(7)}
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#000',
+              padding: '16px 42px',
+              borderRadius: '999px',
+              border: 'none',
+              fontWeight: 800,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
+            }}
+          >
+            Light The Birthday Cake &rarr;
+          </motion.button>
+        </div>
+      )}
+
+      {/* ── SCENE 7: 3D CAKE & CANDLE BLOWOUT ── */}
+      {scene === 7 && (
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Scene VII: Make a Wish
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', color: '#fff', margin: '0.35rem 0' }}>
+              Blow Out The Candles!
+            </h2>
+            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600 }}>
+              Tap the glowing candles to blow them out and make your wish come true.
+            </p>
+          </div>
+
+          {/* Birthday Cake */}
+          <div style={{ margin: '0 auto 3rem', display: 'flex', justifyContent: 'center' }}>
+            <motion.div
+              whileHover={{ scale: candlesBlown ? 1 : 1.04 }}
+              onClick={() => setCandlesBlown(true)}
               style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px dashed rgba(245, 158, 11, 0.3)',
-                borderRadius: '24px',
-                padding: '3rem 2rem',
-                textAlign: 'center',
-                maxWidth: '480px',
-                margin: '0 auto 2.5rem',
+                width: 'min(88vw, 340px)',
+                height: '240px',
+                borderRadius: '32px',
+                background: 'linear-gradient(145deg, #2e0854, #120422)',
+                border: '2px solid rgba(245, 158, 11, 0.4)',
+                boxShadow: '0 30px 70px rgba(0,0,0,0.7), inset 0 2px 10px rgba(255,255,255,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                position: 'relative',
               }}
             >
-              <GoldBadge name="sparkle" size={48} />
-              <h3 style={{ color: '#fff', marginTop: '1rem' }}>Pure Golden Moments</h3>
-              <p style={{ color: '#cbd5e1', fontSize: '0.95rem' }}>
-                Every single second spent with you is a memory worth treasuring for a lifetime.
-              </p>
-            </div>
-          )}
+              {candlesBlown ? (
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  style={{ textAlign: 'center' }}
+                >
+                  <span style={{ fontSize: '64px', display: 'block', marginBottom: '8px' }}>✨🎂🎉</span>
+                  <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
+                    WISH GRANTED!
+                  </p>
+                </motion.div>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '64px', display: 'block', animation: 'bounce 1.5s infinite alternate' }}>🕯️🎂🕯️</span>
+                  <p style={{ color: '#fbbf24', fontSize: '0.95rem', fontWeight: 800, margin: '10px 0 0', letterSpacing: '0.1em' }}>
+                    TAP TO BLOW CANDLES
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </div>
 
-          <div style={{ textAlign: 'center' }}>
+          {candlesBlown && (
             <motion.button
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setScene(7)}
+              onClick={() => setScene(8)}
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '18px 46px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1.15rem',
                 cursor: 'pointer',
+                boxShadow: '0 10px 30px rgba(245, 158, 11, 0.45)',
               }}
             >
-              Ready For The Birthday Cake &rarr;
+              Claim VIP Lifetime Birthday Pass &rarr;
             </motion.button>
-          </div>
+          )}
         </div>
       )}
 
-      {/* ── SCENE 7: CAKE BLOWOUT & FIREWORKS ── */}
-      {scene === 7 && (
-        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-          <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="glass-card"
-            style={{
-              padding: '3.5rem 2rem',
-              borderRadius: '28px',
-              border: '2px solid rgba(245, 158, 11, 0.4)',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-              maxWidth: '540px',
-              margin: '0 auto',
-            }}
-          >
-            <motion.div
-              animate={{
-                scale: candlesBlown ? [1, 1.2, 1] : [1, 1.04, 1],
-              }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              style={{ display: 'inline-flex', marginBottom: '1.5rem' }}
-            >
-              <GoldBadge name="cake" size={76} />
-            </motion.div>
-
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 3.4rem)',
-                color: '#fff',
-                margin: '0 0 1rem',
-              }}
-            >
-              {candlesBlown ? 'WISH GRANTED!' : 'Make Your Secret Wish'}
-            </h1>
-
-            <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-              {candlesBlown
-                ? 'The universe has received your wish! Confetti and fireworks are bursting across the sky!'
-                : 'Close your eyes, think of the one thing you want most this year, and blow out the candles!'}
-            </p>
-
-            {!candlesBlown && (
-              <motion.button
-                whileHover={{ scale: 1.08, boxShadow: '0 0 35px rgba(245, 158, 11, 0.8)' }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleBlowCandles}
-                style={{
-                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                  color: '#000',
-                  padding: '16px 42px',
-                  borderRadius: '50px',
-                  border: 'none',
-                  fontSize: '1.2rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <GoldBadge name="candle" size={22} />
-                Blow Out The Candles!
-              </motion.button>
-            )}
-          </motion.div>
-        </div>
-      )}
-
-      {/* ── SCENE 8: THE FINALE LETTER & VIP PASS ── */}
+      {/* ── SCENE 8: VIP LIFETIME PASS & LETTER ── */}
       {scene === 8 && (
-        <div>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '50%', marginBottom: '1rem' }}>
-              <GoldBadge name="crown" size={54} />
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
+              <GoldBadge name="crown" size={56} />
             </div>
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.5rem, 6vw, 3.8rem)',
+                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
                 color: '#fff',
                 margin: '0 0 0.5rem',
               }}
             >
-              The Grand Finale
+              Lifetime VIP Golden Pass
             </h1>
-            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600 }}>
-              Your lifetime VIP birthday card & personal tribute.
+            <p style={{ color: '#fbbf24', fontSize: '1.15rem', fontWeight: 600 }}>
+              Officially minted for {recipient}.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            {/* VIP Pass */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem', marginBottom: '3rem' }}>
+            {/* VIP Pass Card */}
             <div
               style={{
-                background: 'radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.2) 0%, rgba(0,0,0,0.85) 100%)',
-                border: '2px solid #f59e0b',
-                borderRadius: '24px',
-                padding: '2rem',
-                boxShadow: '0 0 35px rgba(245, 158, 11, 0.25)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: '28px',
+                padding: '2.25rem',
+                backdropFilter: 'blur(20px)',
               }}
             >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.2em' }}>VIP ALL-ACCESS PASS</span>
-                  <GoldBadge name="crown" size={24} />
-                </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>
-                  {recipient}
-                </div>
-                <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                  VALIDITY: FOREVER • UNLIMITED SMILES & FAVOR
-                </div>
-                <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                  Entitles holder to guaranteed hugs, listening ears, spontaneous food outings, and lifelong unconditional support.
-                </p>
+              <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <GoldBadge name="crown" size={24} />
+                Exclusive VIP Privileges
+              </h3>
+              <div style={{ background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '14px', padding: '8px 14px', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '1rem' }}>
+                VALIDITY: FOREVER • UNLIMITED SMILES
               </div>
-
-              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                <WholesomeMemeSticker type="bearHug" size={75} caption="Lifetime VIP holder" />
-              </div>
+              <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.7 }}>
+                Entitles holder to guaranteed hugs, listening ears, spontaneous food outings, and lifelong unconditional support.
+              </p>
             </div>
 
             {/* Gift Clue Card */}
             <div
               style={{
-                background: 'rgba(255, 255, 255, 0.04)',
+                background: 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: '24px',
-                padding: '2rem',
+                borderRadius: '28px',
+                padding: '2.25rem',
+                backdropFilter: 'blur(20px)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
               }}
             >
               <div>
-                <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <GoldBadge name="sparkle" size={20} />
+                <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <GoldBadge name="sparkle" size={24} />
                   Secret Gift Clue
                 </h3>
-                <p style={{ color: '#fbbf24', fontSize: '1.05rem', fontWeight: 600, margin: '0 0 1rem' }}>
+                <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1rem' }}>
                   {giftClue}
                 </p>
-                <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.7 }}>
                   May this birthday be the launchpad for the most extraordinary year of your life yet.
                 </p>
               </div>
 
-              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-                <GoldBadge name="toast" size={48} />
+              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                <WholesomeMemeSticker caption="Lifetime VIP Holder" />
               </div>
             </div>
           </div>
 
           {/* Letter / Keepsake */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <WaxSealLetter
               title={`A Birthday Letter for ${recipient}`}
               content={customMsg}

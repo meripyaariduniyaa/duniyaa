@@ -19,13 +19,24 @@ export async function GET(request) {
   try {
     const user = await requireUser(request);
     const db = getAdminDb();
-    const creatorSnap = await db.collection('creators').doc(user.uid).get();
+    
+    // 1. Try lookup by uid
+    let creatorSnap = await db.collection('creators').doc(user.uid).get();
 
-    if (!creatorSnap.exists) {
+    // 2. Fallback lookup by email
+    if (!creatorSnap.exists && user.email) {
+      const byEmail = await db.collection('creators').where('email', '==', user.email.toLowerCase().trim()).limit(1).get();
+      if (!byEmail.empty) {
+        creatorSnap = byEmail.docs[0];
+      }
+    }
+
+    if (!creatorSnap || !creatorSnap.exists) {
       return NextResponse.json({ creator: null, applied: false });
     }
 
     const creatorData = serialize(creatorSnap);
+    const creatorId = creatorData.id;
 
     if (creatorData.status === 'pending' || creatorData.status === 'suspended' || creatorData.status === 'rejected') {
       return NextResponse.json({
@@ -38,12 +49,12 @@ export async function GET(request) {
     }
 
     const [orders, clicks, commissions, payouts, gifts, coupons] = await Promise.all([
-      db.collection('orders').where('creator_id', '==', user.uid).get(),
-      db.collection('referralClicks').where('creator_id', '==', user.uid).get(),
-      db.collection('commissions').where('creator_id', '==', user.uid).get(),
-      db.collection('payouts').where('creator_id', '==', user.uid).get(),
-      db.collection('creatorGifts').where('creator_id', '==', user.uid).get(),
-      db.collection('coupons').where('creator_id', '==', user.uid).get(),
+      db.collection('orders').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('orders').where('creator_id', '==', creatorId).get()),
+      db.collection('referralClicks').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('referralClicks').where('creator_id', '==', creatorId).get()),
+      db.collection('commissions').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('commissions').where('creator_id', '==', creatorId).get()),
+      db.collection('payouts').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('payouts').where('creator_id', '==', creatorId).get()),
+      db.collection('creatorGifts').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('creatorGifts').where('creator_id', '==', creatorId).get()),
+      db.collection('coupons').where('creator_id', 'in', [creatorId, user.uid]).get().catch(() => db.collection('coupons').where('creator_id', '==', creatorId).get()),
     ]);
 
     const orderList = orders.docs.map(serialize);
@@ -75,6 +86,17 @@ export async function PATCH(request) {
   try {
     const user = await requireUser(request);
     const body = await request.json();
+    const db = getAdminDb();
+    
+    let creatorSnap = await db.collection('creators').doc(user.uid).get();
+    let targetDocRef = db.collection('creators').doc(user.uid);
+    if (!creatorSnap.exists && user.email) {
+      const byEmail = await db.collection('creators').where('email', '==', user.email.toLowerCase().trim()).limit(1).get();
+      if (!byEmail.empty) {
+        targetDocRef = byEmail.docs[0].ref;
+      }
+    }
+
     const allowed = ['name', 'bio', 'instagram_url', 'youtube_url', 'profile_image', 'phone', 'terms_accepted_at', 'terms_version'];
     const update = {};
 
@@ -85,10 +107,9 @@ export async function PATCH(request) {
     });
 
     update.updated_at = FieldValue.serverTimestamp();
-    await getAdminDb().collection('creators').doc(user.uid).update(update);
+    await targetDocRef.update(update);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Could not update profile.' }, { status: 403 });
   }
 }
-

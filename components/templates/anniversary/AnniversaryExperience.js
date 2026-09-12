@@ -13,25 +13,11 @@ import WaxSealLetter from '../common/WaxSealLetter';
 
 /**
  * 🥂 ANNIVERSARY SPECIAL (ID: anniversary)
- * 7-Chapter Nostalgic Love Museum & Milestone Odyssey
- * Chapter 1: The Live Relationship Time Counter
- * Chapter 2: The Milestone Map Timeline
- * Chapter 3: The 5 Vow Tablets
- * Chapter 4: The Relationship Statistics Dashboard
- * Chapter 5: The Love Museum (Draggable Polaroids)
- * Chapter 6: The Interactive Champagne Toast
- * Chapter 7: The Wax-Sealed Letter & Eternal Keepsake
+ * 7-Chapter Full-Bleed Haute-Couture Love Museum
  */
 export default function AnniversaryExperience({ note, isPreview = false, onReachEnd }) {
   const [chapter, setChapter] = useState(1);
   const [unlockedSecrets, setUnlockedSecrets] = useState([true, false, false]);
-
-  useEffect(() => {
-    onReachEnd?.(chapter === 7, () => {
-      setChapter(1);
-      setRevealedVows({});
-    });
-  }, [chapter, onReachEnd]);
 
   // Live seconds elapsed
   const [timeElapsed, setTimeElapsed] = useState({ days: 730, hours: 14, minutes: 22, seconds: 45 });
@@ -44,6 +30,13 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
   const yearsTogether = note?.custom_details?.years_together || '2';
   const specialMemory = note?.custom_details?.special_memory || 'The unforgettable evening we sat under the stars and talked about our future until sunrise.';
   const photos = note?.image_urls || [];
+
+  useEffect(() => {
+    onReachEnd?.(chapter === 7, () => {
+      setChapter(1);
+      setRevealedVows({});
+    });
+  }, [chapter, onReachEnd]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -107,10 +100,16 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
     },
     {
       date: 'Chapter IV',
-      title: 'Today & Forever',
-      description: `Celebrating ${yearsTogether} years of magic, memories, and our growing legacy of love.`,
+      title: 'Building Our Safe Haven',
+      description: 'Creating a private little universe filled with our own jokes, comfort foods, and quiet peace.',
       icon: 'toast',
     },
+    {
+      date: 'Chapter V',
+      title: 'Decades Still Ahead',
+      description: specialMemory || 'Looking into each other\'s eyes and knowing that the best is still yet to come.',
+      icon: 'crown',
+    }
   ];
 
   return (
@@ -132,92 +131,91 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
           ? 'Champagne Toast'
           : 'Eternal Keepsake'
       }
-      particleMode="embers"
+      particleMode="bubbles"
       theme="golden"
       unlockedSecrets={unlockedSecrets}
     >
-      {/* ── CHAPTER 1: LIVE RELATIONSHIP TIME COUNTER ── */}
+      {/* ── CHAPTER 1: LIVE TIME COUNTER ── */}
       {chapter === 1 && (
-        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="glass-card"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
             style={{
-              padding: '3.5rem 2rem',
-              borderRadius: '28px',
-              border: '2px solid rgba(245, 158, 11, 0.4)',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-              maxWidth: '600px',
-              margin: '0 auto',
+              padding: 'clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 5vw, 3.5rem)',
+              borderRadius: '32px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              backdropFilter: 'blur(30px)',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(212, 175, 55, 0.15)',
             }}
           >
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
-              <GoldBadge name="toast" size={54} />
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(212, 175, 55, 0.12)', borderRadius: '50%', marginBottom: '1.5rem', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
+              <GoldBadge name="crown" size={60} />
             </div>
 
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
-              {yearsTogether} Years Anniversary Odyssey
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fde047', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'block', marginBottom: '1rem' }}>
+              ✦ Live Relationship Chronometer ✦
             </span>
 
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.3rem, 5.5vw, 3.5rem)',
+                fontSize: 'clamp(2.4rem, 6vw, 4.2rem)',
                 color: '#fff',
-                margin: '0 0 1.5rem',
+                margin: '0 0 1rem',
+                textShadow: '0 0 30px rgba(212, 175, 55, 0.4)',
               }}
             >
-              Every Second With You
+              Happy {yearsTogether} Year Anniversary, {recipient}
             </h1>
 
-            {/* Time Ticker Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '0.75rem',
-                background: 'rgba(0,0,0,0.4)',
-                padding: '1.5rem 1rem',
-                borderRadius: '20px',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                marginBottom: '2rem',
-              }}
-            >
+            <p style={{ color: '#cbd5e1', fontSize: '1.1rem', maxWidth: '560px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+              Every single second by your side has been an adventure. Here is the exact measure of our journey together:
+            </p>
+
+            {/* Time Counter Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', maxWidth: '580px', margin: '0 auto 2.5rem' }}>
               {[
-                { label: 'Days', val: timeElapsed.days },
-                { label: 'Hours', val: timeElapsed.hours },
-                { label: 'Minutes', val: timeElapsed.minutes },
-                { label: 'Seconds', val: timeElapsed.seconds },
+                { val: timeElapsed.days, label: 'DAYS' },
+                { val: timeElapsed.hours, label: 'HOURS' },
+                { val: timeElapsed.minutes, label: 'MINS' },
+                { val: timeElapsed.seconds, label: 'SECS' }
               ].map((item, idx) => (
-                <div key={idx} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)', fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>
-                    {String(item.val).padStart(2, '0')}
+                <div
+                  key={idx}
+                  style={{
+                    background: 'rgba(212, 175, 55, 0.08)',
+                    border: '1px solid rgba(212, 175, 55, 0.25)',
+                    borderRadius: '20px',
+                    padding: '1.25rem 0.5rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', fontWeight: 800, color: '#fbbf24', fontFamily: 'monospace' }}>
+                    {item.val}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '4px' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fef08a', letterSpacing: '0.14em', marginTop: '4px' }}>
                     {item.label}
                   </div>
                 </div>
               ))}
             </div>
 
-            <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-              And every single tick of the clock has made my love for you deeper and stronger.
-            </p>
-
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(2)}
               style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: 'linear-gradient(135deg, #d4af37, #b45309)',
                 color: '#000',
-                padding: '14px 36px',
-                borderRadius: '50px',
+                padding: '16px 42px',
+                borderRadius: '999px',
                 border: 'none',
                 fontWeight: 800,
                 fontSize: '1.05rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(212, 175, 55, 0.35)',
               }}
             >
               Walk Our Milestone Map &rarr;
@@ -226,18 +224,18 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
         </div>
       )}
 
-      {/* ── CHAPTER 2: MILESTONE MAP TIMELINE ── */}
+      {/* ── CHAPTER 2: MILESTONE TIMELINE ── */}
       {chapter === 2 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter II: The Journey
+        <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fde047', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter II: The Odyssey
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
               Our Milestone Map
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              From stranger to best friend to the love of my life.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              From strangers to best friends to partners for life.
             </p>
           </div>
 
@@ -247,41 +245,43 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(3)}
               style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: 'linear-gradient(135deg, #d4af37, #b45309)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '16px 40px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(212, 175, 55, 0.35)',
               }}
             >
-              Reveal The 5 Vow Tablets
+              Reveal The 5 Vow Tablets &rarr;
             </motion.button>
           </div>
         </div>
       )}
 
-      {/* ── CHAPTER 3: THE 5 VOW TABLETS ── */}
+      {/* ── CHAPTER 3: 5 VOW TABLETS ── */}
       {chapter === 3 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fde047', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Chapter III: Sacred Promises
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
               The 5 Illuminated Vows
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
               Tap each illuminated tablet to unseal our mutual promises.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
             {vows.map((v) => {
               const isRevealed = revealedVows[v.id];
               return (
@@ -290,29 +290,30 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
                   whileHover={{ y: -6, scale: 1.02 }}
                   onClick={() => handleRevealVow(v.id)}
                   style={{
-                    background: isRevealed ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    border: isRevealed ? '2px solid #f59e0b' : '1px dashed rgba(245, 158, 11, 0.3)',
-                    borderRadius: '22px',
-                    padding: '1.75rem 1.25rem',
+                    background: isRevealed ? 'rgba(212, 175, 55, 0.14)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isRevealed ? '1px solid rgba(212, 175, 55, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '24px',
+                    padding: '2rem',
                     textAlign: 'center',
                     cursor: 'pointer',
-                    boxShadow: isRevealed ? '0 0 25px rgba(245, 158, 11, 0.2)' : 'none',
-                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(20px)',
+                    minHeight: '200px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  <div style={{ display: 'inline-flex', padding: '12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                    <GoldBadge name={v.icon} size={32} />
-                  </div>
-                  <h3 style={{ color: '#fff', fontSize: '1.05rem', margin: '0 0 0.5rem' }}>{v.title}</h3>
-                  {isRevealed ? (
-                    <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.5, margin: 0 }}>
-                      {v.desc}
+                  <div>
+                    <div style={{ display: 'inline-flex', padding: '14px', background: 'rgba(212, 175, 55, 0.12)', borderRadius: '50%', marginBottom: '1rem' }}>
+                      <GoldBadge name={v.icon} size={32} />
+                    </div>
+                    <h3 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+                      {v.title}
+                    </h3>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                      {isRevealed ? v.desc : 'Tap to reveal vow.'}
                     </p>
-                  ) : (
-                    <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700 }}>
-                      Tap to Unseal
-                    </span>
-                  )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -320,20 +321,22 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(4)}
               style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: 'linear-gradient(135deg, #d4af37, #b45309)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '16px 40px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(212, 175, 55, 0.35)',
               }}
             >
-              Examine Relationship Stats
+              Inspect Relationship Statistics &rarr;
             </motion.button>
           </div>
         </div>
@@ -341,43 +344,41 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
 
       {/* ── CHAPTER 4: RELATIONSHIP STATISTICS ── */}
       {chapter === 4 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter IV: Data of Us
+        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fde047', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter IV: Quantitative Love
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              Relationship Infographic
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              Our Love Statistics
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              The numbers don’t lie: We are legendary.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              The empirical data proving we are unstoppable together.
             </p>
           </div>
 
           <div style={{ marginBottom: '2.5rem' }}>
-            <RelationshipStatsCard />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-            <WholesomeMemeSticker type="talk3am" size={80} caption="3 AM Discussions Champion" />
+            <RelationshipStatsCard years={yearsTogether} />
           </div>
 
           <div style={{ textAlign: 'center' }}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setChapter(5)}
               style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: 'linear-gradient(135deg, #d4af37, #b45309)',
                 color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
+                padding: '16px 40px',
+                borderRadius: '999px',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: '1rem',
                 cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(212, 175, 55, 0.35)',
               }}
             >
-              Enter The Love Museum
+              Enter The Love Museum &rarr;
             </motion.button>
           </div>
         </div>
@@ -385,83 +386,60 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
 
       {/* ── CHAPTER 5: THE LOVE MUSEUM ── */}
       {chapter === 5 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter V: Curated Memories
+        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fde047', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter V: The Gallery
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              The Love Museum Gallery
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
+              The Love Museum
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Every photo holds a chapter of our story.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Every photo in this gallery is a milestone in our forever story.
             </p>
           </div>
 
-          {photos.length > 0 ? (
-            <div style={{ marginBottom: '2.5rem' }}>
-              <PolaroidStack photos={photos} />
-            </div>
-          ) : (
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px dashed rgba(245, 158, 11, 0.3)',
-                borderRadius: '24px',
-                padding: '3rem 2rem',
-                textAlign: 'center',
-                maxWidth: '480px',
-                margin: '0 auto 2.5rem',
-              }}
-            >
-              <GoldBadge name="heart" size={48} />
-              <h3 style={{ color: '#fff', marginTop: '1rem' }}>Our Golden Archive</h3>
-              <p style={{ color: '#cbd5e1', fontSize: '0.95rem' }}>
-                {specialMemory}
-              </p>
-            </div>
-          )}
-
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                setChapter(6);
-                setUnlockedSecrets([true, true, true]);
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '14px 34px',
-                borderRadius: '50px',
-                border: 'none',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Ready For The Champagne Toast &rarr;
-            </motion.button>
+          <div style={{ marginBottom: '3rem' }}>
+            <PolaroidStack photos={photos.length > 0 ? photos : ['/images/sample1.jpg', '/images/sample2.jpg']} />
           </div>
+
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setChapter(6)}
+            style={{
+              background: 'linear-gradient(135deg, #d4af37, #b45309)',
+              color: '#000',
+              padding: '16px 42px',
+              borderRadius: '999px',
+              border: 'none',
+              fontWeight: 800,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 25px rgba(212, 175, 55, 0.35)',
+            }}
+          >
+            Toast To Our Future &rarr;
+          </motion.button>
         </div>
       )}
 
-      {/* ── CHAPTER 6: CLINKING CHAMPAGNE TOAST ── */}
+      {/* ── CHAPTER 6: CHAMPAGNE TOAST ── */}
       {chapter === 6 && (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              Chapter VI: Raise A Glass
+        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fde047', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Chapter VI: Celebration
             </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: '2.5rem', color: '#fff', margin: '0.25rem 0' }}>
-              The Interactive Toast
+            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', color: '#fff', margin: '0.35rem 0' }}>
+              The Champagne Toast
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-              Drag or tap the glasses to clink them together in celebration.
+            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
+              Tap or drag the glasses to clink them together in celebration.
             </p>
           </div>
 
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <ClinkingGlasses onClinkComplete={() => {}} />
           </div>
 
@@ -470,14 +448,15 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
             whileTap={{ scale: 0.95 }}
             onClick={() => setChapter(7)}
             style={{
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              background: 'linear-gradient(135deg, #d4af37, #b45309)',
               color: '#000',
-              padding: '14px 36px',
-              borderRadius: '50px',
+              padding: '18px 44px',
+              borderRadius: '999px',
               border: 'none',
               fontWeight: 800,
-              fontSize: '1.05rem',
+              fontSize: '1.1rem',
               cursor: 'pointer',
+              boxShadow: '0 10px 30px rgba(212, 175, 55, 0.4)',
             }}
           >
             Read Our Anniversary Letter &rarr;
@@ -487,28 +466,28 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
 
       {/* ── CHAPTER 7: WAX SEAL LETTER & KEEPSAKE ── */}
       {chapter === 7 && (
-        <div>
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '50%', marginBottom: '1rem' }}>
-              <GoldBadge name="crown" size={54} />
+            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(212, 175, 55, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
+              <GoldBadge name="crown" size={56} />
             </div>
             <h1
               style={{
                 fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 3.8rem)',
+                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
                 color: '#fff',
                 margin: '0 0 0.5rem',
               }}
             >
               Happy Anniversary, {recipient}
             </h1>
-            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600 }}>
+            <p style={{ color: '#fbbf24', fontSize: '1.15rem', fontWeight: 600 }}>
               Cheers to all that we have built and the decades still ahead.
             </p>
           </div>
 
           {/* Letter */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '3rem' }}>
             <WaxSealLetter
               title={`Anniversary Letter for ${recipient}`}
               content={customMsg}
@@ -518,7 +497,7 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <WholesomeMemeSticker type="bearHug" size={80} caption="Here's to forever!" />
+            <WholesomeMemeSticker caption="Here's to forever together" />
           </div>
         </div>
       )}

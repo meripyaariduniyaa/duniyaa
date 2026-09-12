@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/creator-auth';
 import { normalizeCode, normalizeSlug } from '@/lib/creator-club';
 
@@ -9,9 +9,22 @@ export async function POST(request, { params }) {
     const admin = await requireAdmin(request);
     const { id } = await params;
     const body = await request.json();
-    const { issue_gift_pass = false, template_id = 'proposal', discount_rate = 20 } = body;
+
+    const {
+      signing_email,
+      password,
+      creator_name,
+      phone,
+      slug: customSlug,
+      coupon_code: customCouponCode,
+      commission_rate = 15,
+      discount_rate = 20,
+      issue_gift_pass = false,
+      template_id = 'proposal',
+    } = body;
 
     const db = getAdminDb();
+    const auth = getAdminAuth();
     const prospectRef = db.collection('crm_prospects').doc(id);
     const prospectSnap = await prospectRef.get();
 
@@ -28,68 +41,108 @@ export async function POST(request, { params }) {
       }, { status: 409 });
     }
 
-    // Build creator slug from name/handle
-    const rawSlug = prospect.handle
-      ? prospect.handle.replace(/^@/, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
-      : prospect.name;
-    let slug = normalizeSlug(rawSlug);
-
-    // Ensure slug is unique
-    const existingSlug = await db.collection('creators').where('slug', '==', slug).limit(1).get();
-    if (!existingSlug.empty) {
-      const randomSuffix = Math.floor(10 + Math.random() * 90);
-      slug = `${slug}${randomSuffix}`;
+    // 1. Determine and validate email
+    const finalEmail = (signing_email || prospect.public_email || '').toLowerCase().trim();
+    if (!finalEmail) {
+      return NextResponse.json({ error: 'A signing email is required to approve the creator.' }, { status: 400 });
     }
 
-    // Generate coupon code
-    const baseCode = `${slug.replace(/-/g, '').toUpperCase().substring(0, 10)}${discount_rate}`;
-    let couponCode = normalizeCode(baseCode);
+    // 2. Determine and validate slug
+    let rawSlug = customSlug || (prospect.handle ? prospect.handle.replace(/^@/, '') : prospect.name);
+    let finalSlug = normalizeSlug(rawSlug);
+    if (!finalSlug) {
+      finalSlug = normalizeSlug(prospect.name || 'creator');
+    }
 
-    const existingCoupon = await db.collection('coupons').where('code', '==', couponCode).limit(1).get();
-    if (!existingCoupon.empty) {
-      couponCode = `${couponCode}${Math.floor(10 + Math.random() * 90)}`;
+    // Check slug uniqueness
+    const existingSlugSnap = await db.collection('creators').where('slug', '==', finalSlug).limit(1).get();
+    if (!existingSlugSnap.empty) {
+      // If the existing slug doesn't belong to this prospect
+      const existingCreator = existingSlugSnap.docs[0].data();
+      if (existingCreator.crm_prospect_id !== id) {
+        finalSlug = `${finalSlug}-${Math.floor(10 + Math.random() * 90)}`;
+      }
+    }
+
+    // 3. Determine and validate coupon code
+    let finalCouponCode = normalizeCode(customCouponCode || `${finalSlug.replace(/-/g, '').toUpperCase().substring(0, 10)}${discount_rate}`);
+    if (!finalCouponCode) {
+      finalCouponCode = normalizeCode(`PROMO${discount_rate}`);
+    }
+
+    const existingCouponSnap = await db.collection('coupons').where('code', '==', finalCouponCode).limit(1).get();
+    if (!existingCouponSnap.empty) {
+      finalCouponCode = `${finalCouponCode}${Math.floor(10 + Math.random() * 90)}`;
+    }
+
+    // 4. Create or link Firebase Auth User
+    let authUid = null;
+    let authCreated = false;
+    try {
+      const existingAuthUser = await auth.getUserByEmail(finalEmail);
+      authUid = existingAuthUser.uid;
+      if (password && password.trim().length >= 6) {
+        await auth.updateUser(authUid, {
+          password: password.trim(),
+          displayName: creator_name || prospect.name || 'Creator',
+        });
+      }
+    } catch (authErr) {
+      if (authErr.code === 'auth/user-not-found') {
+        const genPassword = password && password.trim().length >= 6 ? password.trim() : `${finalSlug.replace(/-/g, '')}#2026`;
+        const newUser = await auth.createUser({
+          email: finalEmail,
+          password: genPassword,
+          displayName: creator_name || prospect.name || 'Creator',
+        });
+        authUid = newUser.uid;
+        authCreated = true;
+      } else {
+        console.warn('Firebase Auth lookup notice:', authErr);
+      }
     }
 
     const batch = db.batch();
 
-    // 1. Create the creator doc
-    const creatorRef = db.collection('creators').doc();
+    // 5. Create the Creator Document
+    const creatorRef = authUid ? db.collection('creators').doc(authUid) : db.collection('creators').doc();
     const creatorId = creatorRef.id;
 
     const couponRef = db.collection('coupons').doc();
     const couponId = couponRef.id;
 
     batch.set(creatorRef, {
-      name: prospect.name,
-      email: prospect.public_email || '',
-      phone: '',
-      bio: prospect.pitch_angle || '',
-      instagram_url: prospect.instagram_url || prospect.handle ? `https://instagram.com/${(prospect.handle || '').replace(/^@/, '')}` : '',
+      name: (creator_name || prospect.name || '').trim(),
+      email: finalEmail,
+      phone: (phone || prospect.phone || '').trim(),
+      bio: prospect.pitch_angle || `Exclusive partner on LovelyCrafts`,
+      instagram_url: prospect.instagram_url || (prospect.handle ? `https://instagram.com/${prospect.handle.replace(/^@/, '')}` : ''),
       youtube_url: prospect.youtube_url || '',
       profile_image: prospect.profile_image || null,
-      slug,
+      slug: finalSlug,
       status: 'active',
       tier: 'starter',
       tier_override: null,
-      commission_rate_override: null,
-      discount_rate: Number(discount_rate),
+      commission_rate: Number(commission_rate) || 15,
+      commission_rate_override: Number(commission_rate) || 15,
+      discount_rate: Number(discount_rate) || 20,
       coupon_id: couponId,
-      coupon_code: couponCode,
+      coupon_code: finalCouponCode,
       featured: false,
       recommended_template_ids: [],
       crm_prospect_id: id,
       created_at: FieldValue.serverTimestamp(),
       joined_at: FieldValue.serverTimestamp(),
       updated_at: FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
 
-    // 2. Create the coupon
+    // 6. Create the Discount Coupon Document
     batch.set(couponRef, {
-      code: couponCode,
+      code: finalCouponCode,
       creator_id: creatorId,
       type: 'creator',
-      discount_percent: Number(discount_rate),
-      label: `${discount_rate}% Creator Discount`,
+      discount_percent: Number(discount_rate) || 20,
+      label: `${discount_rate}% Off with ${creator_name || prospect.name}`,
       active: true,
       expires_at: null,
       max_uses: null,
@@ -100,7 +153,7 @@ export async function POST(request, { params }) {
       updated_at: FieldValue.serverTimestamp(),
     });
 
-    // 3. Optionally issue a free gift pass
+    // 7. Optionally issue a free VIP test pass
     let giftCode = null;
     let giftCouponId = null;
     if (issue_gift_pass && template_id) {
@@ -116,7 +169,7 @@ export async function POST(request, { params }) {
         creator_id: creatorId,
         type: 'gift',
         discount_percent: 100,
-        label: `VIP Gift Pass for ${prospect.name} (${template_id})`,
+        label: `VIP Free Test Pass for ${creator_name || prospect.name} (${template_id})`,
         active: true,
         expires_at: null,
         max_uses: 1,
@@ -129,11 +182,11 @@ export async function POST(request, { params }) {
 
       batch.set(giftRef, {
         creator_id: creatorId,
-        creator_name: prospect.name,
+        creator_name: creator_name || prospect.name,
         template_id,
         coupon_id: giftCouponId,
         code: giftCode,
-        note: `Auto-issued on approval from CRM by ${admin.email}`,
+        note: `Auto-issued on CRM approval by ${admin.email}`,
         claimed: false,
         claimed_note_id: null,
         created_at: FieldValue.serverTimestamp(),
@@ -141,26 +194,35 @@ export async function POST(request, { params }) {
       });
     }
 
-    // 4. Update CRM prospect
+    // 8. Update CRM Prospect status
     batch.update(prospectRef, {
       status: 'Approved',
       linked_creator_id: creatorId,
-      free_pass_issued: issue_gift_pass,
+      signing_email: finalEmail,
+      free_pass_issued: Boolean(issue_gift_pass),
       updated_at: FieldValue.serverTimestamp(),
     });
 
     await batch.commit();
 
-    const referral_link = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://lovelycrafts.in'}/c/${slug}`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lovelycrafts.in';
 
     return NextResponse.json({
       ok: true,
       creator_id: creatorId,
-      coupon_code: couponCode,
-      referral_link,
+      slug: finalSlug,
+      email: finalEmail,
+      coupon_code: finalCouponCode,
+      commission_rate: Number(commission_rate) || 15,
+      discount_rate: Number(discount_rate) || 20,
+      referral_link: `${siteUrl}/creators/${finalSlug}`,
+      partner_promo_url: `${siteUrl}/?ref=${finalCouponCode}`,
+      login_url: `${siteUrl}/creator/login`,
       gift_code: giftCode,
+      auth_created: authCreated,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Approval failed.' }, { status: 500 });
+    console.error('Creator Approval Error:', error);
+    return NextResponse.json({ error: error.message || 'Could not approve creator.' }, { status: 500 });
   }
 }
