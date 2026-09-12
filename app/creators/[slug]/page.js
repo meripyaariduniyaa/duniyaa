@@ -13,6 +13,7 @@ export default function PublicCreatorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -39,12 +40,31 @@ export default function PublicCreatorPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const shareCreatorPage = () => {
+    const pageUrl = window.location.href;
+    const code = creator?.primaryCoupon?.code || creator?.coupon_code || '';
+    const shareText = `Hey! Check out ${creator?.name || 'this creator'}'s official LovelyCrafts storefront and use code ${code} for 10% OFF personalized digital surprises! 💕\n${pageUrl}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: `${creator?.name} | LovelyCrafts Creator Storefront`,
+        text: shareText,
+        url: pageUrl,
+      }).catch(() => {});
+    } else {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank');
+      setShared(true);
+      setTimeout(() => setShared(false), 2500);
+    }
+  };
+
   if (loading) {
     return (
-      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 50% 20%, #ffe4e6 0%, #fafafa 100%)' }}>
         <div style={{ textAlign: 'center', color: '#6b7280' }}>
-          <div style={{ fontSize: '2.5rem', animation: 'bounce 1s infinite' }}>💖</div>
-          <p style={{ marginTop: '12px', fontWeight: 600 }}>Loading creator showcase...</p>
+          <div style={{ fontSize: '3rem', animation: 'bounce 1s infinite' }}>💖</div>
+          <p style={{ marginTop: '14px', fontWeight: 700, fontSize: '1rem', color: '#111827' }}>Loading Creator Storefront...</p>
         </div>
       </main>
     );
@@ -52,56 +72,82 @@ export default function PublicCreatorPage() {
 
   if (error || !creator) {
     return (
-      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ textAlign: 'center', background: '#fff', padding: '40px', borderRadius: '20px', border: '1px solid #f3f4f6', maxWidth: '460px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Creator Profile Not Found</h1>
-          <p style={{ color: '#6b7280', marginBottom: '24px' }}>This creator link might be inactive or does not exist.</p>
-          <Link href="/creators" style={{ background: '#e11d48', color: '#fff', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>
-            Explore LovelyCrafts Creators
+      <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', background: '#fafafa' }}>
+        <div style={{ textAlign: 'center', background: '#fff', padding: '40px 28px', borderRadius: '24px', border: '1px solid #fecdd3', maxWidth: '480px', boxShadow: '0 12px 32px rgba(225,29,72,0.06)' }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🔍</div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', marginBottom: '8px' }}>Creator Profile Not Found</h1>
+          <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '24px' }}>This creator link might be inactive or does not exist.</p>
+          <Link href="/creators" style={{ background: '#e11d48', color: '#fff', padding: '12px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 700, boxShadow: '0 4px 14px rgba(225,29,72,0.2)' }}>
+            Explore Verified Creators 🚀
           </Link>
         </div>
       </main>
     );
   }
 
-  // Find recommended templates
   const recommendedIds = creator.recommended_template_ids || [];
   const recommendedTemplates = templates.filter((t) => recommendedIds.includes(t.id)).slice(0, 4);
-  const displayTemplates = recommendedTemplates.length > 0 ? recommendedTemplates : templates.slice(0, 4);
+  const displayTemplates = recommendedTemplates.length > 0 ? recommendedTemplates : templates.slice(0, 6);
+  const couponCode = creator.primaryCoupon?.code || creator.coupon_code || '';
+  const discountPercent = creator.primaryCoupon?.discount_percent || creator.discount_rate || 10;
 
   return (
-    <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #fff1f2 0%, #fff 30%, #fafafa 100%)', padding: '40px 16px 80px' }}>
-      <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+    <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #fff1f2 0%, #ffffff 25%, #fafafa 100%)', padding: '24px 16px 80px' }}>
+      <div style={{ maxWidth: '980px', margin: '0 auto' }}>
 
-        {/* CREATOR HERO CARD */}
+        {/* TOP BRAND BAR */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
+            <span style={{ fontSize: '1.3rem' }}>❤️</span> Lovely<span style={{ color: '#e11d48' }}>Crafts</span>
+          </Link>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={shareCreatorPage}
+              style={{ background: '#fff', color: '#374151', border: '1px solid #e5e7eb', padding: '8px 16px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}
+            >
+              <span>📲 Share Page</span>
+            </button>
+            <Link href="/creators" style={{ background: '#ffe4e6', color: '#be123c', padding: '8px 16px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
+              ⭐ All Creators
+            </Link>
+          </div>
+        </div>
+
+        {/* HERO CREATOR BRAND CARD */}
         <div
           style={{
-            background: '#fff',
-            borderRadius: '24px',
-            padding: '36px',
-            border: '1px solid #ffe4e6',
-            boxShadow: '0 12px 30px rgba(225,29,72,0.06)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fffbfb 100%)',
+            borderRadius: '28px',
+            padding: '36px 24px',
+            border: '1px solid #fecdd3',
+            boxShadow: '0 16px 40px rgba(225,29,72,0.06)',
             textAlign: 'center',
-            marginBottom: '40px',
+            marginBottom: '36px',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
+          {/* Subtle Background Glow */}
+          <div style={{ position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', width: '300px', height: '150px', background: 'radial-gradient(circle, rgba(251,113,133,0.15) 0%, rgba(255,255,255,0) 70%)', pointerEvents: 'none' }} />
+
+          {/* AVATAR */}
           <div
             style={{
-              width: '100px',
-              height: '100px',
+              width: '108px',
+              height: '108px',
               borderRadius: '50%',
               background: '#ffe4e6',
               margin: '0 auto 16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '2.5rem',
+              fontSize: '2.8rem',
               overflow: 'hidden',
               border: '3px solid #fda4af',
-              boxShadow: '0 4px 12px rgba(225,29,72,0.15)',
+              boxShadow: '0 8px 24px rgba(225,29,72,0.18)',
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             {creator.profile_image ? (
@@ -111,31 +157,42 @@ export default function PublicCreatorPage() {
             )}
           </div>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#ecfdf5', color: '#065f46', padding: '4px 12px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '8px' }}>
-            ✓ Verified LovelyCrafts Creator
+          {/* BADGES */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            <span style={{ background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              ✓ Verified Partner
+            </span>
+            <span style={{ background: '#fff1f2', color: '#be123c', border: '1px solid #fecdd3', padding: '3px 10px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 800, textTransform: 'capitalize' }}>
+              {creator.tier ? `${creator.tier} Creator` : 'Official Creator'}
+            </span>
           </div>
 
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
+          {/* NAME & BIO */}
+          <h1 style={{ fontSize: 'clamp(1.9rem, 4.5vw, 2.6rem)', fontWeight: 900, color: '#111827', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
             {creator.name}
           </h1>
 
-          {creator.bio && (
-            <p style={{ fontSize: '1.05rem', color: '#4b5563', maxWidth: '580px', margin: '0 auto 20px', lineHeight: 1.6 }}>
-              {creator.bio}
+          {creator.bio ? (
+            <p style={{ fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', color: '#4b5563', maxWidth: '620px', margin: '0 auto 20px', lineHeight: 1.6, fontStyle: 'italic' }}>
+              &ldquo;{creator.bio}&rdquo;
+            </p>
+          ) : (
+            <p style={{ fontSize: '1rem', color: '#6b7280', maxWidth: '580px', margin: '0 auto 20px', lineHeight: 1.5 }}>
+              &ldquo;My favorite interactive surprises to personalize and send privately on WhatsApp ✨&rdquo;
             </p>
           )}
 
           {/* SOCIAL LINKS */}
           {(creator.instagram_url || creator.youtube_url) && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '28px', flexWrap: 'wrap' }}>
               {creator.instagram_url && (
                 <a
                   href={creator.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: '#fdf2f8', color: '#be185d', fontWeight: 600, fontSize: '0.85rem', textDecoration: 'none', border: '1px solid #fbcfe8' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 18px', borderRadius: '12px', background: '#fdf2f8', color: '#be185d', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', border: '1px solid #fbcfe8', transition: 'transform 0.15s' }}
                 >
-                  📷 Instagram
+                  📷 Instagram Channel ↗
                 </a>
               )}
               {creator.youtube_url && (
@@ -143,91 +200,94 @@ export default function PublicCreatorPage() {
                   href={creator.youtube_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: '#fef2f2', color: '#b91c1c', fontWeight: 600, fontSize: '0.85rem', textDecoration: 'none', border: '1px solid #fecaca' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 18px', borderRadius: '12px', background: '#fef2f2', color: '#b91c1c', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', border: '1px solid #fecaca', transition: 'transform 0.15s' }}
                 >
-                  ▶️ YouTube
+                  ▶️ YouTube Channel ↗
                 </a>
               )}
             </div>
           )}
 
-          {/* EXCLUSIVE DISCOUNT COUPON BANNER */}
-          {creator.primaryCoupon && (
+          {/* EXCLUSIVE DISCOUNT COUPON CARD */}
+          {couponCode && (
             <div
               style={{
-                maxWidth: '480px',
+                maxWidth: '520px',
                 margin: '0 auto',
                 background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
                 border: '2px dashed #fb7185',
-                borderRadius: '16px',
-                padding: '16px 20px',
+                borderRadius: '20px',
+                padding: '20px 24px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                gap: '12px',
+                gap: '14px',
+                boxShadow: '0 8px 24px rgba(225,29,72,0.08)',
               }}
             >
               <div style={{ textAlign: 'left' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#be123c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {creator.name}&apos;s Special Discount
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#be123c', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '2px' }}>
+                  🎟️ {creator.name}&apos;s Exclusive Audience Code
                 </span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#881337', fontFamily: 'monospace' }}>
-                  {creator.primaryCoupon.code}
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#881337', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                  {couponCode}
                 </div>
-                <small style={{ color: '#e11d48', fontWeight: 600 }}>
-                  {creator.primaryCoupon.discount_percent}% OFF at Checkout
-                </small>
+                <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.85rem' }}>
+                  ✓ Unlocks {discountPercent}% OFF Entire Order
+                </span>
               </div>
 
-              <button
-                type="button"
-                onClick={copyCoupon}
-                style={{
-                  background: copied ? '#059669' : '#e11d48',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '10px 18px',
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
-                  boxShadow: '0 4px 10px rgba(225,29,72,0.2)',
-                }}
-              >
-                {copied ? '✓ Copied!' : 'Copy Code 📋'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={copyCoupon}
+                  style={{
+                    background: copied ? '#059669' : '#e11d48',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.92rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 14px rgba(225,29,72,0.22)',
+                  }}
+                >
+                  {copied ? '✓ Code Copied!' : 'Copy Code 📋'}
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* RECOMMENDED EXPERIENCES */}
-        <section>
+        {/* RECOMMENDED EXPERIENCES SHOWCASE */}
+        <section style={{ marginBottom: '50px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', margin: 0 }}>
-                {creator.name}&apos;s Hand-Picked Favorites
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Storefront Recommendations
+              </span>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2rem)', fontWeight: 800, color: '#111827', margin: '2px 0 0' }}>
+                ⭐ {creator.name}&apos;s Favorite Surprises
               </h2>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: '4px 0 0' }}>
-                Personalize these emotional surprises for your special someone with {creator.name}&apos;s discount code!
-              </p>
             </div>
-            <Link href="/templates" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem' }}>
+            <Link href="/templates" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none', fontSize: '0.92rem' }}>
               View All 18+ Gifts →
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '22px' }}>
             {displayTemplates.map((template) => (
               <div
                 key={template.id}
                 style={{
                   background: '#fff',
-                  borderRadius: '20px',
+                  borderRadius: '24px',
                   padding: '24px',
                   border: '1px solid #f3f4f6',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.03)',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -235,44 +295,78 @@ export default function PublicCreatorPage() {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>{template.icon || '🎁'}</div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '2.5rem' }}>{template.icon || '🎁'}</div>
+                    <span style={{ background: '#ffe4e6', color: '#be123c', padding: '3px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 800 }}>
+                      Recommended ✨
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
                     {template.title}
                   </h3>
-                  <p style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '16px' }}>
+                  <p style={{ color: '#6b7280', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 16px' }}>
                     {template.description}
                   </p>
                 </div>
 
                 <div>
-                  {creator.primaryCoupon && (
-                    <div style={{ marginBottom: '14px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
-                      <span style={{ fontSize: '0.75rem', background: '#ffe4e6', color: '#e11d48', padding: '3px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                        🏷️ Special Discount Code: {creator.primaryCoupon.code} (-{creator.primaryCoupon.discount_percent}%)
+                  {couponCode && (
+                    <div style={{ marginBottom: '14px', paddingTop: '12px', borderTop: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#be123c', fontWeight: 700 }}>
+                        🏷️ Auto-Apply Code:
                       </span>
+                      <code style={{ fontSize: '0.88rem', fontWeight: 900, color: '#881337', background: '#ffe4e6', padding: '2px 8px', borderRadius: '6px' }}>
+                        {couponCode} (-{discountPercent}%)
+                      </code>
                     </div>
                   )}
 
                   <Link
-                    href={`/create?template=${template.id}${creator.primaryCoupon ? `&coupon=${creator.primaryCoupon.code}` : ''}`}
+                    href={`/create?template=${template.id}${couponCode ? `&coupon=${couponCode}` : ''}`}
                     style={{
                       display: 'block',
                       textAlign: 'center',
                       background: '#e11d48',
                       color: '#fff',
-                      padding: '10px 16px',
-                      borderRadius: '10px',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
+                      padding: '12px 18px',
+                      borderRadius: '12px',
+                      fontWeight: 800,
+                      fontSize: '0.95rem',
                       textDecoration: 'none',
-                      boxShadow: '0 4px 12px rgba(225,29,72,0.2)',
+                      boxShadow: '0 4px 14px rgba(225,29,72,0.22)',
+                      transition: 'background 0.2s',
                     }}
                   >
-                    ✨ Craft This Surprise
+                    ✨ Craft Experience with {creator.name}&apos;s Code
                   </Link>
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* TRUST PILLARS */}
+        <section style={{ background: '#fff', borderRadius: '24px', padding: '32px 24px', border: '1px solid #f3f4f6', boxShadow: '0 6px 20px rgba(0,0,0,0.02)', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', margin: '0 0 18px' }}>
+            Why 50,000+ Senders Love LovelyCrafts
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ background: '#fafafa', padding: '16px', borderRadius: '16px', border: '1px solid #f3f4f6' }}>
+              <div style={{ fontSize: '1.8rem', marginBottom: '6px' }}>📲</div>
+              <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Instant WhatsApp Delivery</strong>
+              <small style={{ color: '#6b7280', fontSize: '0.8rem' }}>Send private surprise links in under 2 minutes.</small>
+            </div>
+            <div style={{ background: '#fafafa', padding: '16px', borderRadius: '16px', border: '1px solid #f3f4f6' }}>
+              <div style={{ fontSize: '1.8rem', marginBottom: '6px' }}>🔒</div>
+              <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '2px' }}>100% Private &amp; Secure</strong>
+              <small style={{ color: '#6b7280', fontSize: '0.8rem' }}>Only the recipient with your link can view your gift.</small>
+            </div>
+            <div style={{ background: '#fafafa', padding: '16px', borderRadius: '16px', border: '1px solid #f3f4f6' }}>
+              <div style={{ fontSize: '1.8rem', marginBottom: '6px' }}>⭐</div>
+              <strong style={{ fontSize: '0.95rem', color: '#111827', display: 'block', marginBottom: '2px' }}>4.9★ Rated Experiences</strong>
+              <small style={{ color: '#6b7280', fontSize: '0.8rem' }}>Heartfelt reactions, tears of joy &amp; unforgettable smiles.</small>
+            </div>
           </div>
         </section>
 
