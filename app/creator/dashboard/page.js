@@ -32,6 +32,8 @@ export default function CreatorDashboardPage() {
   const [copiedDisclosure, setCopiedDisclosure] = useState(false);
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true); // optimistic default until data loads
+  // Earnings estimator — must be declared here (before any conditional returns) to satisfy Rules of Hooks
+  const [estimatedMonthlyOrders, setEstimatedMonthlyOrders] = useState(30);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -294,8 +296,6 @@ export default function CreatorDashboardPage() {
     ordersToNextTier = nextMin - currentOrders;
   }
 
-  // Earnings calculator state
-  const [estimatedMonthlyOrders, setEstimatedMonthlyOrders] = useState(30);
   const avgOrderValue = 499; // Average order price in INR
 
   // WhatsApp share builder
