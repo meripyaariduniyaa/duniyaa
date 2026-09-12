@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 export const metadata = {
@@ -33,5 +34,17 @@ export const metadata = {
 };
 
 export default function ArcadeLayout({ children }) {
-  return children;
+  return (
+    <>
+      {/* Google AdSense Auto Ads Script — Arcade Page Only */}
+      <Script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-8921431202323090'}`}
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+      {children}
+    </>
+  );
 }
+

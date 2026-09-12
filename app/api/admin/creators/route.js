@@ -5,8 +5,8 @@ import { requireAdmin } from '@/lib/creator-auth';
 import { normalizeCode, normalizeSlug } from '@/lib/creator-club';
 
 async function generateUniqueCreatorCoupon(db, creatorId, baseCode, discountPercent) {
-  let candidate = normalizeCode(baseCode || 'CREATOR20');
-  if (candidate.length < 3) candidate = `CREATOR${candidate}20`;
+  let candidate = normalizeCode(baseCode || 'CREATOR10');
+  if (candidate.length < 3) candidate = `CREATOR${candidate}10`;
 
   let existing = await db.collection('coupons').where('code', '==', candidate).limit(1).get();
   if (!existing.empty && existing.docs[0].data().creator_id !== creatorId) {
@@ -19,8 +19,8 @@ async function generateUniqueCreatorCoupon(db, creatorId, baseCode, discountPerc
     code: candidate,
     creator_id: creatorId,
     type: 'creator',
-    discount_percent: Math.min(100, Math.max(1, Number(discountPercent) || 20)),
-    label: `${discountPercent || 20}% Creator Discount`,
+    discount_percent: Math.min(100, Math.max(1, Number(discountPercent) || 10)),
+    label: `${discountPercent || 10}% Creator Discount`,
     active: true,
     expires_at: null,
     max_uses: null,
@@ -60,7 +60,7 @@ export async function POST(request) {
     const id = body.user_id || db.collection('creators').doc().id;
     const name = String(body.name || '').trim();
     const slug = normalizeSlug(body.slug || name);
-    const discountRate = Number(body.discount_rate) || 20;
+    const discountRate = Number(body.discount_rate) || 10;
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'Name and a valid URL slug are required.' }, { status: 400 });
@@ -152,7 +152,7 @@ export async function PATCH(request) {
     });
 
     const nextStatus = update.status || currentData.status;
-    const discountRate = Number(update.discount_rate || currentData.discount_rate || 20);
+    const discountRate = Number(update.discount_rate || currentData.discount_rate || 10);
 
     // If creator is being approved or is active without a coupon, auto-create one
     if ((nextStatus === 'active' || nextStatus === 'approved') && !currentData.coupon_id && !update.coupon_id) {

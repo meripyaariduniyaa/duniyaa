@@ -83,7 +83,7 @@ const FAQS = [
   },
   {
     q: 'What discount does my audience receive?',
-    a: 'Depending on your custom creator offer, your audience receives up to 20% OFF across all LovelyCrafts interactive experiences with your coupon.',
+    a: 'Depending on your custom creator offer, your audience receives 10% OFF across all LovelyCrafts interactive experiences with your coupon.',
   },
   {
     q: 'How do referrals and attribution work?',
@@ -275,7 +275,7 @@ export default function CreatorsLandingPage() {
           </h1>
 
           <p style={{ fontSize: 'clamp(1.05rem, 2.2vw, 1.25rem)', color: '#4b5563', maxWidth: '720px', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Join the LovelyCrafts Creator Club. Give your audience <strong>up to 20% OFF</strong> personalized digital surprises and earn <strong>up to 18% commission</strong> on successful referrals.
+            Join the LovelyCrafts Creator Club. Give your audience <strong>10% OFF</strong> personalized digital surprises and earn <strong>10% to 18% commission</strong> on successful referrals.
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '40px' }}>
@@ -513,23 +513,23 @@ export default function CreatorsLandingPage() {
                 </thead>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>🌱 0–19 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>🌱 0–99 referrals</td>
                     <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>10%</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💚 20–49 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💚 100–199 referrals</td>
                     <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>15%</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💙 50–79 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💙 200–299 referrals</td>
                     <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>16%</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💜 80–119 referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>💜 300–399 referrals</td>
                     <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.05rem', textAlign: 'right' }}>17%</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '12px', fontWeight: 700, color: '#111827', fontSize: '0.95rem' }}>👑 120+ referrals</td>
+                    <td style={{ padding: '12px', fontWeight: 700, color: '#111827', fontSize: '0.95rem' }}>👑 400+ referrals</td>
                     <td style={{ padding: '12px', fontWeight: 800, color: '#e11d48', fontSize: '1.15rem', textAlign: 'right' }}>18%</td>
                   </tr>
                 </tbody>
@@ -556,27 +556,27 @@ export default function CreatorsLandingPage() {
                   <strong>₹219.00</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#e11d48' }}>
-                  <span>With Your 20% Discount:</span>
-                  <strong>Viewer pays ₹175.20</strong>
+                  <span>With Your 10% Discount:</span>
+                  <strong>Viewer pays ₹197.10</strong>
                 </div>
                 <div style={{ height: '1px', background: '#e5e7eb', margin: '10px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 10% Starter Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹17.52</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹19.71</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 15% Rising Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹26.28</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹29.57</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 18% Elite Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹31.54</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹35.48</strong>
                 </div>
               </div>
             </div>
 
             <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
-              * Illustrative calculation based on standard ₹219 experience with a 20% coupon applied. Actual earnings depend on qualifying order value, applicable tier, and terms.
+              * Illustrative calculation based on standard ₹219 experience with a 10% coupon applied. Actual earnings depend on qualifying order value, applicable tier, and terms.
             </p>
           </div>
 
@@ -677,10 +677,10 @@ export default function CreatorsLandingPage() {
                 <div style={{ background: '#fff1f2', border: '1px dashed #fb7185', borderRadius: '10px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ textAlign: 'left' }}>
                     <small style={{ fontSize: '0.7rem', color: '#be123c', fontWeight: 700 }}>EXCLUSIVE CODE</small>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#881337', fontFamily: 'monospace' }}>ANANYA20</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#881337', fontFamily: 'monospace' }}>ANANYA10</div>
                   </div>
                   <span style={{ background: '#e11d48', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '4px 8px', borderRadius: '6px' }}>
-                    20% OFF
+                    10% OFF
                   </span>
                 </div>
               </div>
@@ -869,7 +869,7 @@ export default function CreatorsLandingPage() {
                 When sharing LovelyCrafts in your videos, posts, or stories, please clearly disclose your affiliate relationship (as required by ASCI / FTC guidelines).
               </p>
               <div style={{ background: '#fff', padding: '8px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', color: '#334155', fontFamily: 'monospace' }}>
-                &quot;I&apos;m partnered with LovelyCrafts, and you can use my code YOURCODE for up to 20% off at lovelycrafts.in/c/yourname&quot;
+                &quot;I&apos;m partnered with LovelyCrafts, and you can use my code YOURCODE for 10% off at lovelycrafts.in/c/yourname&quot;
               </div>
             </div>
           </div>

@@ -84,7 +84,7 @@ export default function AdminCreatorsPage() {
       tier: creator.tier || 'starter',
       tier_override: creator.tier_override || '',
       commission_rate_override: creator.commission_rate_override !== null && creator.commission_rate_override !== undefined ? creator.commission_rate_override : '',
-      discount_rate: creator.discount_rate || 20,
+      discount_rate: creator.discount_rate || 10,
       featured: Boolean(creator.featured),
       recommended_template_ids: Array.isArray(creator.recommended_template_ids) ? creator.recommended_template_ids : [],
     });
@@ -107,7 +107,7 @@ export default function AdminCreatorsPage() {
           ...editForm,
           tier_override: editForm.tier_override ? editForm.tier_override : null,
           commission_rate_override: editForm.commission_rate_override !== '' ? Number(editForm.commission_rate_override) : null,
-          discount_rate: Number(editForm.discount_rate) || 20,
+          discount_rate: Number(editForm.discount_rate) || 10,
         }),
       });
       const data = await res.json();
@@ -126,7 +126,7 @@ export default function AdminCreatorsPage() {
   const handleApprove = async (creator) => {
     try {
       const token = await user.getIdToken();
-      await fetch('/api/admin/creators', {
+      const res = await fetch('/api/admin/creators', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +134,27 @@ export default function AdminCreatorsPage() {
         },
         body: JSON.stringify({ id: creator.id, status: 'active' })
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not approve creator');
       loadCreators();
+
+      // Automatically open email client with prefilled approval details
+      setTimeout(() => {
+        const siteUrl = window.location.origin;
+        const coupon = creator.coupon_code || data.coupon_code || 'ACTIVE';
+        const subject = `Your LovelyCrafts Creator Account is Approved! 🚀`;
+        const bodyText = `🎉 Hey ${creator.name}!\n\n` +
+          `Great news! Your LovelyCrafts Creator Club account has been approved and activated.\n\n` +
+          `🔑 YOUR CREATOR DASHBOARD LOGIN:\n` +
+          `• Portal: ${siteUrl}/creator/login\n` +
+          `• Email: ${creator.email}\n\n` +
+          `🛍️ YOUR AUDIENCE PERKS & COMMISSIONS:\n` +
+          `• Coupon Code: ${coupon}\n` +
+          `• Your Public Creator Page: ${siteUrl}/creators/${creator.slug}\n\n` +
+          `Log in with your Google account (${creator.email}) or password at ${siteUrl}/creator/login to view your earnings!\n\nWelcome aboard! ✨`;
+
+        window.location.href = `mailto:${encodeURIComponent(creator.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+      }, 300);
     } catch (err) {
       alert(err.message);
     }
@@ -458,7 +478,7 @@ export default function AdminCreatorsPage() {
                   <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>Assigned Promo Code</label>
                   <input
                     type="text"
-                    placeholder="e.g. MAYA20"
+                    placeholder="e.g. MAYA10"
                     value={editForm.coupon_code}
                     onChange={(e) => setEditForm({ ...editForm, coupon_code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '') })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontWeight: 700, fontFamily: 'monospace', background: '#f8fafc', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}

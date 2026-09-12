@@ -4,14 +4,14 @@ import Script from 'next/script';
 export const metadata = {
   title: 'LovelyCrafts Creator Club | Earn With LovelyCrafts',
   description:
-    'Join the LovelyCrafts Creator Club. Give your audience up to 20% OFF personalized digital surprises and earn up to 18% commission on successful referrals.',
+    'Join the LovelyCrafts Creator Club. Give your audience 10% OFF personalized digital surprises and earn 10% to 18% commission on successful referrals.',
   alternates: {
     canonical: `${SITE_URL}/creators`,
   },
   openGraph: {
     title: 'LovelyCrafts Creator Club | Earn With LovelyCrafts',
     description:
-      'Give your audience up to 20% OFF interactive digital surprises and earn up to 18% commission on successful referrals.',
+      'Give your audience 10% OFF interactive digital surprises and earn 10% to 18% commission on successful referrals.',
     url: `${SITE_URL}/creators`,
     siteName: SITE_NAME,
     images: [
@@ -28,7 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'LovelyCrafts Creator Club | Earn With LovelyCrafts',
     description:
-      'Give your audience up to 20% OFF interactive digital surprises and earn up to 18% commission.',
+      'Give your audience 10% OFF interactive digital surprises and earn 10% to 18% commission.',
   },
 };
 
@@ -50,7 +50,7 @@ export default function CreatorsLayout({ children }) {
         name: 'How much commission can I earn?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Creators earn between 15% and 18% commission on every qualifying paid referral, increasing automatically as your referral volume grows.',
+          text: 'Creators earn between 10% and 18% commission on every qualifying paid referral, increasing automatically as your referral volume grows.',
         },
       },
       {
@@ -58,7 +58,7 @@ export default function CreatorsLayout({ children }) {
         name: 'What discount does my audience receive?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Depending on your creator coupon, your followers receive up to 20% OFF across all personalized LovelyCrafts digital experiences.',
+          text: 'Depending on your creator coupon, your followers receive 10% OFF across all personalized LovelyCrafts digital experiences.',
         },
       },
       {

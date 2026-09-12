@@ -84,14 +84,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en-IN" className={`${fredoka.variable} ${caveat.variable} ${dancing.variable}`}>
-      <head>
-        {/* Google AdSense Site Verification & Auto Ads Script (Plain head script avoids data-nscript warning) */}
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-8921431202323090'}`}
-          crossOrigin="anonymous"
-        />
-      </head>
+      <head />
       <body>
         <AuthProvider>
           <Header />

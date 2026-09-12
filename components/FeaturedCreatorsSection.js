@@ -10,8 +10,8 @@ const FALLBACK_CREATORS = [
     slug: 'ananya',
     bio: 'Couple & relationship surprises enthusiast ✨ Sharing sweet memories & love letters.',
     tier: 'elite',
-    discount: '20% OFF',
-    code: 'ANANYA20',
+    discount: '10% OFF',
+    code: 'ANANYA10',
     avatar: '👩‍🦰',
     profile_image: null,
     niche: 'Couple & Romance',
@@ -23,8 +23,8 @@ const FALLBACK_CREATORS = [
     slug: 'rohan',
     bio: 'Tech & aesthetic digital experiences. Making long distance birthdays special 🎉',
     tier: 'partner',
-    discount: '20% OFF',
-    code: 'ROHAN20',
+    discount: '10% OFF',
+    code: 'ROHAN10',
     avatar: '👨‍💻',
     profile_image: null,
     niche: 'Lifestyle & Birthday',
@@ -36,8 +36,8 @@ const FALLBACK_CREATORS = [
     slug: 'priyakabir',
     bio: 'Documenting our journey across India ✈️ Big fans of the dodging NO proposal box!',
     tier: 'elite',
-    discount: '20% OFF',
-    code: 'PRIYA20',
+    discount: '10% OFF',
+    code: 'PRIYA10',
     avatar: '👩‍❤️‍👨',
     profile_image: null,
     niche: 'Travel & Proposals',
@@ -118,8 +118,8 @@ export default function FeaturedCreatorsSection() {
             .join('')
             .substring(0, 2)
             .toUpperCase();
-          const discountText = creator.discount || '20% OFF';
-          const codeText = creator.code || `${(creator.slug || creator.name || 'CREATOR').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 8)}20`;
+          const discountText = creator.discount || '10% OFF';
+          const codeText = creator.code || `${(creator.slug || creator.name || 'CREATOR').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 8)}10`;
 
           return (
             <div
@@ -280,7 +280,7 @@ export default function FeaturedCreatorsSection() {
               Are you a content creator, influencer, or storyteller?
             </h4>
             <p style={{ fontSize: '0.86rem', color: '#4b5563', margin: 0 }}>
-              Join the <strong>LovelyCrafts Creator Club</strong>. Give your audience up to 20% off and earn up to <strong>18% commission</strong>.
+              Join the <strong>LovelyCrafts Creator Club</strong>. Give your audience 10% off and earn up to <strong>18% commission</strong>.
             </p>
           </div>
         </div>

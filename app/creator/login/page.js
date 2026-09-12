@@ -3,12 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { auth, signInWithGoogle } from '@/lib/firebase';
+import { signInWithGoogle, signInWithEmail } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function CreatorLoginPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
 
@@ -17,6 +21,27 @@ export default function CreatorLoginPage() {
       router.push('/creator/dashboard');
     }
   }, [user, router]);
+
+  const handleEmailSignIn = async (e) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password.');
+      return;
+    }
+    setSigningIn(true);
+    setError('');
+    const { user: signedUser, error: authErr } = await signInWithEmail(email.trim(), password.trim());
+    if (authErr) {
+      setError(authErr);
+      setSigningIn(false);
+      return;
+    }
+    if (signedUser) {
+      router.push('/creator/dashboard');
+    } else {
+      setSigningIn(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
@@ -35,33 +60,110 @@ export default function CreatorLoginPage() {
   };
 
   return (
-    <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 50% 30%, #ffe4e6 0%, #fafafa 100%)', padding: '24px' }}>
+    <main style={{ minHeight: '88vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 50% 30%, #ffe4e6 0%, #fafafa 100%)', padding: '24px' }}>
       <div
         style={{
           background: '#fff',
-          maxWidth: '420px',
+          maxWidth: '440px',
           width: '100%',
           padding: '36px',
           borderRadius: '24px',
           border: '1px solid #fecdd3',
           boxShadow: '0 12px 36px rgba(225,29,72,0.08)',
-          textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👑</div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
-          Creator Club Portal
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: '0 0 28px', lineHeight: 1.5 }}>
-          Sign in to access your real-time analytics, coupon codes, referral links, and earnings.
-        </p>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '12px' }}>👑</div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
+            Creator Club Portal
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
+            Sign in to access your real-time analytics, coupon codes, referral links, and earnings.
+          </p>
+        </div>
 
         {error && (
           <div style={{ color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '10px', fontSize: '0.85rem', marginBottom: '20px' }}>
-            {error}
+            ⚠️ {error}
           </div>
         )}
 
+        {/* EMAIL & PASSWORD LOGIN FORM */}
+        <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '4px' }}>
+              Creator Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. creator@gmail.com"
+              style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.92rem', outline: 'none', background: '#f9fafb' }}
+            />
+          </div>
+
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', margin: 0 }}>
+                Password
+              </label>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.92rem', outline: 'none', background: '#f9fafb' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#9ca3af', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={signingIn || loading}
+            style={{
+              width: '100%',
+              background: '#e11d48',
+              color: '#fff',
+              border: 'none',
+              padding: '12px',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: signingIn ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 14px rgba(225,29,72,0.22)',
+              marginTop: '4px',
+              transition: 'all 0.2s',
+            }}
+          >
+            {signingIn ? 'Signing in...' : 'Sign In with Password 🔑'}
+          </button>
+        </form>
+
+        {/* SECURITY NOTICE FOR FIRST TIME LOGIN */}
+        <div style={{ background: '#fff1f2', border: '1px border-dashed #fda4af', borderRadius: '12px', padding: '10px 14px', fontSize: '0.8rem', color: '#be123c', lineHeight: 1.4, marginBottom: '20px', textAlign: 'left' }}>
+          💡 <strong>First-Time Login Note:</strong> If you are signing in with a temporary password provided by your admin, please <Link href="/creator/change-password" style={{ color: '#9f1239', fontWeight: 800, textDecoration: 'underline' }}>change your password</Link> after your first login.
+        </div>
+
+        {/* DIVIDER */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+          <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>OR</span>
+          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+        </div>
+
+        {/* GOOGLE SIGN IN BUTTON */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
@@ -78,7 +180,7 @@ export default function CreatorLoginPage() {
             padding: '12px 20px',
             borderRadius: '12px',
             fontWeight: 600,
-            fontSize: '0.95rem',
+            fontSize: '0.92rem',
             cursor: signingIn ? 'not-allowed' : 'pointer',
             boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
             transition: 'all 0.2s',
@@ -93,7 +195,7 @@ export default function CreatorLoginPage() {
           {signingIn ? 'Signing in...' : 'Sign in with Google'}
         </button>
 
-        <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #f3f4f6', fontSize: '0.85rem', color: '#6b7280' }}>
+        <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #f3f4f6', fontSize: '0.85rem', color: '#6b7280' }}>
           Not yet a member?{' '}
           <Link href="/creators" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>
             Apply for Creator Club

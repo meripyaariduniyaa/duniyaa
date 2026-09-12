@@ -25,19 +25,19 @@ test('1. Normalization utilities', () => {
 
 test('2. Creator tiers and automatic commission scaling', () => {
   assert.equal(tierForOrders(0).id, 'starter');
-  assert.equal(tierForOrders(19).id, 'starter');
-  assert.equal(tierForOrders(20).id, 'rising');
-  assert.equal(tierForOrders(49).id, 'rising');
-  assert.equal(tierForOrders(50).id, 'creator');
-  assert.equal(tierForOrders(79).id, 'creator');
-  assert.equal(tierForOrders(80).id, 'partner');
-  assert.equal(tierForOrders(119).id, 'partner');
-  assert.equal(tierForOrders(120).id, 'elite');
+  assert.equal(tierForOrders(99).id, 'starter');
+  assert.equal(tierForOrders(100).id, 'rising');
+  assert.equal(tierForOrders(199).id, 'rising');
+  assert.equal(tierForOrders(200).id, 'creator');
+  assert.equal(tierForOrders(299).id, 'creator');
+  assert.equal(tierForOrders(300).id, 'partner');
+  assert.equal(tierForOrders(399).id, 'partner');
+  assert.equal(tierForOrders(400).id, 'elite');
   assert.equal(tierForOrders(500).id, 'elite');
 
   const next = nextTierForOrders(5);
   assert.equal(next?.id, 'rising');
-  assert.equal(nextTierForOrders(120), null);
+  assert.equal(nextTierForOrders(400), null);
 });
 
 test('3. Commission calculation on final paid amount', () => {

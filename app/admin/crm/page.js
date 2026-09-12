@@ -577,15 +577,15 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
   const defaultCoupon = `${(prospect.handle ? prospect.handle.replace(/^@/, '') : (prospect.name || 'CREATOR'))
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, '')
-    .substring(0, 8)}20`;
+    .substring(0, 8)}10`;
 
   const [signingEmail, setSigningEmail] = useState(prospect.public_email || '');
   const [password, setPassword] = useState(generateRandomPassword());
   const [showPassword, setShowPassword] = useState(true);
   const [slug, setSlug] = useState(defaultSlug);
   const [couponCode, setCouponCode] = useState(defaultCoupon);
-  const [commissionRate, setCommissionRate] = useState(20);
-  const [discountRate, setDiscountRate] = useState(20);
+  const [commissionRate, setCommissionRate] = useState(10);
+  const [discountRate, setDiscountRate] = useState(10);
   const [phone, setPhone] = useState(prospect.phone || '');
   const [issuePass, setIssuePass] = useState(true);
   const [templateId, setTemplateId] = useState('proposal');
@@ -625,8 +625,8 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
           phone: phone.trim(),
           slug: slug.trim().toLowerCase(),
           coupon_code: couponCode.trim().toUpperCase(),
-          commission_rate: Number(commissionRate) || 20,
-          discount_rate: Number(discountRate) || 20,
+          commission_rate: Number(commissionRate) || 10,
+          discount_rate: Number(discountRate) || 10,
           issue_gift_pass: issuePass,
           template_id: templateId,
         }),
@@ -635,6 +635,27 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
       if (!res.ok) throw new Error(data.error || 'Approval failed');
       setResult(data);
       onApproved();
+
+      // Automatically open email client pre-filled with all login & creator details
+      setTimeout(() => {
+        const bodyText = `🎉 Hey ${prospect.name}!\n\n` +
+          `Welcome to the LovelyCrafts Creator Partner Club! Your official partner dashboard and custom creator storefront are live and ready.\n\n` +
+          `🔑 YOUR CREATOR DASHBOARD LOGIN:\n` +
+          `• Portal: ${data.login_url || `${window.location.origin}/creator/login`}\n` +
+          `• Email: ${data.email}\n` +
+          `• Temporary Password: ${password.trim()}\n` +
+          `• Change Password Link: ${window.location.origin}/creator/change-password (Please update after your first login!)\n\n` +
+          `🛍️ YOUR AUDIENCE PERKS & COMMISSIONS:\n` +
+          `• Coupon Code: ${data.coupon_code} (${data.discount_rate}% OFF for your audience)\n` +
+          `• Your Commission: ${data.commission_rate}% on all orders tracked automatically\n` +
+          `• Your Public Creator Page: ${data.referral_link || `${window.location.origin}/creators/${data.slug}`}\n` +
+          `• 1-Click Discount Link: ${data.partner_promo_url || `${window.location.origin}/?ref=${data.coupon_code}`}\n` +
+          (data.gift_code ? `\n🎁 YOUR COMPLIMENTARY VIP TEST PASS:\n• Pass Code: ${data.gift_code} (100% Free experience to test & create content with!)\n` : '') +
+          `\nLogin to your dashboard anytime to track live clicks, orders, commission payouts, and request VIP review passes.\n\nLet's make some viral magic together! ✨`;
+
+        const subject = `Welcome to LovelyCrafts Creator Club! Your Account & Login Details 🚀`;
+        window.location.href = `mailto:${encodeURIComponent(data.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+      }, 300);
     } catch (e) { setErr(e.message); }
     finally { setLoading(false); }
   };
@@ -650,13 +671,15 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
     const loginUrl = result.login_url || `${window.location.origin}/creator/login`;
     const partnerPage = result.referral_link || `${window.location.origin}/creators/${result.slug}`;
     const promoLink = result.partner_promo_url || `${window.location.origin}/?ref=${result.coupon_code}`;
+    const changePasswordLink = `${window.location.origin}/creator/change-password`;
     
     return `🎉 Hey ${prospect.name}!\n\n` +
       `Welcome to the LovelyCrafts Creator Partner Club! Your official partner dashboard and custom creator storefront are live and ready.\n\n` +
       `🔑 YOUR CREATOR DASHBOARD LOGIN:\n` +
       `• Portal: ${loginUrl}\n` +
       `• Email: ${result.email}\n` +
-      `• Temporary Password: ${password}\n\n` +
+      `• Temporary Password: ${password}\n` +
+      `• Change Password Link: ${changePasswordLink} (Please update after first login)\n\n` +
       `🛍️ YOUR AUDIENCE PERKS & COMMISSIONS:\n` +
       `• Coupon Code: ${result.coupon_code} (${result.discount_rate}% OFF for your audience)\n` +
       `• Your Commission: ${result.commission_rate}% on all orders tracked automatically\n` +
@@ -759,8 +782,19 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
                 type="button"
+                onClick={() => {
+                  const subject = `Welcome to LovelyCrafts Creator Club! Your Account & Login Details 🚀`;
+                  const bodyText = getWelcomePitchMessage();
+                  window.location.href = `mailto:${encodeURIComponent(result.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+                }}
+                style={{ padding: '12px', borderRadius: '10px', border: 'none', background: '#e11d48', color: '#fff', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.25)' }}>
+                <span>✉️ Open Welcome Email in Mail Client</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => copyToClipboard(getWelcomePitchMessage(), 'Welcome Message')}
-                style={{ padding: '12px', borderRadius: '10px', border: 'none', background: '#0284c7', color: '#fff', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)' }}>
+                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #0284c7', background: '#f0f9ff', color: '#0369a1', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <CopyIcon size={16} />
                 <span>Copy 1-Click WhatsApp / Email Welcome Pitch</span>
               </button>
@@ -858,7 +892,7 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                   required
-                  placeholder="e.g. ANANYA20"
+                  placeholder="e.g. ANANYA10"
                 />
               </div>
 
@@ -868,11 +902,13 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
                   style={inputStyle}
                   value={commissionRate}
                   onChange={(e) => setCommissionRate(Number(e.target.value))}>
-                  <option value={10}>10% Commission</option>
-                  <option value={15}>15% Commission (Standard)</option>
-                  <option value={20}>20% Commission (Tier A / Partner)</option>
-                  <option value={25}>25% Commission (VIP / Exclusive)</option>
-                  <option value={30}>30% Commission</option>
+                  <option value={10}>10% Commission (Starter / Standard)</option>
+                  <option value={15}>15% Commission (Rising Tier)</option>
+                  <option value={16}>16% Commission (Creator Tier)</option>
+                  <option value={17}>17% Commission (Partner Tier)</option>
+                  <option value={18}>18% Commission (Elite Tier)</option>
+                  <option value={20}>20% Commission (Custom)</option>
+                  <option value={25}>25% Commission (Exclusive)</option>
                 </select>
               </div>
             </div>
@@ -885,9 +921,9 @@ function ApproveModal({ prospect, onApproved, onClose, token }) {
                   style={inputStyle}
                   value={discountRate}
                   onChange={(e) => setDiscountRate(Number(e.target.value))}>
-                  <option value={10}>10% Audience Discount</option>
+                  <option value={10}>10% Audience Discount (Standard)</option>
                   <option value={15}>15% Audience Discount</option>
-                  <option value={20}>20% Audience Discount (Standard)</option>
+                  <option value={20}>20% Audience Discount</option>
                   <option value={25}>25% Audience Discount</option>
                   <option value={30}>30% Audience Discount</option>
                 </select>

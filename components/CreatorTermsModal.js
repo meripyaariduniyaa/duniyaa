@@ -293,10 +293,11 @@ export default function CreatorTermsModal({ creatorName, creatorEmail, onAccept 
                 </Clause>
                 <Clause>The current commission tiers are as follows (subject to revision per Section 11):</Clause>
                 <SubList items={[
-                  'Starter Tier — 15% commission per qualifying order',
-                  'Rising Tier — 16% commission per qualifying order (upon reaching programme milestone)',
-                  'Pro Tier — 17% commission per qualifying order',
-                  'Elite Tier — 18% commission per qualifying order (subject to admin approval)',
+                  'Starter Tier — 10% commission per qualifying order (0–99 orders milestone)',
+                  'Rising Tier — 15% commission per qualifying order (upon reaching 100 orders milestone)',
+                  'Creator Tier — 16% commission per qualifying order (upon reaching 200 orders milestone)',
+                  'Partner Tier — 17% commission per qualifying order (upon reaching 300 orders milestone)',
+                  'Elite Tier — 18% commission per qualifying order (upon reaching 400 orders milestone)',
                 ]} />
                 <Clause>
                   Tier upgrades are determined solely by the Company based on verified order counts

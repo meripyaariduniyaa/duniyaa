@@ -308,6 +308,9 @@ export default function CreatorDashboardPage() {
             <Link href="/" style={{ fontSize: '0.85rem', color: '#4b5563', textDecoration: 'none', fontWeight: 600 }}>
               🏠 Main Site
             </Link>
+            <Link href="/creator/change-password" style={{ fontSize: '0.85rem', color: '#e11d48', textDecoration: 'none', fontWeight: 700 }}>
+              🔒 Change Password
+            </Link>
             <button
               type="button"
               onClick={async () => {
@@ -360,9 +363,12 @@ export default function CreatorDashboardPage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Link href={`/creators/${creator.slug}`} target="_blank" style={{ background: '#f3f4f6', color: '#374151', padding: '10px 16px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none' }}>
               👁️ View Public Page
+            </Link>
+            <Link href="/creator/change-password" style={{ background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0', padding: '10px 16px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              🔒 Change Password
             </Link>
             <button
               type="button"
@@ -405,7 +411,7 @@ export default function CreatorDashboardPage() {
               <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 2</div>
                 <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Get Creator Code</strong>
-                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Your audience gets up to 20% OFF with your coupon.</small>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Your audience gets 10% OFF with your coupon.</small>
               </div>
 
               <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
@@ -429,7 +435,7 @@ export default function CreatorDashboardPage() {
               <div style={{ background: '#fff', padding: '14px', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 6</div>
                 <strong style={{ fontSize: '0.9rem', color: '#111827', display: 'block', marginBottom: '2px' }}>Unlock Higher Tiers</strong>
-                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Advance from 15% to 18% automatically with more orders.</small>
+                <small style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.4, display: 'block' }}>Advance from 10% to 18% automatically with more orders.</small>
               </div>
             </div>
           </div>
@@ -688,12 +694,12 @@ export default function CreatorDashboardPage() {
             </p>
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
               <code style={{ fontSize: '0.85rem', color: '#334155', flex: 1, fontFamily: 'monospace' }}>
-                {`"I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for up to 20% off at lovelycrafts.in/c/${creator.slug}"`}
+                {`"I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for 10% off at lovelycrafts.in/c/${creator.slug}"`}
               </code>
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(`I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for up to 20% off at https://lovelycrafts.in/c/${creator.slug}`);
+                  navigator.clipboard.writeText(`I'm partnered with LovelyCrafts, and you can use my code ${primaryCouponCode || creator.slug?.toUpperCase() || 'CODE'} for 10% off at https://lovelycrafts.in/c/${creator.slug}`);
                   setCopiedDisclosure(true);
                   setTimeout(() => setCopiedDisclosure(false), 2000);
                 }}
