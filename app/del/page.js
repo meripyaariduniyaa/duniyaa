@@ -336,7 +336,7 @@ export default function ExpirationCleanupPage() {
             <IconShield size={22} />
           </span>
           <div>
-            <strong>Strict Scope:</strong> Only customer-created shareable notes (<code>/p/[slug]</code>) and customer uploads (<code>user-uploads/</code>) older than {retentionDays} days are eligible for cleanup. <strong>Referral links (<code>/c/[slug]</code>), referral clicks, creator accounts, and financial orders are permanently preserved and safe.</strong>
+            <strong>Strict Scope:</strong> Only customer-created shareable notes (<code>/p/[slug]</code>) and customer uploads (<code>user-uploads/</code>) older than {retentionDays} days are eligible for cleanup. <strong>Referral links (<code>/c/[slug]</code>), referral clicks, creator accounts, gross amounts, and the permanent <code>admin_payment_ledger</code> vault are 100% immutable and safe.</strong>
           </div>
         </div>
 

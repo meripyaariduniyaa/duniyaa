@@ -14,15 +14,58 @@ export async function GET(request) {
   try {
     await requireAdmin(request);
     const db = getAdminDb();
-    const [creators, orders, commissions, payouts, prospects] = await Promise.all([
+    const [creators, ordersSnap, vaultSnap, commissions, payouts, prospects] = await Promise.all([
       db.collection('creators').get(),
       db.collection('orders').get(),
+      db.collection('admin_payment_ledger').get().catch(() => ({ docs: [] })),
       db.collection('commissions').get(),
       db.collection('payouts').get(),
       db.collection('crm_prospects').where('deleted', '==', false).get(),
     ]);
 
-    const orderData = orders.docs.map((d) => d.data()).filter((item) => item.payment_status === 'paid');
+    // Map and merge orders from primary orders collection and permanent admin_payment_ledger vault
+    const orderMap = new Map();
+
+    // 1. Ingest vault records first
+    vaultSnap.docs.forEach((d) => {
+      const data = d.data();
+      orderMap.set(d.id, { id: d.id, ...data });
+    });
+
+    // 2. Ingest / merge primary orders collection records
+    const unvaultedOrders = [];
+    ordersSnap.docs.forEach((d) => {
+      const data = d.data();
+      if (!orderMap.has(d.id)) {
+        orderMap.set(d.id, { id: d.id, ...data });
+        unvaultedOrders.push({ id: d.id, data });
+      }
+    });
+
+    // Asynchronously backfill unvaulted orders to permanent vault
+    if (unvaultedOrders.length > 0) {
+      (async () => {
+        try {
+          const batch = db.batch();
+          unvaultedOrders.forEach(({ id, data }) => {
+            const vaultRef = db.collection('admin_payment_ledger').doc(id);
+            batch.set(vaultRef, {
+              ...data,
+              order_id: id,
+              amount_in_rupees: Number(((data.final_amount || 0) / 100).toFixed(2)),
+              vault_recorded_at: new Date(),
+              immutable_permanent_lock: true,
+            }, { merge: true });
+          });
+          await batch.commit();
+        } catch (e) {
+          console.error('Auto-vault backfill error:', e);
+        }
+      })();
+    }
+
+    const allOrdersList = Array.from(orderMap.values());
+    const orderData = allOrdersList.filter((item) => item.payment_status === 'paid');
     const commissionData = commissions.docs.map((d) => d.data());
 
     // Separate Organic Sales vs Creator Sponsored Referrals
@@ -34,7 +77,7 @@ export async function GET(request) {
     const organicRevenue = organicOrders.reduce((sum, item) => sum + (item.final_amount || 0), 0);
 
     // Razorpay fee: 2% + 18% GST on fee = 2.36% per transaction, capped at ₹2500 (250000 paise)
-    const calcRazorpayFee = (amountPaise) => Math.min(Math.ceil(amountPaise * 0.0236), 250000);
+    const calcRazorpayFee = (amountPaise) => Math.min(Math.ceil((amountPaise || 0) * 0.0236), 250000);
     const razorpayFeeTotal = orderData.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);
     const razorpayFeeOrganic = organicOrders.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);
     const razorpayFeeCreator = creatorOrders.reduce((sum, item) => sum + calcRazorpayFee(item.final_amount || 0), 0);

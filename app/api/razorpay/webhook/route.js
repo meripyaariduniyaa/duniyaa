@@ -81,7 +81,7 @@ export async function POST(request) {
         const newOrderRef = adminDb.collection('orders').doc();
         orderId = newOrderRef.id;
 
-        await newOrderRef.set({
+        const orderPayload = {
           note_id: apologyId,
           customer_uid: noteData.creator_uid || null,
           template_id: noteData.template || 'proposal',
@@ -90,6 +90,7 @@ export async function POST(request) {
           coupon_id: couponId,
           discount_percent: discountPercent,
           final_amount: amountPaid,
+          amount_in_rupees: Number(((amountPaid || 0) / 100).toFixed(2)),
           payment_method: 'razorpay',
           payment_status: 'paid',
           razorpay_order_id: razorpay_order_id || null,
@@ -97,7 +98,21 @@ export async function POST(request) {
           attribution_source: attributionSource || (creatorId ? (couponCode ? 'coupon' : 'referral_link') : null),
           created_at: FieldValue.serverTimestamp(),
           paid_at: FieldValue.serverTimestamp(),
-        });
+        };
+
+        await newOrderRef.set(orderPayload);
+
+        // Save permanent immutable copy to admin_payment_ledger
+        try {
+          await adminDb.collection('admin_payment_ledger').doc(orderId).set({
+            ...orderPayload,
+            order_id: orderId,
+            vault_recorded_at: FieldValue.serverTimestamp(),
+            immutable_permanent_lock: true,
+          });
+        } catch (vaultErr) {
+          console.error('Failed to write to admin_payment_ledger vault from webhook:', vaultErr);
+        }
 
         // Increment coupon usage
         if (couponId) {
@@ -183,6 +198,18 @@ export async function POST(request) {
           refunded_at: FieldValue.serverTimestamp(),
           updated_at: FieldValue.serverTimestamp(),
         });
+
+        // Mirror refund status to admin_payment_ledger vault
+        try {
+          await adminDb.collection('admin_payment_ledger').doc(orderDoc.id).set({
+            payment_status: 'refunded',
+            refund_id: payment.refund_status || razorpay_payment_id,
+            refunded_at: FieldValue.serverTimestamp(),
+            updated_at: FieldValue.serverTimestamp(),
+          }, { merge: true });
+        } catch (vaultRefundErr) {
+          console.error('Failed to update admin_payment_ledger refund status:', vaultRefundErr);
+        }
 
         // Find pending commissions associated with this order and reverse them
         const commSnap = await adminDb.collection('commissions')

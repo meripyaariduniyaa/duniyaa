@@ -91,13 +91,28 @@ export async function POST(request) {
 
     // -------------------------------------------------------------
     // A. FIRESTORE EXPIRED USER SHAREABLE CREATION DATA SCAN / PURGE
-    // Protected collections strictly omitted:
-    // - referralClicks (referral links/clicks preserved), creators, coupons, creatorGifts, crm_prospects, payouts, blogs, orders, commissions
+    // Protected collections strictly IMMUTABLE & OMITTED:
+    // - admin_payment_ledger (Dedicated permanent payment vault)
+    // - orders, commissions, payouts (Financial ledgers)
+    // - creators, coupons, creatorGifts, crm_prospects, referralClicks, blogs
     // Only customer-generated shareable note items ('notes') are evaluated.
     // -------------------------------------------------------------
+    const PERMANENT_IMMUTABLE_COLLECTIONS = new Set([
+      'admin_payment_ledger',
+      'orders',
+      'commissions',
+      'payouts',
+      'creators',
+      'coupons',
+      'creatorGifts',
+      'crm_prospects',
+      'referralClicks',
+      'blogs',
+    ]);
+
     const targetCollections = [
       { name: 'notes', titleField: 'recipient_name' },
-    ];
+    ].filter((col) => !PERMANENT_IMMUTABLE_COLLECTIONS.has(col.name));
 
     const expiredFirestoreDocs = [];
     let deletedFirestoreCount = 0;

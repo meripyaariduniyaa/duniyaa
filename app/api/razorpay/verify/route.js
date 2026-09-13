@@ -96,7 +96,7 @@ export async function POST(request) {
       paid_at: FieldValue.serverTimestamp(),
     });
 
-    // 3. Create Immutable Order Snapshot
+    // 3. Create Immutable Order Snapshot in orders & permanent admin_payment_ledger vault
     const orderRef = adminDb.collection('orders').doc();
     const orderSnapshot = {
       note_id: apologyId,
@@ -107,6 +107,7 @@ export async function POST(request) {
       coupon_id: effectiveCouponId || null,
       discount_percent: finalDiscountPercent,
       final_amount: finalAmountPaid,
+      amount_in_rupees: Number(((finalAmountPaid || 0) / 100).toFixed(2)),
       payment_method: method,
       payment_status: 'paid',
       razorpay_order_id: razorpay_order_id || null,
@@ -116,7 +117,20 @@ export async function POST(request) {
       paid_at: FieldValue.serverTimestamp(),
     };
 
+    // Save to primary orders collection
     await orderRef.set(orderSnapshot);
+
+    // Save permanent immutable copy to admin_payment_ledger
+    try {
+      await adminDb.collection('admin_payment_ledger').doc(orderRef.id).set({
+        ...orderSnapshot,
+        order_id: orderRef.id,
+        vault_recorded_at: FieldValue.serverTimestamp(),
+        immutable_permanent_lock: true,
+      });
+    } catch (vaultErr) {
+      console.error('Failed to write to admin_payment_ledger vault:', vaultErr);
+    }
 
     // 4. Atomically increment coupon usage
     if (resolvedCouponDoc) {
