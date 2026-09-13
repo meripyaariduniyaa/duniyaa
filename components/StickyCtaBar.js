@@ -12,6 +12,8 @@ export default function StickyCtaBar() {
     if (
       pathname?.startsWith('/p/') ||
       pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/drive') ||
+      pathname?.startsWith('/del') ||
       pathname?.startsWith('/creator/') ||
       pathname === '/creator' ||
       pathname === '/create' ||
@@ -23,16 +25,31 @@ export default function StickyCtaBar() {
       return;
     }
 
+    let footerVisible = false;
+
     const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShow(true);
-      } else {
-        setShow(false);
-      }
+      setShow(window.scrollY > 400 && !footerVisible);
     };
 
+    // Hide bar when footer comes into view
+    const footer = document.getElementById('site-footer');
+    let observer = null;
+    if (footer) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          footerVisible = entry.isIntersecting;
+          setShow(window.scrollY > 400 && !footerVisible);
+        },
+        { threshold: 0.01 }
+      );
+      observer.observe(footer);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer?.disconnect();
+    };
   }, [pathname]);
 
   if (!show) return null;

@@ -98,6 +98,7 @@ export default function VoiceNoteRecorder({ onVoiceRecorded, onVoiceRemoved, exi
       const formData = new FormData();
       formData.append('file', blobOrFile, 'voicenote.webm');
       formData.append('upload_preset', uploadPreset);
+      formData.append('folder', 'user-uploads');
       formData.append('resource_type', 'video'); // Cloudinary handles audio as video resource_type
 
       const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {

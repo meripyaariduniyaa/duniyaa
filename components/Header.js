@@ -32,6 +32,8 @@ export default function Header() {
   if (
     pathname?.startsWith('/p/') ||
     pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/drive') ||
+    pathname?.startsWith('/del') ||
     pathname?.startsWith('/creator/') ||
     pathname === '/creator' ||
     pathname === '/create' ||

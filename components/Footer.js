@@ -11,6 +11,8 @@ export default function Footer() {
   if (
     pathname?.startsWith('/p/') ||
     pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/drive') ||
+    pathname?.startsWith('/del') ||
     pathname?.startsWith('/creator/') ||
     pathname === '/creator' ||
     pathname === '/create' ||
@@ -123,6 +125,9 @@ export default function Footer() {
               <li><Link href="/creator/login">🔑 Creator Login</Link></li>
               <li><Link href="/privacy">Privacy Policy</Link></li>
               <li><Link href="/terms">Terms of Service</Link></li>
+              <li><Link href="/refund">Refund Policy</Link></li>
+              <li><Link href="/shipping">Shipping Policy</Link></li>
+              <li><Link href="/cookies">Cookie Policy</Link></li>
               <li><a href="mailto:meri.pyaari.duniyaa@gmail.com">Help &amp; Support</a></li>
             </ul>
             <div className="footer-badge-payment">
@@ -151,6 +156,12 @@ export default function Footer() {
             <Link href="/privacy">Privacy</Link>
             <span>•</span>
             <Link href="/terms">Terms</Link>
+            <span>•</span>
+            <Link href="/refund">Refunds</Link>
+            <span>•</span>
+            <Link href="/shipping">Shipping</Link>
+            <span>•</span>
+            <Link href="/cookies">Cookies</Link>
             <span>•</span>
             <Link href="/templates">Gifts</Link>
           </div>

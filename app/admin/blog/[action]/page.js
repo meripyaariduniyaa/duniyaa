@@ -120,6 +120,7 @@ export default function AdminBlogEditorPage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', uploadPreset);
+    formData.append('folder', 'admin-uploads');
 
     const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
       method: 'POST',
@@ -310,7 +311,7 @@ export default function AdminBlogEditorPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      
+
       {/* TOP ACTIONS BAR */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', background: '#fff', padding: '16px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', position: 'sticky', top: '70px', zIndex: 40, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -440,10 +441,10 @@ export default function AdminBlogEditorPage() {
       ) : (
         /* EDITING MODE FORM */
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
-          
+
           {/* MAIN COLUMN: TITLE + BLOCKS */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+
             {/* TITLE & SLUG CARD */}
             <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -856,7 +857,7 @@ export default function AdminBlogEditorPage() {
 
           {/* SIDEBAR COLUMN: COVER IMAGE, EXCERPT, SEO, TAGS */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+
             {/* COVER IMAGE CARD */}
             <div style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>

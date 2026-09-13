@@ -17,6 +17,8 @@ import {
   GiftsIcon,
   ReportsIcon,
   BlogIcon,
+  DriveIcon,
+  TrashIcon,
   ShieldIcon,
   LogOutIcon,
   MenuIcon,
@@ -111,7 +113,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc', color: '#0f172a', fontFamily: 'inherit' }}>
-      
+
       {/* FIXED TOPBAR (PERMANENTLY AT TOP) */}
       <header style={{
         position: 'fixed',
@@ -124,7 +126,7 @@ export default function AdminLayout({ children }) {
         borderBottom: '1px solid #1e293b',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
       }}>
-        
+
         {/* ROW 1: BRAND LOGO + USER CONTROLS */}
         <div style={{
           maxWidth: '1920px',
@@ -135,7 +137,7 @@ export default function AdminLayout({ children }) {
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          
+
           {/* BRAND & STORE LINK */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <Link href="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
@@ -175,11 +177,57 @@ export default function AdminLayout({ children }) {
               <span>Live Storefront</span>
               <ExternalLinkIcon size={12} />
             </a>
+
+            <Link
+              href="/drive"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(190, 18, 60, 0.15) 100%)',
+                border: '1px solid rgba(236, 72, 153, 0.35)',
+                color: '#f472b6',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              className="hidden md:inline-flex"
+              title="Open Cloudinary Drive Manager"
+            >
+              <DriveIcon size={14} />
+              <span>Cloud Drive</span>
+            </Link>
+
+            <Link
+              href="/del"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.15) 100%)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                color: '#f87171',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              className="hidden md:inline-flex"
+              title="Open Expiration & Cleanup Manager"
+            >
+              <TrashIcon size={14} />
+              <span>Cleanup</span>
+            </Link>
           </div>
 
           {/* RIGHT: SYSTEM STATUS, USER PROFILE & LOGOUT */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            
+
             {/* LIVE STATUS */}
             <div style={{
               display: 'flex',
@@ -207,7 +255,7 @@ export default function AdminLayout({ children }) {
                   {user?.email}
                 </span>
               </div>
-              
+
               <div style={{
                 width: '30px',
                 height: '30px',
@@ -288,7 +336,7 @@ export default function AdminLayout({ children }) {
           }}>
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const active = item.exact 
+              const active = item.exact
                 ? (pathname === item.href || pathname === '/admin')
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
 
@@ -336,7 +384,7 @@ export default function AdminLayout({ children }) {
           }}>
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const active = item.exact 
+              const active = item.exact
                 ? (pathname === item.href || pathname === '/admin')
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
 

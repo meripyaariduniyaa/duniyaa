@@ -73,6 +73,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
       alternates: enInAlternates('/terms'),
     },
+    {
+      url: `${SITE_URL}/refund`,
+      lastModified: LEGAL_UPDATED,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+      alternates: enInAlternates('/refund'),
+    },
+    {
+      url: `${SITE_URL}/shipping`,
+      lastModified: LEGAL_UPDATED,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+      alternates: enInAlternates('/shipping'),
+    },
+    {
+      url: `${SITE_URL}/cookies`,
+      lastModified: LEGAL_UPDATED,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+      alternates: enInAlternates('/cookies'),
+    },
   ];
 
   const templatePages: MetadataRoute.Sitemap = templates
