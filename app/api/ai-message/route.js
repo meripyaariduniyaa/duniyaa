@@ -115,9 +115,6 @@ const TEMPLATE_CONTEXT = {
   'things-i-never-said': {
     occasion: 'deep unsaid-feelings reveal', goal: 'gently express truths the sender has held back', style: 'honest, intimate, tender', avoid: 'apology language or melodrama',
   },
-  'i-miss-you': {
-    occasion: 'long-distance miss-you message', goal: 'make distance feel emotional but hopeful through specific everyday moments', style: 'nostalgic, affectionate, reassuring', avoid: 'guilt, blame, or an apology tone',
-  },
   'open-when': {
     occasion: 'open-when letter collection', goal: 'write short comforting messages for different moments in the recipient’s life', style: 'supportive, caring, concise', avoid: 'repeating the same message across envelopes',
   },
@@ -133,7 +130,6 @@ const TEMPLATE_CONTEXT = {
 const FALLBACK_ENGINE = {
   'just-because': { sincere: [`{name}, there is no occasion today. I just wanted to remind you that you make life warmer, lighter, and better. {keywords}You are so special to me. ✨`, `{name}, this is a small note for an important person. Thank you for being exactly who you are. {keywords}💛` ] },
   'things-i-never-said': { sincere: [`{name}, some feelings deserve more than a passing message. {keywords}I notice you, I value you, and I hope you always know how much you mean to me. 💌`, `{name}, I have held these words quietly for too long: you make a real difference in my life. {keywords}✨`] },
-  'i-miss-you': { sincere: [`{name}, distance has a way of making the smallest things feel precious. {keywords}I miss you, and I am holding our next moment together close. 🫂`, `{name}, even from far away, you are part of my everyday thoughts. {keywords}Until we meet again, I am only a message away. 💛`] },
   'open-when': { sincere: [`{name}, whenever you need this, please remember: you are loved, capable, and never as alone as you think. {keywords} 💌`, `{name}, save this for a hard day: I believe in you completely, even when you are struggling to believe in yourself. ✨`] },
   'emotional-apology': { sincere: [`{name}, I am sorry for the hurt I caused. {keywords}I take responsibility without asking you to make this easier for me. I will do better through my actions.`, `{name}, I understand that an apology does not erase what happened. I am sorry, and I will respect whatever time and space you need. 💛`] },
   'youre-my-person': { sincere: [`{name}, you are the person I want to tell everything to — the good, the messy, and the ordinary. {keywords}Life feels more like home with you in it. ❤️`, `{name}, some people become part of your world so naturally that you cannot imagine it without them. You are that person for me. ✨`] },
@@ -494,7 +490,6 @@ function buildTemplateFill(templateId, name, tone, keywords, relationship = '') 
   const fields = {
     'just-because': { small_detail: short('I keep thinking about', 0) },
     'things-i-never-said': { unsaid: [`I notice how you make life lighter.`, `I am grateful for your quiet kindness.`, `You matter to me more than I say.`], memory: short('I still smile when I remember', 1) },
-    'i-miss-you': { from_location: 'my side of the world', to_location: 'yours', missed_things: ['your laugh', 'our easy conversations', 'the way you understand me', 'our little routines', 'being around you'], favorite_memory: short('My favourite memory is', 1) },
     'open-when': { envelopes: [{ title: 'you need a smile', message: `Remember ${context}. You always make the world brighter.` }, { title: 'you miss me', message: `Distance cannot change what you mean to me, ${name}.` }, { title: 'you feel alone', message: `You do not have to carry everything by yourself. I am here.` }, { title: 'you need courage', message: `You have handled hard things before. I believe in you completely.` }] },
     'emotional-apology': { what_happened: `I have been thinking about ${context} and the way I hurt you.`, regrets: ['I regret not listening with enough care.', 'I regret making you feel unseen.', 'I regret the pain my actions caused.'], promise: 'I will listen, take responsibility, and earn back your trust through my actions.' },
     'youre-my-person': { reasons: ['You make ordinary moments feel special.', 'You understand me without a long explanation.', 'You make me laugh when I need it most.', 'You show up with a kind heart.', 'Life feels more like home with you in it.'], memories: [short('I love remembering', 1), short('Another moment I hold close is', 2)], inside_joke: `Only we would understand ${context}.` },

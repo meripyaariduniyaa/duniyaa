@@ -452,20 +452,6 @@ function buildScenes(template, d, message, photos, name) {
     ];
   }
 
-  // 2. I MISS YOU (6 Slides with Distance Hug Meter Mini Game)
-  if (template === 'i-miss-you') {
-    const fromLoc = d.from_location || 'Here';
-    const toLoc = d.to_location || 'There';
-    return [
-      { icon: '🫂', title: `Missing You, ${name}`, subtitle: `${fromLoc} ➔ ${toLoc}` },
-      { eyebrow: `${fromLoc} ➔ ${toLoc}`, title: "Distance changes the map, not the feeling.", body: "No matter how many miles lie between us, you are the first thought in my morning and the last at night.", photo: photos[0] },
-      { eyebrow: 'The little things', title: '5 things I miss the most', cards: (d.missed_things && d.missed_things.filter(Boolean).length > 0) ? d.missed_things : ['Your spontaneous laugh', 'Sharing random everyday moments with you', 'The comfort of having you right next to me', 'Our late-night chats that never end', 'Just knowing you are around'] },
-      { type: 'game-hug-meter' },
-      { eyebrow: 'My favourite memory', title: d.favorite_memory || 'The day we laughed until our stomachs hurt.', body: 'Distance is just a test to see how far love can travel.', photo: photos[1] || photos[0] },
-      end
-    ];
-  }
-
   // 3. OPEN WHEN… (5 Slides)
   if (template === 'open-when') {
     const envelopes = (d.envelopes && d.envelopes.length > 0) ? d.envelopes : [

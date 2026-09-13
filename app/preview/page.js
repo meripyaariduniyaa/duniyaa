@@ -144,7 +144,6 @@ function PreviewContent() {
     proposal: '#f43f5e',
     birthday: '#f59e0b',
     anniversary: '#fbbf24',
-    'i-miss-you': '#38bdf8',
     'emotional-apology': '#94a3b8',
   };
   const accent = accentMap[note?.template] || '#f43f5e';

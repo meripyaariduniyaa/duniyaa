@@ -86,7 +86,6 @@ export default function Footer() {
               <li><Link href="/templates/birthday">🎂 Virtual Birthday Bash</Link></li>
               <li><Link href="/templates/proposal">💍 The Perfect Proposal</Link></li>
               <li><Link href="/templates/anniversary">🥂 Romantic Anniversary</Link></li>
-              <li><Link href="/templates/i-miss-you">🫂 I Miss You</Link></li>
               <li><Link href="/templates/emotional-apology">🥺 I&apos;m Sorry</Link></li>
               <li><Link href="/arcade">🎮 Couple Mini Arcade</Link></li>
             </ul>
@@ -96,7 +95,6 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-heading">By Feeling</h4>
             <ul className="footer-list">
-              <li><Link href="/templates/i-miss-you">🫂 Long Distance</Link></li>
               <li><Link href="/templates/emotional-apology">🥺 Heartfelt Apology</Link></li>
               <li><Link href="/templates/proposal">💕 Love &amp; Romance</Link></li>
               <li><Link href="/templates/birthday">🎂 Celebration &amp; Joy</Link></li>

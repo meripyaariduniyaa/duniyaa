@@ -31,17 +31,6 @@ const ALL_BESTSELLERS = [
     borderColor: '#fbcfe8',
   },
   {
-    id: 'i-miss-you',
-    title: 'I Miss You',
-    icon: '🫂💙',
-    badge: '💙 LONG DISTANCE',
-    tagline: 'Emotional Memory Journey',
-    desc: 'Send a heartfelt message across the miles with a personalized photo journey & letter.',
-    rating: '4.9 ★ (Long Distance)',
-    gradient: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-    borderColor: '#bfdbfe',
-  },
-  {
     id: 'anniversary',
     title: 'Anniversary Special',
     icon: '🥂✨',
@@ -51,6 +40,17 @@ const ALL_BESTSELLERS = [
     rating: '4.9 ★ (Romantic Hit)',
     gradient: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
     borderColor: '#fed7aa',
+  },
+  {
+    id: 'emotional-apology',
+    title: "I'm Sorry",
+    icon: '🥺💌',
+    badge: '💔 HEARTFELT APOLOGY',
+    tagline: 'Sincere Reconciliation',
+    desc: 'A sincere apology that gives them room to feel. Gentle, heartfelt, and beautifully designed.',
+    rating: '4.8 ★ (Reconciliation)',
+    gradient: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
+    borderColor: '#e9d5ff',
   },
 ];
 
@@ -76,7 +76,7 @@ export default function PersonalizedHeroSection() {
       });
   }, []);
 
-  const featuredIds = personalization.featuredIds || ['birthday', 'proposal', 'anniversary', 'i-miss-you'];
+  const featuredIds = personalization.featuredIds || ['birthday', 'proposal', 'anniversary', 'emotional-apology'];
   const spotlightItems = featuredIds
     .map((id) => ALL_BESTSELLERS.find((b) => b.id === id))
     .filter(Boolean);

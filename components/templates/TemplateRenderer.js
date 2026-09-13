@@ -5,7 +5,6 @@ import BirthdayExperience from './birthday/BirthdayExperience';
 import EmotionalExperience from './EmotionalExperience';
 import ProposalExperience from './proposal/ProposalExperience';
 import AnniversaryExperience from './anniversary/AnniversaryExperience';
-import IMissYouExperience from './imissyou/IMissYouExperience';
 import ApologyExperience from './apology/ApologyExperience';
 
 export default function TemplateRenderer({ note, isPreview = false, onReachEnd }) {
@@ -22,8 +21,6 @@ export default function TemplateRenderer({ note, isPreview = false, onReachEnd }
     case 'anniversary':
     case 'love-letter':
       experience = <AnniversaryExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'i-miss-you':
-      experience = <IMissYouExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'emotional-apology':
     case 'sorry':
     case 'apology':

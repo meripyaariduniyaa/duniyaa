@@ -70,14 +70,12 @@ export default function RootLayout({ children }) {
       'Virtual Birthday Bash',
       'The Perfect Proposal',
       'Anniversary Special',
-      'I Miss You',
       "I'm Sorry",
     ],
     url: [
       `${SITE_URL}/templates/birthday`,
       `${SITE_URL}/templates/proposal`,
       `${SITE_URL}/templates/anniversary`,
-      `${SITE_URL}/templates/i-miss-you`,
       `${SITE_URL}/templates/emotional-apology`,
     ],
   };
