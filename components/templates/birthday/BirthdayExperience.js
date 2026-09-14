@@ -1,629 +1,647 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import CinematicStageWrapper from '../common/CinematicStageWrapper';
-import GoldBadge from '../common/GoldBadge';
-import WholesomeMemeSticker from '../common/WholesomeMemeSticker';
-import SparklerCanvas from '../common/SparklerCanvas';
-import PolaroidStack from '../common/PolaroidStack';
-import WaxSealLetter from '../common/WaxSealLetter';
 
-/**
- * 🎂 VIRTUAL BIRTHDAY BASH (ID: birthday)
- * 8-Scene Full-Bleed VIP Cinematic Celebration
- */
+/* ─────────────────────────────────────────────────────────
+   BIRTHDAY EXPERIENCE
+   Scenes:
+   1. Splash — throw item at heart → burst
+   2. Full-screen Happy Birthday (red bg)
+   3. Gold burst → tree grows → heart leaves bloom
+   4. Falling heart leaves + name reveal
+   5. Cake scene — candle blow + cut
+   6. Make a wish (shooting star)
+   7. Balloon pop reveals
+   8. Memory photos
+   9. Envelope + handwritten letter
+  10. Final happy birthday again
+───────────────────────────────────────────────────────── */
 export default function BirthdayExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
-  const [countdown, setCountdown] = useState(3);
-  const [unlockedSecrets, setUnlockedSecrets] = useState([true, false, false]);
-
-  // Scene 4: Balloon popping
-  const [poppedBalloons, setPoppedBalloons] = useState({});
-
-  // Scene 7: Cake candles extinguished
-  const [candlesBlown, setCandlesBlown] = useState(false);
-
-  const recipient = note?.recipient_name || 'Birthday Star';
-  const customMsg = note?.custom_message || 'Happy Birthday! May your new year of life be overflowing with joy, incredible adventures, boundless health, and all the dreams your heart has been quietly holding.';
-  const specialMemory = note?.custom_details?.special_memory || 'The unforgettably hilarious times we could not stop laughing until our stomachs hurt.';
-  const giftClue = note?.custom_details?.gift_clue || 'Your biggest surprise is waiting in real life!';
+  const name = note?.recipient_name || 'Birthday Star';
+  const senderName = note?.custom_details?.sender_name || '';
+  const turningAge = note?.custom_details?.turning_age || '';
+  const cakeType = note?.custom_details?.cake_type || 'chocolate';
+  const balloonMessages = note?.custom_details?.balloon_messages || ['Happy Birthday! 🎂', 'You are amazing!', 'So proud of you!'];
+  const letter = note?.custom_details?.letter || note?.custom_message || '';
   const photos = note?.image_urls || [];
 
-  useEffect(() => {
-    onReachEnd?.(scene === 8, () => {
-      setScene(1);
-      setCountdown(3);
-      setPoppedBalloons({});
-      setCandlesBlown(false);
-    });
-  }, [scene, onReachEnd]);
-
-  // Countdown timer for Scene 1
-  useEffect(() => {
-    if (scene === 1 && countdown > 0) {
-      const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [scene, countdown]);
-
-  const balloons = [
-    { id: 'b1', title: 'Infinite Laughs', desc: 'Guaranteed 365 days of unhinged laughter and spontaneous fun.' },
-    { id: 'b2', title: 'Wild Adventures', desc: 'Unlocking new trips, delicious food quests, and road trips.' },
-    { id: 'b3', title: 'Career Breakthroughs', desc: 'Watching every single goal you set fall into place effortlessly.' },
-    { id: 'b4', title: 'Unconditional Love', desc: 'Never forgetting that you are deeply loved and cherished.' },
-    { id: 'b5', title: 'A Secret Surprise', desc: giftClue }
-  ];
-
-  const handlePopBalloon = (id) => {
-    const updated = { ...poppedBalloons, [id]: true };
-    setPoppedBalloons(updated);
-    if (Object.keys(updated).length >= 3) {
-      setUnlockedSecrets([true, true, unlockedSecrets[2]]);
-    }
-  };
-
-  const awards = [
-    { title: 'The World\'s Best Energy', category: 'Grand Trophy', icon: 'crown' },
-    { title: 'Master of Spontaneous Chaos', category: 'Golden Medal', icon: 'sparkle' },
-    { title: 'Always Having Our Back', category: 'Diamond Honor', icon: 'heart' },
-    { title: 'Unmatched Taste & Vibe', category: 'Hall of Fame', icon: 'toast' }
-  ];
+  const goNext = () => setScene((s) => s + 1);
 
   return (
-    <CinematicStageWrapper
-      currentStep={scene}
-      totalSteps={8}
-      chapterTitle={
-        scene === 1
-          ? 'Midnight Countdown'
-          : scene === 2
-          ? 'Spotlight Entrance'
-          : scene === 3
-          ? 'Sparkler Wish'
-          : scene === 4
-          ? 'Pop The Balloons'
-          : scene === 5
-          ? 'Birthday Awards'
-          : scene === 6
-          ? 'Memory Cinema'
-          : scene === 7
-          ? 'Blow The Candles'
-          : 'VIP Keepsake'
-      }
-      particleMode="gold_confetti"
-      theme="festive"
-      unlockedSecrets={unlockedSecrets}
+    <div style={{ background: '#080810', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Dancing+Script:wght@600;700&family=Caveat:wght@500;700&display=swap');
+        @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+        @keyframes heartFloat { 0%,100%{transform:translateY(0) rotate(-8deg);opacity:0.8} 50%{transform:translateY(-18px) rotate(8deg);opacity:1} }
+        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 20px rgba(251,191,36,0.3)} 50%{box-shadow:0 0 50px rgba(251,191,36,0.7)} }
+        @keyframes shoot { 0%{transform:translate(0,0) rotate(-45deg);opacity:1} 100%{transform:translate(200px,-200px) rotate(-45deg);opacity:0} }
+        @keyframes typewriter-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes leaf-fall { 0%{transform:translateY(-20px) rotate(0) scale(0.5);opacity:0} 20%{opacity:1} 100%{transform:translateY(100vh) rotate(360deg) scale(0.8);opacity:0} }
+      `}</style>
+
+      <AnimatePresence mode="wait">
+        {scene === 1 && <SceneSplash key="s1" name={name} onNext={goNext} />}
+        {scene === 2 && <SceneHBDFull key="s2" name={name} turningAge={turningAge} onNext={goNext} />}
+        {scene === 3 && <SceneGoldTree key="s3" name={name} onNext={goNext} />}
+        {scene === 4 && <SceneNameReveal key="s4" name={name} turningAge={turningAge} onNext={goNext} />}
+        {scene === 5 && <SceneCake key="s5" cakeType={cakeType} name={name} onNext={goNext} />}
+        {scene === 6 && <SceneWish key="s6" name={name} onNext={goNext} />}
+        {scene === 7 && <SceneBalloons key="s7" messages={balloonMessages} onNext={goNext} />}
+        {scene === 8 && photos.length > 0 && <SceneMemories key="s8" photos={photos} onNext={goNext} />}
+        {scene === 8 && photos.length === 0 && <SceneEnvelope key="s8b" onOpen={goNext} />}
+        {scene === 9 && photos.length > 0 && <SceneEnvelope key="s9" onOpen={goNext} />}
+        {scene === 9 && photos.length === 0 && <SceneLetter key="s9b" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
+        {scene === 10 && photos.length > 0 && <SceneLetter key="s10" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
+        {scene === 10 && photos.length === 0 && <SceneFinal key="s10b" name={name} turningAge={turningAge} onEnd={onReachEnd} />}
+        {scene === 11 && <SceneFinal key="s11" name={name} turningAge={turningAge} onEnd={onReachEnd} />}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ── SCENE 1: SPLASH — tap star to throw at heart ── */
+function SceneSplash({ name, onNext }) {
+  const [thrown, setThrown] = useState(false);
+  const [burst, setBurst] = useState(false);
+
+  const handleThrow = () => {
+    if (thrown) return;
+    setThrown(true);
+    setTimeout(() => { setBurst(true); setTimeout(onNext, 1000); }, 600);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.1 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 40%, #1a0505 0%, #080810 100%)', padding: '2rem', position: 'relative', overflow: 'hidden' }}
     >
-      {/* ── SCENE 1: MIDNIGHT COUNTDOWN ── */}
-      {scene === 1 && (
-        <div style={{ width: '100%', maxWidth: '780px', margin: '0 auto', textAlign: 'center', padding: '2rem 1rem' }}>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ color: '#64748b', fontSize: '0.82rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2rem' }}>
+        Tap to start the celebration
+      </motion.p>
+
+      {/* Heart target */}
+      <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem' }}>
+        <motion.div
+          animate={burst ? { scale: [1, 2.5], opacity: [1, 0] } : { scale: [1, 1.05, 1] }}
+          transition={burst ? { duration: 0.5 } : { duration: 1.5, repeat: Infinity }}
+          style={{ fontSize: '5rem', cursor: 'pointer' }}
+          onClick={handleThrow}
+        >
+          {burst ? '💥' : '❤️'}
+        </motion.div>
+        {burst && Array.from({ length: 12 }, (_, i) => (
+          <motion.div key={i} initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+            animate={{ x: Math.cos(i * 30 * Math.PI / 180) * 80, y: Math.sin(i * 30 * Math.PI / 180) * 80, opacity: 0, scale: 0 }}
             transition={{ duration: 0.6 }}
-          >
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'block', marginBottom: '1.5rem' }}>
-              ✦ Live Birthday Broadcast ✦
-            </span>
-
-            <div style={{ margin: '2rem 0' }}>
-              <AnimatePresence mode="wait">
-                {countdown > 0 ? (
-                  <motion.div
-                    key={countdown}
-                    initial={{ scale: 0.4, opacity: 0 }}
-                    animate={{ scale: 1.2, opacity: 1 }}
-                    exit={{ scale: 1.8, opacity: 0 }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                    style={{
-                      fontFamily: '"Playfair Display", Georgia, serif',
-                      fontSize: 'clamp(5.5rem, 16vw, 10rem)',
-                      fontWeight: 900,
-                      color: '#fbbf24',
-                      textShadow: '0 0 50px rgba(251, 191, 36, 0.7), 0 0 100px rgba(245, 158, 11, 0.4)',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {countdown}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <h1
-                      style={{
-                        fontFamily: 'var(--font-dancing)',
-                        fontSize: 'clamp(3rem, 8vw, 5.5rem)',
-                        color: '#ffffff',
-                        textShadow: '0 0 35px rgba(251, 191, 36, 0.8)',
-                        margin: '0 0 1.5rem',
-                      }}
-                    >
-                      IT&apos;S YOUR BIRTHDAY!
-                    </h1>
-                    <p style={{ color: '#cbd5e1', fontSize: '1.2rem', maxWidth: '520px', margin: '0 auto 2.5rem' }}>
-                      The universe has been waiting 365 days for this exact celebration.
-                    </p>
-                    <motion.button
-                      whileHover={{ scale: 1.05, boxShadow: '0 0 45px rgba(245, 158, 11, 0.8)' }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setScene(2)}
-                      style={{
-                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                        color: '#000000',
-                        padding: '18px 46px',
-                        borderRadius: '999px',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: '1.15rem',
-                        cursor: 'pointer',
-                        boxShadow: '0 10px 30px rgba(245, 158, 11, 0.4)',
-                      }}
-                    >
-                      Step Into The Spotlight &rarr;
-                    </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            style={{ position: 'absolute', fontSize: '1.5rem' }}>
+            {['💕', '✨', '🌟', '💖'][i % 4]}
           </motion.div>
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* ── SCENE 2: SPOTLIGHT GRAND ENTRANCE ── */}
-      {scene === 2 && (
-        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+      {/* Projectile */}
+      <AnimatePresence>
+        {!thrown && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              padding: 'clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 3rem)',
-              borderRadius: '32px',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              backdropFilter: 'blur(30px)',
-              boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(245, 158, 11, 0.15)',
-            }}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 100, y: -100, rotate: -45 }}
+            transition={{ exit: { duration: 0.6, ease: 'easeIn' } }}
+            onClick={handleThrow}
+            style={{ fontSize: '2.5rem', cursor: 'pointer', animation: 'heartFloat 2s ease-in-out infinite' }}
           >
-            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-              <GoldBadge name="crown" size={60} />
-            </div>
-
-            <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.2em', textTransform: 'uppercase', display: 'block', marginBottom: '1rem' }}>
-              VIP Guest of Honor
-            </span>
-
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.5rem, 6vw, 4.2rem)',
-                color: '#fff',
-                margin: '0 0 1.25rem',
-                textShadow: '0 0 30px rgba(251, 191, 36, 0.4)',
-              }}
-            >
-              Happy Birthday, {recipient}!
-            </h1>
-
-            <p style={{ color: '#cbd5e1', fontSize: '1.1rem', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 2.5rem' }}>
-              Tonight is entirely dedicated to your laughter, your dreams, and all the brilliance you effortlessly bring into our lives.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setScene(3)}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000000',
-                padding: '16px 42px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '1.05rem',
-                cursor: 'pointer',
-                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
-              }}
-            >
-              Write Your Sky Sparkler Wish &rarr;
-            </motion.button>
+            ⭐
           </motion.div>
-        </div>
+        )}
+      </AnimatePresence>
+
+      <motion.p animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 2, repeat: Infinity }} style={{ color: '#475569', fontSize: '0.85rem', marginTop: '1.5rem' }}>
+        Tap ⭐ to throw at the heart!
+      </motion.p>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 2: Full-screen HBD ── */
+function SceneHBD({ name, turningAge, onNext }) { return null; } // alias
+function SceneHBDFull({ name, turningAge, onNext }) {
+  const confetti = Array.from({ length: 60 }, (_, i) => ({
+    id: i, left: `${(i * 23 + 3) % 100}%`, delay: `${(i * 0.04).toFixed(2)}s`,
+    dur: `${2 + (i % 5) * 0.4}s`, color: ['#fff', '#fbbf24', '#f43f5e', '#a855f7', '#38bdf8'][i % 5],
+    size: 8 + (i % 5) * 4,
+  }));
+
+  useEffect(() => { const t = setTimeout(onNext, 4000); return () => clearTimeout(t); }, [onNext]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#c8000a', position: 'relative', overflow: 'hidden' }}
+    >
+      {confetti.map((c) => (
+        <div key={c.id} style={{ position: 'absolute', top: 0, left: c.left, fontSize: c.size, color: c.color, animation: `confettiFall ${c.dur} ${c.delay} ease-in infinite`, pointerEvents: 'none' }}>■</div>
+      ))}
+      <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, type: 'spring', stiffness: 200 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.8, repeat: Infinity }} style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🎂</motion.div>
+        <h1 style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2.5rem, 10vw, 5rem)', color: '#fff', margin: '0', textShadow: '0 4px 20px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
+          Happy Birthday
+        </h1>
+        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2rem, 7vw, 3.5rem)', color: '#fde68a', margin: '0.25rem 0 0', textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+          {name}! 🎉
+        </motion.h2>
+        {turningAge && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', marginTop: '1rem' }}>
+            Turning {turningAge} never looked this good ✨
+          </motion.p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 3: Gold burst → Tree grows → Hearts bloom ── */
+function SceneGoldTree({ name, onNext }) {
+  const [phase, setPhase] = useState(0); // 0: burst, 1: tree, 2: leaves
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 800);
+    const t2 = setTimeout(() => setPhase(2), 2200);
+    const t3 = setTimeout(onNext, 4200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [onNext]);
+
+  const leaves = Array.from({ length: 20 }, (_, i) => ({
+    id: i, x: 110 + Math.cos(i * 18 * Math.PI / 180) * (30 + (i % 3) * 20),
+    y: 140 - Math.sin(i * 18 * Math.PI / 180) * (20 + (i % 4) * 15),
+    color: ['#f43f5e', '#fbbf24', '#a855f7', '#38bdf8', '#4ade80'][i % 5],
+  }));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 60%, #2a1a00 0%, #080810 100%)', position: 'relative', overflow: 'hidden' }}
+    >
+      {/* Gold burst from center */}
+      {phase >= 0 && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: phase >= 1 ? 0 : [0, 3], opacity: phase >= 1 ? 0 : [0, 1, 0] }}
+          transition={{ duration: 0.8 }}
+          style={{ position: 'absolute', width: 100, height: 100, borderRadius: '50%', background: 'radial-gradient(circle, #fbbf24, #f59e0b, transparent)', pointerEvents: 'none' }}
+        />
       )}
 
-      {/* ── SCENE 3: SKY SPARKLER SIGNATURE ── */}
-      {scene === 3 && (
-        <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Scene III: Interactive Sky Sparkler
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              Draw Your Midnight Wish
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Drag your finger or cursor on the night sky canvas to light glowing gold sparkler trails.
-            </p>
-          </div>
+      {/* Tree SVG — grows upward */}
+      <div style={{ position: 'relative', width: 220, height: 280 }}>
+        <svg viewBox="0 0 220 280" style={{ width: '100%', height: '100%' }}>
+          {/* Trunk */}
+          <motion.rect x="102" y="200" width="16" height="80" rx="4" fill="#92400e"
+            initial={{ scaleY: 0 }} animate={{ scaleY: phase >= 1 ? 1 : 0 }}
+            style={{ transformOrigin: 'bottom center' }} transition={{ duration: 0.6, delay: 0.2 }}
+          />
+          {/* Main branch */}
+          <motion.path d="M110 200 Q80 160 60 120 M110 200 Q140 160 160 120 M110 180 Q95 155 85 130 M110 180 Q125 155 135 130"
+            stroke="#92400e" strokeWidth="6" fill="none" strokeLinecap="round"
+            initial={{ pathLength: 0 }} animate={{ pathLength: phase >= 1 ? 1 : 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+          />
 
-          <div style={{ marginBottom: '2.5rem' }}>
-            <SparklerCanvas onDraw={() => {}} />
-          </div>
+          {/* Hearts as leaves */}
+          {phase >= 2 && leaves.map((leaf, i) => (
+            <motion.text key={leaf.id} x={leaf.x} y={leaf.y} textAnchor="middle" fontSize="18" fill={leaf.color}
+              initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.08, type: 'spring', stiffness: 300 }}
+              style={{ transformOrigin: `${leaf.x}px ${leaf.y}px` }}
+            >
+              ♥
+            </motion.text>
+          ))}
+        </svg>
 
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => setScene(4)}
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#000',
-              padding: '16px 40px',
-              borderRadius: '999px',
-              border: 'none',
-              fontWeight: 800,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
-            }}
+        {/* Falling hearts */}
+        {phase >= 2 && Array.from({ length: 12 }, (_, i) => (
+          <div key={i} style={{
+            position: 'absolute', top: 0, left: `${(i * 41) % 100}%`,
+            fontSize: 14 + (i % 3) * 6, color: ['#f43f5e', '#fbbf24', '#a855f7'][i % 3],
+            animation: `leaf-fall ${2 + (i % 4) * 0.5}s ${(i * 0.2).toFixed(1)}s ease-in infinite`,
+            pointerEvents: 'none',
+          }}>♥</div>
+        ))}
+      </div>
+
+      {phase >= 2 && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+          style={{ color: '#fde68a', fontFamily: "'Dancing Script', cursive", fontSize: '1.4rem', textAlign: 'center', marginTop: '1rem' }}>
+          Blooming with love for you 🌸
+        </motion.p>
+      )}
+    </motion.div>
+  );
+}
+
+/* ── SCENE 4: Name Reveal ── */
+function SceneNameReveal({ name, turningAge, onNext }) {
+  useEffect(() => { const t = setTimeout(onNext, 3500); return () => clearTimeout(t); }, [onNext]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 50%, #1a1000 0%, #080810 100%)', padding: '2rem' }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        {/* Falling hearts decoration */}
+        {Array.from({ length: 15 }, (_, i) => (
+          <div key={i} style={{ position: 'fixed', top: 0, left: `${(i * 37) % 100}%`, fontSize: 14 + (i % 4) * 6, color: ['#f43f5e', '#fbbf24', '#a855f7', '#f9a8d4'][i % 4], animation: `leaf-fall ${2 + (i % 4)}s ${(i * 0.15).toFixed(1)}s ease-in infinite`, pointerEvents: 'none' }}>♥</div>
+        ))}
+
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, delay: 0.2 }} style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.15 }}
+        >
+          Happy Birthday,
+        </motion.h1>
+        <motion.h2
+          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8, type: 'spring', stiffness: 200 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2.5rem, 9vw, 5rem)', background: 'linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0', lineHeight: 1.1 }}
+        >
+          {name}! 🎂
+        </motion.h2>
+        {turningAge && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }} style={{ color: '#94a3b8', fontSize: '1.1rem', marginTop: '1rem' }}>
+            You're turning {turningAge} and you're absolutely glowing ✨
+          </motion.p>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 5: Cake — candle + blow + cut ── */
+const CAKE_COLORS = {
+  chocolate: { bg: '#3b1f0a', icing: '#7c3f1c', layers: ['#5c2d10', '#8b4513'], candle: '#e879f9' },
+  strawberry: { bg: '#4a0020', icing: '#be123c', layers: ['#9f1239', '#fb7185'], candle: '#fde68a' },
+  vanilla: { bg: '#422006', icing: '#b45309', layers: ['#d97706', '#fde68a'], candle: '#f43f5e' },
+};
+
+function SceneCake({ cakeType, name, onNext }) {
+  const [blown, setBlown] = useState(false);
+  const [cut, setCut] = useState(false);
+  const colors = CAKE_COLORS[cakeType] || CAKE_COLORS.chocolate;
+
+  const handleBlow = () => { setBlown(true); setTimeout(() => setCut(true), 800); };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: `radial-gradient(ellipse at 50% 60%, ${colors.bg} 0%, #080810 100%)`, padding: '2rem' }}
+    >
+      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ color: '#94a3b8', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+        🎂 Your Birthday Cake
+      </motion.p>
+
+      {/* Cake Visual */}
+      <div style={{ position: 'relative', marginBottom: '2rem' }}>
+        {/* Candle flame */}
+        {!blown && (
+          <motion.div
+            animate={{ scale: [1, 1.2, 0.9, 1.1, 1], rotate: [-5, 5, -3, 3, 0] }}
+            transition={{ duration: 0.8, repeat: Infinity }}
+            style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', fontSize: '1.8rem' }}
           >
-            Pop The Mystery Balloons &rarr;
-          </motion.button>
-        </div>
-      )}
+            🔥
+          </motion.div>
+        )}
 
-      {/* ── SCENE 4: FLOATING MYSTERY BALLOONS ── */}
-      {scene === 4 && (
-        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Scene IV: Golden Surprises
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              Pop The 5 Mystery Balloons
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Tap each floating golden balloon to pop it and reveal what destiny holds for you this year.
-            </p>
-          </div>
+        {/* Cake body */}
+        <motion.div
+          animate={cut ? { rotate: [-2, 2, -1, 0] } : {}}
+          style={{ width: 180, height: 120, position: 'relative' }}
+        >
+          <svg viewBox="0 0 180 120" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))' }}>
+            <rect x="10" y="60" width="160" height="60" rx="4" fill={colors.layers[0]} />
+            <rect x="20" y="40" width="140" height="30" rx="3" fill={colors.layers[1]} />
+            <rect x="30" y="20" width="120" height="30" rx="3" fill={colors.icing} />
+            {/* Icing drips */}
+            {[30, 60, 90, 120].map((x, i) => <rect key={i} x={x} y="18" width="12" height={8 + (i % 3) * 4} rx="4" fill={colors.icing} opacity="0.7" />)}
+            {/* Candle */}
+            <rect x="84" y="0" width="12" height="24" rx="4" fill={colors.candle} />
+            {/* Cut line */}
+            {cut && <line x1="90" y1="0" x2="90" y2="120" stroke="rgba(255,255,255,0.4)" strokeWidth="1" strokeDasharray="4" />}
+          </svg>
+        </motion.div>
+      </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            {balloons.map((b, idx) => {
-              const isPopped = poppedBalloons[b.id];
-              return (
-                <motion.div
-                  key={b.id}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  onClick={() => handlePopBalloon(b.id)}
-                  style={{
-                    background: isPopped ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 255, 255, 0.03)',
-                    border: isPopped ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '24px',
-                    padding: '2rem',
-                    cursor: 'pointer',
-                    backdropFilter: 'blur(20px)',
-                    minHeight: '200px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                      <GoldBadge name="sparkle" size={26} />
-                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isPopped ? '#4ade80' : '#fbbf24', letterSpacing: '0.1em' }}>
-                        {isPopped ? '💥 POPPED!' : '🎈 TAP TO POP'}
-                      </span>
-                    </div>
-                    <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 700 }}>
-                      {b.title}
-                    </h3>
-                    <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                      {isPopped ? b.desc : 'Pop balloon to inspect secret wish.'}
-                    </p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setScene(5)}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '16px 40px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
-              }}
-            >
-              Enter Official Awards &rarr;
-            </motion.button>
-          </div>
-        </div>
-      )}
-
-      {/* ── SCENE 5: BIRTHDAY AWARDS ── */}
-      {scene === 5 && (
-        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Scene V: Official Honors
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              The Official VIP Honors
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Unanimously voted by everyone who knows and cherishes you.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            {awards.map((aw, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -6, scale: 1.02 }}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(245, 158, 11, 0.25)',
-                  borderRadius: '24px',
-                  padding: '2rem 1.5rem',
-                  textAlign: 'center',
-                  backdropFilter: 'blur(20px)',
-                }}
-              >
-                <div style={{ display: 'inline-flex', padding: '16px', background: 'rgba(245, 158, 11, 0.12)', borderRadius: '50%', marginBottom: '1.25rem' }}>
-                  <GoldBadge name={aw.icon} size={40} />
-                </div>
-                <h3 style={{ color: '#fff', fontSize: '1.2rem', margin: '0 0 0.5rem', fontWeight: 700 }}>{aw.title}</h3>
-                <p style={{ color: '#fbbf24', fontSize: '0.85rem', margin: 0, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{aw.category}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setScene(6)}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '16px 40px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
-              }}
-            >
-              Enter The Memory Cinema &rarr;
-            </motion.button>
-          </div>
-        </div>
-      )}
-
-      {/* ── SCENE 6: MEMORY CINEMA ── */}
-      {scene === 6 && (
-        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Scene VI: Nostalgic Reel
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              The Memory Cinema
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Swipe through our shared scrapbook of adventures and laughter.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: '3rem' }}>
-            <PolaroidStack photos={photos.length > 0 ? photos : ['/images/sample1.jpg', '/images/sample2.jpg']} />
-          </div>
-
+      {/* Blow button */}
+      {!blown ? (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} style={{ textAlign: 'center' }}>
+          <p style={{ color: '#94a3b8', marginBottom: '1rem', fontSize: '0.95rem' }}>Blow out the candle for {name}! 🕯️</p>
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => setScene(7)}
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#000',
-              padding: '16px 42px',
-              borderRadius: '999px',
-              border: 'none',
-              fontWeight: 800,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              boxShadow: '0 8px 25px rgba(245, 158, 11, 0.35)',
-            }}
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            onClick={handleBlow}
+            style={{ padding: '15px 36px', borderRadius: '50px', background: `linear-gradient(135deg, ${colors.icing}, ${colors.layers[0]})`, border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', boxShadow: `0 4px 20px ${colors.icing}55` }}
           >
-            Light The Birthday Cake &rarr;
+            💨 Blow!
           </motion.button>
-        </div>
-      )}
-
-      {/* ── SCENE 7: 3D CAKE & CANDLE BLOWOUT ── */}
-      {scene === 7 && (
-        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Scene VII: Make a Wish
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', color: '#fff', margin: '0.35rem 0' }}>
-              Blow Out The Candles!
-            </h2>
-            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600 }}>
-              Tap the glowing candles to blow them out and make your wish come true.
-            </p>
-          </div>
-
-          {/* Birthday Cake */}
-          <div style={{ margin: '0 auto 3rem', display: 'flex', justifyContent: 'center' }}>
-            <motion.div
-              whileHover={{ scale: candlesBlown ? 1 : 1.04 }}
-              onClick={() => setCandlesBlown(true)}
-              style={{
-                width: 'min(88vw, 340px)',
-                height: '240px',
-                borderRadius: '32px',
-                background: 'linear-gradient(145deg, #2e0854, #120422)',
-                border: '2px solid rgba(245, 158, 11, 0.4)',
-                boxShadow: '0 30px 70px rgba(0,0,0,0.7), inset 0 2px 10px rgba(255,255,255,0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-            >
-              {candlesBlown ? (
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  style={{ textAlign: 'center' }}
-                >
-                  <span style={{ fontSize: '64px', display: 'block', marginBottom: '8px' }}>✨🎂🎉</span>
-                  <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
-                    WISH GRANTED!
-                  </p>
-                </motion.div>
-              ) : (
-                <div style={{ textAlign: 'center' }}>
-                  <span style={{ fontSize: '64px', display: 'block', animation: 'bounce 1.5s infinite alternate' }}>🕯️🎂🕯️</span>
-                  <p style={{ color: '#fbbf24', fontSize: '0.95rem', fontWeight: 800, margin: '10px 0 0', letterSpacing: '0.1em' }}>
-                    TAP TO BLOW CANDLES
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          </div>
-
-          {candlesBlown && (
+        </motion.div>
+      ) : (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center' }}>
+          <motion.p animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.6 }} style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💨✨</motion.p>
+          <p style={{ color: '#fde68a', fontWeight: 700, marginBottom: '1.25rem', fontSize: '0.95rem' }}>
+            {cut ? 'Time to make a wish!' : 'Candle blown out! Now cut the cake!'}
+          </p>
+          {cut && (
             <motion.button
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setScene(8)}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#000',
-                padding: '18px 46px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '1.15rem',
-                cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(245, 158, 11, 0.45)',
-              }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+              onClick={onNext}
+              style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}
             >
-              Claim VIP Lifetime Birthday Pass &rarr;
+              🎊 Make a Wish →
             </motion.button>
           )}
-        </div>
+          {!cut && (
+            <motion.button
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+              onClick={() => setCut(true)}
+              style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}
+            >
+              🎂 Cut the Cake!
+            </motion.button>
+          )}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+/* ── SCENE 6: Make a Wish ── */
+function SceneWish({ name, onNext }) {
+  const [wished, setWished] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 30%, #05051a 0%, #080810 100%)', padding: '2rem', position: 'relative', overflow: 'hidden' }}
+    >
+      {/* Stars */}
+      {Array.from({ length: 30 }, (_, i) => (
+        <div key={i} style={{ position: 'absolute', left: `${(i * 37) % 100}%`, top: `${(i * 61) % 100}%`, width: 2 + (i % 3), height: 2 + (i % 3), borderRadius: '50%', background: '#fff', opacity: 0.3 + (i % 5) * 0.1 }} />
+      ))}
+
+      {/* Shooting star */}
+      {wished && (
+        <motion.div
+          initial={{ x: -100, y: 100, opacity: 0 }}
+          animate={{ x: 300, y: -150, opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
+          style={{ position: 'fixed', fontSize: '1.5rem', zIndex: 10 }}
+        >
+          ⭐
+        </motion.div>
       )}
 
-      {/* ── SCENE 8: VIP LIFETIME PASS & LETTER ── */}
-      {scene === 8 && (
-        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
-              <GoldBadge name="crown" size={56} />
-            </div>
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
-                color: '#fff',
-                margin: '0 0 0.5rem',
-              }}
-            >
-              Lifetime VIP Golden Pass
-            </h1>
-            <p style={{ color: '#fbbf24', fontSize: '1.15rem', fontWeight: 600 }}>
-              Officially minted for {recipient}.
-            </p>
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🌠</div>
+        <h2 style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(1.8rem, 6vw, 2.8rem)', color: '#fff', margin: '0 0 0.5rem' }}>
+          Close your eyes, {name}...
+        </h2>
+        <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+          Make a wish on this shooting star. Whatever you wish for — it's coming true. ✨
+        </p>
+
+        {!wished ? (
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(251,191,36,0.5)' }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { setWished(true); setTimeout(onNext, 2200); }}
+            style={{ padding: '16px 40px', borderRadius: '50px', background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', border: 'none', color: '#fff', fontSize: '1.05rem', fontWeight: 700, cursor: 'pointer' }}
+          >
+            🌟 Make a Wish!
+          </motion.button>
+        ) : (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center' }}>
+            <p style={{ color: '#fde68a', fontSize: '1.1rem', fontFamily: "'Dancing Script', cursive" }}>Wish sent to the universe! ✨</p>
+          </motion.div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 7: Balloon Pop ── */
+function SceneBalloons({ messages, onNext }) {
+  const [popped, setPopped] = useState(new Set());
+  const colors = ['#f43f5e', '#f59e0b', '#a855f7', '#38bdf8', '#4ade80'];
+  const validMessages = messages.filter(Boolean);
+  const allPopped = popped.size >= validMessages.length;
+
+  const handlePop = (i) => {
+    setPopped((prev) => new Set([...prev, i]));
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 40%, #0d051a 0%, #080810 100%)', padding: '2rem' }}
+    >
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#94a3b8', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+        🎈 Pop the Balloons!
+      </motion.p>
+      <p style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '2rem' }}>Each balloon has a hidden message inside</p>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', justifyContent: 'center', maxWidth: '360px', marginBottom: '2rem' }}>
+        {validMessages.map((msg, i) => (
+          <div key={i} style={{ textAlign: 'center', width: '100px' }}>
+            <AnimatePresence mode="wait">
+              {!popped.has(i) ? (
+                <motion.button
+                  key="balloon"
+                  whileHover={{ y: -8, scale: 1.08 }}
+                  whileTap={{ scale: 1.3 }}
+                  onClick={() => handlePop(i)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '3.5rem', display: 'block', margin: '0 auto', filter: `drop-shadow(0 4px 12px ${colors[i % 5]}66)` }}
+                >
+                  🎈
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="message"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                  style={{ background: `${colors[i % 5]}20`, border: `1.5px solid ${colors[i % 5]}55`, borderRadius: '12px', padding: '10px 8px', fontSize: '0.78rem', color: '#fff', fontWeight: 600, lineHeight: 1.4 }}
+                >
+                  {msg}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        ))}
+      </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem', marginBottom: '3rem' }}>
-            {/* VIP Pass Card */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: '28px',
-                padding: '2.25rem',
-                backdropFilter: 'blur(20px)',
-              }}
-            >
-              <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <GoldBadge name="crown" size={24} />
-                Exclusive VIP Privileges
-              </h3>
-              <div style={{ background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '14px', padding: '8px 14px', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '1rem' }}>
-                VALIDITY: FOREVER • UNLIMITED SMILES
-              </div>
-              <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.7 }}>
-                Entitles holder to guaranteed hugs, listening ears, spontaneous food outings, and lifelong unconditional support.
-              </p>
-            </div>
+      <AnimatePresence>
+        {allPopped && (
+          <motion.button
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            onClick={onNext}
+            style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#a855f7,#7c3aed)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}
+          >
+            📸 See our memories →
+          </motion.button>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
-            {/* Gift Clue Card */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: '28px',
-                padding: '2.25rem',
-                backdropFilter: 'blur(20px)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <GoldBadge name="sparkle" size={24} />
-                  Secret Gift Clue
-                </h3>
-                <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1rem' }}>
-                  {giftClue}
-                </p>
-                <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.7 }}>
-                  May this birthday be the launchpad for the most extraordinary year of your life yet.
-                </p>
-              </div>
+/* ── SCENE 8: Memories ── */
+function SceneMemories({ photos, onNext }) {
+  const [current, setCurrent] = useState(0);
+  if (!photos || photos.length === 0) { onNext(); return null; }
 
-              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                <WholesomeMemeSticker caption="Lifetime VIP Holder" />
-              </div>
-            </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#080810', padding: '2rem' }}
+    >
+      <p style={{ color: '#64748b', fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>📸 Our Memories</p>
+
+      <AnimatePresence mode="wait">
+        <motion.div key={current} initial={{ opacity: 0, x: 60, rotate: 3 }} animate={{ opacity: 1, x: 0, rotate: 0 }} exit={{ opacity: 0, x: -60 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          style={{ width: 260, background: '#fff', padding: '10px 10px 36px', borderRadius: '3px', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }}>
+          <div style={{ width: '100%', height: 240, background: `url(${photos[current]}) center/cover`, borderRadius: '1px' }} />
+          <p style={{ textAlign: 'center', fontFamily: "'Caveat', cursive", color: '#92400e', fontSize: '0.9rem', margin: '8px 0 0' }}>{current + 1} / {photos.length}</p>
+        </motion.div>
+      </AnimatePresence>
+
+      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+        {current > 0 && <button onClick={() => setCurrent((c) => c - 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer' }}>←</button>}
+        {current < photos.length - 1
+          ? <button onClick={() => setCurrent((c) => c + 1)} style={{ padding: '10px 24px', borderRadius: '50px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>Next →</button>
+          : <button onClick={onNext} style={{ padding: '10px 24px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>💌 Open Letter</button>
+        }
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 9: Envelope ── */
+function SceneEnvelope({ onOpen }) {
+  const [opening, setOpening] = useState(false);
+  const handleOpen = () => { setOpening(true); setTimeout(onOpen, 1200); };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 50%, #1a0a00 0%, #080810 100%)', padding: '2rem' }}>
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} style={{ color: '#94a3b8', fontSize: '0.85rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+        A special letter for you 💌
+      </motion.p>
+      <div style={{ cursor: 'pointer', textAlign: 'center' }} onClick={!opening ? handleOpen : undefined}>
+        <motion.div animate={opening ? { scale: [1, 1.2, 0.8], opacity: [1, 1, 0] } : { y: [0, -6, 0] }} transition={opening ? { duration: 0.8 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }} style={{ fontSize: '7rem', display: 'inline-block' }}>
+          {opening ? '💌' : '✉️'}
+        </motion.div>
+        {!opening && (
+          <motion.p animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '1rem' }}>
+            Tap to open your letter ↑
+          </motion.p>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE 10: Letter ── */
+function SceneLetter({ letter, senderName, name, onNext }) {
+  const lines = letter ? letter.split('\n').filter(Boolean) : [`Happy Birthday ${name}! 🎂`];
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (visibleLines < lines.length) {
+      const t = setTimeout(() => setVisibleLines((v) => v + 1), 850);
+      return () => clearTimeout(t);
+    } else {
+      const t = setTimeout(() => setDone(true), 500);
+      return () => clearTimeout(t);
+    }
+  }, [visibleLines, lines.length]);
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#080810', padding: '2rem' }}>
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} style={{ maxWidth: '400px', width: '100%' }}>
+        <div style={{ background: 'linear-gradient(180deg,#fef9f0,#fdf6e8)', borderRadius: '4px', padding: '1.75rem', boxShadow: '0 8px 40px rgba(0,0,0,0.5)', minHeight: '260px', position: 'relative' }}>
+          {Array.from({ length: 12 }, (_, i) => <div key={i} style={{ position: 'absolute', left: '1.75rem', right: '1.75rem', top: `${3 + i * 1.8}rem`, height: 1, background: 'rgba(120,80,40,0.1)' }} />)}
+          <p style={{ fontFamily: "'Caveat', cursive", fontSize: '0.9rem', color: '#92400e', margin: '0 0 0.75rem', position: 'relative' }}>Happy Birthday, {name}!</p>
+          <div style={{ position: 'relative' }}>
+            {lines.slice(0, visibleLines).map((line, i) => (
+              <motion.p key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}
+                style={{ fontFamily: "'Caveat', cursive", fontSize: '1.05rem', color: '#3b1f0a', lineHeight: 1.8, margin: '0 0 0.2rem' }}>{line}</motion.p>
+            ))}
+            {!done && <span style={{ display: 'inline-block', width: 2, height: '1.2em', background: '#92400e', animation: 'typewriter-cursor 0.8s infinite', verticalAlign: 'text-bottom', marginLeft: 2 }} />}
           </div>
-
-          {/* Letter / Keepsake */}
-          <div style={{ marginBottom: '3rem' }}>
-            <WaxSealLetter
-              title={`A Birthday Letter for ${recipient}`}
-              content={customMsg}
-              author="With all my love & best wishes"
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            />
-          </div>
+          {done && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ fontFamily: "'Caveat', cursive", fontSize: '0.9rem', color: '#92400e', textAlign: 'right', marginTop: '1rem' }}>
+              With birthday love, {senderName || 'someone who cares'} 🎂
+            </motion.p>
+          )}
         </div>
-      )}
-    </CinematicStageWrapper>
+        {done && (
+          <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={onNext}
+            style={{ width: '100%', marginTop: '1.25rem', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>
+            🎉 One Last Surprise →
+          </motion.button>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ── SCENE FINAL: Happy Birthday again ── */
+function SceneFinal({ name, turningAge, onEnd }) {
+  const confetti = Array.from({ length: 50 }, (_, i) => ({
+    id: i, left: `${(i * 23 + 3) % 100}%`, delay: `${(i * 0.05).toFixed(2)}s`,
+    dur: `${2 + (i % 5) * 0.4}s`, color: ['#fbbf24', '#f43f5e', '#a855f7', '#38bdf8', '#4ade80', '#fff'][i % 6],
+    size: 8 + (i % 5) * 4,
+  }));
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 40%, #1a1000 0%, #080810 100%)', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
+      {confetti.map((c) => (
+        <div key={c.id} style={{ position: 'absolute', top: 0, left: c.left, fontSize: c.size, color: c.color, animation: `confettiFall ${c.dur} ${c.delay} ease-in infinite`, pointerEvents: 'none' }}>
+          {['■', '●', '★'][c.id % 3]}
+        </div>
+      ))}
+      <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 200, delay: 0.3 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎊</div>
+        <h1 style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2rem, 7vw, 3.5rem)', color: '#fde68a', margin: '0 0 0.5rem', textShadow: '0 4px 20px rgba(251,191,36,0.5)' }}>
+          Happy Birthday, {name}! 🎂
+        </h1>
+        {turningAge && (
+          <p style={{ color: '#fbbf24', fontSize: '1rem', marginBottom: '2rem' }}>Cheers to {turningAge} years of being absolutely wonderful! 🥳</p>
+        )}
+        {/* Fun meme-style message */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+          style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1rem 1.5rem', marginBottom: '2rem', fontSize: '1rem', color: '#94a3b8' }}>
+          May your WiFi be strong and your coffee be hot ☕📶
+        </motion.div>
+        {onEnd && (
+          <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            onClick={onEnd}
+            style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>
+            🎂 That's a wrap! ✨
+          </motion.button>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }

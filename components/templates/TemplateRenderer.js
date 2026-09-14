@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import BirthdayExperience from './birthday/BirthdayExperience';
-import EmotionalExperience from './EmotionalExperience';
 import ProposalExperience from './proposal/ProposalExperience';
 import AnniversaryExperience from './anniversary/AnniversaryExperience';
 import ApologyExperience from './apology/ApologyExperience';
@@ -10,57 +9,22 @@ import ApologyExperience from './apology/ApologyExperience';
 export default function TemplateRenderer({ note, isPreview = false, onReachEnd }) {
   if (!note) return null;
 
-  const templateId = note.template || 'default';
-  const vibe = note?.custom_details?.vibe || 'soft';
+  const templateId = note.template || 'proposal';
   let experience;
 
   switch (templateId) {
     case 'proposal':
-    case 'be-my-valentine':
       experience = <ProposalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'anniversary':
-    case 'love-letter':
       experience = <AnniversaryExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'emotional-apology':
-    case 'sorry':
-    case 'apology':
       experience = <ApologyExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     case 'birthday':
-    case 'birthday-surprise':
       experience = <BirthdayExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'just-because':
-    case 'things-i-never-said':
-    case 'open-when':
-    case 'youre-my-person':
-      experience = <EmotionalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'mothers-day':
-    case 'letter-for-mom':
-      experience = <LetterForMomTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'puzzle':
-      experience = <PuzzleTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'friendship':
-      experience = <FriendshipTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'wedding-invitation':
-      experience = <WeddingInvitationTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'surprise-reveal-box':
-      experience = <SurpriseRevealBoxTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'a-rose-for-someone-special':
-      experience = <RoseSpecialTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'rakshabandhan':
-      experience = <RakshabandhanTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'fathers-day':
-    case 'letter-for-dad':
-      experience = <LetterForDadTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
-    case 'get-well-soon':
-    case 'warm-hug':
-      experience = <GetWellSoonTemplate note={note} isPreview={isPreview} onReachEnd={onReachEnd} />; break;
     default:
       experience = <ProposalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />;
   }
-  return <div className={`experience-vibe experience-vibe--${vibe}`}>
-    {!isPreview && <ImmersiveAtmosphere vibe={vibe} />}
-    {experience}
-  </div>;
+  return <div className="experience-wrapper">{experience}</div>;
 }
 
 function ImmersiveAtmosphere({ vibe }) {

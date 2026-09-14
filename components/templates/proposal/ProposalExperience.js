@@ -1,668 +1,388 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import CinematicStageWrapper from '../common/CinematicStageWrapper';
-import GoldBadge from '../common/GoldBadge';
-import WholesomeMemeSticker from '../common/WholesomeMemeSticker';
-import PolaroidStack from '../common/PolaroidStack';
-import WaxSealLetter from '../common/WaxSealLetter';
-import MemoryTimeMachine from '../common/MemoryTimeMachine';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 
-/**
- * 💍 THE PERFECT PROPOSAL (ID: proposal)
- * 7-Chapter Full-Bleed Luxury Romantic Odyssey
- */
+/* ─────────────────────────────────────────────────────────
+   PROPOSAL EXPERIENCE
+   Scenes:
+   1. YES/NO Question — flying NO button
+   2. Confetti Shower → reveal letter button
+   3. Envelope open animation
+   4. Handwritten letter line-by-line
+   5. Memory photo cards
+───────────────────────────────────────────────────────── */
 export default function ProposalExperience({ note, isPreview = false, onReachEnd }) {
-  const [chapter, setChapter] = useState(1);
-  const [unlockedSecrets, setUnlockedSecrets] = useState([true, false, false]);
-  
-  // Chapter 2: Sacred archives inspected
-  const [inspectedCards, setInspectedCards] = useState([false, false, false]);
-
-  // Chapter 3: Quiz state
-  const [quizAnswers, setQuizAnswers] = useState({});
-  const [quizScore, setQuizScore] = useState(null);
-
-  // Chapter 5: Almost proposal state
-  const [heartbeatActive, setHeartbeatActive] = useState(false);
-
-  // Chapter 6: Ring Box & Dodge State
-  const [boxOpened, setBoxOpened] = useState(false);
-  const [noPosition, setNoPosition] = useState({ x: 0, y: 0 });
-  const [dodgeCount, setDodgeCount] = useState(0);
-
-  const recipient = note?.recipient_name || 'My Love';
-  const customMsg = note?.custom_message || 'From our late night conversations to every little adventure we share, every single moment with you feels like home. Will you marry me and be my forever partner?';
-  const dateIdea = note?.custom_details?.date_idea || 'A private candle-lit dinner under the starlit sky';
-  const specialMemory = note?.custom_details?.special_memory || 'The exact moment your eyes met mine and time stood still.';
+  const [scene, setScene] = useState(1);
+  const recipientName = note?.recipient_name || 'My Love';
+  const senderName = note?.custom_details?.sender_name || '';
+  const quotation = note?.custom_details?.quotation || '';
+  const letter = note?.custom_details?.letter || note?.custom_message || '';
   const photos = note?.image_urls || [];
 
-  const funnyDialogue = [
-    'Wait, reconsider! ✨',
-    'Are you completely sure?',
-    'Destiny says YES 💍',
-    'Error: Only YES is permitted! ❤️',
-    'Your fingers slipped! 🥂',
-    '1000x YES in every universe! ✨'
-  ];
+  return (
+    <div style={{ background: '#0a0510', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Dancing+Script:wght@600;700&family=Caveat:wght@500;700&display=swap');
+        @keyframes floatHeart { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-12px) rotate(5deg); } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        @keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+        @keyframes pulse-soft { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes typewriter-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
 
-  const dodgeNoButton = () => {
-    const randomX = Math.floor(Math.random() * 260 - 130);
-    const randomY = Math.floor(Math.random() * 160 - 80);
-    setNoPosition({ x: randomX, y: randomY });
-    setDodgeCount((prev) => prev + 1);
-  };
+      <AnimatePresence mode="wait">
+        {scene === 1 && <Scene1YesNo key="s1" recipientName={recipientName} senderName={senderName} quotation={quotation} onYes={() => setScene(2)} />}
+        {scene === 2 && <Scene2Confetti key="s2" recipientName={recipientName} onNext={() => setScene(3)} />}
+        {scene === 3 && <Scene3Envelope key="s3" onOpen={() => setScene(4)} />}
+        {scene === 4 && <Scene4Letter key="s4" letter={letter} senderName={senderName} recipientName={recipientName} onNext={() => setScene(5)} photos={photos} />}
+        {scene === 5 && <Scene5Photos key="s5" photos={photos} recipientName={recipientName} onEnd={onReachEnd} />}
+      </AnimatePresence>
+    </div>
+  );
+}
 
-  const handleCardInspect = (idx) => {
-    const updated = [...inspectedCards];
-    updated[idx] = true;
-    setInspectedCards(updated);
-    if (updated.filter(Boolean).length >= 2) {
-      setUnlockedSecrets([true, true, unlockedSecrets[2]]);
-    }
-  };
+/* ─────────────────────────────────────────────────────────
+   SCENE 1: YES / NO — flying NO button
+───────────────────────────────────────────────────────── */
+function Scene1YesNo({ recipientName, senderName, quotation, onYes }) {
+  const [noPos, setNoPos] = useState({ x: 0, y: 0 });
+  const [noClickCount, setNoClickCount] = useState(0);
+  const [showHint, setShowHint] = useState(false);
 
-  const quizQuestions = [
-    {
-      id: 'q1',
-      question: 'Who fell in love first?',
-      options: ['You, unconditionally', 'Me, without a doubt', 'It was written in the stars at first sight'],
-      correct: 2,
-    },
-    {
-      id: 'q2',
-      question: 'What defines our happiest moments?',
-      options: ['The quiet comfort of just being together', 'Spontaneous midnight conversations', 'All the laughter that fills our days'],
-      correct: 0,
-    },
-    {
-      id: 'q3',
-      question: 'Where is our favorite place to be?',
-      options: ['Anywhere as long as we are side by side', 'Exploring new roads together', 'Cozy at home sharing quiet moments'],
-      correct: 0,
-    }
-  ];
-
-  const handleQuizAnswer = (qIdx, optIdx) => {
-    const newAnswers = { ...quizAnswers, [qIdx]: optIdx };
-    setQuizAnswers(newAnswers);
-    if (Object.keys(newAnswers).length === quizQuestions.length) {
-      setQuizScore(100);
-      setUnlockedSecrets([true, true, true]);
-    }
-  };
-
+  // After 3 failed NOs, show a hint
   useEffect(() => {
-    onReachEnd?.(chapter === 7, () => {
-      setChapter(1);
-      setBoxOpened(false);
-      setDodgeCount(0);
-      setNoPosition({ x: 0, y: 0 });
+    if (noClickCount >= 3) setShowHint(true);
+  }, [noClickCount]);
+
+  const flyNo = useCallback(() => {
+    setNoClickCount((c) => c + 1);
+    const maxX = typeof window !== 'undefined' ? window.innerWidth - 120 : 200;
+    const maxY = typeof window !== 'undefined' ? window.innerHeight - 80 : 200;
+    setNoPos({
+      x: Math.floor(Math.random() * maxX - maxX / 2),
+      y: Math.floor(Math.random() * maxY - maxY / 2),
     });
-  }, [chapter, onReachEnd]);
+  }, []);
+
+  const particles = Array.from({ length: 18 }, (_, i) => ({
+    id: i, x: `${(i * 41) % 100}%`, y: `${(i * 67) % 100}%`, delay: `${(i * 0.3).toFixed(1)}s`,
+    color: ['#f43f5e', '#fb7185', '#fecdd3', '#fff'][i % 4],
+  }));
 
   return (
-    <CinematicStageWrapper
-      currentStep={chapter}
-      totalSteps={7}
-      chapterTitle={
-        chapter === 1
-          ? 'Royal Invitation'
-          : chapter === 2
-          ? 'Sacred Archives'
-          : chapter === 3
-          ? 'Soul Alignment'
-          : chapter === 4
-          ? 'Memory Time Machine'
-          : chapter === 5
-          ? 'A Quiet Moment'
-          : chapter === 6
-          ? 'The Question'
-          : 'Forever Sealed'
-      }
-      particleMode="petals"
-      theme="romantic"
-      unlockedSecrets={unlockedSecrets}
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.5 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 30%, #2d0a1a 0%, #0a0510 100%)', padding: '2rem', position: 'relative', overflow: 'hidden' }}
     >
-      {/* ── CHAPTER 1: THE MYSTERIOUS ROYAL INVITATION ── */}
-      {chapter === 1 && (
-        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
-          <motion.div
-            initial={{ scale: 0.92, opacity: 0, y: 25 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              padding: 'clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 3.5rem)',
-              borderRadius: '32px',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(244, 63, 94, 0.25)',
-              backdropFilter: 'blur(30px)',
-              boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(244, 63, 94, 0.15)',
-            }}
-          >
-            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(244, 63, 94, 0.12)', borderRadius: '50%', marginBottom: '1.5rem', border: '1px solid rgba(244, 63, 94, 0.3)' }}>
-              <GoldBadge name="crown" size={60} />
-            </div>
-
-            <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#fb7185', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-              Confidential &amp; For Your Eyes Only
-            </span>
-
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing), "Playfair Display", serif',
-                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
-                color: '#fff1f2',
-                margin: '0 0 1.25rem',
-                lineHeight: 1.15,
-                textShadow: '0 4px 25px rgba(244, 63, 94, 0.4)',
-              }}
-            >
-              An Exclusive Invitation for {recipient}
-            </h1>
-
-            <p style={{ color: '#cbd5e1', fontSize: 'clamp(1rem, 2.5vw, 1.15rem)', lineHeight: 1.8, maxWidth: '560px', margin: '0 auto 2.5rem' }}>
-              You have been summoned to a private cinematic journey. Behind these doors lie our greatest moments, unwritten memories, and one life-changing secret.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.04, boxShadow: '0 0 40px rgba(244, 63, 94, 0.6)' }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setChapter(2)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '18px 44px',
-                fontSize: '1.1rem',
-                fontWeight: 700,
-                borderRadius: '999px',
-                background: 'linear-gradient(135deg, #f43f5e, #be123c)',
-                color: '#ffffff',
-                border: '1px solid rgba(255,255,255,0.3)',
-                cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(190, 18, 60, 0.4)',
-              }}
-            >
-              <GoldBadge name="sparkle" size={22} />
-              Open Royal Portal &rarr;
-            </motion.button>
-          </motion.div>
+      {/* Floating hearts background */}
+      {particles.map((p) => (
+        <div key={p.id} style={{ position: 'absolute', left: p.x, top: p.y, fontSize: '1.2rem', opacity: 0.15, animation: `floatHeart ${2 + (p.id % 3)}s ${p.delay} ease-in-out infinite`, color: p.color, pointerEvents: 'none', userSelect: 'none' }}>
+          {['♥', '✦', '❋', '✿'][p.id % 4]}
         </div>
-      )}
+      ))}
 
-      {/* ── CHAPTER 2: SACRED ARCHIVES ── */}
-      {chapter === 2 && (
-        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fb7185', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Chapter II: Undeniable Proof
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', color: '#fff', margin: '0.35rem 0' }}>
-              The Sacred Archives
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem', maxWidth: '520px', margin: '0 auto' }}>
-              Tap each sealed file to reveal the truths that brought us to this moment.
-            </p>
-          </div>
+      {/* Content */}
+      <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, type: 'spring', stiffness: 200 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2, maxWidth: '380px' }}>
+        {/* Rose */}
+        <motion.div animate={{ y: [0, -8, 0], rotate: [-3, 3, -3] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} style={{ fontSize: '4rem', marginBottom: '1.25rem', display: 'inline-block' }}>
+          🌹
+        </motion.div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            {[
-              { title: 'The Light You Bring', desc: 'The undeniable warmth and comfort that makes every day feel like home.', icon: 'sparkle' },
-              { title: 'The Quiet Harmony', desc: 'How effortlessly our worlds align, from endless midnight conversations to shared dreams.', icon: 'heart' },
-              { title: 'The Certainty', desc: specialMemory || 'That every beautiful tomorrow is only complete with you by my side.', icon: 'ring' },
-            ].map((card, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -6, scale: 1.02 }}
-                onClick={() => handleCardInspect(idx)}
-                style={{
-                  background: inspectedCards[idx] ? 'rgba(244, 63, 94, 0.14)' : 'rgba(255, 255, 255, 0.03)',
-                  border: inspectedCards[idx] ? '1px solid rgba(244, 63, 94, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '24px',
-                  padding: '2rem',
-                  cursor: 'pointer',
-                  backdropFilter: 'blur(20px)',
-                  boxShadow: inspectedCards[idx] ? '0 15px 40px rgba(244, 63, 94, 0.2)' : '0 10px 30px rgba(0,0,0,0.3)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  minHeight: '220px',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <GoldBadge name={card.icon} size={28} />
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: inspectedCards[idx] ? '#4ade80' : '#fda4af', letterSpacing: '0.1em' }}>
-                      {inspectedCards[idx] ? '✓ VERIFIED' : 'TAP TO EXAMINE'}
-                    </span>
-                  </div>
-                  <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '0.75rem', fontWeight: 700 }}>
-                    {card.title}
-                  </h3>
-                  <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                    {inspectedCards[idx] ? card.desc : 'Tap to break the wax seal and inspect this sacred memory.'}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        {quotation && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ fontFamily: "'Caveat', cursive", fontSize: '1.3rem', color: '#fda4af', marginBottom: '1.5rem', lineHeight: 1.5, fontWeight: 500 }}>
+            &ldquo;{quotation}&rdquo;
+          </motion.p>
+        )}
 
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setChapter(3)}
-              style={{
-                background: 'linear-gradient(135deg, #f43f5e, #be123c)',
-                color: '#fff',
-                padding: '16px 40px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                boxShadow: '0 8px 25px rgba(244, 63, 94, 0.4)',
-              }}
-            >
-              Proceed to Soul Alignment &rarr;
-            </motion.button>
-          </div>
-        </div>
-      )}
+        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(1.8rem, 6vw, 2.6rem)', color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.2 }}>
+          {recipientName},
+        </motion.h1>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} style={{ color: '#fda4af', fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: 1.5 }}>
+          Will you be mine? 💕
+        </motion.p>
 
-      {/* ── CHAPTER 3: SOUL ALIGNMENT QUIZ ── */}
-      {chapter === 3 && (
-        <div style={{ width: '100%', maxWidth: '780px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fb7185', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Chapter III: Harmony Test
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', color: '#fff', margin: '0.35rem 0' }}>
-              Soul Alignment Check
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Confirm what our hearts already know to unlock the memory capsule.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            {quizQuestions.map((q, qIdx) => (
-              <div
-                key={q.id}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '24px',
-                  padding: '2rem',
-                  backdropFilter: 'blur(20px)',
-                }}
-              >
-                <h4 style={{ color: '#fff', fontSize: '1.15rem', marginBottom: '1.25rem', fontWeight: 600 }}>
-                  {qIdx + 1}. {q.question}
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {q.options.map((opt, optIdx) => {
-                    const isSelected = quizAnswers[qIdx] === optIdx;
-                    return (
-                      <motion.button
-                        key={optIdx}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => handleQuizAnswer(qIdx, optIdx)}
-                        style={{
-                          textAlign: 'left',
-                          padding: '14px 20px',
-                          borderRadius: '16px',
-                          border: isSelected ? '1.5px solid #f43f5e' : '1px solid rgba(255, 255, 255, 0.1)',
-                          background: isSelected ? 'rgba(244, 63, 94, 0.2)' : 'rgba(255, 255, 255, 0.02)',
-                          color: isSelected ? '#fff' : '#cbd5e1',
-                          fontWeight: isSelected ? 700 : 500,
-                          fontSize: '0.95rem',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        <span>{opt}</span>
-                        {isSelected && <span style={{ color: '#f43f5e', fontSize: '1.2rem' }}>♥</span>}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              disabled={Object.keys(quizAnswers).length < quizQuestions.length}
-              onClick={() => setChapter(4)}
-              style={{
-                background: Object.keys(quizAnswers).length === quizQuestions.length ? 'linear-gradient(135deg, #f43f5e, #be123c)' : 'rgba(255,255,255,0.1)',
-                color: '#fff',
-                padding: '16px 40px',
-                borderRadius: '999px',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '1rem',
-                cursor: Object.keys(quizAnswers).length === quizQuestions.length ? 'pointer' : 'not-allowed',
-                boxShadow: Object.keys(quizAnswers).length === quizQuestions.length ? '0 8px 25px rgba(244, 63, 94, 0.4)' : 'none',
-              }}
-            >
-              Enter Memory Time Machine &rarr;
-            </motion.button>
-          </div>
-        </div>
-      )}
-
-      {/* ── CHAPTER 4: THE MEMORY TIME MACHINE ── */}
-      {chapter === 4 && (
-        <div style={{ width: '100%', maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fb7185', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Chapter IV: Nostalgia
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              The Memory Time Machine
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem' }}>
-              Every photo holds a universe of emotions we built together.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: '3rem' }}>
-            <PolaroidStack photos={photos.length > 0 ? photos : ['/images/sample1.jpg', '/images/sample2.jpg']} />
-          </div>
-
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', position: 'relative', minHeight: '80px' }}>
+          {/* YES */}
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => setChapter(5)}
-            style={{
-              background: 'linear-gradient(135deg, #f43f5e, #be123c)',
-              color: '#fff',
-              padding: '16px 42px',
-              borderRadius: '999px',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              boxShadow: '0 8px 25px rgba(244, 63, 94, 0.4)',
-            }}
+            whileHover={{ scale: 1.08, boxShadow: '0 0 30px rgba(244,63,94,0.6)' }}
+            whileTap={{ scale: 0.93 }}
+            onClick={onYes}
+            style={{ padding: '16px 40px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1.15rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(244,63,94,0.4)' }}
           >
-            A Quiet Moment Ahead &rarr;
+            Yes! 💕
+          </motion.button>
+
+          {/* NO — flies away */}
+          <motion.button
+            animate={{ x: noPos.x, y: noPos.y }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            onClick={flyNo}
+            style={{ padding: '14px 28px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#94a3b8', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', position: noClickCount > 0 ? 'absolute' : 'relative' }}
+          >
+            No 😅
           </motion.button>
         </div>
-      )}
 
-      {/* ── CHAPTER 5: CINEMATIC BLACKOUT & HEARTBEAT ── */}
-      {chapter === 5 && (
-        <div style={{ width: '100%', maxWidth: '720px', margin: '0 auto', textAlign: 'center', padding: '3rem 1rem' }}>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2 }}
-          >
-            <div style={{ marginBottom: '2rem' }}>
-              <motion.div
-                animate={{ scale: [1, 1.15, 1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-                style={{
-                  display: 'inline-flex',
-                  padding: '24px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(244, 63, 94, 0.3) 0%, rgba(0,0,0,0) 70%)',
-                }}
-              >
-                <GoldBadge name="heart" size={64} />
-              </motion.div>
-            </div>
+        {showHint && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '1rem' }}>
+            😉 There's only one right answer here...
+          </motion.p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
 
-            <h2
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 3.8rem)',
-                color: '#fff1f2',
-                margin: '0 0 1.5rem',
-                lineHeight: 1.2,
-              }}
-            >
-              Take a Deep Breath…
-            </h2>
+/* ─────────────────────────────────────────────────────────
+   SCENE 2: CONFETTI SHOWER
+───────────────────────────────────────────────────────── */
+function Scene2Confetti({ recipientName, onNext }) {
+  const confetti = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: `${(i * 29 + 5) % 100}%`,
+    delay: `${(i * 0.06).toFixed(2)}s`,
+    duration: `${2.5 + (i % 4) * 0.5}s`,
+    color: ['#f43f5e', '#fbbf24', '#a855f7', '#38bdf8', '#4ade80', '#fb923c', '#fff'][i % 7],
+    size: 8 + (i % 5) * 4,
+    shape: ['■', '●', '♥', '★', '▲'][i % 5],
+  }));
 
-            <p style={{ color: '#cbd5e1', fontSize: '1.15rem', lineHeight: 1.9, maxWidth: '540px', margin: '0 auto 3rem' }}>
-              Out of 8 billion people on this planet, finding you was the most miraculous thing that ever happened to me. There is one question my heart has been waiting to ask you.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: '0 0 45px rgba(244, 63, 94, 0.7)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setChapter(6)}
-              style={{
-                background: 'linear-gradient(135deg, #f43f5e, #be123c)',
-                color: '#fff',
-                padding: '18px 46px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.3)',
-                fontWeight: 800,
-                fontSize: '1.1rem',
-                cursor: 'pointer',
-              }}
-            >
-              Reveal The Secret &rarr;
-            </motion.button>
-          </motion.div>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 30%, #1a0d2e 0%, #080810 100%)', position: 'relative', overflow: 'hidden', padding: '2rem' }}
+    >
+      {/* Confetti */}
+      {confetti.map((c) => (
+        <div key={c.id} style={{ position: 'absolute', top: 0, left: c.left, fontSize: c.size, color: c.color, animation: `confettiFall ${c.duration} ${c.delay} ease-in forwards`, pointerEvents: 'none' }}>
+          {c.shape}
         </div>
-      )}
+      ))}
 
-      {/* ── CHAPTER 6: VELVET RING BOX & THE PROPOSAL ── */}
-      {chapter === 6 && (
-        <div style={{ width: '100%', maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fb7185', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Chapter VI: The Question of a Lifetime
-            </span>
-            <h2 style={{ fontFamily: 'var(--font-dancing)', fontSize: 'clamp(2.4rem, 6vw, 4rem)', color: '#fff', margin: '0.35rem 0' }}>
-              Will You Marry Me?
-            </h2>
-            <p style={{ color: '#fda4af', fontSize: '1.1rem', fontWeight: 600 }}>
-              {recipient}, tap the velvet box to reveal what is inside.
-            </p>
-          </div>
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 18 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <div style={{ fontSize: '5rem', marginBottom: '1rem', animation: 'pulse-soft 1.5s ease-in-out infinite' }}>🎉</div>
+        <h1 style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2rem, 7vw, 3rem)', color: '#fff', margin: '0 0 0.5rem' }}>
+          She said YES! 💕
+        </h1>
+        <p style={{ color: '#fda4af', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
+          Your love story just got even more beautiful, {recipientName}...
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={onNext}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
+          style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 24px rgba(244,63,94,0.4)' }}
+        >
+          Open your letter 💌
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-          {/* Velvet Ring Box */}
-          <div style={{ margin: '0 auto 3rem', display: 'flex', justifyContent: 'center' }}>
+/* ─────────────────────────────────────────────────────────
+   SCENE 3: ENVELOPE OPEN
+───────────────────────────────────────────────────────── */
+function Scene3Envelope({ onOpen }) {
+  const [opening, setOpening] = useState(false);
+
+  const handleOpen = () => {
+    setOpening(true);
+    setTimeout(onOpen, 1400);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 50%, #1a0d0d 0%, #080810 100%)', padding: '2rem' }}
+    >
+      <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} style={{ textAlign: 'center' }}>
+        <p style={{ color: '#94a3b8', fontSize: '0.88rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+          A letter, sealed with love
+        </p>
+
+        {/* Envelope SVG */}
+        <div style={{ position: 'relative', width: 220, height: 160, margin: '0 auto 2rem', cursor: 'pointer' }} onClick={!opening ? handleOpen : undefined}>
+          {/* Envelope body */}
+          <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 8px 24px rgba(244,63,94,0.3))' }}>
+            <rect x="1" y="30" width="218" height="129" rx="8" fill="#1a0d12" stroke="#f43f5e" strokeWidth="1.5" />
+            <polygon points="1,30 110,100 219,30" fill="#2d1520" />
+            {/* Flap */}
+            <motion.polygon
+              points="1,30 110,100 219,30 219,1 1,1"
+              fill="#3d1a28"
+              stroke="#f43f5e"
+              strokeWidth="1"
+              animate={opening ? { rotateX: -180, y: -60, opacity: 0 } : { rotateX: 0, y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+              style={{ transformOrigin: 'top center' }}
+            />
+            {/* Wax seal */}
+            {!opening && <circle cx="110" cy="50" r="18" fill="#f43f5e" opacity="0.9" />}
+            {!opening && <text x="110" y="55" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="serif">♥</text>}
+          </svg>
+
+          {opening && (
             <motion.div
-              whileHover={{ scale: boxOpened ? 1 : 1.05 }}
-              onClick={() => setBoxOpened(true)}
-              style={{
-                width: 'min(86vw, 320px)',
-                height: '240px',
-                borderRadius: '28px',
-                background: 'linear-gradient(145deg, #4c0519, #1f020a)',
-                border: '2px solid rgba(244, 63, 94, 0.4)',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.7), inset 0 2px 10px rgba(255,255,255,0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
+              initial={{ y: 20, opacity: 0, scale: 0.8 }}
+              animate={{ y: -20, opacity: 1, scale: 1 }}
+              style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', fontSize: '3rem' }}
             >
-              {boxOpened ? (
-                <motion.div
-                  initial={{ scale: 0, rotate: -20 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', damping: 12 }}
-                  style={{ textAlign: 'center' }}
-                >
-                  <div style={{ filter: 'drop-shadow(0 0 25px #ffd700)' }}>
-                    <GoldBadge name="ring" size={80} />
-                  </div>
-                  <span style={{ display: 'block', marginTop: '12px', color: '#fbbf24', fontSize: '0.88rem', fontWeight: 800, letterSpacing: '0.1em' }}>
-                    ✦ ETERNAL DIAMOND ✦
-                  </span>
-                </motion.div>
-              ) : (
-                <div style={{ textAlign: 'center' }}>
-                  <GoldBadge name="crown" size={48} />
-                  <p style={{ color: '#fda4af', fontSize: '0.95rem', fontWeight: 700, margin: '10px 0 0' }}>
-                    TAP TO UNLOCK
-                  </p>
-                </div>
-              )}
+              💌
             </motion.div>
-          </div>
-
-          {/* Yes / No Interactive Buttons */}
-          {boxOpened && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', position: 'relative', minHeight: '80px', flexWrap: 'wrap' }}>
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setChapter(7)}
-                style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: '#fff',
-                  padding: '16px 48px',
-                  borderRadius: '999px',
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: '1.2rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.4)',
-                }}
-              >
-                💍 YES, A THOUSAND TIMES YES!
-              </motion.button>
-
-              <motion.button
-                animate={{ x: noPosition.x, y: noPosition.y }}
-                onMouseEnter={dodgeNoButton}
-                onClick={dodgeNoButton}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#94a3b8',
-                  padding: '14px 28px',
-                  borderRadius: '999px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  cursor: 'pointer',
-                }}
-              >
-                {dodgeCount > 0 ? funnyDialogue[dodgeCount % funnyDialogue.length] : 'No...'}
-              </motion.button>
-            </div>
           )}
         </div>
-      )}
 
-      {/* ── CHAPTER 7: ETERNAL KEESAKE & CERTIFICATE ── */}
-      {chapter === 7 && (
-        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '18px', background: 'rgba(244, 63, 94, 0.15)', borderRadius: '50%', marginBottom: '1.25rem' }}>
-              <GoldBadge name="crown" size={56} />
-            </div>
-            <h1
-              style={{
-                fontFamily: 'var(--font-dancing)',
-                fontSize: 'clamp(2.4rem, 6vw, 4rem)',
-                color: '#fff1f2',
-                margin: '0 0 0.5rem',
-              }}
-            >
-              Officially Forever
-            </h1>
-            <p style={{ color: '#fda4af', fontSize: '1.15rem', fontWeight: 600 }}>
-              The promise has been sealed in the stars.
-            </p>
+        <motion.p animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} style={{ color: '#64748b', fontSize: '0.88rem' }}>
+          Tap the envelope to open ↑
+        </motion.p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCENE 4: HANDWRITTEN LETTER
+───────────────────────────────────────────────────────── */
+function Scene4Letter({ letter, senderName, recipientName, onNext, photos }) {
+  const lines = letter ? letter.split('\n').filter(Boolean) : ['From my heart to yours... 💕'];
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (visibleLines < lines.length) {
+      const t = setTimeout(() => setVisibleLines((v) => v + 1), 900);
+      return () => clearTimeout(t);
+    } else {
+      const t = setTimeout(() => setDone(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [visibleLines, lines.length]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 0%, #1a0d0d 0%, #080810 100%)', padding: '2rem' }}
+    >
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} style={{ maxWidth: '420px', width: '100%' }}>
+        {/* Parchment paper */}
+        <div style={{ background: 'linear-gradient(180deg, #fef9f0 0%, #fdf6e8 100%)', borderRadius: '4px', padding: '2rem', boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,200,150,0.3)', position: 'relative', minHeight: '280px' }}>
+          {/* Ruled lines */}
+          {Array.from({ length: 12 }, (_, i) => (
+            <div key={i} style={{ position: 'absolute', left: '2rem', right: '2rem', top: `${3.5 + i * 2}rem`, height: 1, background: 'rgba(120,80,40,0.12)' }} />
+          ))}
+
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontFamily: "'Caveat', cursive", fontSize: '0.9rem', color: '#92400e', margin: 0 }}>Dear {recipientName},</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem', marginBottom: '3rem' }}>
-            {/* Our Lifetime Vows */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(244, 63, 94, 0.25)',
-                borderRadius: '28px',
-                padding: '2.25rem',
-                backdropFilter: 'blur(20px)',
-              }}
-            >
-              <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <GoldBadge name="sparkle" size={22} />
-                Our Lifetime Vows
-              </h3>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  'Never going to sleep angry without making peace.',
-                  'Always sharing the last slice of dessert (or at least 50%).',
-                  'Building a cozy sanctuary filled with warmth, travel, and laughter.',
-                  'Backing each other\'s dreams with unwavering belief.',
-                  'Choosing each other every single day, forever.'
-                ].map((vow, i) => (
-                  <li key={i} style={{ color: '#cbd5e1', fontSize: '0.95rem', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <GoldBadge name="heart" size={14} style={{ marginTop: '4px', flexShrink: 0 }} />
-                    <span>{vow}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Inaugural Date Ticket */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(244, 63, 94, 0.25)',
-                borderRadius: '28px',
-                padding: '2.25rem',
-                backdropFilter: 'blur(20px)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <h3 style={{ color: '#fff', fontSize: '1.3rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <GoldBadge name="toast" size={22} />
-                  Our Inaugural Celebration
-                </h3>
-                <p style={{ color: '#fda4af', fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1rem' }}>
-                  {dateIdea}
-                </p>
-                <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.7 }}>
-                  This ticket represents our first official celebration together as partners for life.
-                </p>
-              </div>
-
-              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                <WholesomeMemeSticker caption="Best decision ever written in the stars" />
-              </div>
-            </div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {lines.slice(0, visibleLines).map((line, i) => (
+              <motion.p key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}
+                style={{ fontFamily: "'Caveat', cursive", fontSize: '1.1rem', color: '#3b1f0a', lineHeight: 1.8, margin: '0 0 0.25rem' }}>
+                {line}
+              </motion.p>
+            ))}
+            {/* Cursor */}
+            {!done && (
+              <span style={{ display: 'inline-block', width: 2, height: '1.2em', background: '#92400e', animation: 'typewriter-cursor 0.8s infinite', verticalAlign: 'text-bottom', marginLeft: 2 }} />
+            )}
           </div>
 
-          {/* Letter / Wax Seal Keepsake */}
-          <div style={{ marginBottom: '3rem' }}>
-            <WaxSealLetter
-              title={`A Permanent Letter for ${recipient}`}
-              content={customMsg}
-              author="Your Forever Partner"
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            />
-          </div>
+          {done && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ textAlign: 'right', marginTop: '1.5rem' }}>
+              <p style={{ fontFamily: "'Caveat', cursive", fontSize: '1rem', color: '#92400e' }}>
+                Always yours, {senderName || 'someone who loves you'} ♥
+              </p>
+            </motion.div>
+          )}
         </div>
-      )}
-    </CinematicStageWrapper>
+
+        {done && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={onNext}
+            style={{ width: '100%', marginTop: '1.5rem', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(244,63,94,0.35)' }}
+          >
+            {photos.length > 0 ? '📸 See our memories →' : '🌹 Finish'}
+          </motion.button>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCENE 5: MEMORY PHOTOS
+───────────────────────────────────────────────────────── */
+function Scene5Photos({ photos, recipientName, onEnd }) {
+  const [current, setCurrent] = useState(0);
+
+  if (photos.length === 0) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#080810', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ fontSize: '3rem' }}>🌹</div>
+        <p style={{ color: '#fda4af', fontFamily: "'Dancing Script', cursive", fontSize: '1.5rem' }}>With all my love, {recipientName} 💕</p>
+        {onEnd && <button onClick={onEnd} style={{ marginTop: '1rem', padding: '12px 28px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>❤️ Done</button>}
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 50%, #1a0d0d 0%, #080810 100%)', padding: '2rem' }}
+    >
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#94a3b8', fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+        Our Memories 📸
+      </motion.p>
+
+      {/* Photo card */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, x: 80, rotate: 3 }}
+          animate={{ opacity: 1, x: 0, rotate: 0 }}
+          exit={{ opacity: 0, x: -80, rotate: -3 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          style={{
+            width: 280, height: 320,
+            background: '#fff',
+            borderRadius: '4px',
+            padding: '12px 12px 40px',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
+            position: 'relative',
+          }}
+        >
+          <div style={{ width: '100%', height: '100%', background: `url(${photos[current]}) center/cover`, borderRadius: '2px' }} />
+          <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, textAlign: 'center', fontFamily: "'Caveat', cursive", fontSize: '0.95rem', color: '#92400e' }}>
+            {current + 1} / {photos.length}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Navigation */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', alignItems: 'center' }}>
+        {current > 0 && (
+          <button onClick={() => setCurrent((c) => c - 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>←</button>
+        )}
+        {current < photos.length - 1 ? (
+          <button onClick={() => setCurrent((c) => c + 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>Next →</button>
+        ) : (
+          onEnd && <button onClick={onEnd} style={{ padding: '12px 28px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>❤️ Finish</button>
+        )}
+      </div>
+
+      {/* Dots */}
+      <div style={{ display: 'flex', gap: '6px', marginTop: '1rem' }}>
+        {photos.map((_, i) => (
+          <div key={i} style={{ width: i === current ? 20 : 6, height: 6, borderRadius: 3, background: i === current ? '#f43f5e' : 'rgba(255,255,255,0.15)', transition: 'all 0.3s' }} />
+        ))}
+      </div>
+    </motion.div>
   );
 }

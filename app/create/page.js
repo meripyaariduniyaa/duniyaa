@@ -1,84 +1,70 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import Link from 'next/link';
+import React, { useState, useCallback, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { doc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
-import VoiceNoteRecorder from '@/components/VoiceNoteRecorder';
-import GoldBadge from '@/components/templates/common/GoldBadge';
-import { AUDIO_PRESETS } from '@/lib/audioPresets';
+import { templates } from '@/lib/templates';
 
-const ACTIVE_TEMPLATES = [
-  {
-    id: 'proposal',
-    title: 'The Perfect Proposal',
-    badge: 'ring',
-    category: 'Romantic Odyssey',
-    accentColor: '#f43f5e',
-    glowColor: 'rgba(244, 63, 94, 0.3)',
-    description: '7-chapter cinematic proposal with royal envelope, compatibility quiz, and velvet ring box.',
-    defaultAudio: 'romantic-piano',
-    sampleMessage: 'From our late-night conversations to exploring new places together, every moment with you feels like home. Will you marry me and make me the happiest person in the universe?',
-  },
-  {
-    id: 'birthday',
-    title: 'Virtual Birthday Bash',
-    badge: 'cake',
-    category: 'VIP Celebration',
-    accentColor: '#f59e0b',
-    glowColor: 'rgba(245, 158, 11, 0.3)',
-    description: '8-scene interactive theater with midnight countdown, golden sparklers, balloon pops, and fireworks.',
-    defaultAudio: 'birthday-joy',
-    sampleMessage: 'Wishing you a year filled with endless laughter, boundless happiness, unforgettable adventures, and every dream your heart has been holding. Happy Birthday!',
-  },
-  {
-    id: 'anniversary',
-    title: 'Anniversary Special',
-    badge: 'toast',
-    category: 'Love Museum',
-    accentColor: '#fbbf24',
-    glowColor: 'rgba(251, 191, 36, 0.3)',
-    description: '7-chapter milestone timeline with live seconds ticker, 5 illuminated vow tablets, and champagne toast.',
-    defaultAudio: 'romantic-piano',
-    sampleMessage: 'Every single day by your side has been an adventure I never want to end. Thank you for filling our world with unconditional kindness, warmth, and laughter. Happy Anniversary!',
-  },
-  {
-    id: 'i-miss-you',
-    title: 'I Miss You',
-    badge: 'compass',
-    category: 'Celestial Odyssey',
-    accentColor: '#38bdf8',
-    glowColor: 'rgba(56, 189, 248, 0.3)',
-    description: '7-chapter long-distance flight path with 5 Open When letters, lo-fi cassette, and virtual hug charger.',
-    defaultAudio: 'lofi-sunset',
-    sampleMessage: 'Even across all these miles and silent evenings, not a single day passes where you are not my first and last thought. Distance is only a test of how far love can travel.',
-  },
-  {
-    id: 'emotional-apology',
-    title: "I'm Sorry",
-    badge: 'crane',
-    category: 'Vulnerable Healing',
-    accentColor: '#94a3b8',
-    glowColor: 'rgba(148, 163, 184, 0.3)',
-    description: '7-chapter sincere apology with rainy window reflection, accountability card, and 3D origami crane.',
-    defaultAudio: 'sincere-acoustic',
-    sampleMessage: 'I am deeply sorry for how I acted and the hurt I caused. You mean far too much to me for me to let my mistakes go unaddressed. I take full responsibility and promise to do better.',
-  },
+/* ─────────────────────────────────────────────────────────
+   TEMPLATE CONFIG
+───────────────────────────────────────────────────────── */
+const TEMPLATES = templates; // 4 clean templates from lib
+
+/* ─────────────────────────────────────────────────────────
+   QUOTE OPTIONS FOR PROPOSAL
+───────────────────────────────────────────────────────── */
+const PROPOSAL_QUOTES = [
+  "Every moment with you feels like home. 🏡",
+  "You make ordinary days feel extraordinary. ✨",
+  "I choose you. Again and again, I choose you. 💕",
+  "With you, forever doesn't feel long enough. 🌹",
+  "You are my favourite hello and hardest goodbye. 💫",
+  "Being with you is the best decision I ever made. ❤️",
 ];
 
+/* ─────────────────────────────────────────────────────────
+   CAKE OPTIONS FOR BIRTHDAY
+───────────────────────────────────────────────────────── */
+const CAKE_OPTIONS = [
+  { id: 'chocolate', label: 'Midnight Chocolate', emoji: '🍫', desc: 'Dark, rich & decadent', bg: '#3b1f0a', accent: '#92400e' },
+  { id: 'strawberry', label: 'Strawberry Blush', emoji: '🍓', desc: 'Sweet, light & rosy', bg: '#4a0020', accent: '#be123c' },
+  { id: 'vanilla', label: 'Vanilla Gold', emoji: '✨', desc: 'Classic, elegant & golden', bg: '#422006', accent: '#b45309' },
+];
+
+/* ─────────────────────────────────────────────────────────
+   WHAT HAPPENED OPTIONS FOR APOLOGY
+───────────────────────────────────────────────────────── */
+const WHAT_HAPPENED_OPTIONS = [
+  { id: 'hurtful', label: 'I said something hurtful', emoji: '😔' },
+  { id: 'fight', label: 'We had a fight', emoji: '💔' },
+  { id: 'not_there', label: "I wasn't there for you", emoji: '🥺' },
+  { id: 'other', label: 'Another reason', emoji: '✍️' },
+];
+
+/* ─────────────────────────────────────────────────────────
+   RELATIONSHIP OPTIONS FOR PROPOSAL
+───────────────────────────────────────────────────────── */
+const RELATIONSHIP_OPTIONS = [
+  { id: 'girlfriend', label: 'Girlfriend', emoji: '👩' },
+  { id: 'boyfriend', label: 'Boyfriend', emoji: '👨' },
+  { id: 'male_bestie', label: 'Male Bestie', emoji: '🤝' },
+  { id: 'female_bestie', label: 'Female Bestie', emoji: '👯‍♀️' },
+];
+
+/* ─────────────────────────────────────────────────────────
+   PAGE ENTRY — SUSPENSE WRAPPER
+───────────────────────────────────────────────────────── */
 export default function CreatePage() {
   return (
     <Suspense
       fallback={
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a12', color: '#fff' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div className="spinner" style={{ margin: '0 auto 1rem' }} />
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>Loading Creative Studio...</p>
-          </div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#080810]">
+          <div className="w-10 h-10 rounded-full border-2 border-rose-500 border-t-transparent animate-spin mb-4" />
+          <p className="text-slate-400 text-sm">Loading Studio...</p>
         </div>
       }
     >
@@ -87,1070 +73,1315 @@ export default function CreatePage() {
   );
 }
 
+/* ─────────────────────────────────────────────────────────
+   MAIN STATE MACHINE
+───────────────────────────────────────────────────────── */
 function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const templateIdParam = searchParams.get('template');
+  const templateParam = searchParams.get('template');
 
-  // Selected template
-  const [selectedTemplateId, setSelectedTemplateId] = useState(
-    ACTIVE_TEMPLATES.some((t) => t.id === templateIdParam) ? templateIdParam : 'proposal'
+  // Screen: 'select' | 'wizard' | 'crafting'
+  const [screen, setScreen] = useState(
+    TEMPLATES.some((t) => t.id === templateParam) ? 'wizard' : 'select'
   );
+  const [selectedId, setSelectedId] = useState(
+    TEMPLATES.some((t) => t.id === templateParam) ? templateParam : null
+  );
+  const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
 
-  useEffect(() => {
-    if (templateIdParam && ACTIVE_TEMPLATES.some((t) => t.id === templateIdParam)) {
-      setSelectedTemplateId(templateIdParam);
-    }
-  }, [templateIdParam]);
+  const activeTemplate = TEMPLATES.find((t) => t.id === selectedId) || TEMPLATES[0];
 
-  const activeTemplate = ACTIVE_TEMPLATES.find((t) => t.id === selectedTemplateId) || ACTIVE_TEMPLATES[0];
-
-  // Form Fields
-  const [recipientName, setRecipientName] = useState('');
-  const [message, setMessage] = useState('');
-  const [voiceNoteUrl, setVoiceNoteUrl] = useState('');
-  const [images, setImages] = useState([]);
-  const [audioPreset, setAudioPreset] = useState(activeTemplate.defaultAudio);
-
-  // Template-Specific Details
-  const [customDetails, setCustomDetails] = useState({
+  // ── FORM DATA ──
+  const [form, setForm] = useState({
+    recipientName: '',
+    senderName: '',
     // Proposal
-    date_idea: '',
-    special_memory: '',
+    relationshipType: '',
+    quotation: '',
     // Birthday
-    nickname: '',
-    gift_clue: '',
+    turningAge: '',
+    birthdayDate: '',
+    cakeType: 'chocolate',
+    balloonMessages: ['', '', '', '', ''],
     // Anniversary
-    years_together: '2',
-    // I Miss You
-    sender_city: '',
-    recipient_city: '',
-    distance_km: '',
-    song_title: '',
-    reunion_date: '',
+    anniversaryDate: '',
+    firstMetDate: '',
+    journey: [{ date: '', memory: '' }, { date: '', memory: '' }, { date: '', memory: '' }],
+    reasons: ['', '', '', '', ''],
     // Apology
-    what_happened: '',
+    whatHappenedType: '',
+    // Shared
+    letter: '',
+    images: [],
   });
 
-  const updateDetail = (field, value) => {
-    setCustomDetails((prev) => ({ ...prev, [field]: value }));
-  };
-
-  // Custom Slug state
-  const [customSlug, setCustomSlug] = useState('');
-  const [slugStatus, setSlugStatus] = useState(''); // '', 'checking', 'available', 'taken'
+  const setField = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
 
   // Submission state
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  // AI Assistant State
-  const [showAiModal, setShowAiModal] = useState(false);
-  const [aiTone, setAiTone] = useState('romantic');
-  const [aiKeywords, setAiKeywords] = useState('');
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiOptions, setAiOptions] = useState([]);
-  const [aiError, setAiError] = useState('');
+  // Crafting screen note id
+  const [createdId, setCreatedId] = useState(null);
 
-  const sanitizeSlug = (val) => {
-    return val
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 60);
+  // ── SELECT TEMPLATE ──
+  const handleSelectTemplate = (id) => {
+    setSelectedId(id);
+    setStepIndex(0);
+    setError('');
+    setScreen('wizard');
   };
 
-  const checkSlugAvailability = useCallback(async (slug) => {
-    if (!slug || slug.length < 3) {
-      setSlugStatus('');
-      return;
-    }
-    setSlugStatus('checking');
-    try {
-      const snap = await getDoc(doc(db, 'notes', slug));
-      setSlugStatus(snap.exists() ? 'taken' : 'available');
-    } catch {
-      setSlugStatus('');
-    }
-  }, []);
+  // ── NAVIGATION ──
+  const steps = activeTemplate?.steps || [];
+  const totalSteps = steps.length;
 
-  useEffect(() => {
-    if (!customSlug || customSlug.length < 3) {
-      setSlugStatus('');
-      return;
-    }
-    const timeout = setTimeout(() => checkSlugAvailability(customSlug), 500);
-    return () => clearTimeout(timeout);
-  }, [customSlug, checkSlugAvailability]);
-
-  const handleTemplateChange = (id) => {
-    setSelectedTemplateId(id);
-    const tmpl = ACTIVE_TEMPLATES.find((t) => t.id === id);
-    if (tmpl) {
-      setAudioPreset(tmpl.defaultAudio);
+  const goNext = () => {
+    if (stepIndex < totalSteps - 1) {
+      setDirection(1);
+      setStepIndex((s) => s + 1);
+      setError('');
+    } else {
+      handleSubmit();
     }
   };
 
-  const handleAutofillSample = () => {
-    setMessage(activeTemplate.sampleMessage);
-    if (!recipientName) {
-      setRecipientName('My Special Someone');
+  const goBack = () => {
+    if (stepIndex > 0) {
+      setDirection(-1);
+      setStepIndex((s) => s - 1);
+      setError('');
+    } else {
+      setScreen('select');
     }
   };
 
-  const generateAiMessages = async () => {
-    setAiBusy(true);
-    setAiError('');
-    try {
-      const res = await fetch('/api/ai-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          templateId: selectedTemplateId,
-          recipientName: recipientName.trim(),
-          tone: aiTone,
-          keywords: aiKeywords.trim(),
-          mode: 'generate',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate AI options.');
-      setAiOptions(data.options || []);
-    } catch (e) {
-      setAiError(e.message || 'Could not connect to AI service.');
-    } finally {
-      setAiBusy(false);
+  // ── VALIDATE CURRENT STEP ──
+  const validateStep = () => {
+    const stepId = steps[stepIndex]?.id;
+    if (stepId === 'person_details') {
+      if (!form.recipientName.trim()) return 'Please enter their name.';
+      if (!form.senderName.trim()) return 'Please enter your name.';
+      if (selectedId === 'birthday' && !form.turningAge.trim()) return 'Please enter the turning age.';
     }
+    if (stepId === 'who_are_they' && !form.relationshipType) return 'Please pick who they are to you.';
+    if (stepId === 'what_happened' && !form.whatHappenedType) return 'Please select what happened.';
+    if (stepId === 'letter' && !form.letter.trim()) return 'Please write your heartfelt message.';
+    return null;
   };
 
-  const getDeviceId = () => {
-    let deviceId = typeof window !== 'undefined' ? localStorage.getItem('note_device_id') : null;
-    if (!deviceId && typeof window !== 'undefined') {
-      deviceId = nanoid(32);
-      localStorage.setItem('note_device_id', deviceId);
-    }
-    return deviceId || 'anonymous_creator';
+  const handleNext = () => {
+    const err = validateStep();
+    if (err) { setError(err); return; }
+    goNext();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ── SUBMIT TO FIRESTORE ──
+  const handleSubmit = async () => {
     setBusy(true);
     setError('');
-
     try {
-      if (!recipientName.trim()) {
-        throw new Error('Please enter the recipient’s name.');
-      }
-      if (!message.trim()) {
-        throw new Error('Please write a heartfelt message or use a preset.');
+      const docId = nanoid(32);
+
+      // Build custom_details per template
+      let customDetails = {};
+      if (selectedId === 'proposal') {
+        customDetails = {
+          sender_name: form.senderName.trim(),
+          relationship_type: form.relationshipType,
+          quotation: form.quotation.trim(),
+          letter: form.letter.trim(),
+        };
+      } else if (selectedId === 'birthday') {
+        customDetails = {
+          sender_name: form.senderName.trim(),
+          turning_age: form.turningAge.trim(),
+          birthday_date: form.birthdayDate.trim(),
+          cake_type: form.cakeType,
+          balloon_messages: form.balloonMessages.filter((m) => m.trim()),
+          letter: form.letter.trim(),
+        };
+      } else if (selectedId === 'anniversary') {
+        customDetails = {
+          sender_name: form.senderName.trim(),
+          anniversary_date: form.anniversaryDate.trim(),
+          first_met_date: form.firstMetDate.trim() || null,
+          journey: form.journey.filter((j) => j.date.trim() && j.memory.trim()),
+          reasons: form.reasons.filter((r) => r.trim()),
+          letter: form.letter.trim(),
+        };
+      } else if (selectedId === 'emotional-apology') {
+        customDetails = {
+          sender_name: form.senderName.trim(),
+          what_happened_type: form.whatHappenedType,
+          letter: form.letter.trim(),
+        };
       }
 
-      let docId;
-      if (customSlug && customSlug.length >= 3) {
-        if (slugStatus === 'taken') {
-          throw new Error('This custom URL is already taken. Please pick another.');
-        }
-        docId = customSlug;
-      } else {
-        docId = nanoid(32);
-      }
-
-      const deviceId = getDeviceId();
-
-      // Clean undefined fields to avoid Firestore error
-      const cleanedDetails = { ...customDetails, audio_preset: audioPreset };
-      Object.keys(cleanedDetails).forEach((key) => {
-        if (cleanedDetails[key] === undefined || cleanedDetails[key] === '') {
-          delete cleanedDetails[key];
-        }
+      // Clean empty values
+      Object.keys(customDetails).forEach((k) => {
+        if (customDetails[k] === '' || customDetails[k] === null) delete customDetails[k];
       });
 
       await setDoc(doc(db, 'notes', docId), {
-        creator_uid: deviceId,
-        recipient_name: recipientName.trim(),
-        custom_message: message.trim(),
-        voice_note_url: voiceNoteUrl || null,
-        image_urls: images || [],
-        custom_details: Object.keys(cleanedDetails).length > 0 ? cleanedDetails : null,
+        creator_uid: getDeviceId(),
+        recipient_name: form.recipientName.trim(),
+        custom_message: form.letter.trim(),
+        image_urls: form.images || [],
+        custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
         is_paid: false,
-        template: selectedTemplateId,
-        custom_slug: customSlug || null,
+        template: selectedId,
+        custom_slug: null,
+        voice_note_url: null,
         created_at: serverTimestamp(),
         expires_at: null,
       });
 
       if (typeof window !== 'undefined') {
-        const createdIds = JSON.parse(localStorage.getItem('created_note_ids') || '[]');
-        createdIds.push(docId);
-        localStorage.setItem('created_note_ids', JSON.stringify(createdIds));
+        const ids = JSON.parse(localStorage.getItem('created_note_ids') || '[]');
+        ids.push(docId);
+        localStorage.setItem('created_note_ids', JSON.stringify(ids));
       }
 
-      router.push(`/preview?id=${docId}`);
+      setCreatedId(docId);
+      setScreen('crafting');
     } catch (err) {
-      setError(err.message || 'Failed to create surprise. Please try again.');
+      setError(err.message || 'Something went wrong. Please try again.');
       setBusy(false);
     }
   };
 
+  const getDeviceId = () => {
+    if (typeof window === 'undefined') return 'anonymous';
+    let id = localStorage.getItem('note_device_id');
+    if (!id) { id = nanoid(32); localStorage.setItem('note_device_id', id); }
+    return id;
+  };
+
   return (
-    <div
+    <div className="min-h-screen bg-[#080810] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* ── Google Font ── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Dancing+Script:wght@700&display=swap');
+        * { box-sizing: border-box; }
+        input, textarea, select { outline: none; }
+        input:focus, textarea:focus { border-color: rgba(255,255,255,0.35) !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+      `}</style>
+
+      <AnimatePresence mode="wait">
+        {screen === 'select' && (
+          <SelectScreen key="select" templates={TEMPLATES} onSelect={handleSelectTemplate} />
+        )}
+        {screen === 'wizard' && selectedId && (
+          <WizardScreen
+            key="wizard"
+            template={activeTemplate}
+            steps={steps}
+            stepIndex={stepIndex}
+            direction={direction}
+            form={form}
+            setField={setField}
+            onNext={handleNext}
+            onBack={goBack}
+            busy={busy}
+            error={error}
+            setError={setError}
+            isLastStep={stepIndex === totalSteps - 1}
+          />
+        )}
+        {screen === 'crafting' && (
+          <CraftingScreen
+            key="crafting"
+            template={activeTemplate}
+            recipientName={form.recipientName}
+            noteId={createdId}
+            router={router}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCREEN 1: SELECT TEMPLATE
+───────────────────────────────────────────────────────── */
+function SelectScreen({ templates, onSelect }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen flex flex-col"
+    >
+      {/* Header */}
+      <div className="text-center pt-12 pb-8 px-5">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          style={{
+            display: 'inline-block',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: '#f43f5e',
+            background: 'rgba(244,63,94,0.12)',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            marginBottom: '1rem',
+          }}
+        >
+          ✨ LovelyCrafts Studio
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            fontFamily: "'Dancing Script', cursive",
+            fontSize: 'clamp(2rem, 7vw, 3rem)',
+            color: '#fff',
+            margin: '0 0 0.75rem',
+            lineHeight: 1.2,
+          }}
+        >
+          What would you like to craft?
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          style={{ color: '#94a3b8', fontSize: '0.95rem', maxWidth: '380px', margin: '0 auto' }}
+        >
+          Choose a moment. We'll help you turn it into something they'll never forget.
+        </motion.p>
+      </div>
+
+      {/* Template Cards */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem',
+          padding: '0 1.25rem 5rem',
+          maxWidth: '480px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {templates.map((tmpl, i) => (
+          <TemplateCard key={tmpl.id} template={tmpl} index={i} onSelect={onSelect} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function TemplateCard({ template, index, onSelect }) {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.08, type: 'spring', stiffness: 260, damping: 20 }}
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.96 }}
+      onClick={() => onSelect(template.id)}
       style={{
-        minHeight: '100vh',
-        background: 'radial-gradient(ellipse at 50% 0%, #151528 0%, #080810 100%)',
-        color: '#f8fafc',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        paddingBottom: '6rem',
+        background: 'rgba(255,255,255,0.04)',
+        border: `1.5px solid rgba(255,255,255,0.1)`,
+        borderRadius: '20px',
+        padding: '1.5rem 1rem',
+        textAlign: 'center',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.6rem',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: `0 0 0 0 ${template.glowColor}`,
+        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = template.accentColor;
+        e.currentTarget.style.boxShadow = `0 0 30px ${template.glowColor}`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+        e.currentTarget.style.boxShadow = '0 0 0 0 transparent';
       }}
     >
-      {/* ── TOP NAV BAR (BACK BUTTON & BRANDING) ── */}
-      <header
+      {/* Glow blob */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `radial-gradient(circle at 50% 0%, ${template.glowColor} 0%, transparent 70%)`,
+          opacity: 0.5,
+          pointerEvents: 'none',
+        }}
+      />
+      <div style={{ fontSize: '2.5rem', lineHeight: 1 }}>{template.emoji}</div>
+      <div
+        style={{
+          fontSize: '0.88rem',
+          fontWeight: 700,
+          color: '#fff',
+          lineHeight: 1.3,
+          position: 'relative',
+        }}
+      >
+        {template.title}
+      </div>
+      <div
+        style={{
+          fontSize: '0.72rem',
+          color: '#64748b',
+          lineHeight: 1.4,
+          position: 'relative',
+        }}
+      >
+        {template.time}
+      </div>
+      <div
+        style={{
+          marginTop: '0.25rem',
+          padding: '4px 10px',
+          borderRadius: '999px',
+          background: `${template.accentColor}22`,
+          color: template.accentColor,
+          fontSize: '0.68rem',
+          fontWeight: 800,
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          position: 'relative',
+        }}
+      >
+        ₹219
+      </div>
+    </motion.button>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCREEN 2: WIZARD
+───────────────────────────────────────────────────────── */
+function WizardScreen({ template, steps, stepIndex, direction, form, setField, onNext, onBack, busy, error, setError, isLastStep }) {
+  const currentStep = steps[stepIndex];
+  const accent = template.accentColor;
+
+  const stepVariants = {
+    enter: (dir) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
+    center: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 280, damping: 28 } },
+    exit: (dir) => ({ x: dir > 0 ? '-60%' : '60%', opacity: 0, transition: { duration: 0.2 } }),
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.35 }}
+      className="min-h-screen flex flex-col"
+    >
+      {/* Top Bar */}
+      <div
         style={{
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          background: 'rgba(8, 8, 16, 0.85)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          background: 'rgba(8,8,16,0.9)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
           padding: '0.85rem 1.25rem',
         }}
       >
         <div
           style={{
-            maxWidth: '1100px',
+            maxWidth: '480px',
             margin: '0 auto',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
-          {/* Back to Home Button */}
-          <Link
-            href="/"
+          <button
+            onClick={onBack}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
               borderRadius: '50px',
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              color: '#cbd5e1',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
+              padding: '7px 14px',
+              color: '#94a3b8',
+              fontSize: '0.85rem',
               fontWeight: 600,
-              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
             </svg>
-            <span>Back to Home</span>
-          </Link>
+            Back
+          </button>
 
-          {/* Studio Brand Indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <GoldBadge name="sparkle" size={20} />
-            <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.05em', color: '#fff' }}>
-              LovelyCrafts Studio
-            </span>
+            <span style={{ fontSize: '1.2rem' }}>{template.emoji}</span>
+            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{template.title}</span>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* ── MAIN CREATOR CONTENT ── */}
-      <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
-        {/* Headline */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: activeTemplate.accentColor,
-              background: activeTemplate.glowColor,
-              padding: '6px 14px',
-              borderRadius: '999px',
-              marginBottom: '0.75rem',
-            }}
+      {/* Step Progress */}
+      <StepProgressBar steps={steps} currentIndex={stepIndex} accent={accent} />
+
+      {/* Step Content */}
+      <div
+        style={{
+          flex: 1,
+          maxWidth: '480px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '1.5rem 1.25rem 0',
+          overflow: 'hidden',
+        }}
+      >
+        <AnimatePresence custom={direction} mode="wait">
+          <motion.div
+            key={currentStep?.id || stepIndex}
+            custom={direction}
+            variants={stepVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
           >
-            {activeTemplate.category}
-          </span>
-          <h1
-            style={{
-              fontFamily: 'var(--font-dancing)',
-              fontSize: 'clamp(2.2rem, 5.5vw, 3.4rem)',
-              color: '#fff',
-              margin: '0 0 0.5rem',
-            }}
-          >
-            Craft an Unforgettable Surprise
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto' }}>
-            Customize your 7-chapter cinematic movie with personal memories, photos, vows, and romantic interactions.
-          </p>
-        </div>
-
-        {/* ── 1. SELECT CINEMATIC TEMPLATE TABS ── */}
-        <section style={{ marginBottom: '2.5rem' }}>
-          <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-            1. Select Experience Template
-          </label>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '0.75rem',
-            }}
-          >
-            {ACTIVE_TEMPLATES.map((tmpl) => {
-              const isSelected = tmpl.id === selectedTemplateId;
-              return (
-                <button
-                  key={tmpl.id}
-                  type="button"
-                  onClick={() => handleTemplateChange(tmpl.id)}
-                  style={{
-                    background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                    border: isSelected ? `2px solid ${tmpl.accentColor}` : '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '18px',
-                    padding: '1.25rem 0.75rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    boxShadow: isSelected ? `0 0 25px ${tmpl.glowColor}` : 'none',
-                    transition: 'all 0.25s ease',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <GoldBadge name={tmpl.badge} size={32} />
-                  <div style={{ color: isSelected ? '#fff' : '#94a3b8', fontWeight: isSelected ? 700 : 500, fontSize: '0.9rem', lineHeight: 1.2 }}>
-                    {tmpl.title}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── FORM CONTAINER ── */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          
-          {/* ── 2. RECIPIENT & OCCASION SPECIFICS ── */}
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '24px',
-              padding: '1.75rem',
-            }}
-          >
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GoldBadge name="sparkle" size={18} />
-              Recipient & Journey Details
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Recipient Name */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                  Recipient Name <span style={{ color: activeTemplate.accentColor }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex, Maya, Bestie"
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              {/* Template Specific Dynamic Inputs */}
-              {selectedTemplateId === 'proposal' && (
-                <>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Special First Moment / Memory
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. That rainy café evening when our eyes first locked"
-                      value={customDetails.special_memory}
-                      onChange={(e) => updateDetail('special_memory', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Proposed Date Idea / Surprise (Revealed after YES!)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Private candle-light dinner on the rooftop"
-                      value={customDetails.date_idea}
-                      onChange={(e) => updateDetail('date_idea', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {selectedTemplateId === 'birthday' && (
-                <>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Special Birthday Memory or Inside Joke
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. The hilarious road trip where we got lost for 4 hours"
-                      value={customDetails.special_memory}
-                      onChange={(e) => updateDetail('special_memory', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Secret Gift Clue / Surprise Plan
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Check your doorstep at 7:00 PM tonight!"
-                      value={customDetails.gift_clue}
-                      onChange={(e) => updateDetail('gift_clue', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {selectedTemplateId === 'anniversary' && (
-                <>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Years / Milestones Together
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2 Years, 500 Days, 10 Golden Years"
-                      value={customDetails.years_together}
-                      onChange={(e) => updateDetail('years_together', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      Cherished Anniversary Memory
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Watching the sunrise from the mountain cabin"
-                      value={customDetails.special_memory}
-                      onChange={(e) => updateDetail('special_memory', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {selectedTemplateId === 'i-miss-you' && (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                        Your City (Origin)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. New York, Mumbai"
-                        value={customDetails.sender_city}
-                        onChange={(e) => updateDetail('sender_city', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          color: '#fff',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                        Their City (Destination)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. London, Tokyo"
-                        value={customDetails.recipient_city}
-                        onChange={(e) => updateDetail('recipient_city', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          color: '#fff',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                        Distance (in Kilometers)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 1,450"
-                        value={customDetails.distance_km}
-                        onChange={(e) => updateDetail('distance_km', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          color: '#fff',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                        Next Reunion Date
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. December 24th, Soon"
-                        value={customDetails.reunion_date}
-                        onChange={(e) => updateDetail('reunion_date', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          color: '#fff',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {selectedTemplateId === 'emotional-apology' && (
-                <>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      What Happened (Honest Reflection)
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. I let my frustration get the better of me and failed to listen to how you were feeling."
-                      value={customDetails.what_happened}
-                      onChange={(e) => updateDetail('what_happened', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                        resize: 'vertical',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                      The Sacred Memory (Why our bond matters)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. The effortless laughter and trust we have always shared."
-                      value={customDetails.special_memory}
-                      onChange={(e) => updateDetail('special_memory', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        fontSize: '0.95rem',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ── 3. HEARTFELT LETTER & AI ASSISTANT ── */}
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '24px',
-              padding: '1.75rem',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <GoldBadge name="waxSeal" size={18} />
-                Your Sincere Letter / Custom Message
-              </h2>
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={handleAutofillSample}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    borderRadius: '50px',
-                    padding: '6px 14px',
-                    color: '#cbd5e1',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Use Preset Message
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAiModal(true)}
-                  style={{
-                    background: 'linear-gradient(135deg, #a855f7, #6366f1)',
-                    border: 'none',
-                    borderRadius: '50px',
-                    padding: '6px 14px',
-                    color: '#fff',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                >
-                  <GoldBadge name="sparkle" size={12} />
-                  AI Magic
-                </button>
-              </div>
-            </div>
-
-            <textarea
-              rows={5}
-              required
-              placeholder="Write your personal letter here... This will be typewritten on authentic wax-sealed parchment in the cinematic finale."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                borderRadius: '14px',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                background: 'rgba(0, 0, 0, 0.3)',
-                color: '#fff',
-                fontSize: '1rem',
-                lineHeight: 1.6,
-                boxSizing: 'border-box',
-                resize: 'vertical',
-              }}
+            <StepContent
+              stepId={currentStep?.id}
+              templateId={template.id}
+              form={form}
+              setField={setField}
+              accent={accent}
+              setError={setError}
             />
-          </div>
+          </motion.div>
+        </AnimatePresence>
 
-          {/* ── 4. MEDIA & POLAROID MEMORIES ── */}
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '24px',
-              padding: '1.75rem',
-            }}
-          >
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GoldBadge name="sparkle" size={18} />
-              Memory Gallery & Voice Note
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>
-                  Upload Memory Photos (Displayed in 3D Draggable Polaroids)
-                </label>
-                <CloudinaryUpload
-                  images={images}
-                  setImages={setImages}
-                  maxImages={6}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>
-                  Record a Personal Voice Note (Optional)
-                </label>
-                <VoiceNoteRecorder
-                  audioUrl={voiceNoteUrl}
-                  setAudioUrl={setVoiceNoteUrl}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ── 5. SOUNDTRACK & CUSTOM SHORT LINK ── */}
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '24px',
-              padding: '1.75rem',
-            }}
-          >
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GoldBadge name="cassette" size={18} />
-              Soundtrack & Memorable Custom URL
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Soundtrack Preset */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>
-                  Ambient Background Mood
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem' }}>
-                  {AUDIO_PRESETS.map((p) => {
-                    const isSelected = audioPreset === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setAudioPreset(p.id)}
-                        style={{
-                          textAlign: 'left',
-                          padding: '10px 14px',
-                          borderRadius: '12px',
-                          border: isSelected ? `2px solid ${activeTemplate.accentColor}` : '1px solid rgba(255, 255, 255, 0.1)',
-                          background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.2)',
-                          color: isSelected ? '#fff' : '#94a3b8',
-                          fontSize: '0.85rem',
-                          fontWeight: isSelected ? 700 : 400,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {p.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Custom Slug */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.4rem' }}>
-                  Custom Memorable Link (Optional)
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>lovelycrafts.in/p/</span>
-                  <input
-                    type="text"
-                    placeholder="for-my-love"
-                    value={customSlug}
-                    onChange={(e) => setCustomSlug(sanitizeSlug(e.target.value))}
-                    style={{
-                      flex: 1,
-                      padding: '10px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      color: '#fff',
-                      fontSize: '0.95rem',
-                    }}
-                  />
-                </div>
-                {slugStatus === 'checking' && <span style={{ color: '#38bdf8', fontSize: '0.78rem', marginTop: '4px', display: 'block' }}>Checking availability...</span>}
-                {slugStatus === 'available' && <span style={{ color: '#4ade80', fontSize: '0.78rem', marginTop: '4px', display: 'block' }}>✓ Custom link is available!</span>}
-                {slugStatus === 'taken' && <span style={{ color: '#f87171', fontSize: '0.78rem', marginTop: '4px', display: 'block' }}>✗ Custom link is already taken.</span>}
-              </div>
-            </div>
-          </div>
-
-          {/* Error Banner */}
+        {/* Error */}
+        <AnimatePresence>
           {error && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
-                borderRadius: '14px',
-                padding: '12px 16px',
+                marginTop: '1rem',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                background: 'rgba(239,68,68,0.12)',
+                border: '1px solid rgba(239,68,68,0.3)',
                 color: '#fca5a5',
-                fontSize: '0.92rem',
+                fontSize: '0.85rem',
               }}
             >
               {error}
-            </div>
-          )}
-
-          {/* ── SUBMIT BUTTON ── */}
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <motion.button
-              whileHover={{ scale: 1.04, boxShadow: `0 0 35px ${activeTemplate.glowColor}` }}
-              whileTap={{ scale: 0.96 }}
-              type="submit"
-              disabled={busy}
-              style={{
-                background: `linear-gradient(135deg, ${activeTemplate.accentColor}, #be123c)`,
-                color: '#fff',
-                padding: '18px 48px',
-                borderRadius: '50px',
-                border: 'none',
-                fontSize: '1.15rem',
-                fontWeight: 800,
-                cursor: busy ? 'not-allowed' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                width: '100%',
-                maxWidth: '420px',
-                justifyContent: 'center',
-                opacity: busy ? 0.7 : 1,
-              }}
-            >
-              <GoldBadge name="sparkle" size={20} />
-              {busy ? 'Creating Cinematic Experience...' : 'Launch Cinematic Preview →'}
-            </motion.button>
-          </div>
-        </form>
-
-        {/* ── AI MAGIC MODAL ── */}
-        <AnimatePresence>
-          {showAiModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0, 0, 0, 0.75)',
-                backdropFilter: 'blur(8px)',
-                zIndex: 100,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem',
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                style={{
-                  background: '#131320',
-                  border: '1px solid rgba(168, 85, 247, 0.4)',
-                  borderRadius: '24px',
-                  padding: '2rem',
-                  maxWidth: '520px',
-                  width: '100%',
-                  boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                  <h3 style={{ color: '#fff', fontSize: '1.25rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <GoldBadge name="sparkle" size={20} />
-                    AI Message Craftsman
-                  </h3>
-                  <button
-                    onClick={() => setShowAiModal(false)}
-                    style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600 }}>Message Tone</label>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-                      {['romantic', 'heartfelt', 'poetic', 'playful', 'sincere'].map((tone) => (
-                        <button
-                          key={tone}
-                          type="button"
-                          onClick={() => setAiTone(tone)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '50px',
-                            border: aiTone === tone ? '1px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                            background: aiTone === tone ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                            color: aiTone === tone ? '#fff' : '#94a3b8',
-                            fontSize: '0.8rem',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {tone}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600 }}>Key Memories / Keywords</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. late night chats, favorite song, forever partner"
-                      value={aiKeywords}
-                      onChange={(e) => setAiKeywords(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        color: '#fff',
-                        marginTop: '4px',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={aiBusy}
-                    onClick={generateAiMessages}
-                    style={{
-                      background: 'linear-gradient(135deg, #a855f7, #6366f1)',
-                      color: '#fff',
-                      padding: '12px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      fontWeight: 700,
-                      cursor: aiBusy ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    {aiBusy ? 'Crafting Heartfelt Options...' : 'Generate Messages'}
-                  </button>
-
-                  {aiError && <p style={{ color: '#f87171', fontSize: '0.85rem', margin: 0 }}>{aiError}</p>}
-
-                  {aiOptions.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-                      {aiOptions.map((opt, idx) => (
-                        <div
-                          key={idx}
-                          onClick={() => {
-                            setMessage(opt);
-                            setShowAiModal(false);
-                          }}
-                          style={{
-                            padding: '10px 12px',
-                            borderRadius: '10px',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: '#e2e8f0',
-                            fontSize: '0.88rem',
-                            lineHeight: 1.4,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {opt}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
+      </div>
+
+      {/* Bottom CTA */}
+      <div
+        style={{
+          maxWidth: '480px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '1.5rem 1.25rem 2.5rem',
+        }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={onNext}
+          disabled={busy}
+          style={{
+            width: '100%',
+            padding: '16px',
+            borderRadius: '16px',
+            background: template.gradient,
+            border: 'none',
+            color: '#fff',
+            fontSize: '1.05rem',
+            fontWeight: 800,
+            cursor: busy ? 'not-allowed' : 'pointer',
+            opacity: busy ? 0.7 : 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: `0 4px 24px ${template.glowColor}`,
+          }}
+        >
+          {busy ? (
+            <>
+              <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              Crafting...
+            </>
+          ) : isLastStep ? (
+            <>✨ Craft My Experience</>
+          ) : (
+            <>Continue → </>
+          )}
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
+
+function StepProgressBar({ steps, currentIndex, accent }) {
+  return (
+    <div
+      style={{
+        maxWidth: '480px',
+        margin: '0 auto',
+        width: '100%',
+        padding: '1rem 1.25rem 0',
+        display: 'flex',
+        gap: '6px',
+        alignItems: 'center',
+      }}
+    >
+      {steps.map((step, i) => (
+        <div
+          key={step.id}
+          style={{
+            flex: 1,
+            height: '4px',
+            borderRadius: '4px',
+            background: i <= currentIndex ? accent : 'rgba(255,255,255,0.1)',
+            transition: 'background 0.4s ease',
+          }}
+        />
+      ))}
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP CONTENT ROUTER
+───────────────────────────────────────────────────────── */
+function StepContent({ stepId, templateId, form, setField, accent, setError }) {
+  switch (stepId) {
+    case 'person_details':
+      return <StepPersonDetails templateId={templateId} form={form} setField={setField} accent={accent} />;
+    case 'who_are_they':
+      return <StepWhoAreThey form={form} setField={setField} accent={accent} />;
+    case 'quotation':
+      return <StepQuotation form={form} setField={setField} accent={accent} />;
+    case 'cake':
+      return <StepCake form={form} setField={setField} accent={accent} />;
+    case 'balloons':
+      return <StepBalloons form={form} setField={setField} accent={accent} />;
+    case 'special_dates':
+      return <StepSpecialDates form={form} setField={setField} accent={accent} />;
+    case 'journey':
+      return <StepJourney form={form} setField={setField} accent={accent} />;
+    case 'reasons':
+      return <StepReasons form={form} setField={setField} accent={accent} />;
+    case 'what_happened':
+      return <StepWhatHappened form={form} setField={setField} accent={accent} />;
+    case 'memories':
+      return <StepMemories form={form} setField={setField} accent={accent} templateId={templateId} />;
+    case 'letter':
+      return <StepLetter templateId={templateId} form={form} setField={setField} accent={accent} />;
+    default:
+      return null;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   SHARED UI PRIMITIVES
+───────────────────────────────────────────────────────── */
+function StepHeader({ icon, title, subtitle }) {
+  return (
+    <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>{icon}</div>
+      <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#fff', margin: '0 0 0.35rem', lineHeight: 1.2 }}>{title}</h2>
+      {subtitle && <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0, lineHeight: 1.5 }}>{subtitle}</p>}
+    </div>
+  );
+}
+
+function FieldLabel({ children }) {
+  return (
+    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.45rem' }}>
+      {children}
+    </label>
+  );
+}
+
+function TextInput({ value, onChange, placeholder, type = 'text' }) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      style={{
+        width: '100%',
+        padding: '13px 16px',
+        borderRadius: '14px',
+        border: '1.5px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.04)',
+        color: '#fff',
+        fontSize: '1rem',
+        transition: 'border-color 0.2s',
+      }}
+    />
+  );
+}
+
+function TextArea({ value, onChange, placeholder, rows = 5 }) {
+  return (
+    <textarea
+      rows={rows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      style={{
+        width: '100%',
+        padding: '13px 16px',
+        borderRadius: '14px',
+        border: '1.5px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.04)',
+        color: '#fff',
+        fontSize: '1rem',
+        lineHeight: 1.7,
+        resize: 'none',
+        transition: 'border-color 0.2s',
+      }}
+    />
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP COMPONENTS
+───────────────────────────────────────────────────────── */
+
+// STEP: Person Details (shared by all)
+function StepPersonDetails({ templateId, form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="👤" title="Tell me about you both" subtitle="These names will appear throughout their experience." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <div>
+          <FieldLabel>Their Name *</FieldLabel>
+          <TextInput value={form.recipientName} onChange={(v) => setField('recipientName', v)} placeholder="e.g. Priya, Alex, Bestie..." />
+        </div>
+        <div>
+          <FieldLabel>Your Name *</FieldLabel>
+          <TextInput value={form.senderName} onChange={(v) => setField('senderName', v)} placeholder="e.g. Rahul, Your name..." />
+        </div>
+        {templateId === 'birthday' && (
+          <>
+            <div>
+              <FieldLabel>Turning Age *</FieldLabel>
+              <TextInput value={form.turningAge} onChange={(v) => setField('turningAge', v)} placeholder="e.g. 22, 25, 30..." type="text" />
+            </div>
+            <div>
+              <FieldLabel>Their Birthday</FieldLabel>
+              <TextInput value={form.birthdayDate} onChange={(v) => setField('birthdayDate', v)} placeholder="e.g. 15 March, August 7..." />
+            </div>
+          </>
+        )}
+        {templateId === 'anniversary' && (
+          <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.82rem', color: '#64748b' }}>
+            💡 You'll enter your anniversary dates in the next steps.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// STEP: Who Are They (Proposal)
+function StepWhoAreThey({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="💞" title="Who are they to you?" subtitle="This helps us personalize their experience." />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        {RELATIONSHIP_OPTIONS.map((opt) => {
+          const isSelected = form.relationshipType === opt.id;
+          return (
+            <motion.button
+              key={opt.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setField('relationshipType', opt.id)}
+              style={{
+                padding: '1.1rem 0.75rem',
+                borderRadius: '16px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.1)',
+                background: isSelected ? `${accent}18` : 'rgba(255,255,255,0.03)',
+                color: isSelected ? '#fff' : '#94a3b8',
+                fontWeight: isSelected ? 700 : 500,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.9rem',
+                boxShadow: isSelected ? `0 0 20px ${accent}30` : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span style={{ fontSize: '1.8rem' }}>{opt.emoji}</span>
+              {opt.label}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// STEP: Quotation (Proposal)
+function StepQuotation({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="💬" title="A message for them" subtitle="Pick one that feels right or write your own below." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
+        {PROPOSAL_QUOTES.map((q) => {
+          const isSelected = form.quotation === q;
+          return (
+            <motion.button
+              key={q}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setField('quotation', isSelected ? '' : q)}
+              style={{
+                textAlign: 'left',
+                padding: '12px 14px',
+                borderRadius: '14px',
+                border: isSelected ? `1.5px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
+                background: isSelected ? `${accent}14` : 'rgba(255,255,255,0.03)',
+                color: isSelected ? '#fff' : '#94a3b8',
+                fontSize: '0.9rem',
+                lineHeight: 1.5,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              {q}
+            </motion.button>
+          );
+        })}
+      </div>
+      <FieldLabel>Or write your own</FieldLabel>
+      <TextArea
+        rows={3}
+        value={PROPOSAL_QUOTES.includes(form.quotation) ? '' : form.quotation}
+        onChange={(v) => setField('quotation', v)}
+        placeholder="Write something from your heart..."
+      />
+    </div>
+  );
+}
+
+// STEP: Cake (Birthday)
+function StepCake({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="🎂" title="Pick the perfect cake" subtitle="This is the cake we'll bake and present to them." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {CAKE_OPTIONS.map((cake) => {
+          const isSelected = form.cakeType === cake.id;
+          return (
+            <motion.button
+              key={cake.id}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setField('cakeType', cake.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                padding: '1rem 1.1rem',
+                borderRadius: '16px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
+                background: isSelected ? `${cake.bg}` : 'rgba(255,255,255,0.02)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: isSelected ? `0 0 20px ${cake.accent}40` : 'none',
+              }}
+            >
+              <span style={{ fontSize: '2.2rem' }}>{cake.emoji}</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 700, color: isSelected ? '#fff' : '#94a3b8', fontSize: '0.95rem' }}>{cake.label}</div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{cake.desc}</div>
+              </div>
+              {isSelected && (
+                <div style={{ marginLeft: 'auto', color: accent, fontSize: '1.2rem' }}>✓</div>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// STEP: Balloon Messages (Birthday)
+function StepBalloons({ form, setField, accent }) {
+  const updateBalloon = (index, val) => {
+    const updated = [...form.balloonMessages];
+    updated[index] = val;
+    setField('balloonMessages', updated);
+  };
+
+  return (
+    <div>
+      <StepHeader icon="🎈" title="Balloon pop reveals!" subtitle="Add up to 5 surprise messages — one per balloon. They'll pop and reveal your words!" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: [accent, '#f43f5e', '#f59e0b', '#a855f7', '#22d3ee'][i % 5] + '33',
+                border: `1.5px solid ${[accent, '#f43f5e', '#f59e0b', '#a855f7', '#22d3ee'][i % 5]}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem',
+                flexShrink: 0,
+              }}
+            >
+              🎈
+            </div>
+            <input
+              type="text"
+              value={form.balloonMessages[i] || ''}
+              onChange={(e) => updateBalloon(i, e.target.value)}
+              placeholder={`Message ${i + 1}... (e.g. "You light up my world")`}
+              style={{
+                flex: 1,
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: '1.5px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.04)',
+                color: '#fff',
+                fontSize: '0.9rem',
+              }}
+            />
+          </div>
+        ))}
+        <p style={{ color: '#475569', fontSize: '0.78rem', marginTop: '0.25rem' }}>
+          💡 At least 1 message required. The rest are optional.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// STEP: Special Dates (Anniversary)
+function StepSpecialDates({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="📅" title="Your special dates" subtitle="These dates will anchor the live anniversary timer." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <div>
+          <FieldLabel>Anniversary Date *</FieldLabel>
+          <TextInput value={form.anniversaryDate} onChange={(v) => setField('anniversaryDate', v)} placeholder="e.g. 12 February 2022, Feb 12 2022..." />
+        </div>
+        <div>
+          <FieldLabel>The Day You First Met (optional)</FieldLabel>
+          <TextInput value={form.firstMetDate} onChange={(v) => setField('firstMetDate', v)} placeholder="e.g. June 5, 2020..." />
+        </div>
+        <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.15)', fontSize: '0.82rem', color: '#92400e' }}>
+          🥂 The experience will show a live countdown — years, months, days, hours, minutes & seconds since your anniversary.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// STEP: Journey Together (Anniversary)
+function StepJourney({ form, setField, accent }) {
+  const updateJourney = (index, field, val) => {
+    const updated = form.journey.map((j, i) => i === index ? { ...j, [field]: val } : j);
+    setField('journey', updated);
+  };
+
+  const addEvent = () => {
+    if (form.journey.length < 5) setField('journey', [...form.journey, { date: '', memory: '' }]);
+  };
+
+  const removeEvent = (index) => {
+    if (form.journey.length > 1) setField('journey', form.journey.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div>
+      <StepHeader icon="🗺️" title="Your journey together" subtitle="Add key moments — these form a beautiful timeline in the experience." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {form.journey.map((event, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              padding: '1rem',
+              borderRadius: '14px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Event {i + 1}
+              </span>
+              {form.journey.length > 1 && (
+                <button onClick={() => removeEvent(i)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '1rem' }}>×</button>
+              )}
+            </div>
+            <input
+              type="text"
+              value={event.date}
+              onChange={(e) => updateJourney(i, 'date', e.target.value)}
+              placeholder="Date (e.g. March 2021)"
+              style={{ width: '100%', padding: '10px 13px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.88rem', marginBottom: '0.5rem' }}
+            />
+            <input
+              type="text"
+              value={event.memory}
+              onChange={(e) => updateJourney(i, 'memory', e.target.value)}
+              placeholder="Memory (e.g. Our first road trip)"
+              style={{ width: '100%', padding: '10px 13px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.88rem' }}
+            />
+          </motion.div>
+        ))}
+        {form.journey.length < 5 && (
+          <button
+            onClick={addEvent}
+            style={{
+              width: '100%',
+              padding: '11px',
+              borderRadius: '12px',
+              border: `1.5px dashed ${accent}55`,
+              background: `${accent}08`,
+              color: accent,
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+            }}
+          >
+            + Add another moment
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// STEP: Reasons (Anniversary)
+function StepReasons({ form, setField, accent }) {
+  const updateReason = (i, val) => {
+    const updated = [...form.reasons];
+    updated[i] = val;
+    setField('reasons', updated);
+  };
+
+  return (
+    <div>
+      <StepHeader icon="❤️" title="Why do you love them?" subtitle="5 honest reasons — these will burst out of heart balloons in the experience." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                background: 'rgba(244,63,94,0.15)',
+                border: '1.5px solid rgba(244,63,94,0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                color: '#f43f5e',
+                flexShrink: 0,
+              }}
+            >
+              {i + 1}
+            </div>
+            <input
+              type="text"
+              value={form.reasons[i] || ''}
+              onChange={(e) => updateReason(i, e.target.value)}
+              placeholder={`Reason ${i + 1}... (e.g. "Your laugh is contagious")`}
+              style={{
+                flex: 1,
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: '1.5px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.04)',
+                color: '#fff',
+                fontSize: '0.9rem',
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// STEP: What Happened (Apology)
+function StepWhatHappened({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader icon="💔" title="What happened?" subtitle="Being honest is the first step to making things right." />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {WHAT_HAPPENED_OPTIONS.map((opt) => {
+          const isSelected = form.whatHappenedType === opt.id;
+          return (
+            <motion.button
+              key={opt.id}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setField('whatHappenedType', opt.id)}
+              style={{
+                textAlign: 'left',
+                padding: '1rem 1.1rem',
+                borderRadius: '16px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
+                background: isSelected ? 'rgba(148,163,184,0.12)' : 'rgba(255,255,255,0.02)',
+                color: isSelected ? '#fff' : '#94a3b8',
+                fontWeight: isSelected ? 700 : 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                fontSize: '0.95rem',
+                transition: 'all 0.2s',
+                boxShadow: isSelected ? `0 0 20px ${accent}30` : 'none',
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>{opt.emoji}</span>
+              {opt.label}
+              {isSelected && <span style={{ marginLeft: 'auto', color: accent }}>✓</span>}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// STEP: Memories / Photos (shared)
+function StepMemories({ form, setField, accent, templateId }) {
+  const maxPhotos = templateId === 'birthday' ? 5 : templateId === 'anniversary' ? 5 : 3;
+
+  return (
+    <div>
+      <StepHeader
+        icon="📸"
+        title="Add your memories"
+        subtitle={`Upload up to ${maxPhotos} photos — they'll be beautifully presented in the experience.`}
+      />
+      <CloudinaryUpload
+        images={form.images}
+        setImages={(imgs) => setField('images', imgs)}
+        maxImages={maxPhotos}
+      />
+      {form.images.length === 0 && (
+        <div style={{ marginTop: '1rem', padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', color: '#475569', fontSize: '0.82rem', textAlign: 'center' }}>
+          Photos are optional but they make the experience so much more personal 💫
+        </div>
+      )}
+    </div>
+  );
+}
+
+// STEP: Letter (shared)
+function StepLetter({ templateId, form, setField, accent }) {
+  const prompts = {
+    proposal: "Write from your heart — this will be typewritten on a parchment letter after they click YES...",
+    birthday: "Write a heartfelt birthday letter — it will appear line by line in a beautiful envelope...",
+    anniversary: "A love letter to close the experience — take your time, it will be presented beautifully...",
+    'emotional-apology': "Pour your heart out — this becomes the handwritten letter they'll read...",
+  };
+
+  const charCount = form.letter.length;
+
+  return (
+    <div>
+      <StepHeader
+        icon="✉️"
+        title={templateId === 'emotional-apology' ? "Write from your heart" : "Your heartfelt letter"}
+        subtitle="This becomes a beautifully animated handwritten letter in their experience."
+      />
+      <div style={{ position: 'relative' }}>
+        <TextArea
+          value={form.letter}
+          onChange={(v) => setField('letter', v)}
+          placeholder={prompts[templateId] || "Write your heartfelt message here..."}
+          rows={7}
+        />
+        <div style={{ textAlign: 'right', fontSize: '0.72rem', color: '#475569', marginTop: '0.35rem' }}>
+          {charCount} characters
+        </div>
+      </div>
+      <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p style={{ color: '#475569', fontSize: '0.8rem', textAlign: 'center', margin: 0 }}>
+          ✍️ Your exact words will be typewritten line-by-line in their experience
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCREEN 3: CRAFTING EXPERIENCE ANIMATION
+───────────────────────────────────────────────────────── */
+function CraftingScreen({ template, recipientName, noteId, router }) {
+  const [phase, setPhase] = useState(0); // 0: sparkle in, 1: typing, 2: done
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 600);
+    const t2 = setTimeout(() => setPhase(2), 2000);
+    const t3 = setTimeout(() => {
+      if (noteId) router.push(`/preview?id=${noteId}`);
+    }, 3200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [noteId, router]);
+
+  const particles = Array.from({ length: 24 }, (_, i) => ({
+    id: i,
+    left: `${(i * 37) % 100}%`,
+    top: `${(i * 61) % 100}%`,
+    delay: `${(i * 0.12).toFixed(2)}s`,
+    size: 8 + (i % 4) * 6,
+    color: [template.accentColor, '#fff', '#fbbf24', '#f43f5e', '#a855f7'][i % 5],
+  }));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: '#060610',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Particles */}
+      <style>{`
+        @keyframes floatSpark { 0% { transform: translate(0,0) scale(0); opacity: 0; } 20% { opacity: 1; transform: translate(0,0) scale(1); } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+      `}</style>
+
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            borderRadius: '50%',
+            background: p.color,
+            animation: `floatSpark 3s ${p.delay} infinite`,
+            '--tx': `${((p.id * 17) % 80) - 40}px`,
+            '--ty': `${((p.id * 23) % 80) - 40}px`,
+            opacity: 0,
+          }}
+        />
+      ))}
+
+      {/* Glowing ring */}
+      <div style={{ position: 'relative', marginBottom: '2rem' }}>
+        <div style={{
+          position: 'absolute',
+          inset: '-20px',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${template.glowColor}, transparent)`,
+          animation: 'pulse-ring 2s ease-out infinite',
+        }} />
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontSize: '4.5rem', position: 'relative' }}
+        >
+          {template.emoji}
+        </motion.div>
+      </div>
+
+      {/* Text */}
+      <AnimatePresence mode="wait">
+        {phase === 0 && (
+          <motion.p key="p0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ color: '#475569', fontSize: '1rem', textAlign: 'center' }}>
+            Preparing...
+          </motion.p>
+        )}
+        {phase === 1 && (
+          <motion.div key="p1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ textAlign: 'center', padding: '0 2rem' }}>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Crafting something beautiful</p>
+            <h2 style={{ fontFamily: "'Dancing Script', cursive", fontSize: '2rem', color: '#fff', margin: '0 0 0.5rem' }}>
+              For {recipientName || 'them'}...
+            </h2>
+            <p style={{ color: '#475569', fontSize: '0.88rem' }}>{template.title}</p>
+          </motion.div>
+        )}
+        {phase === 2 && (
+          <motion.div key="p2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            style={{ textAlign: 'center', padding: '0 2rem' }}>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 0.5 }}
+              style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}
+            >
+              ✨
+            </motion.div>
+            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: '1.3rem', marginBottom: '0.4rem' }}>
+              Experience Ready!
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Opening your private preview...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Progress bar */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.06)' }}>
+        <motion.div
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 3, ease: 'linear' }}
+          style={{ height: '100%', background: template.gradient }}
+        />
+      </div>
+    </motion.div>
   );
 }
