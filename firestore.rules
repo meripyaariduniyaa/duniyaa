@@ -2,60 +2,60 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Public & Note Owner Access ──
+    // ── 1. Notes & Surprises (Client + Recipient Access) ──
+    // Allows reading notes, creating new ones, and updating view counts / reactions
     match /notes/{token} {
-      allow get: if true;
-
-      allow list: if request.query.filters.size() == 1
-                  && request.query.filters[0].fieldPath == 'creator_uid'
-                  && request.query.filters[0].value is string
-                  && request.query.filters[0].value.size() > 0;
-
-      allow create: if request.resource.data.keys().hasAll([
-                        'creator_uid', 'recipient_name', 'custom_message',
-                        'image_urls', 'is_paid', 'template', 'created_at'
-                      ])
-                    && request.resource.data.creator_uid is string
-                    && request.resource.data.creator_uid.size() > 0
-                    && request.resource.data.recipient_name is string
-                    && request.resource.data.is_paid == false;
-
-      allow update: if (request.auth != null && resource.data.creator_uid == request.auth.uid)
-                    || (resource.data.creator_uid is string && resource.data.creator_uid == request.resource.data.creator_uid);
-
-      allow delete: if (request.auth != null && resource.data.creator_uid == request.auth.uid);
+      allow read, create, update: if true;
+      allow delete: if request.auth != null && resource.data.creator_uid == request.auth.uid;
     }
 
-    // ── Data Isolation: Creator Club collections are server-accessed only ──
-    match /creators/{id} {
-      allow read, write: if false;
-    }
-
-    match /creatorTiers/{id} {
-      allow read, write: if false;
-    }
-
+    // ── 2. Public Content Collections ──
+    // Coupons: Client can check promo codes
     match /coupons/{id} {
-      allow read, write: if false;
+      allow read: if true;
+      allow write: if false;
     }
 
+    // Blog Posts: Publicly readable for SEO & Blog pages
+    match /blog/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /blogs/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Public Challenges / Leaderboards
+    match /challenges/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ── 3. Referral Tracking ──
+    // Allows client to log referral clicks anonymously
     match /referralClicks/{id} {
-      allow read, write: if false;
+      allow create: if true;
+      allow read, update, delete: if false;
     }
 
-    match /orders/{id} {
-      allow read, write: if false;
-    }
+    // ── 4. Server-Only & Admin Collections (Firebase Admin SDK Only) ──
+    // These collections are accessed exclusively via Next.js Server / API routes using Admin SDK.
+    // Client SDK access is completely blocked for security.
+    match /creators/{id} { allow read, write: if false; }
+    match /creatorTiers/{id} { allow read, write: if false; }
+    match /creatorGifts/{id} { allow read, write: if false; }
+    match /creatorApplications/{id} { allow read, write: if false; }
+    match /orders/{id} { allow read, write: if false; }
+    match /admin_payment_ledger/{id} { allow read, write: if false; }
+    match /commissions/{id} { allow read, write: if false; }
+    match /payouts/{id} { allow read, write: if false; }
+    match /crm/{id} { allow read, write: if false; }
+    match /analytics/{id} { allow read, write: if false; }
 
-    match /commissions/{id} {
-      allow read, write: if false;
-    }
-
-    match /payouts/{id} {
-      allow read, write: if false;
-    }
-
-    match /creatorGifts/{id} {
+    // ── 5. Default Catch-All Block ──
+    // Blocks unauthorized access to any unlisted collection
+    match /{document=**} {
       allow read, write: if false;
     }
   }
