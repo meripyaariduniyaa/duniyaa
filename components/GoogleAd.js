@@ -34,11 +34,16 @@ export default function GoogleAd({
     if (isExcludedRoute || !adsenseClientId || !slot) return;
 
     try {
-      if (typeof window !== 'undefined') {
+      if (
+        typeof window !== 'undefined' &&
+        adRef.current &&
+        !adRef.current.getAttribute('data-adsbygoogle-status') &&
+        adRef.current.children.length === 0
+      ) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch (err) {
-      console.warn('AdSense unit push warning:', err?.message || err);
+      // Ignore duplicate push warnings or transient AdSense errors
     }
   }, [pathname, adsenseClientId, slot, isExcludedRoute]);
 

@@ -214,7 +214,7 @@ export default function MarketingPopup() {
           }}
           onClick={() => setIsVisible(false)}
         >
-          ✨ Explore All 18+ Experiences →
+          ✨ Explore All Gift Experiences →
         </Link>
 
         {/* Social Proof Subtext */}

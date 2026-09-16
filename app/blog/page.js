@@ -269,7 +269,7 @@ export default async function BlogPage() {
             Ready to turn your feelings into a real surprise?
           </h2>
           <p style={{ fontSize: '1.05rem', color: '#9f1239', maxWidth: '580px', margin: '0 auto 24px', lineHeight: 1.6 }}>
-            Browse over 18+ interactive gift templates with photo puzzles, memory roadmaps, voice notes, and romantic animations.
+            Browse interactive gift templates with photo puzzles, memory roadmaps, voice notes, and romantic animations.
           </p>
           <Link
             href="/templates"

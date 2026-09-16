@@ -261,16 +261,42 @@ function CreatePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080810] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* ── Google Font ── */}
+    <div className="min-h-screen relative overflow-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #fff5f8 0%, #fff0f5 50%, #faf0f7 100%)' }}>
+      {/* ── Background Ambient Glows ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '-10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '600px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '-5%',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── Styles ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Dancing+Script:wght@700&display=swap');
         * { box-sizing: border-box; }
         input, textarea, select { outline: none; }
-        input:focus, textarea:focus { border-color: rgba(255,255,255,0.35) !important; }
+        input::placeholder, textarea::placeholder { color: #94a3b8; }
+        input:focus, textarea:focus { border-color: #f43f5e !important; box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12) !important; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
       `}</style>
 
       <AnimatePresence mode="wait">
@@ -318,7 +344,7 @@ function SelectScreen({ templates, onSelect }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col relative z-10"
     >
       {/* Header */}
       <div className="text-center pt-12 pb-8 px-5">
@@ -328,15 +354,17 @@ function SelectScreen({ templates, onSelect }) {
           transition={{ delay: 0.1 }}
           style={{
             display: 'inline-block',
-            fontSize: '0.72rem',
+            fontSize: '0.75rem',
             fontWeight: 800,
-            letterSpacing: '0.2em',
+            letterSpacing: '0.15em',
             textTransform: 'uppercase',
-            color: '#f43f5e',
-            background: 'rgba(244,63,94,0.12)',
-            padding: '6px 14px',
+            color: '#be185d',
+            background: 'rgba(244,63,94,0.1)',
+            border: '1px solid rgba(244,63,94,0.2)',
+            padding: '6px 16px',
             borderRadius: '999px',
             marginBottom: '1rem',
+            boxShadow: '0 4px 12px rgba(244,63,94,0.08)',
           }}
         >
           ✨ LovelyCrafts Studio
@@ -347,10 +375,14 @@ function SelectScreen({ templates, onSelect }) {
           transition={{ delay: 0.2 }}
           style={{
             fontFamily: "'Dancing Script', cursive",
-            fontSize: 'clamp(2rem, 7vw, 3rem)',
-            color: '#fff',
+            fontSize: 'clamp(2.2rem, 7vw, 3.4rem)',
+            color: '#be185d',
+            background: 'linear-gradient(135deg, #be185d 0%, #e11d48 50%, #9333ea 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
             margin: '0 0 0.75rem',
-            lineHeight: 1.2,
+            lineHeight: 1.25,
+            fontWeight: 700,
           }}
         >
           What would you like to craft?
@@ -359,7 +391,7 @@ function SelectScreen({ templates, onSelect }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          style={{ color: '#94a3b8', fontSize: '0.95rem', maxWidth: '380px', margin: '0 auto' }}
+          style={{ color: '#475569', fontSize: '0.98rem', fontWeight: 500, maxWidth: '400px', margin: '0 auto', lineHeight: 1.6 }}
         >
           Choose a moment. We'll help you turn it into something they'll never forget.
         </motion.p>
@@ -370,9 +402,9 @@ function SelectScreen({ templates, onSelect }) {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1rem',
+          gap: '1.1rem',
           padding: '0 1.25rem 5rem',
-          maxWidth: '480px',
+          maxWidth: '520px',
           margin: '0 auto',
           width: '100%',
         }}
@@ -386,8 +418,6 @@ function SelectScreen({ templates, onSelect }) {
 }
 
 function TemplateCard({ template, index, onSelect }) {
-  const [pressed, setPressed] = useState(false);
-
   return (
     <motion.button
       initial={{ opacity: 0, y: 30 }}
@@ -397,28 +427,32 @@ function TemplateCard({ template, index, onSelect }) {
       whileTap={{ scale: 0.96 }}
       onClick={() => onSelect(template.id)}
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: `1.5px solid rgba(255,255,255,0.1)`,
-        borderRadius: '20px',
-        padding: '1.5rem 1rem',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1.5px solid rgba(244, 63, 94, 0.15)',
+        borderRadius: '24px',
+        padding: '1.6rem 1rem',
         textAlign: 'center',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '0.6rem',
+        gap: '0.65rem',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: `0 0 0 0 ${template.glowColor}`,
-        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+        boxShadow: '0 10px 30px -5px rgba(225, 29, 72, 0.08), 0 4px 12px rgba(0,0,0,0.02)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = template.accentColor;
-        e.currentTarget.style.boxShadow = `0 0 30px ${template.glowColor}`;
+        e.currentTarget.style.boxShadow = `0 18px 40px -10px ${template.glowColor}`;
+        e.currentTarget.style.background = '#ffffff';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-        e.currentTarget.style.boxShadow = '0 0 0 0 transparent';
+        e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.15)';
+        e.currentTarget.style.boxShadow = '0 10px 30px -5px rgba(225, 29, 72, 0.08), 0 4px 12px rgba(0,0,0,0.02)';
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
       }}
     >
       {/* Glow blob */}
@@ -427,16 +461,16 @@ function TemplateCard({ template, index, onSelect }) {
           position: 'absolute',
           inset: 0,
           background: `radial-gradient(circle at 50% 0%, ${template.glowColor} 0%, transparent 70%)`,
-          opacity: 0.5,
+          opacity: 0.4,
           pointerEvents: 'none',
         }}
       />
-      <div style={{ fontSize: '2.5rem', lineHeight: 1 }}>{template.emoji}</div>
+      <div style={{ fontSize: '2.6rem', lineHeight: 1, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.08))' }}>{template.emoji}</div>
       <div
         style={{
-          fontSize: '0.88rem',
-          fontWeight: 700,
-          color: '#fff',
+          fontSize: '0.92rem',
+          fontWeight: 800,
+          color: '#0f172a',
           lineHeight: 1.3,
           position: 'relative',
         }}
@@ -445,7 +479,8 @@ function TemplateCard({ template, index, onSelect }) {
       </div>
       <div
         style={{
-          fontSize: '0.72rem',
+          fontSize: '0.75rem',
+          fontWeight: 600,
           color: '#64748b',
           lineHeight: 1.4,
           position: 'relative',
@@ -456,18 +491,19 @@ function TemplateCard({ template, index, onSelect }) {
       <div
         style={{
           marginTop: '0.25rem',
-          padding: '4px 10px',
+          padding: '5px 12px',
           borderRadius: '999px',
-          background: `${template.accentColor}22`,
+          background: `${template.accentColor}18`,
           color: template.accentColor,
-          fontSize: '0.68rem',
+          border: `1px solid ${template.accentColor}35`,
+          fontSize: '0.72rem',
           fontWeight: 800,
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
           position: 'relative',
         }}
       >
-        ₹219
+        ✨ Tap to craft
       </div>
     </motion.button>
   );
@@ -492,7 +528,7 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col relative z-10"
     >
       {/* Top Bar */}
       <div
@@ -502,9 +538,10 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
           zIndex: 50,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          background: 'rgba(8,8,16,0.9)',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(255, 255, 255, 0.88)',
+          borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
           padding: '0.85rem 1.25rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
         }}
       >
         <div
@@ -519,17 +556,19 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
           <button
             onClick={onBack}
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
               borderRadius: '50px',
-              padding: '7px 14px',
-              color: '#94a3b8',
+              padding: '7px 16px',
+              color: '#334155',
               fontSize: '0.85rem',
               fontWeight: 600,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s',
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -540,7 +579,7 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '1.2rem' }}>{template.emoji}</span>
-            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{template.title}</span>
+            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }}>{template.title}</span>
           </div>
         </div>
       </div>
@@ -588,15 +627,16 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
               exit={{ opacity: 0 }}
               style={{
                 marginTop: '1rem',
-                padding: '10px 14px',
-                borderRadius: '12px',
-                background: 'rgba(239,68,68,0.12)',
+                padding: '12px 16px',
+                borderRadius: '14px',
+                background: 'rgba(239,68,68,0.1)',
                 border: '1px solid rgba(239,68,68,0.3)',
-                color: '#fca5a5',
-                fontSize: '0.85rem',
+                color: '#dc2626',
+                fontSize: '0.88rem',
+                fontWeight: 600,
               }}
             >
-              {error}
+              ⚠️ {error}
             </motion.div>
           )}
         </AnimatePresence>
@@ -631,7 +671,7 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            boxShadow: `0 4px 24px ${template.glowColor}`,
+            boxShadow: `0 6px 24px ${template.glowColor}`,
           }}
         >
           {busy ? (
@@ -642,7 +682,7 @@ function WizardScreen({ template, steps, stepIndex, direction, form, setField, o
           ) : isLastStep ? (
             <>✨ Craft My Experience</>
           ) : (
-            <>Continue → </>
+            <>Continue →</>
           )}
         </motion.button>
       </div>
@@ -668,10 +708,11 @@ function StepProgressBar({ steps, currentIndex, accent }) {
           key={step.id}
           style={{
             flex: 1,
-            height: '4px',
+            height: '5px',
             borderRadius: '4px',
-            background: i <= currentIndex ? accent : 'rgba(255,255,255,0.1)',
-            transition: 'background 0.4s ease',
+            background: i <= currentIndex ? accent : 'rgba(0,0,0,0.08)',
+            boxShadow: i <= currentIndex ? `0 0 10px ${accent}60` : 'none',
+            transition: 'all 0.4s ease',
           }}
         />
       ))}
@@ -717,16 +758,16 @@ function StepContent({ stepId, templateId, form, setField, accent, setError }) {
 function StepHeader({ icon, title, subtitle }) {
   return (
     <div style={{ marginBottom: '1.5rem' }}>
-      <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>{icon}</div>
-      <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#fff', margin: '0 0 0.35rem', lineHeight: 1.2 }}>{title}</h2>
-      {subtitle && <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0, lineHeight: 1.5 }}>{subtitle}</p>}
+      <div style={{ fontSize: '2.4rem', marginBottom: '0.5rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.06))' }}>{icon}</div>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem', lineHeight: 1.25 }}>{title}</h2>
+      {subtitle && <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0, lineHeight: 1.55 }}>{subtitle}</p>}
     </div>
   );
 }
 
 function FieldLabel({ children }) {
   return (
-    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.45rem' }}>
+    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.45rem' }}>
       {children}
     </label>
   );
@@ -743,11 +784,13 @@ function TextInput({ value, onChange, placeholder, type = 'text' }) {
         width: '100%',
         padding: '13px 16px',
         borderRadius: '14px',
-        border: '1.5px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.04)',
-        color: '#fff',
+        border: '1.5px solid #cbd5e1',
+        background: '#ffffff',
+        color: '#0f172a',
         fontSize: '1rem',
-        transition: 'border-color 0.2s',
+        fontWeight: '500',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        transition: 'all 0.2s',
       }}
     />
   );
@@ -764,13 +807,15 @@ function TextArea({ value, onChange, placeholder, rows = 5 }) {
         width: '100%',
         padding: '13px 16px',
         borderRadius: '14px',
-        border: '1.5px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.04)',
-        color: '#fff',
+        border: '1.5px solid #cbd5e1',
+        background: '#ffffff',
+        color: '#0f172a',
         fontSize: '1rem',
+        fontWeight: '500',
         lineHeight: 1.7,
         resize: 'none',
-        transition: 'border-color 0.2s',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        transition: 'all 0.2s',
       }}
     />
   );
@@ -807,7 +852,7 @@ function StepPersonDetails({ templateId, form, setField, accent }) {
           </>
         )}
         {templateId === 'anniversary' && (
-          <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.82rem', color: '#64748b' }}>
+          <div style={{ padding: '14px 16px', borderRadius: '14px', background: 'rgba(255,255,255,0.8)', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#475569', fontWeight: 500, boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
             💡 You'll enter your anniversary dates in the next steps.
           </div>
         )}
@@ -821,7 +866,7 @@ function StepWhoAreThey({ form, setField, accent }) {
   return (
     <div>
       <StepHeader icon="💞" title="Who are they to you?" subtitle="This helps us personalize their experience." />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
         {RELATIONSHIP_OPTIONS.map((opt) => {
           const isSelected = form.relationshipType === opt.id;
           return (
@@ -830,23 +875,23 @@ function StepWhoAreThey({ form, setField, accent }) {
               whileTap={{ scale: 0.95 }}
               onClick={() => setField('relationshipType', opt.id)}
               style={{
-                padding: '1.1rem 0.75rem',
-                borderRadius: '16px',
-                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.1)',
-                background: isSelected ? `${accent}18` : 'rgba(255,255,255,0.03)',
-                color: isSelected ? '#fff' : '#94a3b8',
-                fontWeight: isSelected ? 700 : 500,
+                padding: '1.2rem 0.85rem',
+                borderRadius: '18px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid #e2e8f0',
+                background: isSelected ? `${accent}12` : '#ffffff',
+                color: isSelected ? '#0f172a' : '#334155',
+                fontWeight: isSelected ? 800 : 600,
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '0.4rem',
-                fontSize: '0.9rem',
-                boxShadow: isSelected ? `0 0 20px ${accent}30` : 'none',
+                fontSize: '0.92rem',
+                boxShadow: isSelected ? `0 6px 20px ${accent}25` : '0 2px 6px rgba(0,0,0,0.02)',
                 transition: 'all 0.2s',
               }}
             >
-              <span style={{ fontSize: '1.8rem' }}>{opt.emoji}</span>
+              <span style={{ fontSize: '2rem' }}>{opt.emoji}</span>
               {opt.label}
             </motion.button>
           );
@@ -861,7 +906,7 @@ function StepQuotation({ form, setField, accent }) {
   return (
     <div>
       <StepHeader icon="💬" title="A message for them" subtitle="Pick one that feels right or write your own below." />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.25rem' }}>
         {PROPOSAL_QUOTES.map((q) => {
           const isSelected = form.quotation === q;
           return (
@@ -871,14 +916,16 @@ function StepQuotation({ form, setField, accent }) {
               onClick={() => setField('quotation', isSelected ? '' : q)}
               style={{
                 textAlign: 'left',
-                padding: '12px 14px',
+                padding: '13px 16px',
                 borderRadius: '14px',
-                border: isSelected ? `1.5px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
-                background: isSelected ? `${accent}14` : 'rgba(255,255,255,0.03)',
-                color: isSelected ? '#fff' : '#94a3b8',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid #e2e8f0',
+                background: isSelected ? `${accent}12` : '#ffffff',
+                color: isSelected ? '#0f172a' : '#334155',
+                fontWeight: isSelected ? 700 : 500,
                 fontSize: '0.9rem',
                 lineHeight: 1.5,
                 cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
                 transition: 'all 0.2s',
               }}
             >
@@ -903,7 +950,7 @@ function StepCake({ form, setField, accent }) {
   return (
     <div>
       <StepHeader icon="🎂" title="Pick the perfect cake" subtitle="This is the cake we'll bake and present to them." />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         {CAKE_OPTIONS.map((cake) => {
           const isSelected = form.cakeType === cake.id;
           return (
@@ -915,22 +962,23 @@ function StepCake({ form, setField, accent }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '1rem',
-                padding: '1rem 1.1rem',
-                borderRadius: '16px',
-                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
-                background: isSelected ? `${cake.bg}` : 'rgba(255,255,255,0.02)',
+                padding: '1.1rem 1.2rem',
+                borderRadius: '18px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid #e2e8f0',
+                background: isSelected ? cake.bg : '#ffffff',
+                color: isSelected ? '#ffffff' : '#0f172a',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: isSelected ? `0 0 20px ${cake.accent}40` : 'none',
+                boxShadow: isSelected ? `0 8px 24px ${cake.accent}40` : '0 2px 6px rgba(0,0,0,0.02)',
               }}
             >
-              <span style={{ fontSize: '2.2rem' }}>{cake.emoji}</span>
+              <span style={{ fontSize: '2.4rem' }}>{cake.emoji}</span>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 700, color: isSelected ? '#fff' : '#94a3b8', fontSize: '0.95rem' }}>{cake.label}</div>
-                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{cake.desc}</div>
+                <div style={{ fontWeight: 800, color: isSelected ? '#ffffff' : '#0f172a', fontSize: '0.98rem' }}>{cake.label}</div>
+                <div style={{ fontSize: '0.8rem', color: isSelected ? 'rgba(255,255,255,0.8)' : '#64748b', marginTop: '2px' }}>{cake.desc}</div>
               </div>
               {isSelected && (
-                <div style={{ marginLeft: 'auto', color: accent, fontSize: '1.2rem' }}>✓</div>
+                <div style={{ marginLeft: 'auto', color: '#ffffff', fontSize: '1.3rem', fontWeight: 800 }}>✓</div>
               )}
             </motion.button>
           );
@@ -953,14 +1001,14 @@ function StepBalloons({ form, setField, accent }) {
       <StepHeader icon="🎈" title="Balloon pop reveals!" subtitle="Add up to 5 surprise messages — one per balloon. They'll pop and reveal your words!" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
-                width: '32px',
-                height: '32px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
-                background: [accent, '#f43f5e', '#f59e0b', '#a855f7', '#22d3ee'][i % 5] + '33',
-                border: `1.5px solid ${[accent, '#f43f5e', '#f59e0b', '#a855f7', '#22d3ee'][i % 5]}`,
+                background: [accent, '#f43f5e', '#f59e0b', '#a855f7', '#06b6d4'][i % 5] + '20',
+                border: `1.5px solid ${[accent, '#f43f5e', '#f59e0b', '#a855f7', '#06b6d4'][i % 5]}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -977,17 +1025,19 @@ function StepBalloons({ form, setField, accent }) {
               placeholder={`Message ${i + 1}... (e.g. "You light up my world")`}
               style={{
                 flex: 1,
-                padding: '11px 14px',
-                borderRadius: '12px',
-                border: '1.5px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.04)',
-                color: '#fff',
-                fontSize: '0.9rem',
+                padding: '12px 15px',
+                borderRadius: '14px',
+                border: '1.5px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '0.92rem',
+                fontWeight: 500,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
               }}
             />
           </div>
         ))}
-        <p style={{ color: '#475569', fontSize: '0.78rem', marginTop: '0.25rem' }}>
+        <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.35rem', fontWeight: 500 }}>
           💡 At least 1 message required. The rest are optional.
         </p>
       </div>
@@ -1009,7 +1059,7 @@ function StepSpecialDates({ form, setField, accent }) {
           <FieldLabel>The Day You First Met (optional)</FieldLabel>
           <TextInput value={form.firstMetDate} onChange={(v) => setField('firstMetDate', v)} placeholder="e.g. June 5, 2020..." />
         </div>
-        <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.15)', fontSize: '0.82rem', color: '#92400e' }}>
+        <div style={{ padding: '14px 16px', borderRadius: '14px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
           🥂 The experience will show a live countdown — years, months, days, hours, minutes & seconds since your anniversary.
         </div>
       </div>
@@ -1042,18 +1092,19 @@ function StepJourney({ form, setField, accent }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             style={{
-              padding: '1rem',
-              borderRadius: '14px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              padding: '1.1rem',
+              borderRadius: '16px',
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Event {i + 1}
               </span>
               {form.journey.length > 1 && (
-                <button onClick={() => removeEvent(i)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '1rem' }}>×</button>
+                <button onClick={() => removeEvent(i)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 700 }}>×</button>
               )}
             </div>
             <input
@@ -1061,14 +1112,14 @@ function StepJourney({ form, setField, accent }) {
               value={event.date}
               onChange={(e) => updateJourney(i, 'date', e.target.value)}
               placeholder="Date (e.g. March 2021)"
-              style={{ width: '100%', padding: '10px 13px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.88rem', marginBottom: '0.5rem' }}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#0f172a', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 500 }}
             />
             <input
               type="text"
               value={event.memory}
               onChange={(e) => updateJourney(i, 'memory', e.target.value)}
               placeholder="Memory (e.g. Our first road trip)"
-              style={{ width: '100%', padding: '10px 13px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.88rem' }}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#0f172a', fontSize: '0.9rem', fontWeight: 500 }}
             />
           </motion.div>
         ))}
@@ -1077,13 +1128,13 @@ function StepJourney({ form, setField, accent }) {
             onClick={addEvent}
             style={{
               width: '100%',
-              padding: '11px',
-              borderRadius: '12px',
-              border: `1.5px dashed ${accent}55`,
+              padding: '12px',
+              borderRadius: '14px',
+              border: `1.5px dashed ${accent}`,
               background: `${accent}08`,
               color: accent,
-              fontWeight: 700,
-              fontSize: '0.88rem',
+              fontWeight: 800,
+              fontSize: '0.9rem',
               cursor: 'pointer',
             }}
           >
@@ -1108,20 +1159,20 @@ function StepReasons({ form, setField, accent }) {
       <StepHeader icon="❤️" title="Why do you love them?" subtitle="5 honest reasons — these will burst out of heart balloons in the experience." />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
-                width: '30px',
-                height: '30px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
-                background: 'rgba(244,63,94,0.15)',
-                border: '1.5px solid rgba(244,63,94,0.4)',
+                background: 'rgba(244,63,94,0.12)',
+                border: '1.5px solid rgba(244,63,94,0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.85rem',
+                fontSize: '0.88rem',
                 fontWeight: 800,
-                color: '#f43f5e',
+                color: '#e11d48',
                 flexShrink: 0,
               }}
             >
@@ -1134,12 +1185,14 @@ function StepReasons({ form, setField, accent }) {
               placeholder={`Reason ${i + 1}... (e.g. "Your laugh is contagious")`}
               style={{
                 flex: 1,
-                padding: '11px 14px',
-                borderRadius: '12px',
-                border: '1.5px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.04)',
-                color: '#fff',
-                fontSize: '0.9rem',
+                padding: '12px 15px',
+                borderRadius: '14px',
+                border: '1.5px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '0.92rem',
+                fontWeight: 500,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
               }}
             />
           </div>
@@ -1154,7 +1207,7 @@ function StepWhatHappened({ form, setField, accent }) {
   return (
     <div>
       <StepHeader icon="💔" title="What happened?" subtitle="Being honest is the first step to making things right." />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         {WHAT_HAPPENED_OPTIONS.map((opt) => {
           const isSelected = form.whatHappenedType === opt.id;
           return (
@@ -1164,24 +1217,24 @@ function StepWhatHappened({ form, setField, accent }) {
               onClick={() => setField('whatHappenedType', opt.id)}
               style={{
                 textAlign: 'left',
-                padding: '1rem 1.1rem',
-                borderRadius: '16px',
-                border: isSelected ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
-                background: isSelected ? 'rgba(148,163,184,0.12)' : 'rgba(255,255,255,0.02)',
-                color: isSelected ? '#fff' : '#94a3b8',
-                fontWeight: isSelected ? 700 : 500,
+                padding: '1.1rem 1.2rem',
+                borderRadius: '18px',
+                border: isSelected ? `2px solid ${accent}` : '1.5px solid #e2e8f0',
+                background: isSelected ? `${accent}12` : '#ffffff',
+                color: isSelected ? '#0f172a' : '#334155',
+                fontWeight: isSelected ? 800 : 500,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                fontSize: '0.95rem',
+                gap: '0.85rem',
+                fontSize: '0.98rem',
                 transition: 'all 0.2s',
-                boxShadow: isSelected ? `0 0 20px ${accent}30` : 'none',
+                boxShadow: isSelected ? `0 6px 20px ${accent}20` : '0 2px 6px rgba(0,0,0,0.02)',
               }}
             >
-              <span style={{ fontSize: '1.5rem' }}>{opt.emoji}</span>
+              <span style={{ fontSize: '1.8rem' }}>{opt.emoji}</span>
               {opt.label}
-              {isSelected && <span style={{ marginLeft: 'auto', color: accent }}>✓</span>}
+              {isSelected && <span style={{ marginLeft: 'auto', color: accent, fontWeight: 800 }}>✓</span>}
             </motion.button>
           );
         })}
@@ -1207,7 +1260,7 @@ function StepMemories({ form, setField, accent, templateId }) {
         maxImages={maxPhotos}
       />
       {form.images.length === 0 && (
-        <div style={{ marginTop: '1rem', padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', color: '#475569', fontSize: '0.82rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '1rem', padding: '14px 16px', borderRadius: '14px', background: 'rgba(255,255,255,0.8)', border: '1px dashed #cbd5e1', color: '#64748b', fontSize: '0.85rem', textAlign: 'center', fontWeight: 500 }}>
           Photos are optional but they make the experience so much more personal 💫
         </div>
       )}
@@ -1240,12 +1293,12 @@ function StepLetter({ templateId, form, setField, accent }) {
           placeholder={prompts[templateId] || "Write your heartfelt message here..."}
           rows={7}
         />
-        <div style={{ textAlign: 'right', fontSize: '0.72rem', color: '#475569', marginTop: '0.35rem' }}>
+        <div style={{ textAlign: 'right', fontSize: '0.78rem', color: '#64748b', marginTop: '0.4rem', fontWeight: 600 }}>
           {charCount} characters
         </div>
       </div>
       <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <p style={{ color: '#475569', fontSize: '0.8rem', textAlign: 'center', margin: 0 }}>
+        <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', margin: 0, fontWeight: 500 }}>
           ✍️ Your exact words will be typewritten line-by-line in their experience
         </p>
       </div>
@@ -1341,7 +1394,7 @@ function CraftingScreen({ template, recipientName, noteId, router }) {
       <AnimatePresence mode="wait">
         {phase === 0 && (
           <motion.p key="p0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ color: '#475569', fontSize: '1rem', textAlign: 'center' }}>
+            style={{ color: '#94a3b8', fontSize: '1rem', textAlign: 'center' }}>
             Preparing...
           </motion.p>
         )}
@@ -1349,10 +1402,10 @@ function CraftingScreen({ template, recipientName, noteId, router }) {
           <motion.div key="p1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             style={{ textAlign: 'center', padding: '0 2rem' }}>
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Crafting something beautiful</p>
-            <h2 style={{ fontFamily: "'Dancing Script', cursive", fontSize: '2rem', color: '#fff', margin: '0 0 0.5rem' }}>
+            <h2 style={{ fontFamily: "'Dancing Script', cursive", fontSize: '2.2rem', color: '#fff', margin: '0 0 0.5rem' }}>
               For {recipientName || 'them'}...
             </h2>
-            <p style={{ color: '#475569', fontSize: '0.88rem' }}>{template.title}</p>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem' }}>{template.title}</p>
           </motion.div>
         )}
         {phase === 2 && (
@@ -1368,7 +1421,7 @@ function CraftingScreen({ template, recipientName, noteId, router }) {
             <h2 style={{ color: '#fff', fontWeight: 800, fontSize: '1.3rem', marginBottom: '0.4rem' }}>
               Experience Ready!
             </h2>
-            <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Opening your private preview...</p>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem' }}>Opening your private preview...</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1385,3 +1438,4 @@ function CraftingScreen({ template, recipientName, noteId, router }) {
     </motion.div>
   );
 }
+

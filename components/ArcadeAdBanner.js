@@ -18,7 +18,11 @@ export default function ArcadeAdBanner({ slot = process.env.NEXT_PUBLIC_ADSENSE_
     if (!adsenseClientId || typeof window === 'undefined') return;
 
     try {
-      if (adRef.current && !adRef.current.getAttribute('data-adsbygoogle-status')) {
+      if (
+        adRef.current &&
+        !adRef.current.getAttribute('data-adsbygoogle-status') &&
+        adRef.current.children.length === 0
+      ) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch {

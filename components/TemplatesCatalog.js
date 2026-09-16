@@ -76,11 +76,7 @@ export default function TemplatesCatalog({ templates }) {
                   {template.features.map((feature) => <li key={feature}>{feature}</li>)}
                 </ul>
                 <div className="template-card-footer">
-                  <div>
-                    <span className="template-price">From ₹{template.price}</span>
-                    <span className="template-price-old">₹{template.basePrice}</span>
-                  </div>
-                  <div className="template-card-actions">
+                  <div className="template-card-actions" style={{ width: '100%', justifyContent: 'flex-end', gap: '0.5rem' }}>
                     <PreviewDemoButton
                       templateId={template.id}
                       className="btn-secondary"

@@ -26,7 +26,7 @@ export default function Footer() {
   return (
     <footer className="site-footer" id="site-footer">
       <div className="footer-container">
-        
+
         {/* Top Mini Promo Ribbon */}
         <div className="footer-promo-card">
           <div className="footer-promo-left">
@@ -41,7 +41,7 @@ export default function Footer() {
 
         {/* Main Footer Grid */}
         <div className="footer-grid">
-          
+
           {/* Brand Column */}
           <div className="footer-col-brand">
             <div style={{ marginBottom: '14px' }}>
@@ -107,8 +107,7 @@ export default function Footer() {
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-list">
               <li><Link href="/blog">📝 Blog &amp; Gift Guides</Link></li>
-              <li><Link href="/templates">All 18+ Gift Templates</Link></li>
-              <li><Link href="/#feelings">Filter by Mood</Link></li>
+              <li><Link href="/templates">All Gift Templates</Link></li>
               <li><Link href="/arcade/heart-rush">⚡ Heart Rush Game</Link></li>
               <li><Link href="/arcade/memory-match">🃏 Memory Match Duel</Link></li>
               <li><Link href="/profile">My Sent Surprises</Link></li>

@@ -52,12 +52,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="nav-links desktop-nav">
-            <Link
-              href="/#feelings"
-              className={`nav-link ${pathname === '/#feelings' ? 'active' : ''}`}
-            >
-              💖 Feelings
-            </Link>
+
 
             <Link
               href="/templates"
@@ -152,17 +147,7 @@ export default function Header() {
         </div>
 
         <div className="mobile-drawer-links">
-          <Link
-            href="/#feelings"
-            className="mobile-nav-item"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <span className="mobile-nav-icon">💖</span>
-            <div>
-              <strong>Find by Feeling</strong>
-              <small>Browse gifts based on your emotion</small>
-            </div>
-          </Link>
+
 
           <Link
             href="/templates"
@@ -172,7 +157,7 @@ export default function Header() {
             <span className="mobile-nav-icon">🎁</span>
             <div>
               <strong>All Gift Experiences</strong>
-              <small>Explore all 18+ interactive templates</small>
+              <small>Explore all interactive templates</small>
             </div>
           </Link>
 

@@ -274,7 +274,7 @@ export default function PublicCreatorPage() {
               </h2>
             </div>
             <Link href="/templates" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none', fontSize: '0.92rem' }}>
-              View All 18+ Gifts →
+              View All Gifts →
             </Link>
           </div>
 
