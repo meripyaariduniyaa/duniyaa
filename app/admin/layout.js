@@ -23,20 +23,22 @@ import {
   LogOutIcon,
   MenuIcon,
   CloseIcon,
-  ExternalLinkIcon
+  ExternalLinkIcon,
+  FinanceIcon
 } from '@/components/admin/AdminIcons';
 
 const NAV_ITEMS = [
-  { href: '/admin/dashboard', label: 'Executive Overview', icon: DashboardIcon, exact: true },
-  { href: '/admin/orders', label: 'Orders Ledger', icon: OrdersIcon },
-  { href: '/admin/crm', label: 'Creator CRM', icon: CrmIcon },
+  { href: '/admin/dashboard', label: 'Overview', icon: DashboardIcon, exact: true },
+  { href: '/admin/finance', label: 'Finance & Invoices', icon: FinanceIcon },
+  { href: '/admin/orders', label: 'Orders', icon: OrdersIcon },
+  { href: '/admin/crm', label: 'CRM', icon: CrmIcon },
   { href: '/admin/creators', label: 'Creators', icon: CreatorsIcon },
-  { href: '/admin/coupons', label: 'Coupons & Promo', icon: CouponsIcon },
+  { href: '/admin/coupons', label: 'Coupons', icon: CouponsIcon },
   { href: '/admin/commissions', label: 'Commissions', icon: CommissionsIcon },
-  { href: '/admin/payouts', label: 'Payout Batches', icon: PayoutsIcon },
-  { href: '/admin/creator-gifts', label: 'VIP Gift Passes', icon: GiftsIcon },
-  { href: '/admin/blog', label: 'Blog CMS', icon: BlogIcon },
-  { href: '/admin/reports', label: 'Excel Reports Hub', icon: ReportsIcon },
+  { href: '/admin/payouts', label: 'Payouts', icon: PayoutsIcon },
+  { href: '/admin/creator-gifts', label: 'VIP Gifts', icon: GiftsIcon },
+  { href: '/admin/blog', label: 'Blog', icon: BlogIcon },
+  { href: '/admin/reports', label: 'Reports', icon: ReportsIcon },
 ];
 
 export default function AdminLayout({ children }) {
@@ -327,12 +329,13 @@ export default function AdminLayout({ children }) {
           <div style={{
             maxWidth: '1920px',
             margin: '0 auto',
-            padding: '0 24px',
+            padding: '0 16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            height: '46px',
-            minWidth: 'max-content',
+            gap: '3px',
+            height: '42px',
+            width: '100%',
+            justifyContent: 'flex-start',
           }}>
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -347,10 +350,10 @@ export default function AdminLayout({ children }) {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '0.82rem',
+                    gap: '6px',
+                    padding: '5px 9px',
+                    borderRadius: '7px',
+                    fontSize: '0.78rem',
                     fontWeight: active ? 700 : 500,
                     textDecoration: 'none',
                     color: active ? '#ffffff' : '#94a3b8',
@@ -358,10 +361,11 @@ export default function AdminLayout({ children }) {
                     border: active ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
                     transition: 'all 0.15s ease',
                     whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
                   <span style={{ color: active ? '#38bdf8' : '#64748b', display: 'flex', alignItems: 'center' }}>
-                    <Icon size={16} />
+                    <Icon size={14} />
                   </span>
                   <span>{item.label}</span>
                 </Link>
@@ -423,10 +427,10 @@ export default function AdminLayout({ children }) {
         width: '100%',
         maxWidth: '1920px',
         margin: '0 auto',
-        paddingTop: '138px',
+        paddingTop: '120px',
         paddingBottom: '80px',
-        paddingLeft: '32px',
-        paddingRight: '32px',
+        paddingLeft: '24px',
+        paddingRight: '24px',
         boxSizing: 'border-box',
       }} className="admin-content-area">
         {children}

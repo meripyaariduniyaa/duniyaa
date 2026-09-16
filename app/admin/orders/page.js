@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { exportToExcel } from '@/lib/excel-export';
 import {
@@ -13,7 +14,8 @@ import {
   SearchIcon,
   CopyIcon,
   CheckIcon,
-  FilterIcon
+  FilterIcon,
+  InvoiceIcon
 } from '@/components/admin/AdminIcons';
 
 export default function AdminOrdersPage() {
@@ -109,30 +111,52 @@ export default function AdminOrdersPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleExportExcel}
-          disabled={loading || filteredOrders.length === 0}
-          style={{
-            background: '#0f172a',
-            color: '#ffffff',
-            border: 'none',
-            padding: '10px 18px',
-            borderRadius: '10px',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            cursor: loading || filteredOrders.length === 0 ? 'not-allowed' : 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
-            opacity: loading || filteredOrders.length === 0 ? 0.6 : 1,
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <DownloadIcon size={16} />
-          <span>Export Excel (.xlsx)</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <Link
+            href="/admin/finance"
+            style={{
+              background: '#ec4899',
+              color: '#ffffff',
+              padding: '10px 18px',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(236, 72, 153, 0.25)',
+            }}
+          >
+            <InvoiceIcon size={16} />
+            <span>Finance & Invoicing</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || filteredOrders.length === 0}
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '10px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: loading || filteredOrders.length === 0 ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+              opacity: loading || filteredOrders.length === 0 ? 0.6 : 1,
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <DownloadIcon size={16} />
+            <span>Export Excel (.xlsx)</span>
+          </button>
+        </div>
       </div>
 
       {/* REVENUE METRIC TILES */}
@@ -316,12 +340,13 @@ export default function AdminOrdersPage() {
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Net Take-Home</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Coupon</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Invoice</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={9} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
                       <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>No matching orders found</div>
                       <div style={{ fontSize: '0.8rem' }}>Try adjusting your search query or filter selection.</div>
                     </td>
@@ -442,6 +467,30 @@ export default function AdminOrdersPage() {
                             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: o.payment_status === 'paid' ? '#22c55e' : '#ef4444' }} />
                             <span style={{ textTransform: 'capitalize' }}>{o.payment_status || 'paid'}</span>
                           </span>
+                        </td>
+
+                        {/* INVOICE ACTION */}
+                        <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                          <Link
+                            href={`/admin/finance?orderId=${encodeURIComponent(o.id || o.note_id)}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              background: '#fdf2f8',
+                              border: '1px solid #fbcfe8',
+                              color: '#db2777',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <InvoiceIcon size={13} />
+                            <span>Invoice</span>
+                          </Link>
                         </td>
 
                       </tr>
