@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 
+import { ambientSynth } from '@/lib/audioPresets';
+
 /* ─────────────────────────────────────────────────────────
    PROPOSAL EXPERIENCE
    Scenes:
@@ -14,11 +16,35 @@ import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 ───────────────────────────────────────────────────────── */
 export default function ProposalExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
   const recipientName = note?.recipient_name || 'My Love';
   const senderName = note?.custom_details?.sender_name || '';
   const quotation = note?.custom_details?.quotation || '';
   const letter = note?.custom_details?.letter || note?.custom_message || '';
   const photos = note?.image_urls || [];
+
+  useEffect(() => {
+    if (scene === 5) {
+      onReachEnd?.(true, () => setScene(1));
+    }
+  }, [scene, onReachEnd]);
+
+  const toggleAudio = () => {
+    if (isAudioPlaying) {
+      ambientSynth.stop();
+      setIsAudioPlaying(false);
+    } else {
+      ambientSynth.play('romantic-piano');
+      setIsAudioPlaying(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      ambientSynth.stop();
+    };
+  }, []);
 
   return (
     <div style={{ background: '#0a0510', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
@@ -31,12 +57,37 @@ export default function ProposalExperience({ note, isPreview = false, onReachEnd
         @keyframes typewriter-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
       `}</style>
 
+      {/* Floating Audio Toggle */}
+      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
+        <button
+          onClick={toggleAudio}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: isAudioPlaying ? 'rgba(244, 63, 94, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+            border: `1px solid ${isAudioPlaying ? 'rgba(244, 63, 94, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
+            backdropFilter: 'blur(12px)',
+            color: isAudioPlaying ? '#fda4af' : '#cbd5e1',
+            borderRadius: '999px',
+            padding: '7px 14px',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
+        </button>
+      </div>
+
       <AnimatePresence mode="wait">
         {scene === 1 && <Scene1YesNo key="s1" recipientName={recipientName} senderName={senderName} quotation={quotation} onYes={() => setScene(2)} />}
         {scene === 2 && <Scene2Confetti key="s2" recipientName={recipientName} onNext={() => setScene(3)} />}
         {scene === 3 && <Scene3Envelope key="s3" onOpen={() => setScene(4)} />}
         {scene === 4 && <Scene4Letter key="s4" letter={letter} senderName={senderName} recipientName={recipientName} onNext={() => setScene(5)} photos={photos} />}
-        {scene === 5 && <Scene5Photos key="s5" photos={photos} recipientName={recipientName} onEnd={onReachEnd} />}
+        {scene === 5 && <Scene5Photos key="s5" photos={photos} recipientName={recipientName} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
       </AnimatePresence>
     </div>
   );
@@ -50,18 +101,27 @@ function Scene1YesNo({ recipientName, senderName, quotation, onYes }) {
   const [noClickCount, setNoClickCount] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  // After 3 failed NOs, show a hint
+  const evadePhrases = [
+    'No 😅',
+    'Wait, what? 🥺',
+    'Are you sure? 💔',
+    'Wrong button! 😂',
+    'Try clicking YES! 💕',
+    "Can't catch me! 😜",
+  ];
+
+  // After 2 failed NOs, show a hint
   useEffect(() => {
-    if (noClickCount >= 3) setShowHint(true);
+    if (noClickCount >= 2) setShowHint(true);
   }, [noClickCount]);
 
   const flyNo = useCallback(() => {
     setNoClickCount((c) => c + 1);
-    const maxX = typeof window !== 'undefined' ? window.innerWidth - 120 : 200;
-    const maxY = typeof window !== 'undefined' ? window.innerHeight - 80 : 200;
+    const maxX = typeof window !== 'undefined' ? Math.min(window.innerWidth * 0.35, 140) : 120;
+    const maxY = typeof window !== 'undefined' ? Math.min(window.innerHeight * 0.25, 120) : 100;
     setNoPos({
-      x: Math.floor(Math.random() * maxX - maxX / 2),
-      y: Math.floor(Math.random() * maxY - maxY / 2),
+      x: (Math.random() - 0.5) * maxX * 2,
+      y: (Math.random() - 0.5) * maxY * 2,
     });
   }, []);
 
@@ -69,6 +129,9 @@ function Scene1YesNo({ recipientName, senderName, quotation, onYes }) {
     id: i, x: `${(i * 41) % 100}%`, y: `${(i * 67) % 100}%`, delay: `${(i * 0.3).toFixed(1)}s`,
     color: ['#f43f5e', '#fb7185', '#fecdd3', '#fff'][i % 4],
   }));
+
+  const currentNoText = evadePhrases[Math.min(noClickCount, evadePhrases.length - 1)];
+  const yesScale = 1 + Math.min(noClickCount * 0.08, 0.4);
 
   return (
     <motion.div
@@ -107,28 +170,55 @@ function Scene1YesNo({ recipientName, senderName, quotation, onYes }) {
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', position: 'relative', minHeight: '80px' }}>
           {/* YES */}
           <motion.button
-            whileHover={{ scale: 1.08, boxShadow: '0 0 30px rgba(244,63,94,0.6)' }}
-            whileTap={{ scale: 0.93 }}
+            animate={{ scale: yesScale }}
+            whileHover={{ scale: yesScale * 1.08, boxShadow: '0 0 35px rgba(244,63,94,0.7)' }}
+            whileTap={{ scale: yesScale * 0.93 }}
             onClick={onYes}
-            style={{ padding: '16px 40px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1.15rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(244,63,94,0.4)' }}
+            style={{
+              padding: '16px 40px',
+              borderRadius: '50px',
+              background: 'linear-gradient(135deg,#f43f5e,#be123c)',
+              border: 'none',
+              color: '#fff',
+              fontSize: '1.15rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(244,63,94,0.4)',
+              zIndex: 10,
+              transition: 'transform 0.2s ease',
+            }}
           >
             Yes! 💕
           </motion.button>
 
-          {/* NO — flies away */}
+          {/* NO — flies away on hover / touch / click */}
           <motion.button
             animate={{ x: noPos.x, y: noPos.y }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            onMouseEnter={flyNo}
+            onTouchStart={flyNo}
             onClick={flyNo}
-            style={{ padding: '14px 28px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#94a3b8', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', position: noClickCount > 0 ? 'absolute' : 'relative' }}
+            style={{
+              padding: '14px 28px',
+              borderRadius: '50px',
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: '#94a3b8',
+              fontSize: '1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              position: noClickCount > 0 ? 'absolute' : 'relative',
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+            }}
           >
-            No 😅
+            {currentNoText}
           </motion.button>
         </div>
 
         {showHint && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '1rem' }}>
-            😉 There's only one right answer here...
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#fda4af', fontSize: '0.82rem', marginTop: '1.25rem', fontStyle: 'italic' }}>
+            😉 There's only one right answer here... 💕
           </motion.p>
         )}
       </motion.div>

@@ -180,7 +180,7 @@ export default async function TemplateDetailPage({ params }) {
           <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid rgba(0,0,0,0.06)' }}>
             <h2 style={{ fontSize: '1.2rem', marginBottom: '0.75rem', color: '#e11d48' }}>📝 What You&apos;ll Need</h2>
             <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.95rem', color: '#444', lineHeight: 1.7 }}>
-              {template.detailsNeeded.map((detail, i) => (
+              {(template.detailsNeeded || template.steps?.map((s) => s.label) || []).map((detail, i) => (
                 <li key={i}>{detail}</li>
               ))}
             </ul>

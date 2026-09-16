@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { ambientSynth } from '@/lib/audioPresets';
+
 /* ─────────────────────────────────────────────────────────
    BIRTHDAY EXPERIENCE
    Scenes:
@@ -19,6 +21,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 ───────────────────────────────────────────────────────── */
 export default function BirthdayExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
   const name = note?.recipient_name || 'Birthday Star';
   const senderName = note?.custom_details?.sender_name || '';
   const turningAge = note?.custom_details?.turning_age || '';
@@ -27,10 +31,34 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
   const letter = note?.custom_details?.letter || note?.custom_message || '';
   const photos = note?.image_urls || [];
 
+  const finalSceneIndex = photos.length > 0 ? 11 : 10;
+
+  useEffect(() => {
+    if (scene === finalSceneIndex) {
+      onReachEnd?.(true, () => setScene(1));
+    }
+  }, [scene, finalSceneIndex, onReachEnd]);
+
+  const toggleAudio = () => {
+    if (isAudioPlaying) {
+      ambientSynth.stop();
+      setIsAudioPlaying(false);
+    } else {
+      ambientSynth.play('birthday-joy');
+      setIsAudioPlaying(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      ambientSynth.stop();
+    };
+  }, []);
+
   const goNext = () => setScene((s) => s + 1);
 
   return (
-    <div style={{ background: '#080810', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
+    <div style={{ background: '#080810', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Dancing+Script:wght@600;700&family=Caveat:wght@500;700&display=swap');
         @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
@@ -40,6 +68,31 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
         @keyframes typewriter-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes leaf-fall { 0%{transform:translateY(-20px) rotate(0) scale(0.5);opacity:0} 20%{opacity:1} 100%{transform:translateY(100vh) rotate(360deg) scale(0.8);opacity:0} }
       `}</style>
+
+      {/* Floating Audio Toggle */}
+      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
+        <button
+          onClick={toggleAudio}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: isAudioPlaying ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+            border: `1px solid ${isAudioPlaying ? 'rgba(245, 158, 11, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
+            backdropFilter: 'blur(12px)',
+            color: isAudioPlaying ? '#fde68a' : '#cbd5e1',
+            borderRadius: '999px',
+            padding: '7px 14px',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
+        </button>
+      </div>
 
       <AnimatePresence mode="wait">
         {scene === 1 && <SceneSplash key="s1" name={name} onNext={goNext} />}
@@ -54,8 +107,8 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
         {scene === 9 && photos.length > 0 && <SceneEnvelope key="s9" onOpen={goNext} />}
         {scene === 9 && photos.length === 0 && <SceneLetter key="s9b" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
         {scene === 10 && photos.length > 0 && <SceneLetter key="s10" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
-        {scene === 10 && photos.length === 0 && <SceneFinal key="s10b" name={name} turningAge={turningAge} onEnd={onReachEnd} />}
-        {scene === 11 && <SceneFinal key="s11" name={name} turningAge={turningAge} onEnd={onReachEnd} />}
+        {scene === 10 && photos.length === 0 && <SceneFinal key="s10b" name={name} turningAge={turningAge} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
+        {scene === 11 && <SceneFinal key="s11" name={name} turningAge={turningAge} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
       </AnimatePresence>
     </div>
   );

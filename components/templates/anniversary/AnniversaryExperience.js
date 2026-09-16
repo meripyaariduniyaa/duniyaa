@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { ambientSynth } from '@/lib/audioPresets';
+
 /* ─────────────────────────────────────────────────────────
    ANNIVERSARY EXPERIENCE
    Scenes:
@@ -16,6 +18,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 ───────────────────────────────────────────────────────── */
 export default function AnniversaryExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
   const name = note?.recipient_name || 'My Love';
   const senderName = note?.custom_details?.sender_name || '';
   const anniversaryDateStr = note?.custom_details?.anniversary_date || '';
@@ -25,10 +29,32 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
   const letter = note?.custom_details?.letter || note?.custom_message || '';
   const photos = note?.image_urls || [];
 
+  useEffect(() => {
+    if (scene === 8) {
+      onReachEnd?.(true, () => setScene(1));
+    }
+  }, [scene, onReachEnd]);
+
+  const toggleAudio = () => {
+    if (isAudioPlaying) {
+      ambientSynth.stop();
+      setIsAudioPlaying(false);
+    } else {
+      ambientSynth.play('romantic-piano');
+      setIsAudioPlaying(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      ambientSynth.stop();
+    };
+  }, []);
+
   const goNext = () => setScene((s) => s + 1);
 
   return (
-    <div style={{ background: '#080810', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
+    <div style={{ background: '#080810', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Dancing+Script:wght@600;700&family=Caveat:wght@500;700&display=swap');
         @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
@@ -38,6 +64,31 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
         @keyframes champagne-bubble { 0%{transform:translateY(0);opacity:0.6} 100%{transform:translateY(-60px);opacity:0} }
       `}</style>
 
+      {/* Floating Audio Toggle */}
+      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
+        <button
+          onClick={toggleAudio}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: isAudioPlaying ? 'rgba(251, 191, 36, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+            border: `1px solid ${isAudioPlaying ? 'rgba(251, 191, 36, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
+            backdropFilter: 'blur(12px)',
+            color: isAudioPlaying ? '#fde68a' : '#cbd5e1',
+            borderRadius: '999px',
+            padding: '7px 14px',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
+        </button>
+      </div>
+
       <AnimatePresence mode="wait">
         {scene === 1 && <SceneCelebration key="s1" name={name} onNext={goNext} />}
         {scene === 2 && <SceneTimer key="s2" anniversaryDateStr={anniversaryDateStr} firstMetDateStr={firstMetDateStr} name={name} onNext={goNext} />}
@@ -46,7 +97,7 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
         {scene === 5 && <SceneChampagne key="s5" name={name} senderName={senderName} onNext={goNext} />}
         {scene === 6 && <SceneEnvelope key="s6" onOpen={goNext} />}
         {scene === 7 && <SceneLetter key="s7" letter={letter} name={name} senderName={senderName} onNext={goNext} />}
-        {scene === 8 && <SceneLoveMeter key="s8" name={name} onEnd={onReachEnd} />}
+        {scene === 8 && <SceneLoveMeter key="s8" name={name} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
       </AnimatePresence>
     </div>
   );
@@ -154,9 +205,8 @@ function SceneTimer({ anniversaryDateStr, firstMetDateStr, name, onNext }) {
             ))}
           </div>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-            style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.88rem', fontStyle: 'italic', marginBottom: '2rem' }}>
-            <span style={{ color: '#fbbf24', fontWeight: 700 }}>{elapsed.totalDays?.toLocaleString()}</span> days together<br />
-            <span style={{ color: '#64748b', fontSize: '0.78rem' }}>and counting... 🥂</span>
+            style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '2rem' }}>
+            <span style={{ color: '#fbbf24', fontWeight: 700 }}>{elapsed.totalDays?.toLocaleString()} days together</span>, the <span style={{ color: '#fde68a', fontWeight: 700 }}>{elapsed.months + elapsed.years * 12}th month</span> and counting... 🥂
           </motion.div>
         </>
       ) : (
