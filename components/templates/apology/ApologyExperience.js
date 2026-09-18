@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ambientSynth } from '@/lib/audioPresets';
+
 
 /* ─────────────────────────────────────────────────────────
    APOLOGY EXPERIENCE ("I'm Sorry")
@@ -14,7 +14,7 @@ import { ambientSynth } from '@/lib/audioPresets';
 ───────────────────────────────────────────────────────── */
 export default function ApologyExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
 
   const recipientName = note?.recipient_name || 'My Love';
   const senderName = note?.custom_details?.sender_name || '';
@@ -29,22 +29,7 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
     }
   }, [scene, onReachEnd]);
 
-  // Audio toggle helper
-  const toggleAudio = () => {
-    if (isAudioPlaying) {
-      ambientSynth.stop();
-      setIsAudioPlaying(false);
-    } else {
-      ambientSynth.play('sincere-acoustic');
-      setIsAudioPlaying(true);
-    }
-  };
 
-  useEffect(() => {
-    return () => {
-      ambientSynth.stop();
-    };
-  }, []);
 
   const goNext = () => setScene((s) => s + 1);
 

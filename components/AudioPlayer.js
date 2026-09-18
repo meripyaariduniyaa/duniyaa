@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { ambientSynth, AUDIO_PRESETS } from '@/lib/audioPresets';
 
 export default function AudioPlayer({ presetId = 'romantic-piano', autoStart = false }) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentPreset, setCurrentPreset] = useState(presetId || 'romantic-piano');
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {

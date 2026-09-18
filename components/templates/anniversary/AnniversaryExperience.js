@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { ambientSynth } from '@/lib/audioPresets';
+
 
 /* ─────────────────────────────────────────────────────────
    ANNIVERSARY EXPERIENCE
@@ -18,7 +18,7 @@ import { ambientSynth } from '@/lib/audioPresets';
 ───────────────────────────────────────────────────────── */
 export default function AnniversaryExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
 
   const name = note?.recipient_name || 'My Love';
   const senderName = note?.custom_details?.sender_name || '';
@@ -35,21 +35,7 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
     }
   }, [scene, onReachEnd]);
 
-  const toggleAudio = () => {
-    if (isAudioPlaying) {
-      ambientSynth.stop();
-      setIsAudioPlaying(false);
-    } else {
-      ambientSynth.play('romantic-piano');
-      setIsAudioPlaying(true);
-    }
-  };
 
-  useEffect(() => {
-    return () => {
-      ambientSynth.stop();
-    };
-  }, []);
 
   const goNext = () => setScene((s) => s + 1);
 
@@ -64,30 +50,7 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
         @keyframes champagne-bubble { 0%{transform:translateY(0);opacity:0.6} 100%{transform:translateY(-60px);opacity:0} }
       `}</style>
 
-      {/* Floating Audio Toggle */}
-      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
-        <button
-          onClick={toggleAudio}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: isAudioPlaying ? 'rgba(251, 191, 36, 0.25)' : 'rgba(255, 255, 255, 0.08)',
-            border: `1px solid ${isAudioPlaying ? 'rgba(251, 191, 36, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
-            backdropFilter: 'blur(12px)',
-            color: isAudioPlaying ? '#fde68a' : '#cbd5e1',
-            borderRadius: '999px',
-            padding: '7px 14px',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
-          }}
-        >
-          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
-        </button>
-      </div>
+
 
       <AnimatePresence mode="wait">
         {scene === 1 && <SceneCelebration key="s1" name={name} onNext={goNext} />}

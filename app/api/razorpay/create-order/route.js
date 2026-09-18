@@ -13,9 +13,8 @@ export async function POST(request) {
     if (!snap.exists) return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
 
     const raw = snap.data();
-    const customLinkSurcharge = raw.custom_slug ? 2900 : 0; // ₹29 for custom links
     const baseAmount = 21900; // ₹219 base note price
-    const totalAmount = baseAmount + customLinkSurcharge;
+    const totalAmount = baseAmount;
     const templateId = raw.template || null;
 
     // Check referral cookie from request
@@ -60,7 +59,7 @@ export async function POST(request) {
           couponId: appliedCoupon.id || null,
           creatorId: attributedCreatorId,
           attributionSource,
-          message: `${appliedCoupon.label || '100% Coupon applied'}! Entire order (including custom link) is unlocked for free.`
+          message: `${appliedCoupon.label || '100% Coupon applied'}! Entire order is unlocked for free.`
         });
       }
 

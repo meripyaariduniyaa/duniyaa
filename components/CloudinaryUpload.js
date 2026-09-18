@@ -2,15 +2,25 @@
 
 import { useState, useRef } from 'react';
 
-export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount = 0 }) {
+export default function CloudinaryUpload({
+  onUpload,
+  maxPhotos = 6,
+  currentCount = 0,
+  images,
+  setImages,
+  maxImages,
+}) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  
+
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'vkcgnlm1';
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'apology_images';
+
+  const effectiveMax = maxImages ?? maxPhotos;
+  const effectiveCount = Array.isArray(images) ? images.length : currentCount;
 
   const handleFiles = async (fileList) => {
     if (!fileList || fileList.length === 0) return;
@@ -18,6 +28,7 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
     setUploadError('');
 
     const files = Array.from(fileList);
+    let workingImages = Array.isArray(images) ? [...images] : [];
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
@@ -42,7 +53,13 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
 
         const data = await res.json();
         if (data?.secure_url) {
-          onUpload(data.secure_url);
+          workingImages.push(data.secure_url);
+          if (typeof onUpload === 'function') {
+            onUpload(data.secure_url);
+          }
+          if (typeof setImages === 'function') {
+            setImages([...workingImages]);
+          }
         } else {
           setUploadError(data?.error?.message || 'Failed to upload photo.');
         }
@@ -55,6 +72,14 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
     setUploading(false);
     if (cameraInputRef.current) cameraInputRef.current.value = '';
     if (galleryInputRef.current) galleryInputRef.current.value = '';
+  };
+
+  const handleRemove = (indexToRemove) => {
+    if (typeof setImages === 'function') {
+      const currentList = Array.isArray(images) ? images : [];
+      const nextList = currentList.filter((_, i) => i !== indexToRemove);
+      setImages(nextList);
+    }
   };
 
   return (
@@ -81,7 +106,7 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
       <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
         <button
           type="button"
-          disabled={uploading || currentCount >= maxPhotos}
+          disabled={uploading || effectiveCount >= effectiveMax}
           onClick={() => cameraInputRef.current?.click()}
           style={{
             flex: 1,
@@ -97,8 +122,8 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
-            cursor: uploading || currentCount >= maxPhotos ? 'not-allowed' : 'pointer',
-            opacity: uploading || currentCount >= maxPhotos ? 0.6 : 1,
+            cursor: uploading || effectiveCount >= effectiveMax ? 'not-allowed' : 'pointer',
+            opacity: uploading || effectiveCount >= effectiveMax ? 0.6 : 1,
             transition: 'all 0.2s ease',
           }}
         >
@@ -108,7 +133,7 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
 
         <button
           type="button"
-          disabled={uploading || currentCount >= maxPhotos}
+          disabled={uploading || effectiveCount >= effectiveMax}
           onClick={() => galleryInputRef.current?.click()}
           style={{
             flex: 1,
@@ -124,8 +149,8 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
-            cursor: uploading || currentCount >= maxPhotos ? 'not-allowed' : 'pointer',
-            opacity: uploading || currentCount >= maxPhotos ? 0.6 : 1,
+            cursor: uploading || effectiveCount >= effectiveMax ? 'not-allowed' : 'pointer',
+            opacity: uploading || effectiveCount >= effectiveMax ? 0.6 : 1,
             transition: 'all 0.2s ease',
           }}
         >
@@ -145,6 +170,48 @@ export default function CloudinaryUpload({ onUpload, maxPhotos = 6, currentCount
         <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0, fontWeight: 500 }}>
           ⚠️ {uploadError}
         </p>
+      )}
+
+      {/* Render Image Thumbnails if images array is provided */}
+      {Array.isArray(images) && images.length > 0 && (
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+          {images.map((url, index) => (
+            <div key={`${url}-${index}`} style={{ position: 'relative', width: 68, height: 68 }}>
+              <img
+                src={url}
+                alt={`Uploaded memory ${index + 1}`}
+                style={{ width: '100%', height: '100%', borderRadius: 10, objectFit: 'cover', border: '1px solid #e2e8f0' }}
+              />
+              {typeof setImages === 'function' && (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                    color: '#fff',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  }}
+                  title="Remove photo"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

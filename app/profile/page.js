@@ -204,7 +204,7 @@ export default function ProfilePage() {
         ) : (
           <div className="notes-grid">
             {notes.map(note => {
-              const shareSlug = note.custom_slug || note.id;
+              const shareSlug = note.id;
               const url = typeof window !== 'undefined' ? `${window.location.origin}/p/${shareSlug}` : '';
 
               return (
@@ -242,12 +242,6 @@ export default function ProfilePage() {
                         </div>
                       )}
                     </div>
-                  )}
-
-                  {note.custom_slug && (
-                    <p style={{ fontSize: '0.75rem', color: '#db2777', fontWeight: 600, marginBottom: '0.5rem', wordBreak: 'break-all' }}>
-                      🔗 /p/{note.custom_slug}
-                    </p>
                   )}
 
                   <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

@@ -76,8 +76,6 @@ export default function RecipientExperienceWrapper({ note }) {
 
   return (
     <div className="recipient-experience-container">
-      {/* Background Audio Player with smooth soundscape */}
-      <AudioPlayer presetId={musicPreset} autoStart={true} />
 
       {/* Voice Note Player Pill if recorded */}
       {note?.voice_note_url && (

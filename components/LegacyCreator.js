@@ -236,7 +236,7 @@ export default function LegacyCreator({ templateId }) {
         custom_details: customDetailsData,
         is_paid: false,
         template: template.id,
-        custom_slug: customSlug && customSlug.length >= 3 ? customSlug : null,
+        custom_slug: null,
         created_at: serverTimestamp(),
         expires_at: null
       });
@@ -326,23 +326,7 @@ export default function LegacyCreator({ templateId }) {
         existingUrl={voiceNoteUrl}
       />
 
-      {/* Custom Link Section */}
-      <div className="form-group" style={{ background: '#fdf2f8', padding: '14px', borderRadius: '14px', border: '1px solid #fbcfe8' }}>
-        <label className="form-label" style={{ color: '#881337', marginBottom: '6px' }}>🔗 Personalize Custom Link (Optional)</label>
-        <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #f9a8d4', borderRadius: '8px', overflow: 'hidden' }}>
-          <span style={{ padding: '8px 12px', background: '#fce7f3', color: '#be185d', fontSize: '0.85rem', fontWeight: 600, borderRight: '1px solid #f9a8d4', whiteSpace: 'nowrap' }}>lovelycrafts.in/p/</span>
-          <input
-            className="form-input"
-            style={{ border: 'none', borderRadius: 0, outline: 'none', boxShadow: 'none' }}
-            placeholder="e.g. maya-25 (optional)"
-            value={customSlug}
-            onChange={(e) => handleSlugChange(e.target.value)}
-          />
-        </div>
-        {slugStatus === 'checking' && <p style={{ color: '#9333ea', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>Checking link availability…</p>}
-        {slugStatus === 'available' && <p style={{ color: '#16a34a', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>✓ Custom link is available!</p>}
-        {slugStatus === 'taken' && <p style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '4px', fontWeight: 600 }}>✗ Link taken. Try another name or numbers.</p>}
-      </div>
+
 
       <div className="form-group"><label className="form-label">Photos (optional, up to {template.photoRequirement?.max || 6})</label><CloudinaryUpload onUpload={(url) => setImages((current) => current.length < (template.photoRequirement?.max || 6) ? [...current, url] : current)} currentCount={images.length} maxPhotos={template.photoRequirement?.max || 6} /><div className="thumbs">{images.map((url, index) => <button type="button" key={url} onClick={() => setImages(images.filter((_, item) => item !== index))}><img src={url} alt="Selected memory" /></button>)}</div></div>
     </>}

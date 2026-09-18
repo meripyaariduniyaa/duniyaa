@@ -149,8 +149,7 @@ function PreviewContent() {
 
   const accent = ACCENT_MAP[note?.template] || ACCENT_MAP.proposal;
   const selectedTemplate = templates.find((t) => t.id === note?.template);
-  const hasCustomSlug = Boolean(note?.custom_slug);
-  const totalAmount = (selectedTemplate?.price || 219) + (hasCustomSlug ? 29 : 0);
+  const totalAmount = selectedTemplate?.price || 219;
 
   // ── LOADING ──
   if (loading) {
@@ -321,7 +320,6 @@ function PreviewContent() {
                 accent={accent}
                 totalAmount={totalAmount}
                 selectedTemplate={selectedTemplate}
-                hasCustomSlug={hasCustomSlug}
                 onPaid={() => setPaid(true)}
               />
             )}
@@ -348,7 +346,7 @@ function PreviewContent() {
 /* ─────────────────────────────────────────────────────────
    LOCKED PANEL
 ───────────────────────────────────────────────────────── */
-function LockedPanel({ note, accent, totalAmount, selectedTemplate, hasCustomSlug, onPaid }) {
+function LockedPanel({ note, accent, totalAmount, selectedTemplate, onPaid }) {
   const features = [
     'Private shareable link & QR code',
     'WhatsApp 1-click sender',
@@ -392,16 +390,10 @@ function LockedPanel({ note, accent, totalAmount, selectedTemplate, hasCustomSlu
       {/* Price summary */}
       <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.1rem', marginBottom: '1.25rem' }}>
         <div style={{ fontWeight: 700, fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.7rem' }}>Order Summary</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontSize: '0.9rem', marginBottom: hasCustomSlug ? '0.4rem' : '0.6rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.6rem' }}>
           <span>{selectedTemplate?.title || 'Experience'}</span>
           <span style={{ fontWeight: 700 }}>₹{selectedTemplate?.price || 219}</span>
         </div>
-        {hasCustomSlug && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontSize: '0.88rem', marginBottom: '0.6rem' }}>
-            <span>Custom Link</span>
-            <span style={{ fontWeight: 700 }}>+₹29</span>
-          </div>
-        )}
         <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0.5rem 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 800, fontSize: '1.05rem' }}>
           <span>Total</span>

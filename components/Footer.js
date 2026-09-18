@@ -114,18 +114,19 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Creator Club & Support */}
+          {/* Column 4: Trust & Legal */}
           <div className="footer-col">
-            <h4 className="footer-heading">Creator Club</h4>
+            <h4 className="footer-heading">Company &amp; Support</h4>
             <ul className="footer-list">
+              <li><Link href="/about">💡 About LovelyCrafts</Link></li>
+              <li><Link href="/contact">💌 Contact &amp; Help Desk</Link></li>
+              <li><Link href="/faq">❓ FAQs &amp; Help Guide</Link></li>
               <li><Link href="/creators">👑 Join Creator Club</Link></li>
-              <li><Link href="/creator/login">🔑 Creator Login</Link></li>
               <li><Link href="/privacy">Privacy Policy</Link></li>
               <li><Link href="/terms">Terms of Service</Link></li>
               <li><Link href="/refund">Refund Policy</Link></li>
               <li><Link href="/shipping">Shipping Policy</Link></li>
               <li><Link href="/cookies">Cookie Policy</Link></li>
-              <li><a href="mailto:meri.pyaari.duniyaa@gmail.com">Help &amp; Support</a></li>
             </ul>
             <div className="footer-badge-payment">
               <span>🔒 256-Bit SSL Encrypted</span>
@@ -146,6 +147,12 @@ export default function Footer() {
             Made with <span>❤️</span> for the people who matter most.
           </p>
           <div className="footer-bottom-links">
+            <Link href="/about">About Us</Link>
+            <span>•</span>
+            <Link href="/contact">Contact</Link>
+            <span>•</span>
+            <Link href="/faq">FAQ</Link>
+            <span>•</span>
             <Link href="/blog">Blog</Link>
             <span>•</span>
             <Link href="/creators">Creators</Link>
@@ -159,8 +166,6 @@ export default function Footer() {
             <Link href="/shipping">Shipping</Link>
             <span>•</span>
             <Link href="/cookies">Cookies</Link>
-            <span>•</span>
-            <Link href="/templates">Gifts</Link>
           </div>
         </div>
 

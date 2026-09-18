@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 
-import { ambientSynth } from '@/lib/audioPresets';
+
 
 /* ─────────────────────────────────────────────────────────
    PROPOSAL EXPERIENCE
@@ -16,7 +16,7 @@ import { ambientSynth } from '@/lib/audioPresets';
 ───────────────────────────────────────────────────────── */
 export default function ProposalExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
 
   const recipientName = note?.recipient_name || 'My Love';
   const senderName = note?.custom_details?.sender_name || '';
@@ -30,21 +30,7 @@ export default function ProposalExperience({ note, isPreview = false, onReachEnd
     }
   }, [scene, onReachEnd]);
 
-  const toggleAudio = () => {
-    if (isAudioPlaying) {
-      ambientSynth.stop();
-      setIsAudioPlaying(false);
-    } else {
-      ambientSynth.play('romantic-piano');
-      setIsAudioPlaying(true);
-    }
-  };
 
-  useEffect(() => {
-    return () => {
-      ambientSynth.stop();
-    };
-  }, []);
 
   return (
     <div style={{ background: '#0a0510', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
@@ -57,30 +43,7 @@ export default function ProposalExperience({ note, isPreview = false, onReachEnd
         @keyframes typewriter-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
       `}</style>
 
-      {/* Floating Audio Toggle */}
-      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
-        <button
-          onClick={toggleAudio}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: isAudioPlaying ? 'rgba(244, 63, 94, 0.25)' : 'rgba(255, 255, 255, 0.08)',
-            border: `1px solid ${isAudioPlaying ? 'rgba(244, 63, 94, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
-            backdropFilter: 'blur(12px)',
-            color: isAudioPlaying ? '#fda4af' : '#cbd5e1',
-            borderRadius: '999px',
-            padding: '7px 14px',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
-          }}
-        >
-          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
-        </button>
-      </div>
+
 
       <AnimatePresence mode="wait">
         {scene === 1 && <Scene1YesNo key="s1" recipientName={recipientName} senderName={senderName} quotation={quotation} onYes={() => setScene(2)} />}

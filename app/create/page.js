@@ -229,7 +229,7 @@ function CreatePageContent() {
         creator_uid: getDeviceId(),
         recipient_name: form.recipientName.trim(),
         custom_message: form.letter.trim(),
-        image_urls: form.images || [],
+        image_urls: Array.isArray(form.images) ? form.images.filter((img) => typeof img === 'string') : [],
         custom_details: Object.keys(customDetails).length > 0 ? customDetails : null,
         is_paid: false,
         template: selectedId,

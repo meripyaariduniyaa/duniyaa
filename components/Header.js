@@ -69,10 +69,17 @@ export default function Header() {
             </Link>
 
             <Link
-              href="/creators"
-              className={`nav-link ${pathname?.startsWith('/creators') || pathname?.startsWith('/creator') ? 'active' : ''}`}
+              href="/about"
+              className={`nav-link ${pathname === '/about' ? 'active' : ''}`}
             >
-              👑 Creators
+              💡 About
+            </Link>
+
+            <Link
+              href="/faq"
+              className={`nav-link ${pathname === '/faq' ? 'active' : ''}`}
+            >
+              ❓ FAQ
             </Link>
 
             <Link
@@ -80,6 +87,13 @@ export default function Header() {
               className={`nav-link ${pathname?.startsWith('/blog') ? 'active' : ''}`}
             >
               📝 Blog
+            </Link>
+
+            <Link
+              href="/contact"
+              className={`nav-link ${pathname === '/contact' ? 'active' : ''}`}
+            >
+              💌 Contact
             </Link>
 
             <Link
@@ -194,6 +208,42 @@ export default function Header() {
             <div>
               <strong>Blog &amp; Guides</strong>
               <small>Surprise ideas, relationship stories &amp; tips</small>
+            </div>
+          </Link>
+
+          <Link
+            href="/about"
+            className="mobile-nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-nav-icon">💡</span>
+            <div>
+              <strong>About Us</strong>
+              <small>Our story, mission &amp; digital gift platform</small>
+            </div>
+          </Link>
+
+          <Link
+            href="/faq"
+            className="mobile-nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-nav-icon">❓</span>
+            <div>
+              <strong>Frequently Asked Questions</strong>
+              <small>Help desk, photo privacy &amp; link guide</small>
+            </div>
+          </Link>
+
+          <Link
+            href="/contact"
+            className="mobile-nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-nav-icon">💌</span>
+            <div>
+              <strong>Contact &amp; Support Desk</strong>
+              <small>Send a message or reach support team</small>
             </div>
           </Link>
 

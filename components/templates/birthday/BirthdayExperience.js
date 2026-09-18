@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { ambientSynth } from '@/lib/audioPresets';
+
 
 /* ─────────────────────────────────────────────────────────
    BIRTHDAY EXPERIENCE
@@ -21,7 +21,7 @@ import { ambientSynth } from '@/lib/audioPresets';
 ───────────────────────────────────────────────────────── */
 export default function BirthdayExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
 
   const name = note?.recipient_name || 'Birthday Star';
   const senderName = note?.custom_details?.sender_name || '';
@@ -39,21 +39,7 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
     }
   }, [scene, finalSceneIndex, onReachEnd]);
 
-  const toggleAudio = () => {
-    if (isAudioPlaying) {
-      ambientSynth.stop();
-      setIsAudioPlaying(false);
-    } else {
-      ambientSynth.play('birthday-joy');
-      setIsAudioPlaying(true);
-    }
-  };
 
-  useEffect(() => {
-    return () => {
-      ambientSynth.stop();
-    };
-  }, []);
 
   const goNext = () => setScene((s) => s + 1);
 
@@ -69,30 +55,7 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
         @keyframes leaf-fall { 0%{transform:translateY(-20px) rotate(0) scale(0.5);opacity:0} 20%{opacity:1} 100%{transform:translateY(100vh) rotate(360deg) scale(0.8);opacity:0} }
       `}</style>
 
-      {/* Floating Audio Toggle */}
-      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 100 }}>
-        <button
-          onClick={toggleAudio}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: isAudioPlaying ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.08)',
-            border: `1px solid ${isAudioPlaying ? 'rgba(245, 158, 11, 0.5)' : 'rgba(255, 255, 255, 0.15)'}`,
-            backdropFilter: 'blur(12px)',
-            color: isAudioPlaying ? '#fde68a' : '#cbd5e1',
-            borderRadius: '999px',
-            padding: '7px 14px',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
-          }}
-        >
-          <span>{isAudioPlaying ? '🎵 Sound: ON' : '🔇 Play Music'}</span>
-        </button>
-      </div>
+
 
       <AnimatePresence mode="wait">
         {scene === 1 && <SceneSplash key="s1" name={name} onNext={goNext} />}
@@ -331,101 +294,108 @@ function SceneNameReveal({ name, turningAge, onNext }) {
   );
 }
 
-/* ── SCENE 5: Cake — candle + blow + cut ── */
-const CAKE_COLORS = {
-  chocolate: { bg: '#3b1f0a', icing: '#7c3f1c', layers: ['#5c2d10', '#8b4513'], candle: '#e879f9' },
-  strawberry: { bg: '#4a0020', icing: '#be123c', layers: ['#9f1239', '#fb7185'], candle: '#fde68a' },
-  vanilla: { bg: '#422006', icing: '#b45309', layers: ['#d97706', '#fde68a'], candle: '#f43f5e' },
-};
-
+/* ── SCENE 5: Birthday Video Presentation (16:9 Frame on Large Screens) ── */
 function SceneCake({ cakeType, name, onNext }) {
-  const [blown, setBlown] = useState(false);
-  const [cut, setCut] = useState(false);
-  const colors = CAKE_COLORS[cakeType] || CAKE_COLORS.chocolate;
+  const [videoEnded, setVideoEnded] = useState(false);
+  const videoRef = useRef(null);
 
-  const handleBlow = () => { setBlown(true); setTimeout(() => setCut(true), 800); };
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          videoRef.current.play();
+        }
+      });
+    }
+  }, []);
 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: `radial-gradient(ellipse at 50% 60%, ${colors.bg} 0%, #080810 100%)`, padding: '2rem' }}
+      style={{
+        minHeight: '100vh',
+        width: '100%',
+        background: '#09090b',
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem 1rem',
+      }}
     >
-      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ color: '#94a3b8', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
-        🎂 Your Birthday Cake
-      </motion.p>
-
-      {/* Cake Visual */}
-      <div style={{ position: 'relative', marginBottom: '2rem' }}>
-        {/* Candle flame */}
-        {!blown && (
-          <motion.div
-            animate={{ scale: [1, 1.2, 0.9, 1.1, 1], rotate: [-5, 5, -3, 3, 0] }}
-            transition={{ duration: 0.8, repeat: Infinity }}
-            style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', fontSize: '1.8rem' }}
-          >
-            🔥
-          </motion.div>
-        )}
-
-        {/* Cake body */}
-        <motion.div
-          animate={cut ? { rotate: [-2, 2, -1, 0] } : {}}
-          style={{ width: 180, height: 120, position: 'relative' }}
-        >
-          <svg viewBox="0 0 180 120" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))' }}>
-            <rect x="10" y="60" width="160" height="60" rx="4" fill={colors.layers[0]} />
-            <rect x="20" y="40" width="140" height="30" rx="3" fill={colors.layers[1]} />
-            <rect x="30" y="20" width="120" height="30" rx="3" fill={colors.icing} />
-            {/* Icing drips */}
-            {[30, 60, 90, 120].map((x, i) => <rect key={i} x={x} y="18" width="12" height={8 + (i % 3) * 4} rx="4" fill={colors.icing} opacity="0.7" />)}
-            {/* Candle */}
-            <rect x="84" y="0" width="12" height="24" rx="4" fill={colors.candle} />
-            {/* Cut line */}
-            {cut && <line x1="90" y1="0" x2="90" y2="120" stroke="rgba(255,255,255,0.4)" strokeWidth="1" strokeDasharray="4" />}
-          </svg>
-        </motion.div>
+      {/* 16:9 Video Frame Box for Large Screens */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '960px',
+          aspectRatio: '16 / 9',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(244, 63, 94, 0.25)',
+          background: '#000',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        <video
+          ref={videoRef}
+          src="/HappyBirthday.mp4"
+          autoPlay
+          playsInline
+          onEnded={() => setVideoEnded(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+        />
       </div>
 
-      {/* Blow button */}
-      {!blown ? (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} style={{ textAlign: 'center' }}>
-          <p style={{ color: '#94a3b8', marginBottom: '1rem', fontSize: '0.95rem' }}>Blow out the candle for {name}! 🕯️</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-            onClick={handleBlow}
-            style={{ padding: '15px 36px', borderRadius: '50px', background: `linear-gradient(135deg, ${colors.icing}, ${colors.layers[0]})`, border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', boxShadow: `0 4px 20px ${colors.icing}55` }}
-          >
-            💨 Blow!
-          </motion.button>
-        </motion.div>
-      ) : (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center' }}>
-          <motion.p animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.6 }} style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💨✨</motion.p>
-          <p style={{ color: '#fde68a', fontWeight: 700, marginBottom: '1.25rem', fontSize: '0.95rem' }}>
-            {cut ? 'Time to make a wish!' : 'Candle blown out! Now cut the cake!'}
+      {/* Centered Controls Overlay */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        style={{
+          marginTop: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 60,
+          padding: '0 1rem',
+        }}
+      >
+        {videoEnded && (
+          <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: '0 0 0.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.08)', padding: '6px 16px', borderRadius: '20px', backdropFilter: 'blur(8px)' }}>
+            ✨ Hope you enjoyed the video! Now time to make a wish!
           </p>
-          {cut && (
-            <motion.button
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-              onClick={onNext}
-              style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}
-            >
-              🎊 Make a Wish →
-            </motion.button>
-          )}
-          {!cut && (
-            <motion.button
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-              onClick={() => setCut(true)}
-              style={{ padding: '15px 36px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}
-            >
-              🎂 Cut the Cake!
-            </motion.button>
-          )}
-        </motion.div>
-      )}
+        )}
+        <motion.button
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onNext}
+          style={{
+            padding: '14px 38px',
+            borderRadius: '50px',
+            background: 'linear-gradient(135deg, #f43f5e 0%, #fbbf24 100%)',
+            border: '2px solid #ffffff',
+            color: '#ffffff',
+            fontSize: '1.05rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            boxShadow: '0 8px 25px rgba(244, 63, 94, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+          }}
+        >
+          <span>🎂 Make a Wish →</span>
+        </motion.button>
+      </motion.div>
     </motion.div>
   );
 }
