@@ -23,12 +23,16 @@ export default function GoogleAd({
   const adRef = useRef(null);
   const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
-  // Explicitly check excluded routes
+  // Explicitly check excluded routes (/admin, /drive, /del, /create, /preview, /p/*, /c/*)
   const isExcludedRoute =
     !pathname ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/drive') ||
+    pathname.startsWith('/del') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/preview') ||
-    pathname.startsWith('/p/');
+    pathname.startsWith('/p/') ||
+    pathname.startsWith('/c/');
 
   useEffect(() => {
     if (isExcludedRoute || !adsenseClientId || !slot) return;

@@ -294,63 +294,210 @@ function SceneNameReveal({ name, turningAge, onNext }) {
   );
 }
 
-/* ── SCENE 5: Birthday Video Presentation (16:9 Frame on Large Screens) ── */
+/* ── SCENE 5: Birthday Video Presentation (Full Screen Mobile & Phone Mockup Desktop) ── */
 function SceneCake({ cakeType, name, onNext }) {
   const [videoEnded, setVideoEnded] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          videoRef.current.play();
-        }
-      });
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setIsMuted(videoRef.current.muted);
+          })
+          .catch((err) => {
+            console.log('Unmuted autoplay blocked, retrying muted autoplay:', err);
+            if (videoRef.current) {
+              videoRef.current.muted = true;
+              setIsMuted(true);
+              videoRef.current.play().then(() => {
+                setIsPlaying(true);
+              }).catch(e => console.error('Muted autoplay failed:', e));
+            }
+          });
+      }
     }
   }, []);
 
+  const toggleMute = (e) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
+  const handleVideoTap = () => {
+    if (videoRef.current) {
+      if (videoRef.current.muted) {
+        videoRef.current.muted = false;
+        setIsMuted(false);
+      } else if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{
-        minHeight: '100vh',
-        width: '100%',
-        background: '#09090b',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem 1rem',
-      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="scene-cake-root"
+      onClick={handleVideoTap}
     >
-      {/* 16:9 Video Frame Box for Large Screens */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '960px',
-          aspectRatio: '16 / 9',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(244, 63, 94, 0.25)',
-          background: '#000',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-      >
+      <style jsx>{`
+        .scene-cake-root {
+          min-height: 100vh;
+          min-height: 100dvh;
+          width: 100%;
+          background: #000000;
+          overflow: hidden;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 1.5rem 1rem;
+        }
+
+        .video-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 420px;
+          height: 80vh;
+          max-height: 740px;
+          aspect-ratio: 9 / 16;
+          border-radius: 28px;
+          overflow: hidden;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(244, 63, 94, 0.35);
+          background: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .video-element {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .sound-toggle-btn {
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          z-index: 70;
+          background: rgba(0, 0, 0, 0.55);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          color: #ffffff;
+          font-size: 0.82rem;
+          font-weight: 700;
+          padding: 8px 16px;
+          border-radius: 30px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+          transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .sound-toggle-btn:hover {
+          transform: scale(1.05);
+          background: rgba(0, 0, 0, 0.75);
+        }
+
+        .controls-overlay {
+          margin-top: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 60;
+          padding: 0 1rem;
+        }
+
+        @media (max-width: 768px) {
+          .scene-cake-root {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            z-index: 100 !important;
+            background: #000000 !important;
+          }
+
+          .video-wrapper {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-width: none !important;
+            max-height: none !important;
+            aspect-ratio: auto !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+
+          .video-element {
+            object-fit: cover !important;
+          }
+
+          .sound-toggle-btn {
+            top: calc(env(safe-area-inset-top, 16px) + 12px) !important;
+            right: 16px !important;
+          }
+
+          .controls-overlay {
+            position: absolute !important;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 28px) !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin-top: 0 !important;
+            padding: 0 1.5rem !important;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+            padding-top: 2rem !important;
+          }
+        }
+      `}</style>
+
+      {/* Video Container Box */}
+      <div className="video-wrapper">
         <video
           ref={videoRef}
-          src="/HappyBirthday.mp4"
+          src="https://res.cloudinary.com/vkcgnlm1/video/upload/v1789756064/Site_Assets/bmonvulpkw3gezai1iwk.mp4"
           autoPlay
           playsInline
+          webkit-playsinline="true"
           onEnded={() => setVideoEnded(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+          className="video-element"
         />
+
+        {/* Floating Sound Button */}
+        <button
+          type="button"
+          className="sound-toggle-btn"
+          onClick={toggleMute}
+          title={isMuted ? "Click to unmute" : "Click to mute"}
+        >
+          <span>{isMuted ? '🔇 Tap for Sound' : '🔊 Sound On'}</span>
+        </button>
       </div>
 
       {/* Centered Controls Overlay */}
@@ -358,18 +505,11 @@ function SceneCake({ cakeType, name, onNext }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        style={{
-          marginTop: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 60,
-          padding: '0 1rem',
-        }}
+        className="controls-overlay"
+        onClick={(e) => e.stopPropagation()}
       >
         {videoEnded && (
-          <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: '0 0 0.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.08)', padding: '6px 16px', borderRadius: '20px', backdropFilter: 'blur(8px)' }}>
+          <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: '0 0 0.75rem', textAlign: 'center', background: 'rgba(255,255,255,0.12)', padding: '6px 18px', borderRadius: '20px', backdropFilter: 'blur(8px)' }}>
             ✨ Hope you enjoyed the video! Now time to make a wish!
           </p>
         )}
