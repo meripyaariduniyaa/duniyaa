@@ -73,6 +73,9 @@ firebase-debug.log
 /dist
 .next/
 .next/**
+.agents
+GEMINI.md
+
 
 # Uploaded files & temp
 uploads/
