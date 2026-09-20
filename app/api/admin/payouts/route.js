@@ -78,6 +78,32 @@ export async function POST(request) {
     }
 
     await batch.commit();
+
+    // Automatically record payout in finance_expenses
+    try {
+      const creatorDoc = await db.collection('creators').doc(creator_id).get();
+      const creatorName = creatorDoc.exists ? (creatorDoc.data().name || 'Creator') : 'Creator';
+      const amountInRupees = Number(((Number(amount) || 0) / 100).toFixed(2));
+
+      await db.collection('finance_expenses').add({
+        title: `Creator Payout — ${creatorName}`,
+        category: 'creator_payouts',
+        amount: amountInRupees,
+        currency: 'INR',
+        date: new Date().toISOString().split('T')[0],
+        paymentMethod: method || 'UPI',
+        vendor: creatorName,
+        receiptUrl: '',
+        notes: reference ? `UTR / Ref: ${reference}${notes ? ` • ${notes}` : ''}` : (notes || 'Creator commission payout'),
+        payoutId: payoutRef.id,
+        creatorId: creator_id,
+        createdAt: new Date().toISOString(),
+        createdBy: admin.email,
+      });
+    } catch (finErr) {
+      console.error('Failed to sync payout with finance_expenses:', finErr);
+    }
+
     return NextResponse.json({ ok: true, id: payoutRef.id, updatedCommissionsCount: targetCommissionIds.length });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Could not record payout.' }, { status: 403 });

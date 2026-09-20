@@ -138,3 +138,53 @@ export async function POST(request) {
     return handleApiError(error, 'Could not issue gift pass.');
   }
 }
+
+export async function PATCH(request) {
+  try {
+    await requireAdmin(request);
+    const body = await request.json();
+    const { id, active } = body;
+
+    if (!id || typeof active !== 'boolean') {
+      return NextResponse.json({ error: 'Gift ID and boolean active status are required.' }, { status: 400 });
+    }
+
+    const db = getAdminDb();
+    const giftRef = db.collection('creatorGifts').doc(id);
+    const giftDoc = await giftRef.get();
+
+    if (!giftDoc.exists) {
+      return NextResponse.json({ error: 'Gift not found.' }, { status: 404 });
+    }
+
+    const giftData = giftDoc.data();
+    const batch = db.batch();
+
+    batch.update(giftRef, {
+      active,
+      updated_at: FieldValue.serverTimestamp(),
+    });
+
+    // Also update linked coupon if it exists
+    if (giftData.coupon_id) {
+      const couponRef = db.collection('coupons').doc(giftData.coupon_id);
+      batch.update(couponRef, {
+        active,
+        updated_at: FieldValue.serverTimestamp(),
+      });
+    } else if (giftData.code) {
+      const couponSnap = await db.collection('coupons').where('code', '==', giftData.code).limit(1).get();
+      if (!couponSnap.empty) {
+        batch.update(couponSnap.docs[0].ref, {
+          active,
+          updated_at: FieldValue.serverTimestamp(),
+        });
+      }
+    }
+
+    await batch.commit();
+    return NextResponse.json({ ok: true, id, active });
+  } catch (error) {
+    return handleApiError(error, 'Could not update gift status.');
+  }
+}

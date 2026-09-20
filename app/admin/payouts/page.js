@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { exportToExcel } from '@/lib/excel-export';
 import {
@@ -12,7 +12,8 @@ import {
   CheckIcon,
   CloseIcon,
   SearchIcon,
-  CreatorsIcon
+  CreatorsIcon,
+  BellIcon
 } from '@/components/admin/AdminIcons';
 
 export default function AdminPayoutsPage() {
@@ -76,6 +77,41 @@ export default function AdminPayoutsPage() {
   useEffect(() => {
     loadData();
   }, [user]);
+
+  // Group unpaid pending commissions per creator
+  const pendingByCreator = useMemo(() => {
+    const map = {};
+    commissions.forEach((c) => {
+      if (c.status === 'pending' && c.creator_id) {
+        if (!map[c.creator_id]) {
+          map[c.creator_id] = {
+            creator_id: c.creator_id,
+            pendingAmountPaise: 0,
+            commissionsCount: 0,
+          };
+        }
+        map[c.creator_id].pendingAmountPaise += (c.commission_amount || 0);
+        map[c.creator_id].commissionsCount += 1;
+      }
+    });
+
+    return Object.values(map)
+      .map((item) => {
+        const creator = creators.find((cr) => cr.id === item.creator_id);
+        return {
+          ...item,
+          creatorName: creator?.name || item.creator_id,
+          creatorSlug: creator?.slug || '',
+          bankAccount: creator?.bank_account || creator?.bankAccount || '',
+          upiId: creator?.upi_id || creator?.upiId || '',
+          pendingAmountRupees: Number((item.pendingAmountPaise / 100).toFixed(2)),
+        };
+      })
+      .filter((item) => item.pendingAmountPaise > 0)
+      .sort((a, b) => b.pendingAmountPaise - a.pendingAmountPaise);
+  }, [commissions, creators]);
+
+  const totalUnpaidRupees = pendingByCreator.reduce((sum, item) => sum + item.pendingAmountRupees, 0);
 
   // Compute pending commissions for selected creator
   const creatorPendingCommissions = commissions.filter(
@@ -203,6 +239,111 @@ export default function AdminPayoutsPage() {
       {message && (
         <div style={{ padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', background: message.startsWith('Error') ? '#fee2e2' : '#f0fdf4', color: message.startsWith('Error') ? '#991b1b' : '#15803d', border: message.startsWith('Error') ? '1px solid #fecaca' : '1px solid #bbf7d0' }}>
           {message}
+        </div>
+      )}
+
+      {/* PENDING PAYOUTS REMINDER BANNER */}
+      {pendingByCreator.length > 0 ? (
+        <div style={{
+          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          borderRadius: '16px',
+          border: '1px solid #fde68a',
+          padding: '20px 24px',
+          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ background: '#f59e0b', color: '#fff', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BellIcon size={18} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#92400e' }}>
+                  Pending Payout Reminders ({pendingByCreator.length} {pendingByCreator.length === 1 ? 'Creator' : 'Creators'})
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#b45309' }}>
+                  Total unpaid commission balance: <strong>₹{totalUnpaidRupees.toLocaleString('en-IN')}</strong>
+                </p>
+              </div>
+            </div>
+            <span style={{
+              background: '#fef3c7',
+              color: '#b45309',
+              border: '1px solid #fcd34d',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+            }}>
+              Needs Disbursement
+            </span>
+          </div>
+
+          {/* CREATORS WAITING FOR PAYOUT */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+            {pendingByCreator.map((cr) => (
+              <div key={cr.creator_id} style={{
+                background: '#ffffff',
+                borderRadius: '12px',
+                border: '1px solid #fde68a',
+                padding: '14px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
+                    {cr.creatorName}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                    {cr.commissionsCount} unpaid {cr.commissionsCount === 1 ? 'order' : 'orders'}
+                    {cr.upiId ? ` • UPI: ${cr.upiId}` : ''}
+                  </div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>
+                    ₹{cr.pendingAmountRupees.toLocaleString('en-IN')}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCreatorId(cr.creator_id);
+                    setIsCreating(true);
+                    setMessage('');
+                  }}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Pay Now
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          background: '#f0fdf4',
+          borderRadius: '12px',
+          border: '1px solid #bbf7d0',
+          padding: '12px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '0.85rem',
+          color: '#15803d',
+          fontWeight: 600,
+        }}>
+          <CheckIcon size={16} />
+          <span>All creator payouts are settled and up to date! No pending commissions.</span>
         </div>
       )}
 

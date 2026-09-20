@@ -155,6 +155,20 @@ export default function AdminCreatorGiftsPage() {
     }
   };
 
+  const handleToggleGift = async (gift) => {
+    try {
+      const token = await user.getIdToken();
+      await fetch('/api/admin/creator-gifts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ id: gift.id, active: !gift.active }),
+      });
+      loadData();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const filteredGifts = gifts.filter((g) => {
     if (!search.trim()) return true;
     const term = search.toLowerCase();
@@ -238,6 +252,7 @@ export default function AdminCreatorGiftsPage() {
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Template</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Issued Date</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,7 +268,8 @@ export default function AdminCreatorGiftsPage() {
                     const creator = creators.find((c) => c.id === g.creator_id);
                     const prospect = prospects.find((p) => p.id === g.crm_prospect_id);
                     const recipientName = creator?.name || prospect?.name || g.recipient_name || 'Prospect';
-                    const isRedeemed = g.used || g.used_count > 0;
+                    const isRedeemed = g.claimed === true;
+                    const isActive = g.active !== false; // default true if not set
 
                     return (
                       <tr key={g.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.1s ease' }}>
@@ -300,14 +316,37 @@ export default function AdminCreatorGiftsPage() {
                               borderRadius: '999px',
                               fontSize: '0.75rem',
                               fontWeight: 700,
-                              background: isRedeemed ? '#f1f5f9' : '#dcfce7',
-                              color: isRedeemed ? '#64748b' : '#15803d',
-                              border: `1px solid ${isRedeemed ? '#e2e8f0' : '#bbf7d0'}`,
+                              background: isRedeemed ? '#f1f5f9' : isActive ? '#dcfce7' : '#fef3c7',
+                              color: isRedeemed ? '#64748b' : isActive ? '#15803d' : '#b45309',
+                              border: `1px solid ${isRedeemed ? '#e2e8f0' : isActive ? '#bbf7d0' : '#fde68a'}`,
                             }}
                           >
-                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isRedeemed ? '#94a3b8' : '#22c55e' }} />
-                            <span>{isRedeemed ? 'Redeemed' : 'Ready / Active'}</span>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isRedeemed ? '#94a3b8' : isActive ? '#22c55e' : '#f59e0b' }} />
+                            <span>{isRedeemed ? 'Redeemed' : isActive ? 'Active' : 'Disabled'}</span>
                           </span>
+                        </td>
+
+                        {/* ACTIONS */}
+                        <td style={{ padding: '16px 20px' }}>
+                          {!isRedeemed && (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleGift(g)}
+                              style={{
+                                background: '#ffffff',
+                                border: `1px solid ${isActive ? '#fecaca' : '#bbf7d0'}`,
+                                color: isActive ? '#b91c1c' : '#15803d',
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {isActive ? 'Disable' : 'Enable'}
+                            </button>
+                          )}
+                          {isRedeemed && <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Used</span>}
                         </td>
 
                       </tr>

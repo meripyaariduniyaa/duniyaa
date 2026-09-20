@@ -8,13 +8,29 @@ export async function GET(request) {
   try {
     await requireAdmin(request);
     const snap = await getAdminDb().collection('coupons').orderBy('created_at', 'desc').get();
-    const coupons = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-      created_at: d.data().created_at?.toDate?.()?.toISOString() || null,
-      updated_at: d.data().updated_at?.toDate?.()?.toISOString() || null,
-      expires_at: d.data().expires_at?.toDate?.()?.toISOString() || (d.data().expires_at ? new Date(d.data().expires_at).toISOString() : null),
-    }));
+    const coupons = snap.docs.map((d) => {
+      const data = d.data();
+      let expiresAt = null;
+      if (data.expires_at) {
+        try {
+          if (typeof data.expires_at?.toDate === 'function') {
+            expiresAt = data.expires_at.toDate().toISOString();
+          } else if (data.expires_at?._seconds) {
+            expiresAt = new Date(data.expires_at._seconds * 1000).toISOString();
+          } else {
+            const parsed = new Date(data.expires_at);
+            expiresAt = isNaN(parsed.getTime()) ? null : parsed.toISOString();
+          }
+        } catch {}
+      }
+      return {
+        id: d.id,
+        ...data,
+        created_at: data.created_at?.toDate?.()?.toISOString() || null,
+        updated_at: data.updated_at?.toDate?.()?.toISOString() || null,
+        expires_at: expiresAt,
+      };
+    });
     return NextResponse.json({ coupons });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Admin access required.' }, { status: 403 });

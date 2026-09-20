@@ -19,16 +19,24 @@ function AdminLoginContent() {
 
   useEffect(() => {
     if (user) {
-      user.getIdToken().then((token) => {
-        fetch('/api/admin/overview', {
-          headers: { Authorization: `Bearer ${token}` }
-        }).then((res) => {
+      user.getIdToken().then(async (token) => {
+        try {
+          const res = await fetch('/api/admin/overview', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
           if (res.ok) {
-            router.push('/admin/dashboard');
+            router.push('/admin');
           } else {
-            setError('Access Denied: Your Google account is not in the ADMIN_EMAILS allowlist.');
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 403) {
+              setError(`Access Denied: Account (${user.email || 'signed in'}) is not in the ADMIN_EMAILS allowlist.`);
+            } else {
+              setError(data.error || 'Server error verifying admin status. Please try again.');
+            }
           }
-        });
+        } catch (err) {
+          setError(err.message || 'Failed to verify admin status.');
+        }
       });
     }
   }, [user, router]);
@@ -49,9 +57,14 @@ function AdminLoginContent() {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
-          router.push('/admin/dashboard');
+          router.push('/admin');
         } else {
-          setError('Access Denied: Your Google account is not in the ADMIN_EMAILS allowlist.');
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 403) {
+            setError(`Access Denied: Account (${signedUser.email || 'signed in'}) is not in the ADMIN_EMAILS allowlist.`);
+          } else {
+            setError(data.error || 'Server error verifying admin status.');
+          }
         }
       } catch (err) {
         setError(err.message || 'Failed to verify admin status.');

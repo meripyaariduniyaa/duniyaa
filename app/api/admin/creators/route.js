@@ -38,7 +38,28 @@ async function generateUniqueCreatorCoupon(db, creatorId, baseCode, discountPerc
 export async function GET(request) {
   try {
     await requireAdmin(request);
-    const snap = await getAdminDb().collection('creators').orderBy('updated_at', 'desc').get();
+    const db = getAdminDb();
+    const { searchParams } = new URL(request.url);
+    const changeRequestsFor = searchParams.get('changeRequests');
+
+    // Return change requests for a specific creator
+    if (changeRequestsFor) {
+      const snap = await db
+        .collection('creator_change_requests')
+        .where('creator_id', '==', changeRequestsFor)
+        .orderBy('created_at', 'desc')
+        .limit(50)
+        .get();
+      const changeRequests = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        created_at: d.data().created_at?.toDate?.()?.toISOString() || null,
+        resolved_at: d.data().resolved_at?.toDate?.()?.toISOString() || null,
+      }));
+      return NextResponse.json({ changeRequests });
+    }
+
+    const snap = await db.collection('creators').orderBy('updated_at', 'desc').get();
     const creators = snap.docs.map((d) => ({
       id: d.id,
       ...d.data(),
@@ -125,11 +146,41 @@ export async function PATCH(request) {
     if (!creatorSnap.exists) return NextResponse.json({ error: 'Creator not found.' }, { status: 404 });
 
     const currentData = creatorSnap.data();
+    // Handle change request approval/rejection
+    if (body.action === 'resolve_change_request') {
+      const { changeRequestId, resolution } = body; // resolution: 'approved' | 'rejected'
+      if (!changeRequestId || !['approved', 'rejected'].includes(resolution)) {
+        return NextResponse.json({ error: 'changeRequestId and resolution (approved/rejected) required.' }, { status: 400 });
+      }
+      const crRef = db.collection('creator_change_requests').doc(changeRequestId);
+      const crSnap = await crRef.get();
+      if (!crSnap.exists) return NextResponse.json({ error: 'Change request not found.' }, { status: 404 });
+      const crData = crSnap.data();
+
+      if (resolution === 'approved' && crData.creator_id === id) {
+        // Apply the change to the creator doc
+        await creatorRef.update({
+          [crData.field]: crData.new_value,
+          updated_at: FieldValue.serverTimestamp(),
+        });
+      }
+
+      await crRef.update({
+        status: resolution,
+        resolved_at: FieldValue.serverTimestamp(),
+      });
+      return NextResponse.json({ ok: true, resolution });
+    }
+
     const allowed = [
       'name', 'slug', 'email', 'phone', 'status', 'tier', 'tier_override',
       'commission_rate_override', 'discount_rate', 'featured', 'bio',
       'instagram_url', 'youtube_url', 'profile_image', 'recommended_template_ids',
-      'coupon_id', 'coupon_code'
+      'coupon_id', 'coupon_code',
+      // HRMS fields
+      'dob', 'address', 'state', 'language',
+      'bank_account_number', 'bank_ifsc', 'bank_account_holder', 'upi_id',
+      'joining_form_completed',
     ];
 
     const update = {};

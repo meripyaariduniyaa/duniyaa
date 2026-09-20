@@ -544,7 +544,9 @@ function FinanceDashboardContent() {
     `).join('');
 
     const discountRow = Number(inv.discount) > 0
-      ? `<div style="display:flex;justify-content:space-between;color:#16a34a"><span>Discount</span><span>-₹${Number(inv.discount).toLocaleString('en-IN')}</span></div>` : '';
+      ? `<div style="display:flex;justify-content:space-between;color:#16a34a"><span>Discount ${inv.couponCode ? `(${inv.couponCode})` : ''}</span><span>-₹${Number(inv.discount).toLocaleString('en-IN')}</span></div>` : '';
+    const cgstRow = `<div style="display:flex;justify-content:space-between;color:#64748b"><span>CGST (9%)</span><span>₹0</span></div>`;
+    const sgstRow = `<div style="display:flex;justify-content:space-between;color:#64748b"><span>SGST (9%)</span><span>₹0</span></div>`;
     const taxRow = Number(inv.taxAmount) > 0
       ? `<div style="display:flex;justify-content:space-between;color:#475569"><span>GST (${inv.taxRate}%)</span><span>₹${Number(inv.taxAmount).toLocaleString('en-IN')}</span></div>` : '';
 
@@ -680,6 +682,9 @@ function FinanceDashboardContent() {
       <div class="totals-inner">
         <div class="total-row"><span>Subtotal</span><span>₹${Number(inv.subtotal || 0).toLocaleString('en-IN')}</span></div>
         ${discountRow}
+        <div class="total-row"><span>Final Amount</span><span style="font-weight:600">₹${Number(inv.totalAmount || 0).toLocaleString('en-IN')}</span></div>
+        ${cgstRow}
+        ${sgstRow}
         ${taxRow}
         <div class="total-final"><span>Total Payable</span><span>₹${Number(inv.totalAmount || 0).toLocaleString('en-IN')}</span></div>
       </div>
@@ -1066,29 +1071,43 @@ function FinanceDashboardContent() {
             <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: '#0f172a' }}>Expense Distribution</h3>
-                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Every Penny Breakdown</span>
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>One-time + Recurring</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {Object.entries(CATEGORY_META).map(([key, meta]) => {
-                  const amount = categoryTotals[key] || 0;
-                  const percent = summary.totalExpenses > 0 ? Math.round((amount / summary.totalExpenses) * 100) : 0;
-                  return (
-                    <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                        <span style={{ color: '#334155', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: meta.color }} />
-                          {meta.label}
-                        </span>
-                        <span style={{ color: '#64748b' }}>
-                          ₹{amount.toLocaleString('en-IN')} <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>({percent}%)</span>
-                        </span>
+                {(() => {
+                  // Merge one-time categoryTotals with recurring amounts per category
+                  const recurringByCategory = recurring.reduce((acc, r) => {
+                    if (r.category) acc[r.category] = (acc[r.category] || 0) + Number(r.amount || 0);
+                    return acc;
+                  }, {});
+                  const combined = { ...categoryTotals };
+                  Object.entries(recurringByCategory).forEach(([k, v]) => {
+                    combined[k] = (combined[k] || 0) + v;
+                  });
+                  const combinedTotal = Object.values(combined).reduce((s, v) => s + v, 0) || 1;
+                  return Object.entries(CATEGORY_META).map(([key, meta]) => {
+                    const amount = combined[key] || 0;
+                    const isRecurring = (recurringByCategory[key] || 0) > 0;
+                    const percent = Math.round((amount / combinedTotal) * 100);
+                    return (
+                      <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                          <span style={{ color: '#334155', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: meta.color }} />
+                            {meta.label}
+                            {isRecurring && <span style={{ fontSize: '0.65rem', background: '#e0f2fe', color: '#0284c7', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>recurring</span>}
+                          </span>
+                          <span style={{ color: '#64748b' }}>
+                            ₹{amount.toLocaleString('en-IN')} <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>({percent}%)</span>
+                          </span>
+                        </div>
+                        <div style={{ height: '6px', width: '100%', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${percent}%`, background: meta.color, borderRadius: '999px', transition: 'width 0.3s' }} />
+                        </div>
                       </div>
-                      <div style={{ height: '6px', width: '100%', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${percent}%`, background: meta.color, borderRadius: '999px', transition: 'width 0.3s' }} />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
 
@@ -1334,7 +1353,19 @@ function FinanceDashboardContent() {
                       return (
                         <tr key={inv.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                           <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a' }}>
-                            {inv.invoiceNumber}
+                            <div>{inv.invoiceNumber}</div>
+                            <span style={{
+                              display: 'inline-block',
+                              marginTop: '2px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              background: inv.type === 'auto' ? '#eff6ff' : '#f5f3ff',
+                              color: inv.type === 'auto' ? '#1d4ed8' : '#6d28d9',
+                            }}>
+                              {inv.type === 'auto' ? 'Auto Order' : 'Custom'}
+                            </span>
                           </td>
                           <td style={{ padding: '12px 14px', color: '#64748b' }}>
                             {inv.issuedDate}
@@ -2444,10 +2475,22 @@ function FinanceDashboardContent() {
                   </div>
                   {Number(previewInvoice.discount) > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a' }}>
-                      <span>Discount</span>
+                      <span>Discount {previewInvoice.couponCode ? `(${previewInvoice.couponCode})` : ''}</span>
                       <span>-₹{previewInvoice.discount}</span>
                     </div>
                   )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f172a', fontWeight: 600 }}>
+                    <span>Final Amount</span>
+                    <span>₹{previewInvoice.totalAmount?.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                    <span>CGST (9%)</span>
+                    <span>₹0</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                    <span>SGST (9%)</span>
+                    <span>₹0</span>
+                  </div>
                   {Number(previewInvoice.taxAmount) > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
                       <span>GST ({previewInvoice.taxRate}%)</span>

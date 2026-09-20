@@ -15,7 +15,8 @@ import {
   CopyIcon,
   CheckIcon,
   FilterIcon,
-  InvoiceIcon
+  InvoiceIcon,
+  PrinterIcon
 } from '@/components/admin/AdminIcons';
 
 export default function AdminOrdersPage() {
@@ -25,6 +26,8 @@ export default function AdminOrdersPage() {
   const [filter, setFilter] = useState('all'); // 'all' | 'organic' | 'creator'
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [activeInvoice, setActiveInvoice] = useState(null);
+  const [loadingInvoiceId, setLoadingInvoiceId] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -95,6 +98,150 @@ export default function AdminOrdersPage() {
       };
     });
     exportToExcel(formatted, `orders_ledger_${filter}`, 'Orders');
+  };
+
+  const handleOpenInvoice = async (order) => {
+    const orderRefId = order.id || order.note_id;
+    setLoadingInvoiceId(orderRefId);
+    try {
+      if (user) {
+        const token = await user.getIdToken();
+        const res = await fetch(`/api/admin/finance/invoices?orderId=${encodeURIComponent(orderRefId)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.invoices && data.invoices.length > 0) {
+          setActiveInvoice(data.invoices[0]);
+          return;
+        }
+      }
+      // Fallback synthetic invoice from order snapshot
+      const amountPaise = order.final_amount || 0;
+      const amountRupees = Number((amountPaise / 100).toFixed(2));
+      const templateName = (order.template_id || 'Proposal').charAt(0).toUpperCase() + (order.template_id || 'Proposal').slice(1) + ' Interactive Experience';
+      setActiveInvoice({
+        invoiceNumber: `LC-INV-${new Date(order.paid_at || Date.now()).getFullYear()}-${(order.id || 'ORDER').substring(0, 6).toUpperCase()}`,
+        customerName: order.customer_name || 'LovelyCrafts Customer',
+        customerEmail: order.customer_email || '',
+        customerPhone: order.customer_phone || '',
+        items: [{
+          description: templateName,
+          quantity: 1,
+          unitPrice: amountRupees,
+          total: amountRupees,
+        }],
+        subtotal: amountRupees,
+        discount: 0,
+        couponCode: order.coupon_code || '',
+        taxRate: 0,
+        taxAmount: 0,
+        cgst: 0,
+        sgst: 0,
+        totalAmount: amountRupees,
+        status: order.payment_status || 'paid',
+        issuedDate: order.paid_at ? new Date(order.paid_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        orderId: orderRefId,
+        paymentMethod: order.payment_method || 'UPI / Razorpay',
+        paidAt: order.paid_at || new Date().toISOString(),
+        notes: order.coupon_code ? `Coupon applied: ${order.coupon_code}` : 'Thank you for choosing LovelyCrafts!',
+        terms: '1. Access to digital interactive experience granted.\n2. Invoiced amount inclusive of applicable digital taxes (CGST 0%, SGST 0%).',
+        type: 'auto'
+      });
+    } catch (err) {
+      console.error('Failed to load invoice:', err);
+    } finally {
+      setLoadingInvoiceId(null);
+    }
+  };
+
+  const handlePrintInvoice = (inv) => {
+    if (!inv) return;
+    const itemsRows = (inv.items || []).map((item) => `
+      <tr>
+        <td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9">${item.description || ''}</td>
+        <td style="padding:10px 12px;text-align:center;border-bottom:1px solid #f1f5f9">${item.quantity || 1}</td>
+        <td style="padding:10px 12px;text-align:right;border-bottom:1px solid #f1f5f9">₹${Number(item.unitPrice || 0).toLocaleString('en-IN')}</td>
+        <td style="padding:10px 12px;text-align:right;font-weight:700;border-bottom:1px solid #f1f5f9">₹${Number(item.total || ((item.quantity || 1) * (item.unitPrice || 0))).toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    const discountRow = Number(inv.discount) > 0
+      ? `<div style="display:flex;justify-content:space-between;color:#16a34a"><span>Discount ${inv.couponCode ? `(${inv.couponCode})` : ''}</span><span>-₹${Number(inv.discount).toLocaleString('en-IN')}</span></div>` : '';
+    const cgstRow = `<div style="display:flex;justify-content:space-between;color:#64748b"><span>CGST (9%)</span><span>₹0</span></div>`;
+    const sgstRow = `<div style="display:flex;justify-content:space-between;color:#64748b"><span>SGST (9%)</span><span>₹0</span></div>`;
+
+    const statusBg = inv.status === 'paid' ? '#dcfce7' : '#fef3c7';
+    const statusColor = inv.status === 'paid' ? '#15803d' : '#b45309';
+    const statusLabel = inv.status === 'paid' ? 'PAID IN FULL' : 'PAYMENT PENDING';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice ${inv.invoiceNumber} — LovelyCrafts</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #0f172a; background: #fff; font-size: 13px; line-height: 1.5; width: 210mm; min-height: 297mm; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #ec4899; padding-bottom: 16px; margin-bottom: 22px; }
+    .brand-name { font-size: 22px; font-weight: 900; color: #ec4899; }
+    .billing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    thead tr { background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    th { padding: 9px 12px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #475569; text-align: left; }
+    .totals { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .totals-inner { width: 260px; display: flex; flex-direction: column; gap: 5px; font-size: 13px; }
+    .total-row { display: flex; justify-content: space-between; color: #64748b; }
+    .total-final { display: flex; justify-content: space-between; border-top: 2px solid #0f172a; padding-top: 7px; font-size: 15px; font-weight: 800; color: #0f172a; }
+  </style>
+</head>
+<body style="padding:20px">
+  <div class="header">
+    <div>
+      <div class="brand-name">LovelyCrafts</div>
+      <div style="font-size:11px;color:#64748b;margin-top:2px">Digital Interactive Notes &amp; Bespoke Crafts</div>
+      <div style="font-size:10.5px;color:#94a3b8;margin-top:1px">support@lovelycrafts.shop • lovelycrafts.shop</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:18px;font-weight:800">INVOICE</div>
+      <div style="font-size:13px;font-weight:700;color:#475569">${inv.invoiceNumber}</div>
+      <div style="font-size:11px;color:#64748b">Date: ${inv.issuedDate || ''}</div>
+    </div>
+  </div>
+  <div class="billing-grid">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:4px">Billed To</div>
+      <div style="font-size:15px;font-weight:700">${inv.customerName || 'LovelyCrafts Customer'}</div>
+      ${inv.orderId ? `<div style="font-size:11px;color:#be185d;font-weight:600;margin-top:4px">Order Reference: #${inv.orderId}</div>` : ''}
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:4px">Status</div>
+      <div style="display:inline-block;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:800;background:${statusBg};color:${statusColor}">${statusLabel}</div>
+      ${inv.paymentMethod ? `<div style="font-size:11px;color:#64748b;margin-top:4px">Method: ${inv.paymentMethod}</div>` : ''}
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Item Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate (₹)</th><th style="text-align:right">Amount (₹)</th></tr></thead>
+    <tbody>${itemsRows}</tbody>
+  </table>
+  <div class="totals">
+    <div class="totals-inner">
+      <div class="total-row"><span>Subtotal</span><span>₹${Number(inv.subtotal || 0).toLocaleString('en-IN')}</span></div>
+      ${discountRow}
+      <div class="total-row"><span>Final Amount</span><span style="font-weight:600">₹${Number(inv.totalAmount || 0).toLocaleString('en-IN')}</span></div>
+      ${cgstRow}
+      ${sgstRow}
+      <div class="total-final"><span>Total Payable</span><span>₹${Number(inv.totalAmount || 0).toLocaleString('en-IN')}</span></div>
+    </div>
+  </div>
+  <script>window.onload = function() { window.print(); };</script>
+</body>
+</html>`;
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
   };
 
   return (
@@ -471,8 +618,10 @@ export default function AdminOrdersPage() {
 
                         {/* INVOICE ACTION */}
                         <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                          <Link
-                            href={`/admin/finance?orderId=${encodeURIComponent(o.id || o.note_id)}`}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenInvoice(o)}
+                            disabled={loadingInvoiceId === (o.id || o.note_id)}
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -484,13 +633,14 @@ export default function AdminOrdersPage() {
                               color: '#db2777',
                               fontSize: '0.75rem',
                               fontWeight: 700,
-                              textDecoration: 'none',
+                              cursor: 'pointer',
                               whiteSpace: 'nowrap',
+                              opacity: loadingInvoiceId === (o.id || o.note_id) ? 0.6 : 1,
                             }}
                           >
                             <InvoiceIcon size={13} />
-                            <span>Invoice</span>
-                          </Link>
+                            <span>{loadingInvoiceId === (o.id || o.note_id) ? 'Opening...' : 'Invoice'}</span>
+                          </button>
                         </td>
 
                       </tr>
@@ -499,6 +649,159 @@ export default function AdminOrdersPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      {/* INLINE INVOICE MODAL */}
+      {activeInvoice && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px',
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '680px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '24px',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                  Invoice: {activeInvoice.invoiceNumber}
+                </h2>
+                <span style={{
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  background: activeInvoice.status === 'paid' ? '#dcfce7' : '#fef3c7',
+                  color: activeInvoice.status === 'paid' ? '#15803d' : '#b45309',
+                }}>
+                  {activeInvoice.status?.toUpperCase()}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => handlePrintInvoice(activeInvoice)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <PrinterIcon size={15} />
+                  <span>Print / PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveInvoice(null)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#fff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8' }}>Billed To</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{activeInvoice.customerName}</div>
+                {activeInvoice.orderId && <div style={{ fontSize: '0.75rem', color: '#be185d', fontWeight: 600, marginTop: '2px' }}>Order: #{activeInvoice.orderId}</div>}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8' }}>Details</div>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>Date: {activeInvoice.issuedDate}</div>
+                {activeInvoice.paymentMethod && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Method: {activeInvoice.paymentMethod}</div>}
+              </div>
+            </div>
+
+            {/* ITEMS TABLE */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b', fontSize: '0.75rem' }}>
+                  <th style={{ padding: '8px 10px' }}>Item</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'center' }}>Qty</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right' }}>Rate (₹)</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right' }}>Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(activeInvoice.items || []).map((it, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '10px', fontWeight: 600 }}>{it.description}</td>
+                    <td style={{ padding: '10px', textAlign: 'center' }}>{it.quantity || 1}</td>
+                    <td style={{ padding: '10px', textAlign: 'right' }}>₹{it.unitPrice}</td>
+                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: 700 }}>₹{it.total || (it.quantity * it.unitPrice)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* TOTALS */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+              <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Subtotal</span>
+                  <span>₹{activeInvoice.subtotal?.toLocaleString('en-IN')}</span>
+                </div>
+                {Number(activeInvoice.discount) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a' }}>
+                    <span>Discount {activeInvoice.couponCode ? `(${activeInvoice.couponCode})` : ''}</span>
+                    <span>-₹{activeInvoice.discount}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f172a', fontWeight: 600 }}>
+                  <span>Final Amount</span>
+                  <span>₹{activeInvoice.totalAmount?.toLocaleString('en-IN')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>CGST (9%)</span>
+                  <span>₹0</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>SGST (9%)</span>
+                  <span>₹0</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #0f172a', paddingTop: '6px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                  <span>Total Payable</span>
+                  <span>₹{activeInvoice.totalAmount?.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+
+            {activeInvoice.notes && (
+              <div style={{ fontSize: '0.78rem', color: '#64748b', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px' }}>
+                <strong>Notes:</strong> {activeInvoice.notes}
+              </div>
+            )}
           </div>
         </div>
       )}

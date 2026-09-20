@@ -136,7 +136,7 @@ export async function POST(request) {
       creatorId: attributedCreatorId,
       attributionSource,
       discountPercent: 0,
-      message: 'No coupon applied.' 
+      message: 'No coupon applied.'
     });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Unable to create order.' }, { status: 500 });

@@ -142,6 +142,10 @@ export async function PATCH(request) {
       if (fields[key] !== undefined) update[key] = fields[key];
     });
 
+    if (fields.status === 'Converted' || fields.status === 'Approved' || fields.linked_creator_id) {
+      update.deleted = true;
+    }
+
     // Append outreach history entry if provided
     if (outreach_entry && outreach_entry.date) {
       const existing = snap.data().outreach_history || [];

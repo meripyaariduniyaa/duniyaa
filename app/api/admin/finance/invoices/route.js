@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/creator-auth';
+import { generateInvoiceNumber } from '@/lib/finance';
 
 function handleApiError(error, defaultMsg) {
   console.error('Invoices API Error:', error);
@@ -10,21 +11,6 @@ function handleApiError(error, defaultMsg) {
   return NextResponse.json({ error: msg }, { status });
 }
 
-async function generateInvoiceNumber(db) {
-  const year = new Date().getFullYear();
-  try {
-    // Count ALL invoices ever (not just this year) so the number never resets/collides
-    const snap = await db.collection('finance_invoices').count().get();
-    const total = snap.data().count || 0;
-    const seq = String(total + 1).padStart(4, '0');
-    return `LC-INV-${year}-${seq}`;
-  } catch {
-    // Fallback: timestamp-based if count() is not available
-    const seq = String(Date.now()).slice(-5);
-    return `LC-INV-${year}-${seq}`;
-  }
-}
-
 export async function GET(request) {
   try {
     await requireAdmin(request);
@@ -32,6 +18,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const search = searchParams.get('search')?.toLowerCase();
+    const orderIdParam = searchParams.get('orderId');
+    const typeParam = searchParams.get('type');
     const fetchPaidOrders = searchParams.get('fetchPaidOrders') === 'true';
 
     // Fetch invoices safely
@@ -41,6 +29,12 @@ export async function GET(request) {
     // Sort in memory by issuedDate or createdAt descending
     invoices.sort((a, b) => new Date(b.createdAt || b.issuedDate || 0) - new Date(a.createdAt || a.issuedDate || 0));
 
+    if (orderIdParam) {
+      invoices = invoices.filter((inv) => inv.orderId === orderIdParam);
+    }
+    if (typeParam && typeParam !== 'all') {
+      invoices = invoices.filter((inv) => (inv.type || 'custom') === typeParam);
+    }
     if (status && status !== 'all') {
       invoices = invoices.filter((inv) => inv.status === status);
     }
@@ -70,6 +64,16 @@ export async function GET(request) {
         if (isPaid && !orderMap.has(id)) {
           const rawAmount = data.amount_in_rupees || (data.final_amount ? data.final_amount / 100 : 0) || data.amount || 0;
           const rupees = Number(rawAmount > 1000 && data.final_amount ? (data.final_amount / 100).toFixed(2) : Number(rawAmount).toFixed(2));
+          let rawDate = data.paid_at || data.created_at;
+          let dateStr = new Date().toISOString().split('T')[0];
+          if (rawDate) {
+            try {
+              if (typeof rawDate?.toDate === 'function') dateStr = rawDate.toDate().toISOString().split('T')[0];
+              else if (rawDate?._seconds) dateStr = new Date(rawDate._seconds * 1000).toISOString().split('T')[0];
+              else if (typeof rawDate === 'string' && rawDate.includes('T')) dateStr = rawDate.split('T')[0];
+              else if (typeof rawDate === 'string') dateStr = rawDate;
+            } catch {}
+          }
           orderMap.set(id, {
             id,
             note_id: data.note_id || id,
@@ -81,7 +85,7 @@ export async function GET(request) {
             payment_id: data.payment_id || data.razorpay_payment_id || '',
             coupon_code: data.coupon_code || '',
             discount_percent: data.discount_percent || 0,
-            date: data.paid_at || data.created_at || new Date().toISOString().split('T')[0],
+            date: dateStr,
           });
         }
       };
@@ -167,9 +171,13 @@ export async function POST(request) {
       discount: calculatedDiscount,
       taxRate: Number(taxRate) || 0,
       taxAmount: calculatedTax,
+      cgst: 0,
+      sgst: 0,
+      couponCode: safeTrim(body.couponCode || ''),
       totalAmount: calculatedFinalTotal,
       currency,
       status,
+      type: body.type || 'custom',
       issuedDate,
       dueDate,
       notes: safeTrim(notes),

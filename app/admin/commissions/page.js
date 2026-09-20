@@ -255,13 +255,12 @@ export default function AdminCommissionsPage() {
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Value</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Commission Earned</th>
                   <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
-                  <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={5} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
                       <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>No commission records found</div>
                       <div style={{ fontSize: '0.8rem' }}>Sync orders or adjust your search filter.</div>
                     </td>
@@ -333,30 +332,7 @@ export default function AdminCommissionsPage() {
                           </span>
                         </td>
 
-                        {/* ACTIONS */}
-                        <td style={{ padding: '16px 20px' }}>
-                          {comm.status === 'pending' && (
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateStatus(comm.id, 'paid')}
-                              style={{
-                                background: '#15803d',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '6px 12px',
-                                borderRadius: '8px',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Mark Paid
-                            </button>
-                          )}
-                          {comm.status === 'paid' && (
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Reconciled</span>
-                          )}
-                        </td>
+
 
                       </tr>
                     );

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import AdminAiCopilot from '@/components/admin/AdminAiCopilot';
 import {
   DashboardIcon,
   OrdersIcon,
@@ -24,10 +25,14 @@ import {
   MenuIcon,
   CloseIcon,
   ExternalLinkIcon,
-  FinanceIcon
+  FinanceIcon,
+  SparklesIcon,
+  MegaphoneIcon
 } from '@/components/admin/AdminIcons';
 
 const NAV_ITEMS = [
+  { href: '/admin', label: 'AI Home', icon: SparklesIcon, exact: true },
+  { href: '/marketing', label: 'Marketing AI', icon: MegaphoneIcon },
   { href: '/admin/dashboard', label: 'Overview', icon: DashboardIcon, exact: true },
   { href: '/admin/finance', label: 'Finance & Invoices', icon: FinanceIcon },
   { href: '/admin/orders', label: 'Orders', icon: OrdersIcon },
@@ -150,35 +155,31 @@ export default function AdminLayout({ children }) {
                 <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.01em' }}>
                   Lovely<span style={{ color: '#38bdf8' }}>Crafts</span>
                 </span>
-                <span style={{ background: '#1e293b', color: '#38bdf8', fontSize: '0.65rem', fontWeight: 800, padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.06em', border: '1px solid #334155' }}>
-                  Admin Suite
-                </span>
               </div>
             </Link>
 
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/marketing"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
                 padding: '4px 10px',
                 borderRadius: '8px',
-                background: '#131c2e',
-                border: '1px solid #1e293b',
-                color: '#94a3b8',
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(236, 72, 153, 0.18) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.4)',
+                color: '#d8b4fe',
                 fontSize: '0.75rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 textDecoration: 'none',
+                transition: 'all 0.15s ease',
               }}
               className="hidden md:inline-flex"
+              title="Open AI Digital Marketing Suite"
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-              <span>Live Storefront</span>
-              <ExternalLinkIcon size={12} />
-            </a>
+              <MegaphoneIcon size={14} />
+              <span>Marketing AI</span>
+            </Link>
 
             <Link
               href="/drive"
@@ -230,22 +231,6 @@ export default function AdminLayout({ children }) {
           {/* RIGHT: SYSTEM STATUS, USER PROFILE & LOGOUT */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
 
-            {/* LIVE STATUS */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 10px',
-              borderRadius: '999px',
-              background: 'rgba(34, 197, 94, 0.1)',
-              border: '1px solid rgba(34, 197, 94, 0.25)',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              color: '#4ade80'
-            }} className="hidden sm:flex">
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-              <span>Production Live</span>
-            </div>
 
             {/* USER PROFILE CHIP */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '3px 4px 3px 10px', background: '#131c2e', border: '1px solid #1e293b', borderRadius: '999px' }}>
@@ -435,6 +420,9 @@ export default function AdminLayout({ children }) {
       }} className="admin-content-area">
         {children}
       </main>
+
+      {/* PERSISTENT FLOATING AI COPILOT BUBBLE */}
+      <AdminAiCopilot />
 
       <style jsx global>{`
         @media (max-width: 1024px) {

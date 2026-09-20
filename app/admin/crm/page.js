@@ -1292,6 +1292,13 @@ function KanbanView({ prospects, onSelectProspect, onEditProspect, onDeleteProsp
                           style={{ background: '#f1f5f9', border: 'none', padding: '5px', borderRadius: '6px', color: '#64748b', cursor: 'pointer' }}>
                           <EditIcon size={14} />
                         </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onDeleteProspect && onDeleteProspect(p); }}
+                          title="Delete Lead"
+                          style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '5px', borderRadius: '6px', color: '#dc2626', cursor: 'pointer' }}>
+                          <TrashIcon size={14} />
+                        </button>
                       </div>
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', cursor: 'pointer' }} onClick={() => onSelectProspect(p)}>
@@ -1343,6 +1350,20 @@ export default function AdminCRMPage() {
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, [user]);
+
+  const handleDeleteProspect = async (p) => {
+    if (!window.confirm(`Are you sure you want to remove "${p.name}" from CRM?`)) return;
+    try {
+      const token = tokenRef.current || (await user.getIdToken());
+      await fetch(`/api/admin/crm/${p.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      loadProspects();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   useEffect(() => { loadProspects(); }, [loadProspects]);
 
@@ -1536,7 +1557,7 @@ export default function AdminCRMPage() {
           prospects={prospects}
           onSelectProspect={setSelectedProspect}
           onEditProspect={setEditingProspect}
-          onDeleteProspect={loadProspects}
+          onDeleteProspect={handleDeleteProspect}
         />
       ) : (
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
@@ -1641,6 +1662,17 @@ export default function AdminCRMPage() {
                             title="Edit Prospect"
                             style={{ padding: '5px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', cursor: 'pointer' }}>
                             <EditIcon size={14} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProspect(p);
+                            }}
+                            title="Delete Prospect"
+                            style={{ padding: '5px', borderRadius: '6px', border: '1px solid #fecaca', background: '#fff', color: '#dc2626', cursor: 'pointer' }}>
+                            <TrashIcon size={14} />
                           </button>
                         </div>
                       </td>

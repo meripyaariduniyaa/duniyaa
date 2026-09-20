@@ -194,12 +194,13 @@ export async function POST(request, { params }) {
       });
     }
 
-    // 8. Update CRM Prospect status
+    // 8. Update CRM Prospect status & auto-remove from CRM as transferred to creator
     batch.update(prospectRef, {
       status: 'Approved',
       linked_creator_id: creatorId,
       signing_email: finalEmail,
       free_pass_issued: Boolean(issue_gift_pass),
+      deleted: true,
       updated_at: FieldValue.serverTimestamp(),
     });
 

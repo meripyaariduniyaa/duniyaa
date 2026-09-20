@@ -4,6 +4,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { calculateEffectiveTierAndRate, commissionForAmount, normalizeCode } from '@/lib/creator-club';
 import { verifyReferral } from '@/lib/referral-crypto';
+import { createAutoInvoice } from '@/lib/finance';
 
 export async function POST(request) {
   try {
@@ -132,6 +133,21 @@ export async function POST(request) {
       console.error('Failed to write to admin_payment_ledger vault:', vaultErr);
     }
 
+    // 3b. Auto-generate internal invoice in finance_invoices (Item 3b)
+    try {
+      await createAutoInvoice({
+        db: adminDb,
+        orderId: orderRef.id,
+        noteData,
+        amountInRupees: Number(((finalAmountPaid || 0) / 100).toFixed(2)),
+        couponCode: normalizedCode,
+        discountPercent: finalDiscountPercent,
+        paymentMethod: method === 'coupon' ? 'VIP Gift Pass' : 'UPI / Razorpay',
+      });
+    } catch (invoiceErr) {
+      console.error('Failed to auto-generate finance invoice:', invoiceErr);
+    }
+
     // 4. Atomically increment coupon usage
     if (resolvedCouponDoc) {
       try {
@@ -144,13 +160,18 @@ export async function POST(request) {
       }
     }
 
-    // 5. Mark Creator Gift claimed if coupon was a gift pass
+    // 5. Mark Creator Gift claimed & deactivate if coupon was a gift pass
     if (resolvedCouponDoc && resolvedCouponDoc.type === 'gift') {
       try {
+        await adminDb.collection('coupons').doc(resolvedCouponDoc.id).update({
+          active: false,
+          updated_at: FieldValue.serverTimestamp(),
+        });
         const giftSnap = await adminDb.collection('creatorGifts').where('coupon_id', '==', resolvedCouponDoc.id).limit(1).get();
         if (!giftSnap.empty) {
           await giftSnap.docs[0].ref.update({
             claimed: true,
+            active: false,
             claimed_note_id: apologyId,
             claimed_at: FieldValue.serverTimestamp(),
           });

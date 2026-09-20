@@ -266,7 +266,7 @@ export default function AdminCouponsPage() {
 
                         {/* USAGE */}
                         <td style={{ padding: '16px 20px', fontSize: '0.85rem', color: '#475569' }}>
-                          <strong>{c.used_count || 0}</strong> uses
+                          <strong>{c.usage_count ?? c.used_count ?? 0}</strong> uses
                         </td>
 
                         {/* STATUS */}

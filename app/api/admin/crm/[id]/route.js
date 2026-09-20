@@ -56,6 +56,10 @@ export async function PATCH(request, { params }) {
       if (body[key] !== undefined) update[key] = body[key];
     });
 
+    if (body.status === 'Converted' || body.status === 'Approved' || body.linked_creator_id) {
+      update.deleted = true;
+    }
+
     if (body.outreach_entry && body.outreach_entry.date) {
       const existing = snap.data().outreach_history || [];
       update.outreach_history = [
