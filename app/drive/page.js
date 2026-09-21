@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
@@ -193,6 +193,103 @@ function IconClose({ size = 18, className = "" }) {
   );
 }
 
+function IconDownload({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
+    </svg>
+  );
+}
+
+function IconEye({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function IconMenu({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="4" x2="20" y1="12" y2="12" />
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="4" x2="20" y1="18" y2="18" />
+    </svg>
+  );
+}
+
+function IconPlay({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <polygon points="6 3 20 12 6 21 6 3" />
+    </svg>
+  );
+}
+
+function IconChevronLeft({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  );
+}
+
+function IconChevronRight({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+// INLINE AUDIO PLAYER COMPONENT FOR VOICE NOTES
+function InlineAudioCardPlayer({ src, title }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-indigo-950/40 to-slate-950/80 text-center space-y-2">
+      <audio
+        ref={audioRef}
+        src={src}
+        onEnded={() => setIsPlaying(false)}
+        onPause={() => setIsPlaying(false)}
+        preload="metadata"
+      />
+      <div className="w-12 h-12 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform" onClick={togglePlay}>
+        {isPlaying ? (
+          <div className="flex gap-1 items-center justify-center">
+            <span className="w-1 h-4 bg-pink-400 rounded-full animate-pulse" />
+            <span className="w-1 h-5 bg-pink-300 rounded-full animate-pulse delay-75" />
+            <span className="w-1 h-3 bg-pink-400 rounded-full animate-pulse delay-150" />
+          </div>
+        ) : (
+          <IconPlay size={18} className="ml-0.5" />
+        )}
+      </div>
+      <div className="text-[11px] font-semibold text-slate-300 truncate max-w-[150px]">
+        {isPlaying ? 'Playing audio...' : 'Voice Note (.webm)'}
+      </div>
+    </div>
+  );
+}
+
 export default function DrivePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -205,6 +302,7 @@ export default function DrivePage() {
   const [currentFolder, setCurrentFolder] = useState(''); // '' is root
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Resources
   const [resources, setResources] = useState([]);
@@ -215,8 +313,9 @@ export default function DrivePage() {
   // Selection State
   const [selectedIds, setSelectedIds] = useState(new Set());
 
-  // Search & View
+  // Search, Sort & View
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('created-desc'); // 'created-desc' | 'created-asc' | 'size-desc' | 'size-asc' | 'name-asc'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   // Modals & UI States
@@ -238,7 +337,7 @@ export default function DrivePage() {
   const [isQueryDeleteModalOpen, setIsQueryDeleteModalOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  const [previewItem, setPreviewItem] = useState(null);
+  const [previewIndex, setPreviewIndex] = useState(null);
 
   // Upload State
   const [uploading, setUploading] = useState(false);
@@ -360,6 +459,7 @@ export default function DrivePage() {
   // Folder Navigation
   const navigateToFolder = (path) => {
     setCurrentFolder(path);
+    setIsMobileSidebarOpen(false);
   };
 
   const breadcrumbs = currentFolder ? currentFolder.split('/') : [];
@@ -395,7 +495,7 @@ export default function DrivePage() {
     }
   };
 
-  // Delete Folder and its contents
+  // Delete Folder
   const handleDeleteFolder = async () => {
     if (!folderToDelete) return;
     setDeletingFolder(true);
@@ -428,62 +528,65 @@ export default function DrivePage() {
   };
 
   // Upload File
-  const handleFileUpload = useCallback(async (files) => {
-    if (!files || files.length === 0) return;
+  const handleFileUpload = useCallback(
+    async (files) => {
+      if (!files || files.length === 0) return;
 
-    setUploading(true);
-    setUploadProgress(10);
+      setUploading(true);
+      setUploadProgress(10);
 
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
 
-        const signRes = await fetch('/api/drive/sign', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ folder: currentFolder }),
-        });
+          const signRes = await fetch('/api/drive/sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folder: currentFolder }),
+          });
 
-        const signData = await signRes.json();
-        if (!signRes.ok) throw new Error(signData.error || 'Failed to get upload signature');
+          const signData = await signRes.json();
+          if (!signRes.ok) throw new Error(signData.error || 'Failed to get upload signature');
 
-        let targetType = 'image';
-        if (file.type.startsWith('video/')) targetType = 'video';
-        else if (!file.type.startsWith('image/')) targetType = 'raw';
+          let targetType = 'image';
+          if (file.type.startsWith('video/')) targetType = 'video';
+          else if (!file.type.startsWith('image/')) targetType = 'raw';
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('api_key', signData.api_key);
-        formData.append('timestamp', signData.timestamp);
-        formData.append('signature', signData.signature);
-        if (signData.folder) {
-          formData.append('folder', signData.folder);
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('api_key', signData.api_key);
+          formData.append('timestamp', signData.timestamp);
+          formData.append('signature', signData.signature);
+          if (signData.folder) {
+            formData.append('folder', signData.folder);
+          }
+
+          setUploadProgress(40 + Math.round(((i + 0.5) / files.length) * 50));
+
+          const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${targetType}/upload`;
+          const uploadRes = await fetch(uploadEndpoint, {
+            method: 'POST',
+            body: formData,
+          });
+
+          const uploadData = await uploadRes.json();
+          if (!uploadRes.ok) throw new Error(uploadData.error?.message || 'Upload failed');
         }
 
-        setUploadProgress(40 + Math.round(((i + 0.5) / files.length) * 50));
-
-        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${targetType}/upload`;
-        const uploadRes = await fetch(uploadEndpoint, {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) throw new Error(uploadData.error?.message || 'Upload failed');
+        setUploadProgress(100);
+        showToast(`Successfully uploaded ${files.length} file(s)!`);
+        fetchResources();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setTimeout(() => {
+          setUploading(false);
+          setUploadProgress(0);
+        }, 500);
       }
-
-      setUploadProgress(100);
-      showToast(`Successfully uploaded ${files.length} file(s)!`);
-      fetchResources();
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setTimeout(() => {
-        setUploading(false);
-        setUploadProgress(0);
-      }, 500);
-    }
-  }, [currentFolder, fetchResources]);
+    },
+    [currentFolder, fetchResources]
+  );
 
   // Drag & Drop
   const handleDrag = (e) => {
@@ -504,6 +607,17 @@ export default function DrivePage() {
       handleFileUpload(e.dataTransfer.files);
     }
   };
+
+  // Clipboard Paste Support (Ctrl+V)
+  useEffect(() => {
+    const handlePaste = (e) => {
+      if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+        handleFileUpload(e.clipboardData.files);
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [handleFileUpload]);
 
   // Rename Asset
   const handleRename = async (e) => {
@@ -556,6 +670,7 @@ export default function DrivePage() {
 
       showToast('Asset permanently deleted!');
       setDeleteItem(null);
+      if (previewIndex !== null) setPreviewIndex(null);
       fetchResources();
     } catch (err) {
       showToast(err.message, 'error');
@@ -564,7 +679,7 @@ export default function DrivePage() {
     }
   };
 
-  // Execute Batch Delete (Bulk or Query)
+  // Execute Batch Delete
   const executeBatchDelete = async (publicIds) => {
     if (!publicIds || publicIds.length === 0) return;
 
@@ -594,7 +709,7 @@ export default function DrivePage() {
     }
   };
 
-  // Multi-Select handlers
+  // Multi-Select Handlers
   const toggleSelect = (publicId) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -607,26 +722,138 @@ export default function DrivePage() {
     });
   };
 
-  const isAllSelected =
-    resources.length > 0 && selectedIds.size === resources.length;
-
-  const toggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds(new Set());
-    } else {
-      const allIds = resources.map((r) => r.public_id);
-      setSelectedIds(new Set(allIds));
-    }
-  };
-
-  // Copy Single or Bulk URLs
+  // Copy Clipboard Helper
   const copyToClipboard = (text, label = 'Direct link') => {
     navigator.clipboard.writeText(text);
     showToast(`${label} copied to clipboard!`);
   };
 
+  // Helper: Format Bytes
+  const formatBytes = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Helper: Extract File Name
+  const getFileName = (publicId) => {
+    if (!publicId) return '';
+    const parts = publicId.split('/');
+    return parts[parts.length - 1];
+  };
+
+  // Filter & Search Logic
+  const filteredResources = useMemo(() => {
+    let list = resources.filter((item) => {
+      if (currentFolder) {
+        const folderPrefix = currentFolder.endsWith('/') ? currentFolder : `${currentFolder}/`;
+        if (!item.public_id.startsWith(folderPrefix) && item.public_id !== currentFolder) {
+          return false;
+        }
+      } else {
+        const hasFolderQuery = searchQuery && searchQuery.toLowerCase().includes('folder:');
+        if (!hasFolderQuery && item.public_id.includes('/')) {
+          return false;
+        }
+      }
+
+      if (!searchQuery.trim()) return true;
+
+      const queryTokens = searchQuery.toLowerCase().trim().split(/\s+/);
+
+      return queryTokens.every((token) => {
+        const lowerToken = token.trim();
+        if (!lowerToken) return true;
+
+        if (lowerToken.startsWith('older:')) {
+          const daysStr = lowerToken.replace('older:', '').replace('d', '');
+          const days = parseInt(daysStr, 10);
+          if (!isNaN(days) && item.created_at) {
+            const itemDate = new Date(item.created_at).getTime();
+            const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+            return itemDate < cutoff;
+          }
+        }
+
+        if (lowerToken.startsWith('newer:')) {
+          const daysStr = lowerToken.replace('newer:', '').replace('d', '');
+          const days = parseInt(daysStr, 10);
+          if (!isNaN(days) && item.created_at) {
+            const itemDate = new Date(item.created_at).getTime();
+            const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+            return itemDate >= cutoff;
+          }
+        }
+
+        if (lowerToken.startsWith('folder:')) {
+          const targetFolder = lowerToken.replace('folder:', '');
+          return item.public_id.toLowerCase().startsWith(targetFolder.toLowerCase());
+        }
+
+        if (lowerToken.startsWith('ext:')) {
+          const ext = lowerToken.replace('ext:', '').replace('.', '');
+          return (item.format || '').toLowerCase() === ext;
+        }
+
+        if (lowerToken.startsWith('size:>')) {
+          const sizeStr = lowerToken.replace('size:>', '').replace('mb', '');
+          const mb = parseFloat(sizeStr);
+          if (!isNaN(mb)) return (item.bytes || 0) > mb * 1024 * 1024;
+        }
+
+        if (lowerToken.startsWith('size:<')) {
+          const sizeStr = lowerToken.replace('size:<', '').replace('mb', '');
+          const mb = parseFloat(sizeStr);
+          if (!isNaN(mb)) return (item.bytes || 0) < mb * 1024 * 1024;
+        }
+
+        return item.public_id.toLowerCase().includes(lowerToken);
+      });
+    });
+
+    // Sorting
+    list.sort((a, b) => {
+      if (sortBy === 'created-desc') {
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      }
+      if (sortBy === 'created-asc') {
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      }
+      if (sortBy === 'size-desc') {
+        return (b.bytes || 0) - (a.bytes || 0);
+      }
+      if (sortBy === 'size-asc') {
+        return (a.bytes || 0) - (b.bytes || 0);
+      }
+      if (sortBy === 'name-asc') {
+        return (a.public_id || '').localeCompare(b.public_id || '');
+      }
+      return 0;
+    });
+
+    return list;
+  }, [resources, currentFolder, searchQuery, sortBy]);
+
+  // Filter Subfolders
+  const filteredFolders = useMemo(() => {
+    if (!searchQuery.trim()) return folders;
+    return folders.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [folders, searchQuery]);
+
+  const isAllSelected = filteredResources.length > 0 && selectedIds.size === filteredResources.length;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredResources.map((r) => r.public_id)));
+    }
+  };
+
   const handleBulkCopy = () => {
-    const selectedUrls = resources
+    const selectedUrls = filteredResources
       .filter((r) => selectedIds.has(r.public_id))
       .map((r) => r.secure_url)
       .join('\n');
@@ -636,100 +863,33 @@ export default function DrivePage() {
     }
   };
 
-  // Query and Folder filtering
-  const filteredResources = resources.filter((item) => {
-    if (currentFolder) {
-      const folderPrefix = currentFolder.endsWith('/') ? currentFolder : `${currentFolder}/`;
-      if (!item.public_id.startsWith(folderPrefix) && item.public_id !== currentFolder) {
-        return false;
+  const totalFolderBytes = useMemo(() => {
+    return filteredResources.reduce((acc, curr) => acc + (curr.bytes || 0), 0);
+  }, [filteredResources]);
+
+  // Lightbox Keyboard Navigation
+  const previewItem = previewIndex !== null && filteredResources[previewIndex] ? filteredResources[previewIndex] : null;
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (previewIndex === null) return;
+      if (e.key === 'ArrowRight') {
+        setPreviewIndex((prev) => (prev + 1 < filteredResources.length ? prev + 1 : 0));
+      } else if (e.key === 'ArrowLeft') {
+        setPreviewIndex((prev) => (prev - 1 >= 0 ? prev - 1 : filteredResources.length - 1));
+      } else if (e.key === 'Escape') {
+        setPreviewIndex(null);
       }
-    } else {
-      const hasFolderQuery = searchQuery && searchQuery.toLowerCase().includes('folder:');
-      if (!hasFolderQuery && item.public_id.includes('/')) {
-        return false;
-      }
-    }
-
-    if (!searchQuery.trim()) return true;
-
-    const queryTokens = searchQuery.toLowerCase().trim().split(/\s+/);
-
-    return queryTokens.every((token) => {
-      const lowerToken = token.trim();
-      if (!lowerToken) return true;
-
-      if (lowerToken.startsWith('older:')) {
-        const daysStr = lowerToken.replace('older:', '').replace('d', '');
-        const days = parseInt(daysStr, 10);
-        if (!isNaN(days) && item.created_at) {
-          const itemDate = new Date(item.created_at).getTime();
-          const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-          return itemDate < cutoff;
-        }
-      }
-
-      if (lowerToken.startsWith('newer:')) {
-        const daysStr = lowerToken.replace('newer:', '').replace('d', '');
-        const days = parseInt(daysStr, 10);
-        if (!isNaN(days) && item.created_at) {
-          const itemDate = new Date(item.created_at).getTime();
-          const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-          return itemDate >= cutoff;
-        }
-      }
-
-      if (lowerToken.startsWith('folder:')) {
-        const targetFolder = lowerToken.replace('folder:', '');
-        return item.public_id.toLowerCase().startsWith(targetFolder.toLowerCase());
-      }
-
-      if (lowerToken.startsWith('ext:')) {
-        const ext = lowerToken.replace('ext:', '').replace('.', '');
-        return (item.format || '').toLowerCase() === ext;
-      }
-
-      if (lowerToken.startsWith('size:>')) {
-        const sizeStr = lowerToken.replace('size:>', '').replace('mb', '');
-        const mb = parseFloat(sizeStr);
-        if (!isNaN(mb)) return (item.bytes || 0) > mb * 1024 * 1024;
-      }
-
-      if (lowerToken.startsWith('size:<')) {
-        const sizeStr = lowerToken.replace('size:<', '').replace('mb', '');
-        const mb = parseFloat(sizeStr);
-        if (!isNaN(mb)) return (item.bytes || 0) < mb * 1024 * 1024;
-      }
-
-      const fileName = getFileName(item.public_id).toLowerCase();
-      const fullId = item.public_id.toLowerCase();
-      return fileName.includes(lowerToken) || fullId.includes(lowerToken);
-    });
-  });
-
-  const filteredFolders = folders.filter((f) => {
-    if (!searchQuery.trim()) return true;
-    return f.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
-  });
-
-  // Helpers
-  const formatBytes = (bytes) => {
-    if (!bytes) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-
-  const getFileName = (publicId) => {
-    const parts = publicId.split('/');
-    return parts[parts.length - 1];
-  };
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewIndex, filteredResources.length]);
 
   if (authLoading || checkingAuth) {
     return (
-      <div style={styles.loadingScreen}>
-        <div style={styles.spinner} />
-        <p style={{ color: '#94a3b8', fontWeight: 600 }}>Loading Cloudinary Drive...</p>
+      <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-4 text-slate-200">
+        <div className="w-10 h-10 border-3 border-slate-800 border-t-pink-500 rounded-full animate-spin" />
+        <p className="text-sm font-semibold tracking-wide text-slate-400">Loading Cloudinary Drive Manager...</p>
       </div>
     );
   }
@@ -737,49 +897,82 @@ export default function DrivePage() {
   if (!isAdmin) return null;
 
   return (
-    <div style={styles.container} onDragEnter={handleDrag}>
-      {/* Hidden File Input */}
+    <div
+      className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col selection:bg-pink-500 selection:text-white font-sans antialiased overflow-hidden h-screen"
+      onDragEnter={handleDrag}
+    >
+      {/* HIDDEN FILE INPUT */}
       <input
         type="file"
         ref={fileInputRef}
-        multiple
-        style={{ display: 'none' }}
         onChange={(e) => handleFileUpload(e.target.files)}
+        multiple
+        className="hidden"
       />
 
-      {/* TOP HEADER */}
-      <header style={styles.header}>
-        <div style={styles.brandGroup}>
-          <Link href="/admin/dashboard" style={styles.backLink} title="Back to Admin Dashboard">
-            ← Admin
+      {/* 1. TOP HEADER */}
+      <header className="shrink-0 bg-[#0c1220] border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            className="md:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+          >
+            <IconMenu size={18} />
+          </button>
+
+          <Link
+            href="/admin/dashboard"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700/60 transition-colors"
+          >
+            <span>← Admin</span>
           </Link>
-          <div style={styles.logoBadge}>
+
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-pink-900/30">
             <IconCloud size={20} />
           </div>
+
           <div>
-            <h1 style={styles.title}>Cloudinary Drive</h1>
-            <p style={styles.subtitle}>Asset Storage & Hosting Manager</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white">
+                Cloudinary Drive
+              </h1>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-pink-500/15 text-pink-300 border border-pink-500/30">
+                PRO STORAGE
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 hidden sm:block">
+              {filteredResources.length} items • Total in folder: <strong className="text-slate-200">{formatBytes(totalFolderBytes)}</strong>
+            </p>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div style={styles.headerActions}>
+        {/* HEADER ACTIONS */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/del"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30 transition-all"
+          >
+            <IconTrash size={14} />
+            <span className="hidden sm:inline">Expiration Engine</span>
+          </Link>
+
           <button
             type="button"
             onClick={() => setIsNewFolderOpen(true)}
-            style={styles.secondaryBtn}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all"
           >
-            <IconPlus size={16} />
-            <span>New Folder</span>
+            <IconPlus size={15} />
+            <span className="hidden sm:inline">New Folder</span>
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            style={styles.primaryBtn}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-xs font-bold shadow-md shadow-pink-950/50 transition-all disabled:opacity-50"
           >
-            <IconUpload size={16} />
+            <IconUpload size={15} />
             <span>{uploading ? `Uploading (${uploadProgress}%)` : 'Upload Files'}</span>
           </button>
 
@@ -787,169 +980,165 @@ export default function DrivePage() {
             type="button"
             onClick={handleRefresh}
             title="Refresh drive"
-            style={styles.iconBtn}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700"
           >
-            <IconRefresh size={16} />
+            <IconRefresh size={15} />
           </button>
         </div>
       </header>
 
-      {/* DRAG AND DROP OVERLAY */}
+      {/* DRAG & DROP OVERLAY */}
       {dragActive && (
         <div
-          style={styles.dragOverlay}
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6"
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <div style={styles.dragBox}>
-            <IconUpload size={48} />
-            <h3 style={{ margin: '10px 0 4px', color: '#fff', fontSize: '1.4rem' }}>Drop files to upload</h3>
-            <p style={{ color: '#f472b6', margin: 0 }}>Uploading to: /{currentFolder || 'root'}</p>
+          <div className="border-3 border-dashed border-pink-500 rounded-3xl p-12 text-center space-y-4 max-w-md w-full bg-pink-950/20 shadow-2xl animate-pulse">
+            <div className="w-16 h-16 rounded-2xl bg-pink-500/20 text-pink-400 border border-pink-500/40 flex items-center justify-center mx-auto">
+              <IconUpload size={36} />
+            </div>
+            <h3 className="text-xl font-black text-white">Drop files to upload instantly</h3>
+            <p className="text-xs text-pink-300 font-mono">
+              Target Destination: /{currentFolder || 'root'}
+            </p>
           </div>
         </div>
       )}
 
-      {/* MAIN LAYOUT */}
-      <div style={styles.mainLayout}>
-        {/* SIDEBAR */}
-        <aside style={styles.sidebar}>
-          <div style={styles.sidebarSection}>
-            <span style={styles.sectionHeader}>STORAGE SECTIONS</span>
+      {/* 2. MAIN LAYOUT (DUAL PANE) */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* SIDEBAR (DESKTOP & MOBILE DRAWER) */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-30 md:static md:z-0 w-64 bg-[#090e1a] border-r border-slate-800/80 p-4 flex flex-col gap-6 overflow-y-auto transform transition-transform duration-200 md:transform-none ${
+            isMobileSidebarOpen ? 'translate-x-0 top-[57px]' : '-translate-x-full md:translate-x-0'
+          }`}
+        >
+          {/* STORAGE ROOT */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-2">
+              Storage Root
+            </span>
             <button
               type="button"
               onClick={() => navigateToFolder('')}
-              style={{
-                ...styles.navItem,
-                ...(currentFolder === '' ? styles.activeNavItem : {}),
-              }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                currentFolder === ''
+                  ? 'bg-pink-600/15 text-pink-300 border border-pink-500/30 font-bold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
             >
-              <IconHome size={16} />
-              <span>Root Folder</span>
+              <IconHome size={16} className={currentFolder === '' ? 'text-pink-400' : 'text-slate-500'} />
+              <span>Root Storage</span>
             </button>
           </div>
 
-          {/* RESOURCE TYPES */}
-          <div style={styles.sidebarSection}>
-            <span style={styles.sectionHeader}>RESOURCE TYPES</span>
-            <button
-              type="button"
-              onClick={() => setResourceType('image')}
-              style={{
-                ...styles.navItem,
-                ...(resourceType === 'image' ? styles.activeNavItem : {}),
-              }}
-            >
-              <IconImage size={16} />
-              <span>Images</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setResourceType('video')}
-              style={{
-                ...styles.navItem,
-                ...(resourceType === 'video' ? styles.activeNavItem : {}),
-              }}
-            >
-              <IconVideo size={16} />
-              <span>Videos & Audio</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setResourceType('raw')}
-              style={{
-                ...styles.navItem,
-                ...(resourceType === 'raw' ? styles.activeNavItem : {}),
-              }}
-            >
-              <IconFile size={16} />
-              <span>Documents / Raw</span>
-            </button>
+          {/* RESOURCE TYPE SELECTOR */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-2">
+              Resource Category
+            </span>
+            {[
+              { id: 'image', label: 'Images', icon: IconImage, color: 'text-sky-400' },
+              { id: 'video', label: 'Videos & Audio', icon: IconVideo, color: 'text-purple-400' },
+              { id: 'raw', label: 'Documents / Raw', icon: IconFile, color: 'text-amber-400' },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              const isActive = resourceType === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setResourceType(cat.id)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <Icon size={16} className={cat.color} />
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* FOLDER QUICK LIST */}
-          <div style={styles.sidebarSection}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={styles.sectionHeader}>FOLDERS</span>
+          {/* FOLDER EXPLORER TREE */}
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center justify-between px-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                Folders ({folders.length})
+              </span>
               <button
                 type="button"
                 onClick={() => setIsNewFolderOpen(true)}
-                style={styles.tinyBtn}
-                title="Add Subfolder"
+                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white"
+                title="Create Subfolder"
               >
-                <IconPlus size={14} />
+                <IconPlus size={13} />
               </button>
             </div>
 
             {loadingFolders ? (
-              <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Loading folders...</p>
+              <p className="text-xs text-slate-500 px-2 py-1">Loading folders...</p>
             ) : folders.length === 0 ? (
-              <p style={{ fontSize: '0.8rem', color: '#64748b' }}>No subfolders</p>
+              <p className="text-xs text-slate-600 px-2 py-1">No subfolders here</p>
             ) : (
-              folders.map((f) => {
-                const isActive = currentFolder === f.path;
-                return (
-                  <div
-                    key={f.path}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      borderRadius: '8px',
-                      background: isActive ? '#1e293b' : 'transparent',
-                      paddingRight: '6px',
-                      marginBottom: '2px',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => navigateToFolder(f.path)}
-                      style={{
-                        ...styles.navItem,
-                        ...(isActive ? styles.activeNavItem : {}),
-                        flex: 1,
-                        textAlign: 'left',
-                        background: 'transparent',
-                        borderWidth: 0,
-                        borderStyle: 'none',
-                        marginBottom: 0,
-                      }}
+              <div className="space-y-1">
+                {folders.map((f) => {
+                  const isActive = currentFolder === f.path;
+                  return (
+                    <div
+                      key={f.path}
+                      className={`group flex items-center justify-between rounded-xl pr-2 transition-all ${
+                        isActive ? 'bg-slate-800/90 text-pink-300 font-bold' : 'hover:bg-slate-800/40 text-slate-400'
+                      }`}
                     >
-                      <IconFolder size={15} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {f.name}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFolderToDelete(f);
-                      }}
-                      style={styles.folderDeleteIconBtn}
-                      title={`Delete folder "${f.name}"`}
-                    >
-                      <IconTrash size={14} />
-                    </button>
-                  </div>
-                );
-              })
+                      <button
+                        type="button"
+                        onClick={() => navigateToFolder(f.path)}
+                        className="flex-1 flex items-center gap-2 px-3 py-1.5 text-xs text-left truncate"
+                      >
+                        <IconFolder size={15} className={isActive ? 'text-pink-400 shrink-0' : 'text-slate-500 shrink-0'} />
+                        <span className="truncate">{f.name}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFolderToDelete(f);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1 transition-opacity"
+                        title={`Delete folder "${f.name}"`}
+                      >
+                        <IconTrash size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             )}
+          </div>
+
+          {/* CLIPBOARD UPLOAD TIP */}
+          <div className="rounded-xl bg-slate-900/60 border border-slate-800/80 p-3 text-[11px] text-slate-400 space-y-1">
+            <strong className="text-slate-200 block">Pro Tip:</strong>
+            <p>Paste screenshots directly with <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ctrl+V</kbd> to upload instantly!</p>
           </div>
         </aside>
 
-        {/* CONTENT AREA */}
-        <main style={styles.content}>
+        {/* MAIN STAGE CONTENT */}
+        <main className="flex-1 flex flex-col overflow-y-auto p-4 sm:p-6 space-y-4">
           {/* TOOLBAR & BREADCRUMBS */}
-          <div style={styles.toolbar}>
-            {/* Breadcrumb Navigation */}
-            <div style={styles.breadcrumbs}>
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0c1220] p-3 rounded-xl border border-slate-800/80">
+            {/* BREADCRUMB TRAIL */}
+            <div className="flex items-center gap-1 text-xs font-semibold text-slate-400 flex-wrap">
               <button
                 type="button"
                 onClick={() => navigateToFolder('')}
-                style={styles.crumbBtn}
+                className="hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800"
               >
                 Root
               </button>
@@ -957,21 +1146,21 @@ export default function DrivePage() {
                 const targetPath = breadcrumbs.slice(0, idx + 1).join('/');
                 const isLast = idx === breadcrumbs.length - 1;
                 return (
-                  <span key={targetPath} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ color: '#475569' }}>/</span>
+                  <span key={targetPath} className="flex items-center gap-1">
+                    <span className="text-slate-600">/</span>
                     <button
                       type="button"
                       onClick={() => navigateToFolder(targetPath)}
-                      style={{
-                        ...styles.crumbBtn,
-                        ...(isLast ? { color: '#ec4899', fontWeight: 'bold' } : {}),
-                      }}
+                      className={`px-1.5 py-0.5 rounded hover:bg-slate-800 ${
+                        isLast ? 'text-pink-400 font-bold' : 'hover:text-white'
+                      }`}
                     >
                       {crumb}
                     </button>
                   </span>
                 );
               })}
+
               {currentFolder && (
                 <button
                   type="button"
@@ -980,47 +1169,58 @@ export default function DrivePage() {
                     const name = parts[parts.length - 1];
                     setFolderToDelete({ name, path: currentFolder });
                   }}
-                  style={styles.deleteActiveFolderBtn}
-                  title="Delete this folder and all contents"
+                  className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] border border-red-500/20"
+                  title="Delete current folder"
                 >
-                  <IconTrash size={14} />
+                  <IconTrash size={12} />
                   <span>Delete Folder</span>
                 </button>
               )}
             </div>
 
-            {/* Search and Layout Toggle */}
-            <div style={styles.toolbarRight}>
-              <div style={styles.searchBox} title="Type any keyword, folder name, or extension to run a query">
-                <IconSearch size={15} />
+            {/* SEARCH & VIEW CONTROLS */}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-64">
+                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   type="text"
-                  placeholder="Run query (e.g. user-uploads, birthday, .png)..."
+                  placeholder="Search assets (ext:webm, older:30d)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={styles.searchInput}
+                  className="w-full bg-[#070b14] border border-slate-700/70 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-pink-500"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    style={styles.clearSearch}
-                    title="Clear query"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                   >
                     <IconClose size={14} />
                   </button>
                 )}
               </div>
 
-              {/* View Toggle */}
-              <div style={styles.viewToggleGroup}>
+              {/* SORT DROPDOWN */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-[#070b14] border border-slate-700/70 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-pink-500"
+              >
+                <option value="created-desc">Newest First</option>
+                <option value="created-asc">Oldest First</option>
+                <option value="size-desc">Size (Large → Small)</option>
+                <option value="size-asc">Size (Small → Large)</option>
+                <option value="name-asc">Name (A → Z)</option>
+              </select>
+
+              {/* VIEW SWITCHER */}
+              <div className="flex rounded-lg border border-slate-700/70 bg-[#070b14] p-0.5">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
-                  style={{
-                    ...styles.toggleBtn,
-                    ...(viewMode === 'grid' ? styles.activeToggle : {}),
-                  }}
+                  className={`p-1.5 rounded-md text-xs transition-colors ${
+                    viewMode === 'grid' ? 'bg-slate-800 text-pink-400 font-bold' : 'text-slate-400 hover:text-white'
+                  }`}
                   title="Grid View"
                 >
                   <IconGrid size={15} />
@@ -1028,10 +1228,9 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => setViewMode('list')}
-                  style={{
-                    ...styles.toggleBtn,
-                    ...(viewMode === 'list' ? styles.activeToggle : {}),
-                  }}
+                  className={`p-1.5 rounded-md text-xs transition-colors ${
+                    viewMode === 'list' ? 'bg-slate-800 text-pink-400 font-bold' : 'text-slate-400 hover:text-white'
+                  }`}
                   title="List View"
                 >
                   <IconList size={15} />
@@ -1040,139 +1239,82 @@ export default function DrivePage() {
             </div>
           </div>
 
-          {/* QUICK QUERY CHIPS */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Quick Queries:
+          {/* QUICK QUERY CHIP BUTTONS */}
+          <div className="flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Quick Filters:
             </span>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('older:90d')}
-              style={{
-                ...styles.chipBtn,
-                ...(searchQuery === 'older:90d' ? styles.activeChipBtn : {}),
-              }}
-            >
-              <IconClock size={13} />
-              <span>Older than 90 Days</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('older:30d')}
-              style={{
-                ...styles.chipBtn,
-                ...(searchQuery === 'older:30d' ? styles.activeChipBtn : {}),
-              }}
-            >
-              <IconCalendar size={13} />
-              <span>Older than 30 Days</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('folder:user-uploads')}
-              style={{
-                ...styles.chipBtn,
-                ...(searchQuery === 'folder:user-uploads' ? styles.activeChipBtn : {}),
-              }}
-            >
-              <IconFolder size={13} />
-              <span>user-uploads</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('ext:webm')}
-              style={{
-                ...styles.chipBtn,
-                ...(searchQuery === 'ext:webm' ? styles.activeChipBtn : {}),
-              }}
-            >
-              <IconMic size={13} />
-              <span>Voice Notes (.webm)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('ext:png')}
-              style={{
-                ...styles.chipBtn,
-                ...(searchQuery === 'ext:png' ? styles.activeChipBtn : {}),
-              }}
-            >
-              <IconImage size={13} />
-              <span>PNG Images (.png)</span>
-            </button>
+            {[
+              { label: 'Older than 90D', query: 'older:90d' },
+              { label: 'Older than 30D', query: 'older:30d' },
+              { label: 'user-uploads', query: 'folder:user-uploads' },
+              { label: 'Voice Notes (.webm)', query: 'ext:webm' },
+              { label: 'PNG Images', query: 'ext:png' },
+              { label: 'Large Files (>2MB)', query: 'size:>2mb' },
+            ].map((chip) => (
+              <button
+                key={chip.query}
+                type="button"
+                onClick={() => setSearchQuery(searchQuery === chip.query ? '' : chip.query)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                  searchQuery === chip.query
+                    ? 'bg-pink-600/20 text-pink-300 border-pink-500/40 shadow-sm'
+                    : 'bg-slate-800/60 hover:bg-slate-700/60 text-slate-400 border-slate-700/60'
+                }`}
+              >
+                {chip.label}
+              </button>
+            ))}
+
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                style={{ ...styles.chipBtn, color: '#ef4444', borderColor: '#ef4444' }}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
               >
-                <IconClose size={13} />
-                <span>Clear Query</span>
+                Clear Query
               </button>
             )}
           </div>
 
-          {/* QUERY-BASED ACTION RIBBON */}
-          {searchQuery.trim() !== '' && filteredResources.length > 0 && (
-            <div style={styles.queryRibbon}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <IconSearch size={18} />
-                <div>
-                  <span style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.88rem' }}>
-                    Found {filteredResources.length} items matching &quot;{searchQuery}&quot;
-                  </span>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8' }}>
-                    Query results across current folder
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsQueryDeleteModalOpen(true)}
-                style={styles.dangerBtn}
-              >
-                <IconTrash size={15} />
-                <span>Delete All {filteredResources.length} Matching Search</span>
-              </button>
-            </div>
-          )}
-
-          {/* MULTI-SELECT BULK ACTION RIBBON */}
+          {/* FLOATING BULK ACTIONS BAR */}
           {selectedIds.size > 0 && (
-            <div style={styles.bulkRibbon}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="rounded-xl bg-gradient-to-r from-pink-950/80 via-slate-900/90 to-slate-900/90 border border-pink-500/40 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-md">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={isAllSelected}
                   onChange={toggleSelectAll}
-                  style={styles.checkboxInput}
+                  className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
                 />
-                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>
-                  {selectedIds.size} of {filteredResources.length} selected
+                <span className="text-xs font-extrabold text-white">
+                  {selectedIds.size} of {filteredResources.length} items selected
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleBulkCopy}
-                  style={styles.secondaryBtn}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 inline-flex items-center gap-1.5"
                 >
-                  <IconCopy size={15} />
-                  <span>Copy Links ({selectedIds.size})</span>
+                  <IconCopy size={13} />
+                  <span>Copy URLs ({selectedIds.size})</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setIsBulkDeleteModalOpen(true)}
-                  style={styles.dangerBtn}
+                  className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md inline-flex items-center gap-1.5"
                 >
-                  <IconTrash size={15} />
+                  <IconTrash size={13} />
                   <span>Delete Selected ({selectedIds.size})</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setSelectedIds(new Set())}
-                  style={styles.clearSearch}
+                  className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
                   title="Deselect all"
                 >
                   <IconClose size={15} />
@@ -1181,22 +1323,24 @@ export default function DrivePage() {
             </div>
           )}
 
-          {/* FOLDER CARDS DISPLAY */}
+          {/* FOLDER TILES GRID */}
           {filteredFolders.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={styles.subHeading}>Folders ({filteredFolders.length})</h3>
-              <div style={styles.folderGrid}>
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Folders ({filteredFolders.length})
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {filteredFolders.map((f) => (
                   <div
                     key={f.path}
                     onClick={() => navigateToFolder(f.path)}
-                    style={styles.folderCard}
+                    className="group rounded-xl bg-[#0c1220] hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 p-3 flex items-center justify-between cursor-pointer transition-all shadow-sm"
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, overflow: 'hidden' }}>
-                      <span style={{ color: '#ec4899', display: 'flex', alignItems: 'center' }}>
-                        <IconFolder size={24} />
-                      </span>
-                      <span style={styles.folderName}>{f.name}</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20 shrink-0">
+                        <IconFolder size={18} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-200 truncate">{f.name}</span>
                     </div>
                     <button
                       type="button"
@@ -1204,10 +1348,9 @@ export default function DrivePage() {
                         e.stopPropagation();
                         setFolderToDelete(f);
                       }}
-                      style={styles.folderCardDeleteBtn}
-                      title={`Delete folder "${f.name}"`}
+                      className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1 transition-opacity"
                     >
-                      <IconTrash size={14} />
+                      <IconTrash size={13} />
                     </button>
                   </div>
                 ))}
@@ -1215,19 +1358,18 @@ export default function DrivePage() {
             </div>
           )}
 
-          {/* ASSETS SECTION */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <h3 style={styles.subHeading}>
+          {/* ASSETS SECTION (GRID OR LIST) */}
+          <div className="space-y-3 flex-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
                   Files ({filteredResources.length})
-                  {resourceType !== 'image' && ` [${resourceType.toUpperCase()}]`}
-                </h3>
+                </span>
                 {filteredResources.length > 0 && (
                   <button
                     type="button"
                     onClick={toggleSelectAll}
-                    style={styles.selectAllBtn}
+                    className="text-[11px] font-semibold text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded bg-slate-800/60 border border-slate-700/60"
                   >
                     {isAllSelected ? 'Deselect All' : 'Select All'}
                   </button>
@@ -1236,44 +1378,47 @@ export default function DrivePage() {
             </div>
 
             {loadingResources ? (
-              <div style={styles.emptyState}>
-                <div style={styles.spinner} />
-                <p style={{ marginTop: '12px', color: '#94a3b8' }}>Loading files from Cloudinary...</p>
+              <div className="p-16 text-center space-y-3">
+                <div className="w-10 h-10 border-3 border-slate-800 border-t-pink-500 rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-slate-400">Loading files from Cloudinary storage...</p>
               </div>
             ) : filteredResources.length === 0 ? (
-              <div style={styles.emptyState}>
-                <div style={{ color: '#64748b', display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                  <IconFile size={40} />
+              <div className="p-16 text-center space-y-3 rounded-2xl bg-[#0c1220]/50 border border-slate-800/60">
+                <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+                  <IconFile size={24} />
                 </div>
-                <p style={{ color: '#cbd5e1', fontWeight: 600, margin: '4px 0' }}>
-                  {searchQuery ? `No files matching "${searchQuery}"` : 'No files found in this folder'}
-                </p>
-                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-                  Drag & drop files here or click Upload Files above
+                <h3 className="text-sm font-bold text-slate-200">
+                  {searchQuery ? `No files matching "${searchQuery}"` : 'No files in this location'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  Upload files by dragging them here, pasting screenshots with Ctrl+V, or using the Upload button above.
                 </p>
               </div>
             ) : viewMode === 'grid' ? (
               /* GRID VIEW */
-              <div style={styles.assetGrid}>
-                {filteredResources.map((item) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                {filteredResources.map((item, idx) => {
                   const fileName = getFileName(item.public_id);
                   const isSelected = selectedIds.has(item.public_id);
+                  const isAudio = item.format === 'webm' || item.format === 'mp3' || item.format === 'wav';
+
                   return (
                     <div
                       key={item.public_id}
-                      style={{
-                        ...styles.assetCard,
-                        ...(isSelected ? styles.selectedAssetCard : {}),
-                      }}
+                      className={`group relative rounded-2xl bg-[#0e1526] border overflow-hidden flex flex-col transition-all shadow-sm hover:shadow-lg ${
+                        isSelected
+                          ? 'border-pink-500 ring-2 ring-pink-500/20 bg-slate-900'
+                          : 'border-slate-800 hover:border-slate-700'
+                      }`}
                     >
-                      {/* PREVIEW CONTAINER */}
+                      {/* THUMBNAIL / MEDIA PREVIEW */}
                       <div
-                        style={styles.previewContainer}
-                        onClick={() => setPreviewItem(item)}
+                        className="relative h-36 bg-[#070b14] flex items-center justify-center cursor-pointer overflow-hidden"
+                        onClick={() => setPreviewIndex(idx)}
                       >
-                        {/* SELECT CHECKBOX OVERLAY */}
+                        {/* SELECT CHECKBOX */}
                         <div
-                          style={styles.checkboxOverlay}
+                          className="absolute top-2 left-2 z-10"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleSelect(item.public_id);
@@ -1283,58 +1428,59 @@ export default function DrivePage() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            style={styles.cardCheckbox}
+                            className="w-4 h-4 rounded bg-slate-900/80 border-slate-700 text-pink-600 focus:ring-pink-500 cursor-pointer"
                           />
                         </div>
 
-                        {item.resource_type === 'image' ? (
+                        {isAudio ? (
+                          <InlineAudioCardPlayer src={item.secure_url} title={fileName} />
+                        ) : item.resource_type === 'image' ? (
                           <img
                             src={item.secure_url}
                             alt={fileName}
-                            style={styles.gridImg}
                             loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : item.resource_type === 'video' ? (
-                          <div style={styles.videoPlaceholder}>
+                          <div className="flex flex-col items-center justify-center text-purple-400 gap-1">
                             <IconVideo size={36} />
-                            <span style={{ fontSize: '0.75rem', color: '#cbd5e1', marginTop: '4px' }}>
-                              {item.format?.toUpperCase()}
-                            </span>
+                            <span className="text-[10px] uppercase font-bold text-slate-400">{item.format}</span>
                           </div>
                         ) : (
-                          <div style={styles.rawPlaceholder}>
+                          <div className="flex flex-col items-center justify-center text-amber-400 gap-1">
                             <IconFile size={36} />
-                            <span style={{ fontSize: '0.75rem', color: '#cbd5e1', marginTop: '4px' }}>
-                              {item.format?.toUpperCase() || 'FILE'}
-                            </span>
+                            <span className="text-[10px] uppercase font-bold text-slate-400">{item.format || 'RAW'}</span>
                           </div>
                         )}
 
-                        <span style={styles.formatBadge}>{item.format || 'file'}</span>
+                        {/* FORMAT BADGE */}
+                        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-sm text-[10px] font-mono font-bold uppercase text-slate-300">
+                          {item.format || 'file'}
+                        </span>
                       </div>
 
-                      {/* CARD DETAILS */}
-                      <div style={styles.cardDetails}>
-                        <p style={styles.assetTitle} title={item.public_id}>
-                          {fileName}
-                        </p>
-                        <div style={styles.assetMeta}>
-                          <span>{formatBytes(item.bytes)}</span>
-                          {item.width && item.height && (
-                            <span>• {item.width}x{item.height}</span>
-                          )}
+                      {/* DETAILS & ACTIONS */}
+                      <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-200 truncate" title={item.public_id}>
+                            {fileName}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
+                            <span>{formatBytes(item.bytes)}</span>
+                            {item.width && item.height && <span>• {item.width}×{item.height}</span>}
+                          </div>
                         </div>
 
-                        {/* CARD ACTIONS */}
-                        <div style={styles.cardActions}>
+                        {/* HOVER ACTIONS */}
+                        <div className="flex items-center gap-1 pt-1 border-t border-slate-800/80">
                           <button
                             type="button"
                             onClick={() => copyToClipboard(item.secure_url)}
-                            style={styles.actionBtn}
-                            title="Copy Direct URL"
+                            className="flex-1 px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold border border-slate-700/60 inline-flex items-center justify-center gap-1"
+                            title="Copy URL"
                           >
-                            <IconCopy size={13} />
-                            <span>Copy URL</span>
+                            <IconCopy size={11} />
+                            <span>Copy</span>
                           </button>
 
                           <button
@@ -1343,19 +1489,19 @@ export default function DrivePage() {
                               setRenameItem(item);
                               setNewPublicId(item.public_id);
                             }}
-                            style={styles.actionBtnIcon}
+                            className="p-1.5 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/60"
                             title="Rename"
                           >
-                            <IconEdit size={14} />
+                            <IconEdit size={12} />
                           </button>
 
                           <button
                             type="button"
                             onClick={() => setDeleteItem(item)}
-                            style={{ ...styles.actionBtnIcon, color: '#ef4444' }}
+                            className="p-1.5 rounded bg-slate-800/80 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-700/60"
                             title="Delete"
                           >
-                            <IconTrash size={14} />
+                            <IconTrash size={12} />
                           </button>
                         </div>
                       </div>
@@ -1364,93 +1510,93 @@ export default function DrivePage() {
                 })}
               </div>
             ) : (
-              /* LIST VIEW */
-              <div style={styles.listViewContainer}>
-                <table style={styles.listTable}>
+              /* LIST VIEW (TABLE) */
+              <div className="rounded-2xl bg-[#0c1220] border border-slate-800 overflow-x-auto shadow-sm">
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr>
-                      <th style={{ ...styles.th, width: '40px' }}>
+                    <tr className="bg-slate-900/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                      <th className="py-3 px-4 w-10">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
                           onChange={toggleSelectAll}
-                          style={styles.checkboxInput}
+                          className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
                         />
                       </th>
-                      <th style={styles.th}>Name</th>
-                      <th style={styles.th}>Type</th>
-                      <th style={styles.th}>Size</th>
-                      <th style={styles.th}>Dimensions</th>
-                      <th style={styles.th}>Created</th>
-                      <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
+                      <th className="py-3 px-4">Asset Name / Public ID</th>
+                      <th className="py-3 px-4">Format</th>
+                      <th className="py-3 px-4">Size</th>
+                      <th className="py-3 px-4">Dimensions</th>
+                      <th className="py-3 px-4">Created Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredResources.map((item) => {
+                  <tbody className="divide-y divide-slate-800/60 text-xs">
+                    {filteredResources.map((item, idx) => {
                       const fileName = getFileName(item.public_id);
                       const isSelected = selectedIds.has(item.public_id);
+
                       return (
                         <tr
                           key={item.public_id}
-                          style={{
-                            ...styles.tr,
-                            ...(isSelected ? { background: 'rgba(236, 72, 153, 0.08)' } : {}),
-                          }}
+                          className={`hover:bg-slate-800/30 transition-colors ${
+                            isSelected ? 'bg-pink-950/20' : ''
+                          }`}
                         >
-                          <td style={styles.td}>
+                          <td className="py-3 px-4">
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleSelect(item.public_id)}
-                              style={styles.checkboxInput}
+                              className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
                             />
                           </td>
-                          <td style={styles.td}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <td className="py-3 px-4">
+                            <div
+                              className="flex items-center gap-3 cursor-pointer"
+                              onClick={() => setPreviewIndex(idx)}
+                            >
                               {item.resource_type === 'image' ? (
                                 <img
                                   src={item.secure_url}
                                   alt=""
-                                  style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }}
+                                  className="w-8 h-8 rounded-lg object-cover bg-slate-900 shrink-0"
                                 />
                               ) : item.resource_type === 'video' ? (
-                                <span style={{ color: '#a855f7' }}>
-                                  <IconVideo size={20} />
-                                </span>
+                                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+                                  <IconVideo size={16} />
+                                </div>
                               ) : (
-                                <span style={{ color: '#38bdf8' }}>
-                                  <IconFile size={20} />
-                                </span>
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                  <IconFile size={16} />
+                                </div>
                               )}
-                              <div>
-                                <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.85rem' }}>
-                                  {fileName}
-                                </div>
-                                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                                  {item.public_id}
-                                </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-slate-200 truncate">{fileName}</p>
+                                <p className="text-[11px] text-slate-500 font-mono truncate">{item.public_id}</p>
                               </div>
                             </div>
                           </td>
-                          <td style={styles.td}>
-                            <span style={styles.listBadge}>{item.format || item.resource_type}</span>
+                          <td className="py-3 px-4">
+                            <span className="px-2 py-0.5 rounded bg-slate-800 text-pink-300 font-mono text-[10px] font-bold uppercase border border-slate-700">
+                              {item.format || item.resource_type}
+                            </span>
                           </td>
-                          <td style={styles.td}>{formatBytes(item.bytes)}</td>
-                          <td style={styles.td}>
+                          <td className="py-3 px-4 text-slate-300 font-medium">{formatBytes(item.bytes)}</td>
+                          <td className="py-3 px-4 text-slate-400">
                             {item.width && item.height ? `${item.width} × ${item.height}` : '—'}
                           </td>
-                          <td style={styles.td}>
+                          <td className="py-3 px-4 text-slate-400">
                             {item.created_at ? new Date(item.created_at).toLocaleDateString() : '—'}
                           </td>
-                          <td style={{ ...styles.td, textAlign: 'right' }}>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                          <td className="py-3 px-4 text-right">
+                            <div className="inline-flex items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => copyToClipboard(item.secure_url)}
-                                style={styles.tableBtn}
+                                className="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px] font-medium border border-slate-700"
                               >
-                                <IconCopy size={13} />
-                                <span>Copy</span>
+                                Copy
                               </button>
                               <button
                                 type="button"
@@ -1458,7 +1604,7 @@ export default function DrivePage() {
                                   setRenameItem(item);
                                   setNewPublicId(item.public_id);
                                 }}
-                                style={styles.tableBtn}
+                                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700"
                                 title="Rename"
                               >
                                 <IconEdit size={13} />
@@ -1466,7 +1612,7 @@ export default function DrivePage() {
                               <button
                                 type="button"
                                 onClick={() => setDeleteItem(item)}
-                                style={{ ...styles.tableBtn, color: '#ef4444' }}
+                                className="p-1 rounded bg-slate-800/80 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-700"
                                 title="Delete"
                               >
                                 <IconTrash size={13} />
@@ -1484,38 +1630,149 @@ export default function DrivePage() {
         </main>
       </div>
 
-      {/* MODAL: NEW FOLDER */}
-      {isNewFolderOpen && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <IconFolder size={20} />
-              <h3 style={styles.modalTitle}>Create New Folder</h3>
+      {/* 3. MODAL: FULL ASSET PREVIEW LIGHTBOX */}
+      {previewItem && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6" onClick={() => setPreviewIndex(null)}>
+          <div className="bg-[#0e1526] border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* HEADER */}
+            <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+              <div className="truncate pr-4">
+                <h4 className="text-sm font-bold text-white truncate">{getFileName(previewItem.public_id)}</h4>
+                <p className="text-xs text-slate-400 font-mono truncate">{previewItem.public_id}</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPreviewIndex((prev) => (prev - 1 >= 0 ? prev - 1 : filteredResources.length - 1))}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  title="Previous (Left Arrow)"
+                >
+                  <IconChevronLeft size={16} />
+                </button>
+                <span className="text-xs text-slate-400 font-mono">
+                  {previewIndex + 1} / {filteredResources.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewIndex((prev) => (prev + 1 < filteredResources.length ? prev + 1 : 0))}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  title="Next (Right Arrow)"
+                >
+                  <IconChevronRight size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewIndex(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <IconClose size={18} />
+                </button>
+              </div>
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '16px' }}>
-              Current location: /{currentFolder || 'root'}
-            </p>
-            <form onSubmit={handleCreateFolder}>
+
+            {/* PREVIEW STAGE */}
+            <div className="p-6 bg-[#070b14] flex items-center justify-center min-h-[300px] max-h-[55vh] overflow-auto">
+              {previewItem.format === 'webm' || previewItem.format === 'mp3' || previewItem.format === 'wav' ? (
+                <div className="w-full max-w-md p-6 bg-slate-900 rounded-2xl border border-slate-800 text-center space-y-4 shadow-xl">
+                  <div className="w-16 h-16 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center mx-auto">
+                    <IconMic size={28} />
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-bold text-white">{getFileName(previewItem.public_id)}</h5>
+                    <p className="text-xs text-pink-400 font-mono mt-0.5">Voice Note ({previewItem.format})</p>
+                  </div>
+                  <audio src={previewItem.secure_url} controls autoPlay className="w-full" />
+                </div>
+              ) : previewItem.resource_type === 'video' ? (
+                <video src={previewItem.secure_url} controls autoPlay className="max-h-[50vh] rounded-xl shadow-2xl" />
+              ) : (
+                <img
+                  src={previewItem.secure_url}
+                  alt={previewItem.public_id}
+                  className="max-h-[50vh] max-w-full rounded-xl object-contain shadow-2xl"
+                />
+              )}
+            </div>
+
+            {/* METADATA & EMBED TOOLBAR */}
+            <div className="p-4 sm:p-5 border-t border-slate-800 bg-[#0c1220] flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-4 text-slate-400 flex-wrap">
+                <span>Size: <strong className="text-white">{formatBytes(previewItem.bytes)}</strong></span>
+                {previewItem.width && previewItem.height && (
+                  <span>Dimensions: <strong className="text-white">{previewItem.width}×{previewItem.height}</strong></span>
+                )}
+                <span>Created: <strong className="text-white">{new Date(previewItem.created_at).toLocaleDateString()}</strong></span>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(`![${getFileName(previewItem.public_id)}](${previewItem.secure_url})`, 'Markdown code')}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700"
+                >
+                  Copy Markdown
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(previewItem.secure_url, 'Direct URL')}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 inline-flex items-center gap-1"
+                >
+                  <IconCopy size={13} />
+                  <span>Copy URL</span>
+                </button>
+
+                <a
+                  href={previewItem.secure_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold inline-flex items-center gap-1 shadow-md shadow-pink-950/40"
+                >
+                  <span>Open External ↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. MODAL: CREATE NEW FOLDER */}
+      {isNewFolderOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101828] border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                <IconFolder size={22} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white">Create New Folder</h3>
+                <p className="text-xs text-slate-400">Target location: /{currentFolder || 'root'}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateFolder} className="space-y-4">
               <input
                 type="text"
-                placeholder="Folder name (e.g. products, banners)"
+                placeholder="e.g. banners, user-avatars"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                style={styles.modalInput}
+                className="w-full bg-[#070b14] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-pink-500"
                 autoFocus
               />
-              <div style={styles.modalActions}>
+
+              <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsNewFolderOpen(false)}
-                  style={styles.secondaryBtn}
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingFolder || !newFolderName.trim()}
-                  style={styles.primaryBtn}
+                  className="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
                 >
                   {creatingFolder ? 'Creating...' : 'Create Folder'}
                 </button>
@@ -1525,76 +1782,42 @@ export default function DrivePage() {
         </div>
       )}
 
-      {/* MODAL: DELETE FOLDER CONFIRMATION */}
-      {folderToDelete && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#ef4444' }}>
-              <IconTrash size={20} />
-              <h3 style={{ ...styles.modalTitle, color: '#ef4444' }}>Delete Folder</h3>
-            </div>
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '12px' }}>
-              Are you sure you want to permanently delete folder <strong>&quot;{folderToDelete.name}&quot;</strong> and all assets inside it from Cloudinary?
-            </p>
-            <div style={styles.deletePathBox}>
-              Folder Path: {folderToDelete.path}
-            </div>
-            <p style={{ color: '#ef4444', fontSize: '0.78rem', fontWeight: 700, marginBottom: '20px' }}>
-              Warning: All images, videos, and raw files inside this folder will be permanently removed.
-            </p>
-            <div style={styles.modalActions}>
-              <button
-                type="button"
-                onClick={() => setFolderToDelete(null)}
-                style={styles.secondaryBtn}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteFolder}
-                disabled={deletingFolder}
-                style={styles.dangerBtn}
-              >
-                {deletingFolder ? 'Deleting Folder...' : 'Permanently Delete Folder'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: RENAME ITEM */}
+      {/* 5. MODAL: RENAME ASSET */}
       {renameItem && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <IconEdit size={20} />
-              <h3 style={styles.modalTitle}>Rename Asset</h3>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101828] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                <IconEdit size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-sm font-extrabold text-white">Rename Asset</h3>
+                <p className="text-xs text-slate-400 font-mono truncate">{renameItem.public_id}</p>
+              </div>
             </div>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '16px', wordBreak: 'break-all' }}>
-              From: {renameItem.public_id}
-            </p>
-            <form onSubmit={handleRename}>
+
+            <form onSubmit={handleRename} className="space-y-4">
               <input
                 type="text"
-                placeholder="New Public ID (e.g. folder/new-name)"
+                placeholder="New Public ID"
                 value={newPublicId}
                 onChange={(e) => setNewPublicId(e.target.value)}
-                style={styles.modalInput}
+                className="w-full bg-[#070b14] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-sky-500"
                 autoFocus
               />
-              <div style={styles.modalActions}>
+
+              <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setRenameItem(null)}
-                  style={styles.secondaryBtn}
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={renaming || !newPublicId.trim()}
-                  style={styles.primaryBtn}
+                  className="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
                 >
                   {renaming ? 'Renaming...' : 'Rename Asset'}
                 </button>
@@ -1604,23 +1827,33 @@ export default function DrivePage() {
         </div>
       )}
 
-      {/* MODAL: DELETE SINGLE CONFIRMATION */}
+      {/* 6. MODAL: DELETE SINGLE ASSET CONFIRMATION */}
       {deleteItem && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#ef4444' }}>
-              <IconTrash size={20} />
-              <h3 style={{ ...styles.modalTitle, color: '#ef4444' }}>Delete Asset</h3>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                <IconTrash size={22} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white">Delete Asset</h3>
+                <p className="text-xs text-red-400">Permanent Removal</p>
+              </div>
             </div>
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '12px' }}>
+
+            <p className="text-xs text-slate-300">
               Are you sure you want to permanently delete this asset from Cloudinary?
             </p>
-            <div style={styles.deletePathBox}>{deleteItem.public_id}</div>
-            <div style={styles.modalActions}>
+
+            <div className="p-2.5 rounded-lg bg-[#070b14] border border-slate-800 text-xs font-mono text-red-300 break-all">
+              {deleteItem.public_id}
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteItem(null)}
-                style={styles.secondaryBtn}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -1628,7 +1861,7 @@ export default function DrivePage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                style={styles.dangerBtn}
+                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
               >
                 {deleting ? 'Deleting...' : 'Permanently Delete'}
               </button>
@@ -1637,29 +1870,80 @@ export default function DrivePage() {
         </div>
       )}
 
-      {/* MODAL: BULK DELETE CONFIRMATION */}
-      {isBulkDeleteModalOpen && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#ef4444' }}>
-              <IconTrash size={20} />
-              <h3 style={{ ...styles.modalTitle, color: '#ef4444' }}>
-                Delete {selectedIds.size} Selected Items
-              </h3>
+      {/* 7. MODAL: DELETE FOLDER CONFIRMATION */}
+      {folderToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                <IconTrash size={22} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white">Delete Folder</h3>
+                <p className="text-xs text-red-400">Recursive Folder Removal</p>
+              </div>
             </div>
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '12px' }}>
-              Are you sure you want to permanently delete these {selectedIds.size} selected items from Cloudinary?
+
+            <p className="text-xs text-slate-300">
+              Permanently delete folder <strong className="text-white">&quot;{folderToDelete.name}&quot;</strong> and all assets inside it?
             </p>
-            <div style={{ ...styles.deletePathBox, maxHeight: '140px', overflowY: 'auto' }}>
+
+            <div className="p-2.5 rounded-lg bg-[#070b14] border border-slate-800 text-xs font-mono text-red-300 break-all">
+              Path: {folderToDelete.path}
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setFolderToDelete(null)}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteFolder}
+                disabled={deletingFolder}
+                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+              >
+                {deletingFolder ? 'Deleting Folder...' : 'Permanently Delete Folder'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. MODAL: BULK DELETE CONFIRMATION */}
+      {isBulkDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                <IconTrash size={22} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white">
+                  Delete {selectedIds.size} Selected Assets
+                </h3>
+                <p className="text-xs text-red-400 font-semibold">Irreversible Batch Deletion</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300">
+              Permanently delete the selected <strong className="text-white">{selectedIds.size}</strong> assets from Cloudinary?
+            </p>
+
+            <div className="max-h-36 overflow-y-auto p-3 rounded-lg bg-[#070b14] border border-slate-800 text-[11px] font-mono text-red-300 space-y-1">
               {Array.from(selectedIds).map((id) => (
-                <div key={id}>• {id}</div>
+                <div key={id} className="truncate">• {id}</div>
               ))}
             </div>
-            <div style={styles.modalActions}>
+
+            <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsBulkDeleteModalOpen(false)}
-                style={styles.secondaryBtn}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -1667,140 +1951,23 @@ export default function DrivePage() {
                 type="button"
                 onClick={() => executeBatchDelete(Array.from(selectedIds))}
                 disabled={bulkDeleting}
-                style={styles.dangerBtn}
+                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
               >
-                {bulkDeleting ? 'Deleting Items...' : `Delete ${selectedIds.size} Items`}
+                {bulkDeleting ? 'Deleting...' : `Delete ${selectedIds.size} Assets`}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL: QUERY-BASED SEARCH DELETE CONFIRMATION */}
-      {isQueryDeleteModalOpen && (
-        <div style={styles.modalBackdrop}>
-          <div style={styles.modalCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#ef4444' }}>
-              <IconTrash size={20} />
-              <h3 style={{ ...styles.modalTitle, color: '#ef4444' }}>
-                Delete All Matching Query
-              </h3>
-            </div>
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '8px' }}>
-              Search Term: <strong style={{ color: '#ec4899' }}>&quot;{searchQuery}&quot;</strong>
-            </p>
-            <p style={{ color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '12px' }}>
-              This action will permanently delete all <strong>{filteredResources.length}</strong> items matching this query from Cloudinary.
-            </p>
-
-            <div style={{ ...styles.deletePathBox, maxHeight: '160px', overflowY: 'auto' }}>
-              {filteredResources.map((item) => (
-                <div key={item.public_id}>• {item.public_id}</div>
-              ))}
-            </div>
-
-            <div style={styles.modalActions}>
-              <button
-                type="button"
-                onClick={() => setIsQueryDeleteModalOpen(false)}
-                style={styles.secondaryBtn}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => executeBatchDelete(filteredResources.map((r) => r.public_id))}
-                disabled={bulkDeleting}
-                style={styles.dangerBtn}
-              >
-                {bulkDeleting ? 'Deleting Items...' : `Permanently Delete ${filteredResources.length} Items`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: PREVIEW ITEM */}
-      {previewItem && (
-        <div style={styles.modalBackdrop} onClick={() => setPreviewItem(null)}>
-          <div style={styles.previewCard} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.previewHeader}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>
-                  {getFileName(previewItem.public_id)}
-                </span>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  {previewItem.public_id} • {formatBytes(previewItem.bytes)}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                style={styles.iconBtn}
-              >
-                <IconClose size={18} />
-              </button>
-            </div>
-
-            <div style={styles.previewBody}>
-              {previewItem.resource_type === 'image' ? (
-                <img
-                  src={previewItem.secure_url}
-                  alt=""
-                  style={styles.previewImg}
-                />
-              ) : previewItem.resource_type === 'video' ? (
-                <video
-                  src={previewItem.secure_url}
-                  controls
-                  autoPlay
-                  style={styles.previewVideo}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <IconFile size={48} />
-                  <p style={{ marginTop: '12px', color: '#cbd5e1' }}>Document / Raw File</p>
-                  <a
-                    href={previewItem.secure_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={styles.primaryBtn}
-                  >
-                    Download File
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.previewFooter}>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(previewItem.secure_url)}
-                style={styles.secondaryBtn}
-              >
-                <IconCopy size={14} />
-                <span>Copy URL</span>
-              </button>
-              <a
-                href={previewItem.secure_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={styles.secondaryBtn}
-              >
-                Open External ↗
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TOAST */}
+      {/* 9. TOAST SYSTEM */}
       {toast && (
         <div
-          style={{
-            ...styles.toast,
-            background: toast.type === 'error' ? '#991b1b' : '#059669',
-          }}
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold text-white flex items-center gap-2.5 transition-all border ${
+            toast.type === 'error'
+              ? 'bg-red-900/90 border-red-700'
+              : 'bg-pink-900/90 border-pink-700'
+          }`}
         >
           <span>{toast.message}</span>
         </div>
@@ -1808,748 +1975,3 @@ export default function DrivePage() {
     </div>
   );
 }
-
-// ==========================================
-// INLINE STYLES (DARK MODERN DRIVE AESTHETIC)
-// ==========================================
-const styles = {
-  container: {
-    height: '100vh',
-    maxHeight: '100vh',
-    background: '#0b0f19',
-    color: '#f8fafc',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  },
-  loadingScreen: {
-    minHeight: '100vh',
-    background: '#0b0f19',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '16px',
-  },
-  spinner: {
-    width: '36px',
-    height: '36px',
-    borderWidth: '3px',
-    borderStyle: 'solid',
-    borderColor: '#1e293b',
-    borderTopColor: '#ec4899',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  header: {
-    background: '#111827',
-    borderBottom: '1px solid #1e293b',
-    padding: '12px 24px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexShrink: 0,
-    zIndex: 10,
-  },
-  brandGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-  },
-  backLink: {
-    color: '#94a3b8',
-    textDecoration: 'none',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    padding: '6px 12px',
-    background: '#1e293b',
-    borderRadius: '8px',
-  },
-  logoBadge: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '10px',
-    background: 'linear-gradient(135deg, #ec4899 0%, #be123c 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#fff',
-  },
-  title: {
-    margin: 0,
-    fontSize: '1.15rem',
-    fontWeight: 800,
-    letterSpacing: '-0.02em',
-    color: '#f8fafc',
-  },
-  subtitle: {
-    margin: 0,
-    fontSize: '0.75rem',
-    color: '#94a3b8',
-  },
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  primaryBtn: {
-    background: '#ec4899',
-    color: '#fff',
-    borderWidth: 0,
-    borderStyle: 'none',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    fontWeight: 700,
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)',
-    textDecoration: 'none',
-  },
-  secondaryBtn: {
-    background: '#1e293b',
-    color: '#f8fafc',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    padding: '8px 14px',
-    borderRadius: '8px',
-    fontWeight: 600,
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    textDecoration: 'none',
-  },
-  dangerBtn: {
-    background: '#dc2626',
-    color: '#fff',
-    borderWidth: 0,
-    borderStyle: 'none',
-    padding: '8px 14px',
-    borderRadius: '8px',
-    fontWeight: 700,
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
-  },
-  iconBtn: {
-    background: '#1e293b',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#cbd5e1',
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  },
-  folderDeleteIconBtn: {
-    background: 'transparent',
-    borderWidth: 0,
-    borderStyle: 'none',
-    color: '#ef4444',
-    cursor: 'pointer',
-    padding: '4px 6px',
-    borderRadius: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    opacity: 0.6,
-  },
-  deleteActiveFolderBtn: {
-    background: 'rgba(239, 68, 68, 0.1)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    color: '#f87171',
-    padding: '4px 10px',
-    borderRadius: '6px',
-    fontSize: '0.78rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    marginLeft: '8px',
-  },
-  mainLayout: {
-    display: 'flex',
-    flex: 1,
-    overflow: 'hidden',
-  },
-  sidebar: {
-    width: '240px',
-    background: '#0d1322',
-    borderRight: '1px solid #1e293b',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    overflowY: 'auto',
-    flexShrink: 0,
-  },
-  sidebarSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  sectionHeader: {
-    fontSize: '0.7rem',
-    fontWeight: 800,
-    color: '#64748b',
-    letterSpacing: '0.06em',
-    marginBottom: '6px',
-  },
-  navItem: {
-    background: 'transparent',
-    borderWidth: 0,
-    borderStyle: 'none',
-    color: '#94a3b8',
-    padding: '8px 10px',
-    borderRadius: '8px',
-    fontSize: '0.82rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    width: '100%',
-    textAlign: 'left',
-  },
-  activeNavItem: {
-    background: '#1e293b',
-    color: '#f472b6',
-    fontWeight: 700,
-  },
-  tinyBtn: {
-    background: '#1e293b',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#94a3b8',
-    width: '22px',
-    height: '22px',
-    borderRadius: '6px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    padding: 0,
-  },
-  content: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '20px 24px',
-    overflowY: 'auto',
-  },
-  toolbar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '12px',
-    marginBottom: '14px',
-  },
-  breadcrumbs: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '6px',
-  },
-  crumbBtn: {
-    background: 'transparent',
-    borderWidth: 0,
-    borderStyle: 'none',
-    color: '#94a3b8',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    padding: '2px 4px',
-  },
-  toolbarRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  searchBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: '#111827',
-    border: '1px solid #1e293b',
-    borderRadius: '8px',
-    padding: '6px 12px',
-    color: '#94a3b8',
-  },
-  searchInput: {
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    color: '#f8fafc',
-    fontSize: '0.82rem',
-    width: '220px',
-  },
-  clearSearch: {
-    background: 'transparent',
-    border: 'none',
-    color: '#64748b',
-    cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  viewToggleGroup: {
-    display: 'flex',
-    background: '#111827',
-    border: '1px solid #1e293b',
-    borderRadius: '8px',
-    padding: '2px',
-  },
-  toggleBtn: {
-    background: 'transparent',
-    borderWidth: 0,
-    borderStyle: 'none',
-    color: '#64748b',
-    padding: '5px 8px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeToggle: {
-    background: '#1e293b',
-    color: '#f8fafc',
-  },
-  chipBtn: {
-    background: '#111827',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#1e293b',
-    color: '#94a3b8',
-    padding: '4px 10px',
-    borderRadius: '6px',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  activeChipBtn: {
-    background: 'rgba(236, 72, 153, 0.15)',
-    color: '#f472b6',
-    borderColor: '#ec4899',
-  },
-  queryRibbon: {
-    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.08) 100%)',
-    border: '1px solid rgba(239, 68, 68, 0.35)',
-    borderRadius: '10px',
-    padding: '10px 16px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '16px',
-    gap: '12px',
-  },
-  bulkRibbon: {
-    background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(190, 18, 60, 0.15) 100%)',
-    border: '1px solid rgba(236, 72, 153, 0.4)',
-    borderRadius: '10px',
-    padding: '10px 16px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '16px',
-    gap: '12px',
-  },
-  subHeading: {
-    fontSize: '0.9rem',
-    fontWeight: 700,
-    color: '#cbd5e1',
-    margin: 0,
-  },
-  selectAllBtn: {
-    background: 'transparent',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#94a3b8',
-    padding: '3px 8px',
-    borderRadius: '6px',
-    fontSize: '0.75rem',
-    cursor: 'pointer',
-  },
-  folderGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-    gap: '12px',
-    marginTop: '10px',
-  },
-  folderCard: {
-    background: '#111827',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#1e293b',
-    borderRadius: '10px',
-    padding: '10px 14px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  folderName: {
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    color: '#f8fafc',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  folderCardDeleteBtn: {
-    background: 'rgba(239, 68, 68, 0.1)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    color: '#f87171',
-    cursor: 'pointer',
-    padding: '4px 6px',
-    borderRadius: '6px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  assetGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '14px',
-  },
-  assetCard: {
-    background: '#111827',
-    borderRadius: '12px',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#1e293b',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  selectedAssetCard: {
-    borderColor: '#ec4899',
-    background: '#181f33',
-  },
-  previewContainer: {
-    position: 'relative',
-    height: '140px',
-    background: '#090d16',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  },
-  checkboxOverlay: {
-    position: 'absolute',
-    top: '8px',
-    left: '8px',
-    zIndex: 2,
-  },
-  cardCheckbox: {
-    cursor: 'pointer',
-    width: '16px',
-    height: '16px',
-  },
-  gridImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  videoPlaceholder: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    color: '#a855f7',
-  },
-  rawPlaceholder: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    color: '#38bdf8',
-  },
-  formatBadge: {
-    position: 'absolute',
-    bottom: '6px',
-    right: '6px',
-    background: 'rgba(0, 0, 0, 0.7)',
-    color: '#f8fafc',
-    fontSize: '0.65rem',
-    fontWeight: 700,
-    padding: '2px 6px',
-    borderRadius: '4px',
-    textTransform: 'uppercase',
-  },
-  cardDetails: {
-    padding: '10px 12px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  assetTitle: {
-    margin: 0,
-    fontSize: '0.8rem',
-    fontWeight: 600,
-    color: '#f8fafc',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  assetMeta: {
-    fontSize: '0.7rem',
-    color: '#64748b',
-    display: 'flex',
-    gap: '6px',
-  },
-  cardActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    marginTop: '6px',
-  },
-  actionBtn: {
-    flex: 1,
-    background: '#1e293b',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#cbd5e1',
-    padding: '4px 8px',
-    borderRadius: '6px',
-    fontSize: '0.72rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '4px',
-  },
-  actionBtnIcon: {
-    background: '#1e293b',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#cbd5e1',
-    padding: '4px 6px',
-    borderRadius: '6px',
-    fontSize: '0.72rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  listViewContainer: {
-    background: '#111827',
-    borderRadius: '12px',
-    border: '1px solid #1e293b',
-    overflow: 'hidden',
-  },
-  listTable: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    textAlign: 'left',
-  },
-  th: {
-    padding: '10px 14px',
-    fontSize: '0.75rem',
-    fontWeight: 700,
-    color: '#64748b',
-    borderBottom: '1px solid #1e293b',
-    textTransform: 'uppercase',
-  },
-  tr: {
-    borderBottom: '1px solid #1e293b',
-  },
-  td: {
-    padding: '10px 14px',
-    fontSize: '0.8rem',
-    color: '#cbd5e1',
-  },
-  listBadge: {
-    background: '#1e293b',
-    color: '#f472b6',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontSize: '0.68rem',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-  },
-  tableBtn: {
-    background: '#1e293b',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#334155',
-    color: '#cbd5e1',
-    padding: '4px 8px',
-    borderRadius: '6px',
-    fontSize: '0.72rem',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-  },
-  dragOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(11, 15, 25, 0.85)',
-    backdropFilter: 'blur(4px)',
-    zIndex: 1000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dragBox: {
-    border: '2px dashed #ec4899',
-    borderRadius: '16px',
-    padding: '40px 60px',
-    textAlign: 'center',
-    color: '#ec4899',
-  },
-  modalBackdrop: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.75)',
-    backdropFilter: 'blur(4px)',
-    zIndex: 1000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '20px',
-  },
-  modalCard: {
-    background: '#111827',
-    border: '1px solid #1e293b',
-    borderRadius: '16px',
-    padding: '24px',
-    width: '100%',
-    maxWidth: '440px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
-  },
-  modalTitle: {
-    margin: 0,
-    fontSize: '1.05rem',
-    fontWeight: 800,
-  },
-  modalInput: {
-    width: '100%',
-    background: '#090d16',
-    border: '1px solid #334155',
-    borderRadius: '8px',
-    padding: '10px 12px',
-    color: '#fff',
-    fontSize: '0.85rem',
-    outline: 'none',
-    marginBottom: '16px',
-  },
-  modalActions: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-  },
-  deletePathBox: {
-    background: '#090d16',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid #334155',
-    fontFamily: 'monospace',
-    fontSize: '0.8rem',
-    color: '#f87171',
-    wordBreak: 'break-all',
-    marginBottom: '16px',
-  },
-  previewCard: {
-    background: '#111827',
-    border: '1px solid #1e293b',
-    borderRadius: '16px',
-    width: '100%',
-    maxWidth: '700px',
-    maxHeight: '90vh',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  },
-  previewHeader: {
-    padding: '14px 20px',
-    borderBottom: '1px solid #1e293b',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  previewBody: {
-    flex: 1,
-    background: '#090d16',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '16px',
-    overflow: 'auto',
-  },
-  previewImg: {
-    maxWidth: '100%',
-    maxHeight: '60vh',
-    objectFit: 'contain',
-    borderRadius: '8px',
-  },
-  previewVideo: {
-    maxWidth: '100%',
-    maxHeight: '60vh',
-    borderRadius: '8px',
-  },
-  previewFooter: {
-    padding: '14px 20px',
-    borderTop: '1px solid #1e293b',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-  },
-  toast: {
-    position: 'fixed',
-    bottom: '24px',
-    right: '24px',
-    padding: '12px 20px',
-    borderRadius: '10px',
-    color: '#fff',
-    fontWeight: 700,
-    fontSize: '0.88rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    zIndex: 1100,
-  },
-  checkboxInput: {
-    cursor: 'pointer',
-    width: '15px',
-    height: '15px',
-  },
-};
