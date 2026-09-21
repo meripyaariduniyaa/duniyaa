@@ -80,12 +80,12 @@ export async function POST(request) {
     await requireAdmin(request);
     const body = await request.json().catch(() => ({}));
     const type = body.type || 'text'; // 'text' or 'image'
-    const prompt = body.prompt;
+    const prompt = body.prompt ? String(body.prompt).trim() : '';
     const mode = body.mode || 'general'; // 'instagram_caption', 'reel_script', 'whatsapp_agent', 'marketing_strategy', 'campaign_plan'
     const context = body.context || '';
 
-    if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json({ error: 'Prompt is required.' }, { status: 400 });
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt is required for generation.' }, { status: 400 });
     }
 
     const apiKey = process.env.HUGGINGFACE_API_KEY;
@@ -96,7 +96,7 @@ export async function POST(request) {
     if (type === 'image') {
       if (!apiKey) {
         return NextResponse.json({
-          error: 'HUGGINGFACE_API_KEY is required for AI image generation.',
+          error: 'HUGGINGFACE_API_KEY environment variable is not configured on the server. Please add it to your environment variables to enable AI image generation.',
         }, { status: 400 });
       }
 
@@ -172,46 +172,48 @@ Provide structured, highly engaging, copy-paste ready marketing output with hash
     }
 
     if (apiKey) {
-      try {
-        const fullPrompt = `<s>[INST] ${systemInstruction}\n${context ? `Context: ${context}\n` : ''}\nUser Task: ${prompt} [/INST]`;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+      for (const modelUrl of HF_TEXT_MODELS) {
+        try {
+          const fullPrompt = `<s>[INST] ${systemInstruction}\n${context ? `Context: ${context}\n` : ''}\nUser Task: ${prompt} [/INST]`;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-        const textRes = await fetch(HF_TEXT_MODEL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            inputs: fullPrompt,
-            parameters: {
-              max_new_tokens: 550,
-              temperature: 0.7,
-              top_p: 0.9,
-              return_full_text: false,
+          const textRes = await fetch(modelUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
             },
-          }),
-          signal: controller.signal,
-        });
+            body: JSON.stringify({
+              inputs: fullPrompt,
+              parameters: {
+                max_new_tokens: 550,
+                temperature: 0.7,
+                top_p: 0.9,
+                return_full_text: false,
+              },
+            }),
+            signal: controller.signal,
+          });
 
-        clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
 
-        if (textRes.ok) {
-          const data = await textRes.json();
-          const reply = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
-          const cleaned = (reply || '')
-            .trim()
-            .replace(/^<s>\s*\[INST\].*?\[\/INST\]/is, '')
-            .replace(/^Assistant:\s*/i, '')
-            .trim();
+          if (textRes.ok) {
+            const data = await textRes.json();
+            const reply = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+            const cleaned = (reply || '')
+              .trim()
+              .replace(/^<s>\s*\[INST\].*?\[\/INST\]/is, '')
+              .replace(/^Assistant:\s*/i, '')
+              .trim();
 
-          if (cleaned) {
-            return NextResponse.json({ reply: cleaned });
+            if (cleaned) {
+              return NextResponse.json({ reply: cleaned });
+            }
           }
+        } catch (err) {
+          console.warn('HF text generation fallback attempt:', err.message);
         }
-      } catch (err) {
-        console.warn('HF text generation fallback:', err.message);
       }
     }
 

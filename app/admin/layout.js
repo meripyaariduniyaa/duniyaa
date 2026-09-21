@@ -32,7 +32,6 @@ import {
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'AI Home', icon: SparklesIcon, exact: true },
-  { href: '/marketing', label: 'Marketing AI', icon: MegaphoneIcon },
   { href: '/admin/dashboard', label: 'Overview', icon: DashboardIcon, exact: true },
   { href: '/admin/finance', label: 'Finance & Invoices', icon: FinanceIcon },
   { href: '/admin/orders', label: 'Orders', icon: OrdersIcon },
