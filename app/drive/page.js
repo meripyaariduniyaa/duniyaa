@@ -154,26 +154,6 @@ function IconHome({ size = 18, className = "" }) {
   );
 }
 
-function IconClock({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-
-function IconCalendar({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  );
-}
-
 function IconMic({ size = 18, className = "" }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -189,35 +169,6 @@ function IconClose({ size = 18, className = "" }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <line x1="18" x2="6" y1="6" y2="18" />
       <line x1="6" x2="18" y1="6" y2="18" />
-    </svg>
-  );
-}
-
-function IconDownload({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" x2="12" y1="15" y2="3" />
-    </svg>
-  );
-}
-
-function IconEye({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconMenu({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
     </svg>
   );
 }
@@ -247,7 +198,7 @@ function IconChevronRight({ size = 18, className = "" }) {
 }
 
 // INLINE AUDIO PLAYER COMPONENT FOR VOICE NOTES
-function InlineAudioCardPlayer({ src, title }) {
+function InlineAudioCardPlayer({ src }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
@@ -264,7 +215,7 @@ function InlineAudioCardPlayer({ src, title }) {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-indigo-950/40 to-slate-950/80 text-center space-y-2">
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(11,15,25,0.9) 100%)' }}>
       <audio
         ref={audioRef}
         src={src}
@@ -272,20 +223,36 @@ function InlineAudioCardPlayer({ src, title }) {
         onPause={() => setIsPlaying(false)}
         preload="metadata"
       />
-      <div className="w-12 h-12 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform" onClick={togglePlay}>
+      <button
+        type="button"
+        onClick={togglePlay}
+        style={{
+          width: '44px',
+          height: '44px',
+          borderRadius: '50%',
+          background: 'rgba(236, 72, 153, 0.25)',
+          color: '#f472b6',
+          border: '1px solid rgba(236, 72, 153, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(236, 72, 153, 0.2)',
+        }}
+      >
         {isPlaying ? (
-          <div className="flex gap-1 items-center justify-center">
-            <span className="w-1 h-4 bg-pink-400 rounded-full animate-pulse" />
-            <span className="w-1 h-5 bg-pink-300 rounded-full animate-pulse delay-75" />
-            <span className="w-1 h-3 bg-pink-400 rounded-full animate-pulse delay-150" />
+          <div style={{ display: 'flex', gap: '3px', alignItems: 'center', height: '16px' }}>
+            <span style={{ width: '3px', height: '12px', background: '#f472b6', borderRadius: '2px', animation: 'drive-pulse 0.6s infinite alternate' }} />
+            <span style={{ width: '3px', height: '16px', background: '#fbcfe8', borderRadius: '2px', animation: 'drive-pulse 0.6s 0.2s infinite alternate' }} />
+            <span style={{ width: '3px', height: '10px', background: '#f472b6', borderRadius: '2px', animation: 'drive-pulse 0.6s 0.4s infinite alternate' }} />
           </div>
         ) : (
-          <IconPlay size={18} className="ml-0.5" />
+          <IconPlay size={18} style={{ marginLeft: '2px' }} />
         )}
-      </div>
-      <div className="text-[11px] font-semibold text-slate-300 truncate max-w-[150px]">
+      </button>
+      <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#cbd5e1' }}>
         {isPlaying ? 'Playing audio...' : 'Voice Note (.webm)'}
-      </div>
+      </span>
     </div>
   );
 }
@@ -302,7 +269,6 @@ export default function DrivePage() {
   const [currentFolder, setCurrentFolder] = useState(''); // '' is root
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Resources
   const [resources, setResources] = useState([]);
@@ -334,7 +300,6 @@ export default function DrivePage() {
   const [deleting, setDeleting] = useState(false);
 
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [isQueryDeleteModalOpen, setIsQueryDeleteModalOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const [previewIndex, setPreviewIndex] = useState(null);
@@ -459,7 +424,6 @@ export default function DrivePage() {
   // Folder Navigation
   const navigateToFolder = (path) => {
     setCurrentFolder(path);
-    setIsMobileSidebarOpen(false);
   };
 
   const breadcrumbs = currentFolder ? currentFolder.split('/') : [];
@@ -700,7 +664,6 @@ export default function DrivePage() {
       showToast(`Successfully deleted ${data.count || publicIds.length} item(s)!`);
       setSelectedIds(new Set());
       setIsBulkDeleteModalOpen(false);
-      setIsQueryDeleteModalOpen(false);
       fetchResources();
     } catch (err) {
       showToast(err.message, 'error');
@@ -887,9 +850,10 @@ export default function DrivePage() {
 
   if (authLoading || checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-4 text-slate-200">
-        <div className="w-10 h-10 border-3 border-slate-800 border-t-pink-500 rounded-full animate-spin" />
-        <p className="text-sm font-semibold tracking-wide text-slate-400">Loading Cloudinary Drive Manager...</p>
+      <div style={{ minHeight: '100vh', background: '#070b14', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', color: '#f1f5f9', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid #1e293b', borderTopColor: '#ec4899', borderRadius: '50%', animation: 'drive-spin 0.8s linear infinite' }} />
+        <p style={{ fontSize: '0.88rem', fontWeight: 600, color: '#94a3b8' }}>Loading Cloudinary Drive Manager...</p>
+        <style>{`@keyframes drive-spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -897,80 +861,61 @@ export default function DrivePage() {
   if (!isAdmin) return null;
 
   return (
-    <div
-      className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col selection:bg-pink-500 selection:text-white font-sans antialiased overflow-hidden h-screen"
-      onDragEnter={handleDrag}
-    >
+    <div style={driveStyles.container} onDragEnter={handleDrag}>
+      <style>{driveCSS}</style>
+
       {/* HIDDEN FILE INPUT */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={(e) => handleFileUpload(e.target.files)}
         multiple
-        className="hidden"
+        style={{ display: 'none' }}
       />
 
       {/* 1. TOP HEADER */}
-      <header className="shrink-0 bg-[#0c1220] border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            className="md:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-          >
-            <IconMenu size={18} />
-          </button>
-
-          <Link
-            href="/admin/dashboard"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700/60 transition-colors"
-          >
-            <span>← Admin</span>
+      <header style={driveStyles.header}>
+        <div style={driveStyles.brandGroup}>
+          <Link href="/admin/dashboard" style={driveStyles.backBtn}>
+            ← Admin
           </Link>
 
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-pink-900/30">
+          <div style={driveStyles.logoBadge}>
             <IconCloud size={20} />
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white">
-                Cloudinary Drive
-              </h1>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-pink-500/15 text-pink-300 border border-pink-500/30">
-                PRO STORAGE
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <h1 style={driveStyles.title}>Cloudinary Drive</h1>
+              <span style={driveStyles.proBadge}>PRO STORAGE</span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
-              {filteredResources.length} items • Total in folder: <strong className="text-slate-200">{formatBytes(totalFolderBytes)}</strong>
+            <p style={driveStyles.subtitle}>
+              {filteredResources.length} items • Total size in folder: <strong style={{ color: '#fff' }}>{formatBytes(totalFolderBytes)}</strong>
             </p>
           </div>
         </div>
 
         {/* HEADER ACTIONS */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/del"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30 transition-all"
-          >
+        <div style={driveStyles.headerActions}>
+          <Link href="/del" style={driveStyles.expirationBtn}>
             <IconTrash size={14} />
-            <span className="hidden sm:inline">Expiration Engine</span>
+            <span>Expiration Engine</span>
           </Link>
 
           <button
             type="button"
             onClick={() => setIsNewFolderOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all"
+            style={driveStyles.secondaryBtn}
           >
             <IconPlus size={15} />
-            <span className="hidden sm:inline">New Folder</span>
+            <span>New Folder</span>
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-xs font-bold shadow-md shadow-pink-950/50 transition-all disabled:opacity-50"
+            style={driveStyles.primaryBtn}
           >
             <IconUpload size={15} />
             <span>{uploading ? `Uploading (${uploadProgress}%)` : 'Upload Files'}</span>
@@ -980,7 +925,7 @@ export default function DrivePage() {
             type="button"
             onClick={handleRefresh}
             title="Refresh drive"
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700"
+            style={driveStyles.iconBtn}
           >
             <IconRefresh size={15} />
           </button>
@@ -990,60 +935,53 @@ export default function DrivePage() {
       {/* DRAG & DROP OVERLAY */}
       {dragActive && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6"
+          style={driveStyles.dragOverlay}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <div className="border-3 border-dashed border-pink-500 rounded-3xl p-12 text-center space-y-4 max-w-md w-full bg-pink-950/20 shadow-2xl animate-pulse">
-            <div className="w-16 h-16 rounded-2xl bg-pink-500/20 text-pink-400 border border-pink-500/40 flex items-center justify-center mx-auto">
+          <div style={driveStyles.dragBox}>
+            <div style={driveStyles.dragIconBox}>
               <IconUpload size={36} />
             </div>
-            <h3 className="text-xl font-black text-white">Drop files to upload instantly</h3>
-            <p className="text-xs text-pink-300 font-mono">
+            <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+              Drop files to upload instantly
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f472b6', fontFamily: 'monospace' }}>
               Target Destination: /{currentFolder || 'root'}
             </p>
           </div>
         </div>
       )}
 
-      {/* 2. MAIN LAYOUT (DUAL PANE) */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* SIDEBAR (DESKTOP & MOBILE DRAWER) */}
-        <aside
-          className={`fixed inset-y-0 left-0 z-30 md:static md:z-0 w-64 bg-[#090e1a] border-r border-slate-800/80 p-4 flex flex-col gap-6 overflow-y-auto transform transition-transform duration-200 md:transform-none ${
-            isMobileSidebarOpen ? 'translate-x-0 top-[57px]' : '-translate-x-full md:translate-x-0'
-          }`}
-        >
+      {/* 2. DUAL PANE LAYOUT */}
+      <div style={driveStyles.mainLayout}>
+        {/* SIDEBAR */}
+        <aside style={driveStyles.sidebar}>
           {/* STORAGE ROOT */}
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-2">
-              Storage Root
-            </span>
+          <div style={driveStyles.sidebarSection}>
+            <span style={driveStyles.sectionHeader}>Storage Root</span>
             <button
               type="button"
               onClick={() => navigateToFolder('')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                currentFolder === ''
-                  ? 'bg-pink-600/15 text-pink-300 border border-pink-500/30 font-bold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
+              style={{
+                ...driveStyles.navItem,
+                ...(currentFolder === '' ? driveStyles.activeNavItem : {}),
+              }}
             >
-              <IconHome size={16} className={currentFolder === '' ? 'text-pink-400' : 'text-slate-500'} />
+              <IconHome size={16} style={{ color: currentFolder === '' ? '#f472b6' : '#64748b' }} />
               <span>Root Storage</span>
             </button>
           </div>
 
           {/* RESOURCE TYPE SELECTOR */}
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-2">
-              Resource Category
-            </span>
+          <div style={driveStyles.sidebarSection}>
+            <span style={driveStyles.sectionHeader}>Resource Category</span>
             {[
-              { id: 'image', label: 'Images', icon: IconImage, color: 'text-sky-400' },
-              { id: 'video', label: 'Videos & Audio', icon: IconVideo, color: 'text-purple-400' },
-              { id: 'raw', label: 'Documents / Raw', icon: IconFile, color: 'text-amber-400' },
+              { id: 'image', label: 'Images', icon: IconImage, color: '#38bdf8' },
+              { id: 'video', label: 'Videos & Audio', icon: IconVideo, color: '#c084fc' },
+              { id: 'raw', label: 'Documents / Raw', icon: IconFile, color: '#fbbf24' },
             ].map((cat) => {
               const Icon = cat.icon;
               const isActive = resourceType === cat.id;
@@ -1052,29 +990,26 @@ export default function DrivePage() {
                   key={cat.id}
                   type="button"
                   onClick={() => setResourceType(cat.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                  }`}
+                  style={{
+                    ...driveStyles.navItem,
+                    ...(isActive ? driveStyles.activeCatItem : {}),
+                  }}
                 >
-                  <Icon size={16} className={cat.color} />
+                  <Icon size={16} style={{ color: cat.color }} />
                   <span>{cat.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* FOLDER EXPLORER TREE */}
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
-                Folders ({folders.length})
-              </span>
+          {/* FOLDER QUICK LIST */}
+          <div style={{ ...driveStyles.sidebarSection, flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={driveStyles.sectionHeader}>Folders ({folders.length})</span>
               <button
                 type="button"
                 onClick={() => setIsNewFolderOpen(true)}
-                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white"
+                style={driveStyles.miniPlusBtn}
                 title="Create Subfolder"
               >
                 <IconPlus size={13} />
@@ -1082,27 +1017,40 @@ export default function DrivePage() {
             </div>
 
             {loadingFolders ? (
-              <p className="text-xs text-slate-500 px-2 py-1">Loading folders...</p>
+              <p style={{ fontSize: '0.78rem', color: '#64748b', padding: '4px 8px', margin: 0 }}>Loading folders...</p>
             ) : folders.length === 0 ? (
-              <p className="text-xs text-slate-600 px-2 py-1">No subfolders here</p>
+              <p style={{ fontSize: '0.78rem', color: '#475569', padding: '4px 8px', margin: 0 }}>No subfolders</p>
             ) : (
-              <div className="space-y-1">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {folders.map((f) => {
                   const isActive = currentFolder === f.path;
                   return (
                     <div
                       key={f.path}
-                      className={`group flex items-center justify-between rounded-xl pr-2 transition-all ${
-                        isActive ? 'bg-slate-800/90 text-pink-300 font-bold' : 'hover:bg-slate-800/40 text-slate-400'
-                      }`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderRadius: '8px',
+                        background: isActive ? '#1e293b' : 'transparent',
+                        paddingRight: '6px',
+                      }}
                     >
                       <button
                         type="button"
                         onClick={() => navigateToFolder(f.path)}
-                        className="flex-1 flex items-center gap-2 px-3 py-1.5 text-xs text-left truncate"
+                        style={{
+                          ...driveStyles.navItem,
+                          ...(isActive ? driveStyles.activeNavItem : {}),
+                          flex: 1,
+                          background: 'transparent',
+                          border: 'none',
+                        }}
                       >
-                        <IconFolder size={15} className={isActive ? 'text-pink-400 shrink-0' : 'text-slate-500 shrink-0'} />
-                        <span className="truncate">{f.name}</span>
+                        <IconFolder size={15} style={{ color: isActive ? '#f472b6' : '#64748b', flexShrink: 0 }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {f.name}
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -1110,7 +1058,7 @@ export default function DrivePage() {
                           e.stopPropagation();
                           setFolderToDelete(f);
                         }}
-                        className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1 transition-opacity"
+                        style={driveStyles.miniTrashBtn}
                         title={`Delete folder "${f.name}"`}
                       >
                         <IconTrash size={13} />
@@ -1123,22 +1071,22 @@ export default function DrivePage() {
           </div>
 
           {/* CLIPBOARD UPLOAD TIP */}
-          <div className="rounded-xl bg-slate-900/60 border border-slate-800/80 p-3 text-[11px] text-slate-400 space-y-1">
-            <strong className="text-slate-200 block">Pro Tip:</strong>
-            <p>Paste screenshots directly with <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ctrl+V</kbd> to upload instantly!</p>
+          <div style={driveStyles.tipCard}>
+            <strong style={{ color: '#fff', display: 'block', marginBottom: '2px' }}>Pro Tip:</strong>
+            <p style={{ margin: 0 }}>Paste screenshots directly with <kbd style={driveStyles.kbd}>Ctrl+V</kbd> to upload instantly!</p>
           </div>
         </aside>
 
         {/* MAIN STAGE CONTENT */}
-        <main className="flex-1 flex flex-col overflow-y-auto p-4 sm:p-6 space-y-4">
+        <main style={driveStyles.contentArea}>
           {/* TOOLBAR & BREADCRUMBS */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0c1220] p-3 rounded-xl border border-slate-800/80">
+          <div style={driveStyles.toolbarCard}>
             {/* BREADCRUMB TRAIL */}
-            <div className="flex items-center gap-1 text-xs font-semibold text-slate-400 flex-wrap">
+            <div style={driveStyles.breadcrumbTrail}>
               <button
                 type="button"
                 onClick={() => navigateToFolder('')}
-                className="hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800"
+                style={driveStyles.crumbBtn}
               >
                 Root
               </button>
@@ -1146,14 +1094,15 @@ export default function DrivePage() {
                 const targetPath = breadcrumbs.slice(0, idx + 1).join('/');
                 const isLast = idx === breadcrumbs.length - 1;
                 return (
-                  <span key={targetPath} className="flex items-center gap-1">
-                    <span className="text-slate-600">/</span>
+                  <span key={targetPath} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ color: '#475569' }}>/</span>
                     <button
                       type="button"
                       onClick={() => navigateToFolder(targetPath)}
-                      className={`px-1.5 py-0.5 rounded hover:bg-slate-800 ${
-                        isLast ? 'text-pink-400 font-bold' : 'hover:text-white'
-                      }`}
+                      style={{
+                        ...driveStyles.crumbBtn,
+                        ...(isLast ? { color: '#f472b6', fontWeight: 'bold' } : {}),
+                      }}
                     >
                       {crumb}
                     </button>
@@ -1169,7 +1118,7 @@ export default function DrivePage() {
                     const name = parts[parts.length - 1];
                     setFolderToDelete({ name, path: currentFolder });
                   }}
-                  className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] border border-red-500/20"
+                  style={driveStyles.deleteCurrentFolderBtn}
                   title="Delete current folder"
                 >
                   <IconTrash size={12} />
@@ -1178,24 +1127,24 @@ export default function DrivePage() {
               )}
             </div>
 
-            {/* SEARCH & VIEW CONTROLS */}
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            {/* SEARCH & CONTROLS */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={driveStyles.searchBox}>
+                <IconSearch size={14} style={{ color: '#64748b' }} />
                 <input
                   type="text"
                   placeholder="Search assets (ext:webm, older:30d)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#070b14] border border-slate-700/70 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-pink-500"
+                  style={driveStyles.searchInput}
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                    style={driveStyles.clearSearchBtn}
                   >
-                    <IconClose size={14} />
+                    <IconClose size={13} />
                   </button>
                 )}
               </div>
@@ -1204,7 +1153,7 @@ export default function DrivePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#070b14] border border-slate-700/70 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-pink-500"
+                style={driveStyles.sortSelect}
               >
                 <option value="created-desc">Newest First</option>
                 <option value="created-asc">Oldest First</option>
@@ -1214,13 +1163,14 @@ export default function DrivePage() {
               </select>
 
               {/* VIEW SWITCHER */}
-              <div className="flex rounded-lg border border-slate-700/70 bg-[#070b14] p-0.5">
+              <div style={driveStyles.viewSwitchGroup}>
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-md text-xs transition-colors ${
-                    viewMode === 'grid' ? 'bg-slate-800 text-pink-400 font-bold' : 'text-slate-400 hover:text-white'
-                  }`}
+                  style={{
+                    ...driveStyles.viewBtn,
+                    ...(viewMode === 'grid' ? driveStyles.activeViewBtn : {}),
+                  }}
                   title="Grid View"
                 >
                   <IconGrid size={15} />
@@ -1228,9 +1178,10 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-md text-xs transition-colors ${
-                    viewMode === 'list' ? 'bg-slate-800 text-pink-400 font-bold' : 'text-slate-400 hover:text-white'
-                  }`}
+                  style={{
+                    ...driveStyles.viewBtn,
+                    ...(viewMode === 'list' ? driveStyles.activeViewBtn : {}),
+                  }}
                   title="List View"
                 >
                   <IconList size={15} />
@@ -1240,8 +1191,8 @@ export default function DrivePage() {
           </div>
 
           {/* QUICK QUERY CHIP BUTTONS */}
-          <div className="flex items-center gap-2 flex-wrap text-xs">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
               Quick Filters:
             </span>
             {[
@@ -1251,26 +1202,28 @@ export default function DrivePage() {
               { label: 'Voice Notes (.webm)', query: 'ext:webm' },
               { label: 'PNG Images', query: 'ext:png' },
               { label: 'Large Files (>2MB)', query: 'size:>2mb' },
-            ].map((chip) => (
-              <button
-                key={chip.query}
-                type="button"
-                onClick={() => setSearchQuery(searchQuery === chip.query ? '' : chip.query)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                  searchQuery === chip.query
-                    ? 'bg-pink-600/20 text-pink-300 border-pink-500/40 shadow-sm'
-                    : 'bg-slate-800/60 hover:bg-slate-700/60 text-slate-400 border-slate-700/60'
-                }`}
-              >
-                {chip.label}
-              </button>
-            ))}
+            ].map((chip) => {
+              const isActive = searchQuery === chip.query;
+              return (
+                <button
+                  key={chip.query}
+                  type="button"
+                  onClick={() => setSearchQuery(isActive ? '' : chip.query)}
+                  style={{
+                    ...driveStyles.filterChip,
+                    ...(isActive ? driveStyles.activeFilterChip : {}),
+                  }}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
 
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                style={{ ...driveStyles.filterChip, background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.3)' }}
               >
                 Clear Query
               </button>
@@ -1279,24 +1232,24 @@ export default function DrivePage() {
 
           {/* FLOATING BULK ACTIONS BAR */}
           {selectedIds.size > 0 && (
-            <div className="rounded-xl bg-gradient-to-r from-pink-950/80 via-slate-900/90 to-slate-900/90 border border-pink-500/40 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-md">
-              <div className="flex items-center gap-3">
+            <div style={driveStyles.bulkRibbon}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input
                   type="checkbox"
                   checked={isAllSelected}
                   onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
+                  style={driveStyles.checkbox}
                 />
-                <span className="text-xs font-extrabold text-white">
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#fff' }}>
                   {selectedIds.size} of {filteredResources.length} items selected
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={handleBulkCopy}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 inline-flex items-center gap-1.5"
+                  style={driveStyles.secondaryBtn}
                 >
                   <IconCopy size={13} />
                   <span>Copy URLs ({selectedIds.size})</span>
@@ -1305,7 +1258,7 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => setIsBulkDeleteModalOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md inline-flex items-center gap-1.5"
+                  style={{ ...driveStyles.primaryBtn, background: '#dc2626' }}
                 >
                   <IconTrash size={13} />
                   <span>Delete Selected ({selectedIds.size})</span>
@@ -1314,7 +1267,7 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedIds(new Set())}
-                  className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                  style={driveStyles.clearSearchBtn}
                   title="Deselect all"
                 >
                   <IconClose size={15} />
@@ -1323,24 +1276,24 @@ export default function DrivePage() {
             </div>
           )}
 
-          {/* FOLDER TILES GRID */}
+          {/* FOLDERS GRID */}
           {filteredFolders.length > 0 && (
-            <div className="space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#94a3b8' }}>
                 Folders ({filteredFolders.length})
               </span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div style={driveStyles.folderGrid}>
                 {filteredFolders.map((f) => (
                   <div
                     key={f.path}
                     onClick={() => navigateToFolder(f.path)}
-                    className="group rounded-xl bg-[#0c1220] hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 p-3 flex items-center justify-between cursor-pointer transition-all shadow-sm"
+                    style={driveStyles.folderCard}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20 shrink-0">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                      <div style={driveStyles.folderIconBadge}>
                         <IconFolder size={18} />
                       </div>
-                      <span className="text-xs font-bold text-slate-200 truncate">{f.name}</span>
+                      <span style={driveStyles.folderName}>{f.name}</span>
                     </div>
                     <button
                       type="button"
@@ -1348,7 +1301,8 @@ export default function DrivePage() {
                         e.stopPropagation();
                         setFolderToDelete(f);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1 transition-opacity"
+                      style={driveStyles.folderDeleteBtn}
+                      title={`Delete folder "${f.name}"`}
                     >
                       <IconTrash size={13} />
                     </button>
@@ -1359,17 +1313,17 @@ export default function DrivePage() {
           )}
 
           {/* ASSETS SECTION (GRID OR LIST) */}
-          <div className="space-y-3 flex-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#cbd5e1' }}>
                   Files ({filteredResources.length})
                 </span>
                 {filteredResources.length > 0 && (
                   <button
                     type="button"
                     onClick={toggleSelectAll}
-                    className="text-[11px] font-semibold text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded bg-slate-800/60 border border-slate-700/60"
+                    style={driveStyles.selectAllBtn}
                   >
                     {isAllSelected ? 'Deselect All' : 'Select All'}
                   </button>
@@ -1378,25 +1332,25 @@ export default function DrivePage() {
             </div>
 
             {loadingResources ? (
-              <div className="p-16 text-center space-y-3">
-                <div className="w-10 h-10 border-3 border-slate-800 border-t-pink-500 rounded-full animate-spin mx-auto" />
-                <p className="text-xs text-slate-400">Loading files from Cloudinary storage...</p>
+              <div style={driveStyles.emptyBox}>
+                <div style={{ width: '36px', height: '36px', border: '3px solid #1e293b', borderTopColor: '#ec4899', borderRadius: '50%', animation: 'drive-spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>Loading files from Cloudinary storage...</p>
               </div>
             ) : filteredResources.length === 0 ? (
-              <div className="p-16 text-center space-y-3 rounded-2xl bg-[#0c1220]/50 border border-slate-800/60">
-                <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto">
-                  <IconFile size={24} />
+              <div style={driveStyles.emptyBox}>
+                <div style={driveStyles.emptyIconCircle}>
+                  <IconFile size={26} />
                 </div>
-                <h3 className="text-sm font-bold text-slate-200">
-                  {searchQuery ? `No files matching "${searchQuery}"` : 'No files in this location'}
+                <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700, color: '#f1f5f9' }}>
+                  {searchQuery ? `No files matching "${searchQuery}"` : 'No files in this folder'}
                 </h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  Upload files by dragging them here, pasting screenshots with Ctrl+V, or using the Upload button above.
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Drag &amp; drop files here or paste screenshots with <kbd style={driveStyles.kbd}>Ctrl+V</kbd>.
                 </p>
               </div>
             ) : viewMode === 'grid' ? (
               /* GRID VIEW */
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+              <div style={driveStyles.assetGrid}>
                 {filteredResources.map((item, idx) => {
                   const fileName = getFileName(item.public_id);
                   const isSelected = selectedIds.has(item.public_id);
@@ -1405,20 +1359,19 @@ export default function DrivePage() {
                   return (
                     <div
                       key={item.public_id}
-                      className={`group relative rounded-2xl bg-[#0e1526] border overflow-hidden flex flex-col transition-all shadow-sm hover:shadow-lg ${
-                        isSelected
-                          ? 'border-pink-500 ring-2 ring-pink-500/20 bg-slate-900'
-                          : 'border-slate-800 hover:border-slate-700'
-                      }`}
+                      style={{
+                        ...driveStyles.assetCard,
+                        ...(isSelected ? driveStyles.selectedAssetCard : {}),
+                      }}
                     >
                       {/* THUMBNAIL / MEDIA PREVIEW */}
                       <div
-                        className="relative h-36 bg-[#070b14] flex items-center justify-center cursor-pointer overflow-hidden"
+                        style={driveStyles.thumbnailContainer}
                         onClick={() => setPreviewIndex(idx)}
                       >
-                        {/* SELECT CHECKBOX */}
+                        {/* SELECT CHECKBOX OVERLAY */}
                         <div
-                          className="absolute top-2 left-2 z-10"
+                          style={driveStyles.checkboxOverlay}
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleSelect(item.public_id);
@@ -1428,56 +1381,53 @@ export default function DrivePage() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded bg-slate-900/80 border-slate-700 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                            style={driveStyles.checkbox}
                           />
                         </div>
 
                         {isAudio ? (
-                          <InlineAudioCardPlayer src={item.secure_url} title={fileName} />
+                          <InlineAudioCardPlayer src={item.secure_url} />
                         ) : item.resource_type === 'image' ? (
                           <img
                             src={item.secure_url}
                             alt={fileName}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            style={driveStyles.gridImage}
                           />
                         ) : item.resource_type === 'video' ? (
-                          <div className="flex flex-col items-center justify-center text-purple-400 gap-1">
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#c084fc' }}>
                             <IconVideo size={36} />
-                            <span className="text-[10px] uppercase font-bold text-slate-400">{item.format}</span>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{item.format}</span>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center justify-center text-amber-400 gap-1">
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#fbbf24' }}>
                             <IconFile size={36} />
-                            <span className="text-[10px] uppercase font-bold text-slate-400">{item.format || 'RAW'}</span>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{item.format || 'RAW'}</span>
                           </div>
                         )}
 
-                        {/* FORMAT BADGE */}
-                        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-sm text-[10px] font-mono font-bold uppercase text-slate-300">
-                          {item.format || 'file'}
-                        </span>
+                        <span style={driveStyles.formatPill}>{item.format || 'file'}</span>
                       </div>
 
                       {/* DETAILS & ACTIONS */}
-                      <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
+                      <div style={driveStyles.cardContent}>
                         <div>
-                          <p className="text-xs font-semibold text-slate-200 truncate" title={item.public_id}>
+                          <p style={driveStyles.assetTitle} title={item.public_id}>
                             {fileName}
                           </p>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
+                          <div style={driveStyles.assetMeta}>
                             <span>{formatBytes(item.bytes)}</span>
                             {item.width && item.height && <span>• {item.width}×{item.height}</span>}
                           </div>
                         </div>
 
-                        {/* HOVER ACTIONS */}
-                        <div className="flex items-center gap-1 pt-1 border-t border-slate-800/80">
+                        {/* ACTIONS TOOLBAR */}
+                        <div style={driveStyles.cardActions}>
                           <button
                             type="button"
                             onClick={() => copyToClipboard(item.secure_url)}
-                            className="flex-1 px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold border border-slate-700/60 inline-flex items-center justify-center gap-1"
-                            title="Copy URL"
+                            style={driveStyles.cardActionBtn}
+                            title="Copy Direct URL"
                           >
                             <IconCopy size={11} />
                             <span>Copy</span>
@@ -1489,7 +1439,7 @@ export default function DrivePage() {
                               setRenameItem(item);
                               setNewPublicId(item.public_id);
                             }}
-                            className="p-1.5 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/60"
+                            style={driveStyles.miniIconBtn}
                             title="Rename"
                           >
                             <IconEdit size={12} />
@@ -1498,7 +1448,7 @@ export default function DrivePage() {
                           <button
                             type="button"
                             onClick={() => setDeleteItem(item)}
-                            className="p-1.5 rounded bg-slate-800/80 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-700/60"
+                            style={{ ...driveStyles.miniIconBtn, color: '#f87171' }}
                             title="Delete"
                           >
                             <IconTrash size={12} />
@@ -1511,27 +1461,27 @@ export default function DrivePage() {
               </div>
             ) : (
               /* LIST VIEW (TABLE) */
-              <div className="rounded-2xl bg-[#0c1220] border border-slate-800 overflow-x-auto shadow-sm">
-                <table className="w-full text-left border-collapse">
+              <div style={driveStyles.tableContainer}>
+                <table style={driveStyles.table}>
                   <thead>
-                    <tr className="bg-slate-900/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                      <th className="py-3 px-4 w-10">
+                    <tr style={driveStyles.thRow}>
+                      <th style={{ ...driveStyles.th, width: '40px' }}>
                         <input
                           type="checkbox"
                           checked={isAllSelected}
                           onChange={toggleSelectAll}
-                          className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
+                          style={driveStyles.checkbox}
                         />
                       </th>
-                      <th className="py-3 px-4">Asset Name / Public ID</th>
-                      <th className="py-3 px-4">Format</th>
-                      <th className="py-3 px-4">Size</th>
-                      <th className="py-3 px-4">Dimensions</th>
-                      <th className="py-3 px-4">Created Date</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
+                      <th style={driveStyles.th}>Asset Name / Public ID</th>
+                      <th style={driveStyles.th}>Format</th>
+                      <th style={driveStyles.th}>Size</th>
+                      <th style={driveStyles.th}>Dimensions</th>
+                      <th style={driveStyles.th}>Created Date</th>
+                      <th style={{ ...driveStyles.th, textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-xs">
+                  <tbody>
                     {filteredResources.map((item, idx) => {
                       const fileName = getFileName(item.public_id);
                       const isSelected = selectedIds.has(item.public_id);
@@ -1539,62 +1489,61 @@ export default function DrivePage() {
                       return (
                         <tr
                           key={item.public_id}
-                          className={`hover:bg-slate-800/30 transition-colors ${
-                            isSelected ? 'bg-pink-950/20' : ''
-                          }`}
+                          style={{
+                            ...driveStyles.tr,
+                            ...(isSelected ? { background: 'rgba(236, 72, 153, 0.08)' } : {}),
+                          }}
                         >
-                          <td className="py-3 px-4">
+                          <td style={driveStyles.td}>
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleSelect(item.public_id)}
-                              className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-pink-600 focus:ring-pink-500"
+                              style={driveStyles.checkbox}
                             />
                           </td>
-                          <td className="py-3 px-4">
+                          <td style={driveStyles.td}>
                             <div
-                              className="flex items-center gap-3 cursor-pointer"
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
                               onClick={() => setPreviewIndex(idx)}
                             >
                               {item.resource_type === 'image' ? (
                                 <img
                                   src={item.secure_url}
                                   alt=""
-                                  className="w-8 h-8 rounded-lg object-cover bg-slate-900 shrink-0"
+                                  style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover', background: '#090d16' }}
                                 />
                               ) : item.resource_type === 'video' ? (
-                                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+                                <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <IconVideo size={16} />
                                 </div>
                               ) : (
-                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <IconFile size={16} />
                                 </div>
                               )}
-                              <div className="min-w-0">
-                                <p className="font-semibold text-slate-200 truncate">{fileName}</p>
-                                <p className="text-[11px] text-slate-500 font-mono truncate">{item.public_id}</p>
+                              <div>
+                                <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.82rem' }}>{fileName}</div>
+                                <div style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace' }}>{item.public_id}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded bg-slate-800 text-pink-300 font-mono text-[10px] font-bold uppercase border border-slate-700">
-                              {item.format || item.resource_type}
-                            </span>
+                          <td style={driveStyles.td}>
+                            <span style={driveStyles.tableBadge}>{item.format || item.resource_type}</span>
                           </td>
-                          <td className="py-3 px-4 text-slate-300 font-medium">{formatBytes(item.bytes)}</td>
-                          <td className="py-3 px-4 text-slate-400">
+                          <td style={{ ...driveStyles.td, color: '#cbd5e1', fontWeight: 600 }}>{formatBytes(item.bytes)}</td>
+                          <td style={{ ...driveStyles.td, color: '#94a3b8' }}>
                             {item.width && item.height ? `${item.width} × ${item.height}` : '—'}
                           </td>
-                          <td className="py-3 px-4 text-slate-400">
+                          <td style={{ ...driveStyles.td, color: '#94a3b8' }}>
                             {item.created_at ? new Date(item.created_at).toLocaleDateString() : '—'}
                           </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="inline-flex items-center gap-1.5">
+                          <td style={{ ...driveStyles.td, textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                               <button
                                 type="button"
                                 onClick={() => copyToClipboard(item.secure_url)}
-                                className="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px] font-medium border border-slate-700"
+                                style={driveStyles.cardActionBtn}
                               >
                                 Copy
                               </button>
@@ -1604,7 +1553,7 @@ export default function DrivePage() {
                                   setRenameItem(item);
                                   setNewPublicId(item.public_id);
                                 }}
-                                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700"
+                                style={driveStyles.miniIconBtn}
                                 title="Rename"
                               >
                                 <IconEdit size={13} />
@@ -1612,7 +1561,7 @@ export default function DrivePage() {
                               <button
                                 type="button"
                                 onClick={() => setDeleteItem(item)}
-                                className="p-1 rounded bg-slate-800/80 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-700"
+                                style={{ ...driveStyles.miniIconBtn, color: '#f87171' }}
                                 title="Delete"
                               >
                                 <IconTrash size={13} />
@@ -1630,33 +1579,37 @@ export default function DrivePage() {
         </main>
       </div>
 
-      {/* 3. MODAL: FULL ASSET PREVIEW LIGHTBOX */}
+      {/* 3. MODAL: ASSET PREVIEW LIGHTBOX */}
       {previewItem && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6" onClick={() => setPreviewIndex(null)}>
-          <div className="bg-[#0e1526] border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div style={driveStyles.modalBackdrop} onClick={() => setPreviewIndex(null)}>
+          <div style={driveStyles.lightboxCard} onClick={(e) => e.stopPropagation()}>
             {/* HEADER */}
-            <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
-              <div className="truncate pr-4">
-                <h4 className="text-sm font-bold text-white truncate">{getFileName(previewItem.public_id)}</h4>
-                <p className="text-xs text-slate-400 font-mono truncate">{previewItem.public_id}</p>
+            <div style={driveStyles.lightboxHeader}>
+              <div style={{ overflow: 'hidden', paddingRight: '12px' }}>
+                <h4 style={{ margin: '0 0 2px', fontSize: '0.9rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {getFileName(previewItem.public_id)}
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {previewItem.public_id}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setPreviewIndex((prev) => (prev - 1 >= 0 ? prev - 1 : filteredResources.length - 1))}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  style={driveStyles.navArrowBtn}
                   title="Previous (Left Arrow)"
                 >
                   <IconChevronLeft size={16} />
                 </button>
-                <span className="text-xs text-slate-400 font-mono">
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontFamily: 'monospace' }}>
                   {previewIndex + 1} / {filteredResources.length}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPreviewIndex((prev) => (prev + 1 < filteredResources.length ? prev + 1 : 0))}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  style={driveStyles.navArrowBtn}
                   title="Next (Right Arrow)"
                 >
                   <IconChevronRight size={16} />
@@ -1664,7 +1617,7 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => setPreviewIndex(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                  style={driveStyles.closeModalBtn}
                 >
                   <IconClose size={18} />
                 </button>
@@ -1672,44 +1625,46 @@ export default function DrivePage() {
             </div>
 
             {/* PREVIEW STAGE */}
-            <div className="p-6 bg-[#070b14] flex items-center justify-center min-h-[300px] max-h-[55vh] overflow-auto">
+            <div style={driveStyles.lightboxBody}>
               {previewItem.format === 'webm' || previewItem.format === 'mp3' || previewItem.format === 'wav' ? (
-                <div className="w-full max-w-md p-6 bg-slate-900 rounded-2xl border border-slate-800 text-center space-y-4 shadow-xl">
-                  <div className="w-16 h-16 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center mx-auto">
+                <div style={{ width: '100%', maxWidth: '420px', padding: '24px', background: '#0f172a', borderRadius: '16px', border: '1px solid #1e293b', textAlign: 'center' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(236,72,153,0.15)', color: '#f472b6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                     <IconMic size={28} />
                   </div>
-                  <div>
-                    <h5 className="text-sm font-bold text-white">{getFileName(previewItem.public_id)}</h5>
-                    <p className="text-xs text-pink-400 font-mono mt-0.5">Voice Note ({previewItem.format})</p>
-                  </div>
-                  <audio src={previewItem.secure_url} controls autoPlay className="w-full" />
+                  <h5 style={{ margin: '0 0 2px', fontSize: '0.88rem', fontWeight: 700, color: '#fff' }}>
+                    {getFileName(previewItem.public_id)}
+                  </h5>
+                  <p style={{ margin: '0 0 16px', fontSize: '0.75rem', color: '#f472b6', fontFamily: 'monospace' }}>
+                    Voice Note ({previewItem.format})
+                  </p>
+                  <audio src={previewItem.secure_url} controls autoPlay style={{ width: '100%' }} />
                 </div>
               ) : previewItem.resource_type === 'video' ? (
-                <video src={previewItem.secure_url} controls autoPlay className="max-h-[50vh] rounded-xl shadow-2xl" />
+                <video src={previewItem.secure_url} controls autoPlay style={{ maxHeight: '50vh', maxWidth: '100%', borderRadius: '10px' }} />
               ) : (
                 <img
                   src={previewItem.secure_url}
                   alt={previewItem.public_id}
-                  className="max-h-[50vh] max-w-full rounded-xl object-contain shadow-2xl"
+                  style={{ maxHeight: '50vh', maxWidth: '100%', borderRadius: '10px', objectFit: 'contain' }}
                 />
               )}
             </div>
 
             {/* METADATA & EMBED TOOLBAR */}
-            <div className="p-4 sm:p-5 border-t border-slate-800 bg-[#0c1220] flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-4 text-slate-400 flex-wrap">
-                <span>Size: <strong className="text-white">{formatBytes(previewItem.bytes)}</strong></span>
+            <div style={driveStyles.lightboxFooter}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.75rem', color: '#94a3b8', flexWrap: 'wrap' }}>
+                <span>Size: <strong style={{ color: '#fff' }}>{formatBytes(previewItem.bytes)}</strong></span>
                 {previewItem.width && previewItem.height && (
-                  <span>Dimensions: <strong className="text-white">{previewItem.width}×{previewItem.height}</strong></span>
+                  <span>Dimensions: <strong style={{ color: '#fff' }}>{previewItem.width}×{previewItem.height}</strong></span>
                 )}
-                <span>Created: <strong className="text-white">{new Date(previewItem.created_at).toLocaleDateString()}</strong></span>
+                <span>Created: <strong style={{ color: '#fff' }}>{new Date(previewItem.created_at).toLocaleDateString()}</strong></span>
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(`![${getFileName(previewItem.public_id)}](${previewItem.secure_url})`, 'Markdown code')}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700"
+                  style={driveStyles.secondaryBtn}
                 >
                   Copy Markdown
                 </button>
@@ -1717,7 +1672,7 @@ export default function DrivePage() {
                 <button
                   type="button"
                   onClick={() => copyToClipboard(previewItem.secure_url, 'Direct URL')}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 inline-flex items-center gap-1"
+                  style={driveStyles.secondaryBtn}
                 >
                   <IconCopy size={13} />
                   <span>Copy URL</span>
@@ -1727,7 +1682,7 @@ export default function DrivePage() {
                   href={previewItem.secure_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold inline-flex items-center gap-1 shadow-md shadow-pink-950/40"
+                  style={driveStyles.primaryBtn}
                 >
                   <span>Open External ↗</span>
                 </a>
@@ -1739,40 +1694,40 @@ export default function DrivePage() {
 
       {/* 4. MODAL: CREATE NEW FOLDER */}
       {isNewFolderOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101828] border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
-                <IconFolder size={22} />
+        <div style={driveStyles.modalBackdrop}>
+          <div style={driveStyles.dialogCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={driveStyles.folderIconBadge}>
+                <IconFolder size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-white">Create New Folder</h3>
-                <p className="text-xs text-slate-400">Target location: /{currentFolder || 'root'}</p>
+                <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>Create New Folder</h3>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#94a3b8' }}>Target: /{currentFolder || 'root'}</p>
               </div>
             </div>
 
-            <form onSubmit={handleCreateFolder} className="space-y-4">
+            <form onSubmit={handleCreateFolder} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
               <input
                 type="text"
-                placeholder="e.g. banners, user-avatars"
+                placeholder="e.g. banners, user-uploads"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                className="w-full bg-[#070b14] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-pink-500"
+                style={driveStyles.dialogInput}
                 autoFocus
               />
 
-              <div className="flex items-center justify-end gap-2">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setIsNewFolderOpen(false)}
-                  className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  style={driveStyles.secondaryBtn}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingFolder || !newFolderName.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                  style={driveStyles.primaryBtn}
                 >
                   {creatingFolder ? 'Creating...' : 'Create Folder'}
                 </button>
@@ -1784,40 +1739,42 @@ export default function DrivePage() {
 
       {/* 5. MODAL: RENAME ASSET */}
       {renameItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101828] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                <IconEdit size={22} />
+        <div style={driveStyles.modalBackdrop}>
+          <div style={driveStyles.dialogCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ ...driveStyles.folderIconBadge, background: 'rgba(56,189,248,0.15)', color: '#38bdf8' }}>
+                <IconEdit size={20} />
               </div>
-              <div className="min-w-0">
-                <h3 className="text-sm font-extrabold text-white">Rename Asset</h3>
-                <p className="text-xs text-slate-400 font-mono truncate">{renameItem.public_id}</p>
+              <div style={{ overflow: 'hidden' }}>
+                <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>Rename Asset</h3>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {renameItem.public_id}
+                </p>
               </div>
             </div>
 
-            <form onSubmit={handleRename} className="space-y-4">
+            <form onSubmit={handleRename} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
               <input
                 type="text"
                 placeholder="New Public ID"
                 value={newPublicId}
                 onChange={(e) => setNewPublicId(e.target.value)}
-                className="w-full bg-[#070b14] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-sky-500"
+                style={{ ...driveStyles.dialogInput, fontFamily: 'monospace' }}
                 autoFocus
               />
 
-              <div className="flex items-center justify-end gap-2">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setRenameItem(null)}
-                  className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  style={driveStyles.secondaryBtn}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={renaming || !newPublicId.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                  style={{ ...driveStyles.primaryBtn, background: '#0284c7' }}
                 >
                   {renaming ? 'Renaming...' : 'Rename Asset'}
                 </button>
@@ -1827,33 +1784,33 @@ export default function DrivePage() {
         </div>
       )}
 
-      {/* 6. MODAL: DELETE SINGLE ASSET CONFIRMATION */}
+      {/* 6. MODAL: DELETE SINGLE ASSET */}
       {deleteItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                <IconTrash size={22} />
+        <div style={driveStyles.modalBackdrop}>
+          <div style={driveStyles.dialogCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f87171' }}>
+              <div style={{ ...driveStyles.folderIconBadge, background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+                <IconTrash size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-white">Delete Asset</h3>
-                <p className="text-xs text-red-400">Permanent Removal</p>
+                <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>Delete Asset</h3>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#f87171' }}>Permanent Removal</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300">
+            <p style={{ margin: '12px 0 6px', fontSize: '0.8rem', color: '#cbd5e1' }}>
               Are you sure you want to permanently delete this asset from Cloudinary?
             </p>
 
-            <div className="p-2.5 rounded-lg bg-[#070b14] border border-slate-800 text-xs font-mono text-red-300 break-all">
+            <div style={{ padding: '8px 12px', borderRadius: '8px', background: '#070b14', border: '1px solid #1e293b', fontSize: '0.75rem', fontFamily: 'monospace', color: '#fca5a5', wordBreak: 'break-all' }}>
               {deleteItem.public_id}
             </div>
 
-            <div className="flex items-center justify-end gap-2">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
               <button
                 type="button"
                 onClick={() => setDeleteItem(null)}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                style={driveStyles.secondaryBtn}
               >
                 Cancel
               </button>
@@ -1861,7 +1818,7 @@ export default function DrivePage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                style={{ ...driveStyles.primaryBtn, background: '#dc2626' }}
               >
                 {deleting ? 'Deleting...' : 'Permanently Delete'}
               </button>
@@ -1870,33 +1827,33 @@ export default function DrivePage() {
         </div>
       )}
 
-      {/* 7. MODAL: DELETE FOLDER CONFIRMATION */}
+      {/* 7. MODAL: DELETE FOLDER */}
       {folderToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                <IconTrash size={22} />
+        <div style={driveStyles.modalBackdrop}>
+          <div style={driveStyles.dialogCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f87171' }}>
+              <div style={{ ...driveStyles.folderIconBadge, background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+                <IconTrash size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-white">Delete Folder</h3>
-                <p className="text-xs text-red-400">Recursive Folder Removal</p>
+                <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>Delete Folder</h3>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#f87171' }}>Recursive Removal</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300">
-              Permanently delete folder <strong className="text-white">&quot;{folderToDelete.name}&quot;</strong> and all assets inside it?
+            <p style={{ margin: '12px 0 6px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+              Permanently delete folder <strong style={{ color: '#fff' }}>&quot;{folderToDelete.name}&quot;</strong> and all assets inside it?
             </p>
 
-            <div className="p-2.5 rounded-lg bg-[#070b14] border border-slate-800 text-xs font-mono text-red-300 break-all">
+            <div style={{ padding: '8px 12px', borderRadius: '8px', background: '#070b14', border: '1px solid #1e293b', fontSize: '0.75rem', fontFamily: 'monospace', color: '#fca5a5', wordBreak: 'break-all' }}>
               Path: {folderToDelete.path}
             </div>
 
-            <div className="flex items-center justify-end gap-2">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
               <button
                 type="button"
                 onClick={() => setFolderToDelete(null)}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                style={driveStyles.secondaryBtn}
               >
                 Cancel
               </button>
@@ -1904,46 +1861,46 @@ export default function DrivePage() {
                 type="button"
                 onClick={handleDeleteFolder}
                 disabled={deletingFolder}
-                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                style={{ ...driveStyles.primaryBtn, background: '#dc2626' }}
               >
-                {deletingFolder ? 'Deleting Folder...' : 'Permanently Delete Folder'}
+                {deletingFolder ? 'Deleting...' : 'Permanently Delete Folder'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 8. MODAL: BULK DELETE CONFIRMATION */}
+      {/* 8. MODAL: BULK DELETE */}
       {isBulkDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#101828] border border-red-900/60 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                <IconTrash size={22} />
+        <div style={driveStyles.modalBackdrop}>
+          <div style={{ ...driveStyles.dialogCard, maxWidth: '440px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f87171' }}>
+              <div style={{ ...driveStyles.folderIconBadge, background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+                <IconTrash size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-white">
+                <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>
                   Delete {selectedIds.size} Selected Assets
                 </h3>
-                <p className="text-xs text-red-400 font-semibold">Irreversible Batch Deletion</p>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#f87171' }}>Irreversible Batch Removal</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300">
-              Permanently delete the selected <strong className="text-white">{selectedIds.size}</strong> assets from Cloudinary?
+            <p style={{ margin: '12px 0 6px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+              Permanently delete the selected <strong style={{ color: '#fff' }}>{selectedIds.size}</strong> assets from Cloudinary?
             </p>
 
-            <div className="max-h-36 overflow-y-auto p-3 rounded-lg bg-[#070b14] border border-slate-800 text-[11px] font-mono text-red-300 space-y-1">
+            <div style={{ maxHeight: '140px', overflowY: 'auto', padding: '10px', borderRadius: '8px', background: '#070b14', border: '1px solid #1e293b', fontSize: '0.75rem', fontFamily: 'monospace', color: '#fca5a5', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {Array.from(selectedIds).map((id) => (
-                <div key={id} className="truncate">• {id}</div>
+                <div key={id} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>• {id}</div>
               ))}
             </div>
 
-            <div className="flex items-center justify-end gap-2">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
               <button
                 type="button"
                 onClick={() => setIsBulkDeleteModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                style={driveStyles.secondaryBtn}
               >
                 Cancel
               </button>
@@ -1951,7 +1908,7 @@ export default function DrivePage() {
                 type="button"
                 onClick={() => executeBatchDelete(Array.from(selectedIds))}
                 disabled={bulkDeleting}
-                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                style={{ ...driveStyles.primaryBtn, background: '#dc2626' }}
               >
                 {bulkDeleting ? 'Deleting...' : `Delete ${selectedIds.size} Assets`}
               </button>
@@ -1962,16 +1919,744 @@ export default function DrivePage() {
 
       {/* 9. TOAST SYSTEM */}
       {toast && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold text-white flex items-center gap-2.5 transition-all border ${
-            toast.type === 'error'
-              ? 'bg-red-900/90 border-red-700'
-              : 'bg-pink-900/90 border-pink-700'
-          }`}
-        >
+        <div style={{ ...driveStyles.toastBox, background: toast.type === 'error' ? '#991b1b' : '#831843', borderColor: toast.type === 'error' ? '#dc2626' : '#db2777' }}>
           <span>{toast.message}</span>
         </div>
       )}
     </div>
   );
 }
+
+// ==========================================
+// CSS STYLESHEET (CLEAN, SELF-CONTAINED & ROBUST)
+// ==========================================
+const driveCSS = `
+  @keyframes drive-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes drive-pulse {
+    0% { height: 6px; }
+    100% { height: 16px; }
+  }
+`;
+
+const driveStyles = {
+  container: {
+    height: '100vh',
+    maxHeight: '100vh',
+    background: '#070b14',
+    color: '#f1f5f9',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
+  },
+  header: {
+    background: '#0c1220',
+    borderBottom: '1px solid #1e293b',
+    padding: '12px 24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexShrink: 0,
+    zIndex: 20,
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
+  brandGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  backBtn: {
+    padding: '6px 12px',
+    borderRadius: '8px',
+    background: '#1e293b',
+    color: '#cbd5e1',
+    textDecoration: 'none',
+    fontSize: '0.78rem',
+    fontWeight: 600,
+    border: '1px solid #334155',
+  },
+  logoBadge: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #ec4899 0%, #be123c 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)',
+  },
+  title: {
+    margin: 0,
+    fontSize: '1.05rem',
+    fontWeight: 800,
+    letterSpacing: '-0.02em',
+    color: '#fff',
+  },
+  proBadge: {
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '0.65rem',
+    fontWeight: 800,
+    fontFamily: 'monospace',
+    background: 'rgba(236, 72, 153, 0.15)',
+    color: '#f472b6',
+    border: '1px solid rgba(236, 72, 153, 0.3)',
+  },
+  subtitle: {
+    margin: 0,
+    fontSize: '0.72rem',
+    color: '#94a3b8',
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  expirationBtn: {
+    padding: '7px 14px',
+    borderRadius: '8px',
+    background: 'rgba(244, 63, 94, 0.12)',
+    color: '#fda4af',
+    fontSize: '0.78rem',
+    fontWeight: 700,
+    border: '1px solid rgba(244, 63, 94, 0.3)',
+    textDecoration: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  secondaryBtn: {
+    padding: '7px 14px',
+    borderRadius: '8px',
+    background: '#1e293b',
+    color: '#e2e8f0',
+    fontSize: '0.78rem',
+    fontWeight: 600,
+    border: '1px solid #334155',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    textDecoration: 'none',
+  },
+  primaryBtn: {
+    padding: '7px 16px',
+    borderRadius: '8px',
+    background: 'linear-gradient(135deg, #ec4899 0%, #be123c 100%)',
+    color: '#fff',
+    fontSize: '0.78rem',
+    fontWeight: 700,
+    border: 'none',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 2px 10px rgba(236, 72, 153, 0.35)',
+    textDecoration: 'none',
+  },
+  iconBtn: {
+    width: '34px',
+    height: '34px',
+    borderRadius: '8px',
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#cbd5e1',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  mainLayout: {
+    display: 'flex',
+    flex: 1,
+    overflow: 'hidden',
+  },
+  sidebar: {
+    width: '240px',
+    background: '#090e1a',
+    borderRight: '1px solid #1e293b',
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    overflowY: 'auto',
+    flexShrink: 0,
+    boxSizing: 'border-box',
+  },
+  sidebarSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  sectionHeader: {
+    fontSize: '0.68rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: '#64748b',
+    padding: '0 4px',
+  },
+  navItem: {
+    background: 'transparent',
+    border: 'none',
+    color: '#94a3b8',
+    padding: '8px 10px',
+    borderRadius: '8px',
+    fontSize: '0.78rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    textAlign: 'left',
+    width: '100%',
+  },
+  activeNavItem: {
+    background: '#1e293b',
+    color: '#f472b6',
+    fontWeight: 700,
+  },
+  activeCatItem: {
+    background: '#1e293b',
+    color: '#fff',
+    fontWeight: 700,
+  },
+  miniPlusBtn: {
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#94a3b8',
+    width: '20px',
+    height: '20px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    padding: 0,
+  },
+  miniTrashBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#64748b',
+    cursor: 'pointer',
+    padding: '2px 4px',
+    display: 'flex',
+  },
+  tipCard: {
+    background: '#0e1526',
+    border: '1px solid #1e293b',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    fontSize: '0.72rem',
+    color: '#94a3b8',
+  },
+  kbd: {
+    background: '#1e293b',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+    color: '#f472b6',
+  },
+  contentArea: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px 24px',
+    overflowY: 'auto',
+    gap: '16px',
+    boxSizing: 'border-box',
+  },
+  toolbarCard: {
+    background: '#0c1220',
+    border: '1px solid #1e293b',
+    borderRadius: '12px',
+    padding: '10px 16px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
+  breadcrumbTrail: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    color: '#94a3b8',
+    flexWrap: 'wrap',
+  },
+  crumbBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#cbd5e1',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    padding: '2px 4px',
+  },
+  deleteCurrentFolderBtn: {
+    background: 'rgba(239, 68, 68, 0.12)',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    color: '#f87171',
+    padding: '3px 8px',
+    borderRadius: '6px',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    marginLeft: '6px',
+  },
+  searchBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: '#070b14',
+    border: '1px solid #334155',
+    borderRadius: '8px',
+    padding: '6px 12px',
+  },
+  searchInput: {
+    background: 'transparent',
+    border: 'none',
+    outline: 'none',
+    color: '#f8fafc',
+    fontSize: '0.78rem',
+    width: '200px',
+  },
+  clearSearchBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#64748b',
+    cursor: 'pointer',
+    padding: 0,
+    display: 'flex',
+  },
+  sortSelect: {
+    background: '#070b14',
+    border: '1px solid #334155',
+    borderRadius: '8px',
+    padding: '6px 10px',
+    color: '#cbd5e1',
+    fontSize: '0.78rem',
+    outline: 'none',
+    cursor: 'pointer',
+  },
+  viewSwitchGroup: {
+    display: 'flex',
+    background: '#070b14',
+    border: '1px solid #334155',
+    borderRadius: '8px',
+    padding: '2px',
+  },
+  viewBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#64748b',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeViewBtn: {
+    background: '#1e293b',
+    color: '#f472b6',
+  },
+  filterChip: {
+    background: '#0e1526',
+    border: '1px solid #1e293b',
+    color: '#94a3b8',
+    padding: '5px 10px',
+    borderRadius: '8px',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  activeFilterChip: {
+    background: 'rgba(236, 72, 153, 0.15)',
+    color: '#f472b6',
+    borderColor: 'rgba(236, 72, 153, 0.35)',
+  },
+  bulkRibbon: {
+    background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%)',
+    border: '1px solid rgba(236, 72, 153, 0.4)',
+    borderRadius: '12px',
+    padding: '12px 18px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+  },
+  folderGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+    gap: '10px',
+  },
+  folderCard: {
+    background: '#0c1220',
+    border: '1px solid #1e293b',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  folderIconBadge: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    background: 'rgba(236, 72, 153, 0.12)',
+    color: '#f472b6',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  folderName: {
+    fontSize: '0.82rem',
+    fontWeight: 700,
+    color: '#f8fafc',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  folderDeleteBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#64748b',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+  },
+  assetGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+    gap: '14px',
+  },
+  assetCard: {
+    background: '#0e1526',
+    border: '1px solid #1e293b',
+    borderRadius: '14px',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  selectedAssetCard: {
+    borderColor: '#ec4899',
+    boxShadow: '0 0 0 2px rgba(236, 72, 153, 0.3)',
+    background: '#131b2e',
+  },
+  thumbnailContainer: {
+    position: 'relative',
+    height: '140px',
+    background: '#070b14',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    overflow: 'hidden',
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  checkboxOverlay: {
+    position: 'absolute',
+    top: '8px',
+    left: '8px',
+    zIndex: 10,
+  },
+  checkbox: {
+    cursor: 'pointer',
+    width: '16px',
+    height: '16px',
+  },
+  formatPill: {
+    position: 'absolute',
+    bottom: '8px',
+    right: '8px',
+    background: 'rgba(0, 0, 0, 0.75)',
+    color: '#cbd5e1',
+    fontSize: '0.65rem',
+    fontFamily: 'monospace',
+    fontWeight: 700,
+    padding: '2px 6px',
+    borderRadius: '4px',
+    textTransform: 'uppercase',
+  },
+  cardContent: {
+    padding: '12px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    gap: '8px',
+    flex: 1,
+  },
+  assetTitle: {
+    margin: 0,
+    fontSize: '0.8rem',
+    fontWeight: 700,
+    color: '#f8fafc',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  assetMeta: {
+    fontSize: '0.72rem',
+    color: '#94a3b8',
+    marginTop: '2px',
+  },
+  cardActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    borderTop: '1px solid #1e293b',
+    paddingTop: '8px',
+  },
+  cardActionBtn: {
+    flex: 1,
+    padding: '4px 8px',
+    borderRadius: '6px',
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#cbd5e1',
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+  },
+  miniIconBtn: {
+    padding: '5px',
+    borderRadius: '6px',
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#94a3b8',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectAllBtn: {
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#94a3b8',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '0.72rem',
+    cursor: 'pointer',
+  },
+  tableContainer: {
+    background: '#0c1220',
+    border: '1px solid #1e293b',
+    borderRadius: '14px',
+    overflowX: 'auto',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    textAlign: 'left',
+    fontSize: '0.78rem',
+  },
+  thRow: {
+    background: '#090e1a',
+    borderBottom: '1px solid #1e293b',
+  },
+  th: {
+    padding: '12px 16px',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    color: '#94a3b8',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+  },
+  tr: {
+    borderBottom: '1px solid rgba(30, 41, 59, 0.6)',
+  },
+  td: {
+    padding: '12px 16px',
+    color: '#cbd5e1',
+  },
+  tableBadge: {
+    background: 'rgba(236, 72, 153, 0.15)',
+    color: '#f472b6',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    fontFamily: 'monospace',
+    textTransform: 'uppercase',
+  },
+  emptyBox: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    background: 'rgba(12, 18, 32, 0.5)',
+    borderRadius: '16px',
+    border: '1px solid #1e293b',
+  },
+  emptyIconCircle: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    background: '#1e293b',
+    color: '#64748b',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 12px',
+  },
+  dragOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(7, 11, 20, 0.85)',
+    backdropFilter: 'blur(6px)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '24px',
+  },
+  dragBox: {
+    border: '3px dashed #ec4899',
+    borderRadius: '24px',
+    padding: '48px',
+    textAlign: 'center',
+    background: 'rgba(236, 72, 153, 0.08)',
+    maxWidth: '460px',
+    width: '100%',
+  },
+  dragIconBox: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '16px',
+    background: 'rgba(236, 72, 153, 0.2)',
+    color: '#f472b6',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 16px',
+  },
+  modalBackdrop: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.85)',
+    backdropFilter: 'blur(6px)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+  },
+  lightboxCard: {
+    background: '#0e1526',
+    border: '1px solid #334155',
+    borderRadius: '18px',
+    maxWidth: '850px',
+    width: '100%',
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)',
+  },
+  lightboxHeader: {
+    padding: '14px 20px',
+    borderBottom: '1px solid #1e293b',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  navArrowBtn: {
+    background: '#1e293b',
+    border: '1px solid #334155',
+    color: '#cbd5e1',
+    borderRadius: '6px',
+    padding: '4px 8px',
+    cursor: 'pointer',
+    display: 'flex',
+  },
+  closeModalBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#94a3b8',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+  },
+  lightboxBody: {
+    padding: '24px',
+    background: '#070b14',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '300px',
+    maxHeight: '55vh',
+    overflow: 'auto',
+  },
+  lightboxFooter: {
+    padding: '14px 20px',
+    borderTop: '1px solid #1e293b',
+    background: '#0c1220',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
+  dialogCard: {
+    background: '#0f172a',
+    border: '1px solid #334155',
+    borderRadius: '16px',
+    maxWidth: '380px',
+    width: '100%',
+    padding: '20px',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+  },
+  dialogInput: {
+    width: '100%',
+    background: '#070b14',
+    border: '1px solid #334155',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    color: '#fff',
+    fontSize: '0.82rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+  },
+  toastBox: {
+    position: 'fixed',
+    bottom: '24px',
+    right: '24px',
+    zIndex: 1100,
+    padding: '12px 20px',
+    borderRadius: '10px',
+    color: '#fff',
+    fontWeight: 700,
+    fontSize: '0.82rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+    border: '1px solid',
+  },
+};
