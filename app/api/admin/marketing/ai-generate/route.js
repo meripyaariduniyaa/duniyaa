@@ -80,65 +80,70 @@ export async function POST(request) {
     await requireAdmin(request);
     const body = await request.json().catch(() => ({}));
     const type = body.type || 'text'; // 'text' or 'image'
-    const prompt = body.prompt ? String(body.prompt).trim() : '';
+    const prompt = (body.prompt || body.message || body.text || 'LovelyCrafts digital gift promotion').toString().trim();
     const mode = body.mode || 'general'; // 'instagram_caption', 'reel_script', 'whatsapp_agent', 'marketing_strategy', 'campaign_plan'
     const context = body.context || '';
 
-    if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required for generation.' }, { status: 400 });
-    }
-
-    const apiKey = process.env.HUGGINGFACE_API_KEY;
+    const apiKey =
+      process.env.HUGGINGFACE_API_KEY ||
+      process.env.HF_TOKEN ||
+      process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY;
 
     // ─────────────────────────────────────────────────────────────
-    // 1. AI IMAGE GENERATION (Hugging Face FLUX.1 / SDXL + Cloudinary Storage)
+    // 1. AI IMAGE GENERATION (Hugging Face / Pollinations fallback + Cloudinary)
     // ─────────────────────────────────────────────────────────────
     if (type === 'image') {
-      if (!apiKey) {
-        return NextResponse.json({
-          error: 'HUGGINGFACE_API_KEY environment variable is not configured on the server. Please add it to your environment variables to enable AI image generation.',
-        }, { status: 400 });
-      }
-
       const enhancedImagePrompt = `${prompt}, high quality, aesthetic social media poster, vibrant colors, premium digital gift branding, 4k, photorealistic, elegant design, trending on Instagram`;
 
       let imgBuffer = null;
       let contentType = 'image/jpeg';
-      let lastError = null;
 
-      for (const modelUrl of HF_IMAGE_MODELS) {
+      // Attempt Hugging Face if key exists
+      if (apiKey) {
+        for (const modelUrl of HF_IMAGE_MODELS) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            const res = await fetch(modelUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify({ inputs: enhancedImagePrompt }),
+              signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+              imgBuffer = await res.arrayBuffer();
+              contentType = res.headers.get('content-type') || 'image/jpeg';
+              break;
+            }
+          } catch (e) {
+            // Silently proceed to next model or Pollinations fallback
+          }
+        }
+      }
+
+      // ponytail: zero-config Pollinations fallback when HF token is missing or endpoints are busy
+      if (!imgBuffer) {
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 28000);
-
-          const res = await fetch(modelUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({ inputs: enhancedImagePrompt }),
-            signal: controller.signal,
-          });
-
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            imgBuffer = await res.arrayBuffer();
-            contentType = res.headers.get('content-type') || 'image/jpeg';
-            break;
-          } else {
-            const errJson = await res.json().catch(() => ({}));
-            lastError = errJson?.error || `Model ${modelUrl} returned HTTP ${res.status}`;
+          const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedImagePrompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+          const pollRes = await fetch(pollinationsUrl);
+          if (pollRes.ok) {
+            imgBuffer = await pollRes.arrayBuffer();
+            contentType = 'image/jpeg';
           }
         } catch (e) {
-          lastError = e.message;
+          console.warn('Pollinations image fallback warning:', e?.message);
         }
       }
 
       if (imgBuffer) {
         const base64 = Buffer.from(imgBuffer).toString('base64');
-        // Upload immediately to Cloudinary cloud storage
         const permanentCloudinaryUrl = await uploadToCloudinary(base64, contentType, 'lovelycrafts_marketing');
 
         return NextResponse.json({
@@ -146,11 +151,13 @@ export async function POST(request) {
           prompt: enhancedImagePrompt,
           storage: permanentCloudinaryUrl.startsWith('http') && !permanentCloudinaryUrl.startsWith('data:') ? 'cloudinary' : 'inline',
         });
-      } else {
-        return NextResponse.json({
-          error: lastError || 'All Hugging Face image models were unavailable. Please check your token permissions.',
-        }, { status: 400 });
       }
+
+      return NextResponse.json({
+        imageUrl: `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedImagePrompt)}?width=1024&height=1024&nologo=true`,
+        prompt: enhancedImagePrompt,
+        storage: 'pollinations_direct',
+      });
     }
 
     // ─────────────────────────────────────────────────────────────
