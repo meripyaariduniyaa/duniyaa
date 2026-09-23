@@ -14,12 +14,10 @@ import {
   GiftsIcon,
   FinanceIcon,
   SparklesIcon,
-  RefreshIcon,
-  MegaphoneIcon
+  RefreshIcon
 } from '@/components/admin/AdminIcons';
 
 const QUICK_ACTIONS = [
-  { label: 'Marketing AI', href: '/marketing', icon: MegaphoneIcon, color: '#ec4899', bg: '#fce7f3' },
   { label: 'View Orders', href: '/admin/orders', icon: OrdersIcon, color: '#0284c7', bg: '#e0f2fe' },
   { label: 'Manage Creators', href: '/admin/creators', icon: CreatorsIcon, color: '#7c3aed', bg: '#ede9fe' },
   { label: 'Finance Hub', href: '/admin/finance', icon: FinanceIcon, color: '#059669', bg: '#d1fae5' },

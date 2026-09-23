@@ -310,6 +310,9 @@ export default function DrivePage() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Storage Usage (Cloudinary free tier: 25 GB)
+  const [storageUsage, setStorageUsage] = useState(null); // { used_bytes, limit_bytes }
+
   // Toast System
   const [toast, setToast] = useState(null);
 
@@ -410,6 +413,11 @@ export default function DrivePage() {
     if (isAdmin) {
       fetchFolders();
       fetchResources();
+      // Fetch storage usage once on load
+      fetch('/api/drive/usage')
+        .then((r) => r.json())
+        .then((d) => { if (d.limit_bytes) setStorageUsage(d); })
+        .catch(() => { });
     }
   }, [isAdmin, currentFolder, resourceType, fetchFolders, fetchResources]);
 
@@ -495,6 +503,14 @@ export default function DrivePage() {
   const handleFileUpload = useCallback(
     async (files) => {
       if (!files || files.length === 0) return;
+
+      // 10 MB per-file limit (template files)
+      const MAX_SIZE = 10 * 1024 * 1024;
+      const oversized = Array.from(files).find((f) => f.size > MAX_SIZE);
+      if (oversized) {
+        showToast(`"${oversized.name}" exceeds the 10 MB limit. Please compress it first.`, 'error');
+        return;
+      }
 
       setUploading(true);
       setUploadProgress(10);
@@ -887,10 +903,9 @@ export default function DrivePage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h1 style={driveStyles.title}>Cloudinary Drive</h1>
-              <span style={driveStyles.proBadge}>PRO STORAGE</span>
             </div>
             <p style={driveStyles.subtitle}>
-              {filteredResources.length} items • Total size in folder: <strong style={{ color: '#fff' }}>{formatBytes(totalFolderBytes)}</strong>
+              {filteredResources.length} items • Folder: <strong style={{ color: '#fff' }}>{formatBytes(totalFolderBytes)}</strong>
             </p>
           </div>
         </div>
@@ -1070,11 +1085,29 @@ export default function DrivePage() {
             )}
           </div>
 
-          {/* CLIPBOARD UPLOAD TIP */}
-          <div style={driveStyles.tipCard}>
-            <strong style={{ color: '#fff', display: 'block', marginBottom: '2px' }}>Pro Tip:</strong>
-            <p style={{ margin: 0 }}>Paste screenshots directly with <kbd style={driveStyles.kbd}>Ctrl+V</kbd> to upload instantly!</p>
-          </div>
+          {/* STORAGE QUOTA */}
+          {storageUsage && (() => {
+            const pct = Math.min(100, Math.round((storageUsage.used_bytes / storageUsage.limit_bytes) * 100));
+            const usedGB = (storageUsage.used_bytes / (1024 ** 3)).toFixed(2);
+            const limitGB = (storageUsage.limit_bytes / (1024 ** 3)).toFixed(0);
+            const barColor = pct > 85 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#10b981';
+            return (
+              <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Storage</span>
+                  <span style={{ fontSize: '0.7rem', color: barColor, fontWeight: 700 }}>{pct}%</span>
+                </div>
+                <div style={{ height: '5px', borderRadius: '99px', background: 'rgba(255,255,255,0.07)', overflow: 'hidden', marginBottom: '6px' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: '99px', transition: 'width 0.6s ease' }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{usedGB} GB used</span>
+                  <span style={{ fontSize: '0.68rem', color: '#475569' }}>{limitGB} GB free tier</span>
+                </div>
+              </div>
+            );
+          })()}
+
         </aside>
 
         {/* MAIN STAGE CONTENT */}
@@ -1380,7 +1413,7 @@ export default function DrivePage() {
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => {}}
+                            onChange={() => { }}
                             style={driveStyles.checkbox}
                           />
                         </div>

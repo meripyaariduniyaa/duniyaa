@@ -12,7 +12,6 @@ export default function StickyCtaBar() {
     if (
       pathname?.startsWith('/p/') ||
       pathname?.startsWith('/admin') ||
-      pathname?.startsWith('/marketing') ||
       pathname?.startsWith('/drive') ||
       pathname?.startsWith('/del') ||
       pathname?.startsWith('/creator/') ||

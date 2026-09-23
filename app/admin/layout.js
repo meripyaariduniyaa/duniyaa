@@ -158,29 +158,6 @@ export default function AdminLayout({ children }) {
             </Link>
 
             <Link
-              href="/marketing"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 10px',
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(236, 72, 153, 0.18) 100%)',
-                border: '1px solid rgba(168, 85, 247, 0.4)',
-                color: '#d8b4fe',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-                transition: 'all 0.15s ease',
-              }}
-              className="hidden md:inline-flex"
-              title="Open AI Digital Marketing Suite"
-            >
-              <MegaphoneIcon size={14} />
-              <span>Marketing AI</span>
-            </Link>
-
-            <Link
               href="/drive"
               style={{
                 display: 'inline-flex',

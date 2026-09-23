@@ -438,25 +438,6 @@ export default function ExpirationCleanupPage() {
 
       {/* 2. MAIN WORKSPACE */}
       <main style={delStyles.mainContent}>
-        {/* DATA INTEGRITY GUARANTEE BANNER */}
-        <div style={delStyles.shieldBanner}>
-          <div style={delStyles.shieldIconBox}>
-            <IconShield size={22} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <strong style={{ color: '#6ee7b7', fontSize: '0.78rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                Zero Data Loss Scope Guard:
-              </strong>
-              <span style={delStyles.immutableBadge}>
-                Referrals &amp; Ledgers 100% Immutable
-              </span>
-            </div>
-            <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.82rem', lineHeight: 1.5 }}>
-              Only customer-created shareable notes (<code style={delStyles.codeTag}>/p/[slug]</code>) and temporary customer uploads (<code style={delStyles.codeTag}>user-uploads/</code>) older than <strong style={{ color: '#fff' }}>{retentionDays} days</strong> are targeted. Referral links (<code style={delStyles.codeTag}>/c/[slug]</code>), creator profiles, clicks, payouts, and the permanent <code style={delStyles.codeTag}>admin_payment_ledger</code> vault are strictly preserved and untouchable.
-            </p>
-          </div>
-        </div>
 
         {/* STATS OVERVIEW CARDS */}
         <div style={delStyles.statsGrid}>
@@ -508,10 +489,10 @@ export default function ExpirationCleanupPage() {
               <div style={{ ...delStyles.statValue, fontSize: '1.15rem', color: '#7dd3fc' }}>
                 {scanResult?.cutoffDate
                   ? new Date(scanResult.cutoffDate).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
                   : `${retentionDays} Days Ago`}
               </div>
               <p style={delStyles.statSubText}>Data created before this cutoff will be pruned</p>
@@ -751,10 +732,10 @@ export default function ExpirationCleanupPage() {
                         <td style={{ ...delStyles.td, color: '#94a3b8' }}>
                           {doc.createdAt
                             ? new Date(doc.createdAt).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              })
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })
                             : '—'}
                         </td>
                         <td style={{ ...delStyles.td, color: '#fb7185', fontWeight: 700 }}>
@@ -832,10 +813,10 @@ export default function ExpirationCleanupPage() {
                         <td style={{ ...delStyles.td, color: '#94a3b8' }}>
                           {item.created_at
                             ? new Date(item.created_at).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              })
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })
                             : '—'}
                         </td>
                         <td style={{ ...delStyles.td, color: '#fb7185', fontWeight: 700 }}>
