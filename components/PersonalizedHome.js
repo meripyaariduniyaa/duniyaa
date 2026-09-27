@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { HeroPills, BentoGrid } from '@/components/ShuffledTemplates';
 import EmotionFinder from '@/components/EmotionFinder';
 import LiveActivityTicker from '@/components/LiveActivityTicker';
@@ -9,6 +11,10 @@ import GoogleAd from '@/components/GoogleAd';
 import PreviewDemoButton from '@/components/PreviewDemoButton';
 import FeaturedCreatorsSection from '@/components/FeaturedCreatorsSection';
 import { getUserContext, trackUserSignal } from '@/lib/personalization';
+
+// ─── Configuration ──────────────────────────────────────────────────────────
+// Paste your Cloudinary video URL here once uploaded (e.g. 'https://res.cloudinary.com/.../video.mp4')
+const HERO_CLOUDINARY_VIDEO_URL = '';
 
 // ─── Static data ────────────────────────────────────────────────────────────
 
@@ -143,7 +149,47 @@ export default function PersonalizedHome() {
   const [hero, setHero] = useState(DEFAULT_HERO);
   const [bestsellers, setBestsellers] = useState(resolveBestsellers(DEFAULT_FEATURED_IDS));
   const [isPersonalized, setIsPersonalized] = useState(false);
+  const containerRef = useRef(null);
 
+  // GSAP Animations with ScrollTrigger & matchMedia
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      // Hero Stagger animation
+      gsap.from('.gsap-hero-anim', {
+        opacity: 0,
+        y: 20,
+        duration: 0.75,
+        stagger: 0.08,
+        ease: 'power2.out',
+      });
+
+      // Scroll Trigger on major sections
+      const revealSections = gsap.utils.toArray('.gsap-section-reveal');
+      revealSections.forEach((section) => {
+        gsap.from(section, {
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+          opacity: 0,
+          y: 28,
+          duration: 0.75,
+          ease: 'power2.out',
+        });
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Personalization Effect
   useEffect(() => {
     const ctx = getUserContext();
     trackUserSignal('visitCount', (ctx.visitCount || 0) + 1);
@@ -190,6 +236,7 @@ export default function PersonalizedHome() {
   return (
     <main className="shell">
       <div
+        ref={containerRef}
         className="main-content"
         style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2rem, 4.5vw, 3.5rem)', padding: '0 0 2.5rem' }}
       >
@@ -200,44 +247,67 @@ export default function PersonalizedHome() {
           </div>
 
           <section
-            className="hero-section text-center"
+            className="hero-section hero-enhanced text-center"
             style={{
-              background: '#ffffff',
               borderRadius: 'clamp(20px, 4vw, 28px)',
-              padding: 'clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.75rem)',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 16px 36px rgba(0,0,0,0.03)',
+              padding: 'clamp(1.5rem, 3.5vw, 2.5rem) clamp(1rem, 3vw, 1.75rem)',
             }}
           >
+            {/* Glow orb background accent */}
+            <div className="hero-glow-orb" aria-hidden="true" />
+
+            {/* Floating decorative accents */}
+            <span className="hero-floating-decor d1" aria-hidden="true">💝</span>
+            <span className="hero-floating-decor d2" aria-hidden="true">🎂</span>
+            <span className="hero-floating-decor d3" aria-hidden="true">✨</span>
+            <span className="hero-floating-decor d4" aria-hidden="true">💌</span>
+
             <div
+              className="gsap-hero-anim"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
                 background: '#fff1f2',
                 border: '1px solid #fecdd3',
-                padding: '0.28rem 0.8rem',
+                padding: '0.32rem 0.9rem',
                 borderRadius: '99px',
                 fontSize: 'clamp(0.7rem, 1.6vw, 0.76rem)',
                 color: '#be185d',
                 fontWeight: 800,
-                marginBottom: '0.65rem',
+                marginBottom: '0.75rem',
+                boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
               }}
             >
+              <span className="live-pulse-dot" aria-hidden="true" />
               <span>⭐ HIGHLY RATED DIGITAL GIFTS</span>
               <span>•</span>
               <span>Instant 1-Click WhatsApp Surprises</span>
+              {isPersonalized && (
+                <span
+                  style={{
+                    marginLeft: '4px',
+                    background: 'linear-gradient(135deg, #f43f5e, #be185d)',
+                    color: '#fff',
+                    padding: '1px 8px',
+                    borderRadius: '99px',
+                    fontSize: '0.65rem',
+                  }}
+                >
+                  ✨ For You
+                </span>
+              )}
             </div>
 
             <h1
+              className="gsap-hero-anim"
               style={{
-                fontSize: 'clamp(1.8rem, 5.5vw, 3.2rem)',
+                fontSize: 'clamp(1.85rem, 5.5vw, 3.25rem)',
                 lineHeight: 1.15,
                 fontWeight: 800,
                 color: '#1c1917',
                 margin: '0 auto 0.75rem',
                 letterSpacing: '-0.03em',
-                transition: 'opacity 0.3s ease',
               }}
             >
               {hero.title}
@@ -248,23 +318,24 @@ export default function PersonalizedHome() {
             </h1>
 
             <p
-              className="hero-copy text-muted"
+              className="hero-copy text-muted gsap-hero-anim"
               style={{
                 maxWidth: '640px',
-                margin: '0 auto 1rem',
+                margin: '0 auto 1.15rem',
                 fontSize: 'clamp(0.92rem, 2.2vw, 1.05rem)',
                 lineHeight: 1.55,
-                transition: 'opacity 0.3s ease',
               }}
             >
               {hero.subtitle}
             </p>
 
-            <HeroPills />
+            <div className="gsap-hero-anim">
+              <HeroPills />
+            </div>
 
             <div
-              className="hero-actions"
-              style={{ marginTop: '1.15rem', display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}
+              className="hero-actions gsap-hero-anim"
+              style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}
             >
               <Link
                 href="/templates"
@@ -291,16 +362,69 @@ export default function PersonalizedHome() {
               </a>
             </div>
 
-            {isPersonalized && (
-              <p style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: '#be185d', opacity: 0.6, fontStyle: 'italic' }}>
-                ✨ Personalized for you
-              </p>
-            )}
+            {/* Social Proof Micro-Strip */}
+            <div className="hero-social-proof gsap-hero-anim">
+              <span className="hero-social-proof-item">
+                <span>⚡</span>
+                <span><b>50,000+</b> surprises sent</span>
+              </span>
+              <span>•</span>
+              <span className="hero-social-proof-item">
+                <span>★★★★★</span>
+                <span><b>4.9/5</b> loved across India</span>
+              </span>
+              <span>•</span>
+              <span className="hero-social-proof-item">
+                <span>🔒</span>
+                <span>Private 1-click link</span>
+              </span>
+            </div>
+
+            {/* Video / Interactive Experience Demo Slot */}
+            <div className="hero-video-container gsap-hero-anim">
+              <div className="hero-video-inner">
+                {HERO_CLOUDINARY_VIDEO_URL ? (
+                  <video
+                    src={HERO_CLOUDINARY_VIDEO_URL}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    controls
+                  />
+                ) : (
+                  <div className="hero-video-placeholder">
+                    <span style={{ fontSize: '2.4rem' }}>🎬 ✨</span>
+                    <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#ffffff' }}>
+                      See How an Interactive WhatsApp Surprise Works
+                    </div>
+                    <p style={{ fontSize: '0.84rem', color: '#e2e8f0', maxWidth: '440px', margin: 0, lineHeight: 1.5 }}>
+                      Watch recipients unwrap custom digital cards, blow birthday candles, play songs, and reveal letters on their phone.
+                    </p>
+                    <div style={{ marginTop: '0.35rem' }}>
+                      <PreviewDemoButton
+                        templateId="proposal"
+                        className="btn-primary"
+                        style={{
+                          padding: '0.6rem 1.4rem',
+                          fontSize: '0.86rem',
+                          fontWeight: 800,
+                          background: 'linear-gradient(135deg, #f43f5e, #be185d)',
+                          boxShadow: '0 4px 15px rgba(244,63,94,0.4)',
+                        }}
+                      >
+                        ▶ Experience Live Interactive Demo
+                      </PreviewDemoButton>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </section>
         </div>
 
         {/* ── Spotlight Best Sellers ── */}
-        <section id="bestsellers">
+        <section id="bestsellers" className="gsap-section-reveal">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span
               style={{
@@ -326,21 +450,20 @@ export default function PersonalizedHome() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          <div
+            className="bestsellers-scroll-mobile"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}
+          >
             {bestsellers.map((item) => (
               <div
                 key={item.id}
+                className="bestseller-card"
                 style={{
-                  background: '#ffffff',
+                  background: `linear-gradient(165deg, #ffffff 68%, ${item.borderColor}26 100%)`,
                   border: `1.5px solid ${item.borderColor}`,
-                  borderRadius: '24px',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-                  position: 'relative',
                   overflow: 'hidden',
+                  '--card-glow': item.borderColor,
                 }}
               >
                 <div>
@@ -401,12 +524,12 @@ export default function PersonalizedHome() {
         </section>
 
         {/* ── Emotion Finder ── */}
-        <div id="feelings">
+        <div id="feelings" className="gsap-section-reveal">
           <EmotionFinder />
         </div>
 
         {/* ── Bento Grid Catalog ── */}
-        <section className="bento-section" id="experiences">
+        <section className="bento-section gsap-section-reveal" id="experiences">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
               COMPLETE CATALOG
@@ -422,12 +545,13 @@ export default function PersonalizedHome() {
         </section>
 
         {/* ── Featured Creators ── */}
-        <div id="creators">
+        <div id="creators" className="gsap-section-reveal">
           <FeaturedCreatorsSection />
         </div>
 
         {/* ── Why LovelyCrafts Comparison Table ── */}
         <section
+          className="gsap-section-reveal"
           style={{
             background: 'linear-gradient(180deg, #ffffff 0%, #fffbfb 100%)',
             borderRadius: '32px',
@@ -447,8 +571,8 @@ export default function PersonalizedHome() {
               See why modern couples &amp; besties prefer interactive digital surprises over physical cards.
             </p>
           </div>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '540px' }}>
+          <div className="comparison-table-wrap">
+            <table className="comparison-table" style={{ width: '100%', minWidth: '540px' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #fecdd3' }}>
                   <th style={{ padding: '0.85rem 1rem', color: '#374151', fontSize: '0.9rem' }}>Feature</th>
@@ -477,10 +601,10 @@ export default function PersonalizedHome() {
                   ['Forever Keepsake Link', 'Lost in drawer', 'Lost in chat history', '✓ Accessible Anytime', '#ef4444', '#ef4444', '#16a34a'],
                 ].map(([feat, c1, c2, c3, col1, col2, col3], i, arr) => (
                   <tr key={feat} style={{ borderBottom: i < arr.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#1f2937' }}>{feat}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: col1 }}>{c1}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: col2 }}>{c2}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: col3, fontWeight: 800, background: '#fff1f2' }}>{c3}</td>
+                    <td className="feature-title-cell" data-label="Feature" style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#1f2937' }}>{feat}</td>
+                    <td data-label="Paper Cards" style={{ padding: '0.85rem 1rem', color: col1 }}>{c1}</td>
+                    <td data-label="Plain WhatsApp" style={{ padding: '0.85rem 1rem', color: col2 }}>{c2}</td>
+                    <td data-label="❤️ LovelyCrafts" style={{ padding: '0.85rem 1rem', color: col3, fontWeight: 800, background: '#fff1f2' }}>{c3}</td>
                   </tr>
                 ))}
               </tbody>
@@ -489,7 +613,7 @@ export default function PersonalizedHome() {
         </section>
 
         {/* ── How It Works ── */}
-        <section className="how-it-works-section">
+        <section className="how-it-works-section gsap-section-reveal">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
               SIMPLE 3-STEP PROCESS
@@ -498,19 +622,22 @@ export default function PersonalizedHome() {
               How It Works
             </h2>
           </div>
-          <div className="how-it-works-grid">
-            <div className="how-card">
-              <div className="how-step-num">1</div>
+          <div className="how-it-works-grid-enhanced">
+            <div className="how-card-enhanced">
+              <div className="how-step-icon">🎯</div>
+              <div className="how-step-badge">1</div>
               <h3 className="how-title">Pick an Experience</h3>
               <p className="how-desc">Select from Proposals, Birthday Bashes, Sorry Cards, or Romantic Letters.</p>
             </div>
-            <div className="how-card">
-              <div className="how-step-num">2</div>
+            <div className="how-card-enhanced">
+              <div className="how-step-icon">🎨</div>
+              <div className="how-step-badge">2</div>
               <h3 className="how-title">Add Your Personal Touch</h3>
               <p className="how-desc">Upload special photos, craft heartfelt letters, add secret passcode, and choose music.</p>
             </div>
-            <div className="how-card">
-              <div className="how-step-num">3</div>
+            <div className="how-card-enhanced">
+              <div className="how-step-icon">💌</div>
+              <div className="how-step-badge">3</div>
               <h3 className="how-title">Send with Love</h3>
               <p className="how-desc">Share a private link directly via WhatsApp or SMS. Watch their reaction live!</p>
             </div>
@@ -518,7 +645,7 @@ export default function PersonalizedHome() {
         </section>
 
         {/* ── Real Customer Stories ── */}
-        <section>
+        <section className="gsap-section-reveal">
           <div className="text-center" style={{ marginBottom: '2rem' }}>
             <span
               style={{
@@ -540,30 +667,29 @@ export default function PersonalizedHome() {
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-            {TESTIMONIALS.map((t, idx) => (
+            {TESTIMONIALS.map((t) => (
               <div
-                key={idx}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #fecdd3',
-                  borderRadius: '20px',
-                  padding: '1.5rem',
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.03)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
+                key={t.name}
+                className="testimonial-card-enhanced"
               >
+                <span className="testimonial-quote-mark" aria-hidden="true">&ldquo;</span>
                 <div>
-                  <div style={{ color: '#f59e0b', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{t.rating}</div>
-                  <p style={{ fontSize: '0.92rem', color: '#374151', lineHeight: 1.6, fontStyle: 'italic', margin: '0 0 1rem' }}>
+                  <div
+                    style={{ color: '#f59e0b', fontSize: '1.1rem', marginBottom: '0.5rem' }}
+                    aria-label={`${t.rating} rating`}
+                  >
+                    {t.rating}
+                  </div>
+                  <p style={{ fontSize: '0.92rem', color: '#374151', lineHeight: 1.6, fontStyle: 'italic', margin: '0 0 1.25rem', position: 'relative', zIndex: 1 }}>
                     &ldquo;{t.quote}&rdquo;
                   </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem' }}>
-                  <div style={{ fontSize: '1.8rem' }}>{t.avatar}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid #f3f4f6', paddingTop: '0.85rem' }}>
+                  <div className="testimonial-avatar-monogram" aria-hidden="true">
+                    {t.name.charAt(0)}
+                  </div>
                   <div>
-                    <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1f2937', margin: 0 }}>{t.name}</h4>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1f2937', margin: 0 }}>{t.name}</h4>
                     <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
                       {t.city} • Used <em>{t.template}</em>
                     </span>
@@ -576,6 +702,7 @@ export default function PersonalizedHome() {
 
         {/* ── FAQs ── */}
         <section
+          className="gsap-section-reveal"
           style={{
             background: '#ffffff',
             border: '1px solid rgba(0,0,0,0.06)',
@@ -592,14 +719,15 @@ export default function PersonalizedHome() {
               Frequently Asked Questions
             </h2>
           </div>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', maxWidth: '820px', margin: '0 auto' }}
-          >
-            {FAQS.map((faq, idx) => (
-              <div key={idx} style={{ background: '#fafaf9', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1f2937', margin: '0 0 0.5rem' }}>❓ {faq.q}</h4>
-                <p style={{ fontSize: '0.86rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>{faq.a}</p>
-              </div>
+          <div className="faq-accordion-list">
+            {FAQS.map((faq) => (
+              <details key={faq.q} className="faq-item">
+                <summary className="faq-summary">
+                  <span>❓ {faq.q}</span>
+                  <span className="faq-toggle-icon" aria-hidden="true">+</span>
+                </summary>
+                <p className="faq-content">{faq.a}</p>
+              </details>
             ))}
           </div>
         </section>
@@ -609,10 +737,8 @@ export default function PersonalizedHome() {
 
         {/* ── Bottom CTA ── */}
         <section
+          className="bottom-cta-section-enhanced gsap-section-reveal"
           style={{
-            background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fdf2f8 100%)',
-            border: '2px solid #f43f5e',
-            borderRadius: '32px',
             padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2rem)',
             textAlign: 'center',
             boxShadow: '0 16px 40px rgba(244,63,94,0.15)',

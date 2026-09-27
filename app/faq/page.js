@@ -107,45 +107,80 @@ export default function FAQPage() {
   };
 
   return (
-    <main className="shell" style={{ padding: '3.5rem 1rem 5rem', background: '#fafaf9', minHeight: '100vh' }}>
+    <main className="shell" style={{ padding: '2.5rem 1rem 5rem', background: '#fafaf9', minHeight: '100vh' }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div style={{ maxWidth: '840px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '880px', margin: '0 auto' }}>
         {/* Breadcrumb */}
-        <nav style={{ marginBottom: '2rem', fontSize: '0.9rem', color: '#64748b' }}>
-          <Link href="/" style={{ color: '#e11d48', textDecoration: 'none', fontWeight: 600 }}>Home</Link>
+        <nav style={{ marginBottom: '1.75rem', fontSize: '0.88rem', color: '#64748b' }}>
+          <Link href="/" style={{ color: '#be185d', textDecoration: 'none', fontWeight: 700 }}>Home</Link>
           {' / '}
-          <span style={{ fontWeight: 600, color: '#0f172a' }}>FAQ</span>
+          <span style={{ fontWeight: 700, color: '#0f172a' }}>FAQ</span>
         </nav>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <span
+        {/* Hero Header */}
+        <section
+          className="hero-section hero-enhanced text-center mb-10"
+          style={{
+            borderRadius: 'clamp(20px, 4vw, 28px)',
+            padding: 'clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 2.25rem)',
+          }}
+        >
+          <div className="hero-glow-orb" aria-hidden="true" />
+          <span className="hero-floating-decor d1" aria-hidden="true">❓</span>
+          <span className="hero-floating-decor d2" aria-hidden="true">✨</span>
+          <span className="hero-floating-decor d3" aria-hidden="true">💡</span>
+          <span className="hero-floating-decor d4" aria-hidden="true">💌</span>
+
+          <div
             style={{
-              background: '#ffe4e6',
-              color: '#e11d48',
-              padding: '4px 14px',
-              borderRadius: '999px',
-              fontSize: '0.78rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.32rem 0.95rem',
+              borderRadius: '99px',
+              fontSize: 'clamp(0.72rem, 1.6vw, 0.78rem)',
+              color: '#be185d',
               fontWeight: 800,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              display: 'inline-block',
-              marginBottom: '0.75rem',
+              marginBottom: '1rem',
+              boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
             }}
           >
-            ❓ HELP &amp; KNOWLEDGE BASE
-          </span>
-          <h1 style={{ fontSize: 'clamp(2rem, 4.5vw, 3rem)', fontWeight: 900, color: '#0f172a', margin: '0 0 0.75rem' }}>
-            Frequently Asked Questions
+            <span className="live-pulse-dot" aria-hidden="true" />
+            <span>❓ HELP CENTER &bull; FREQUENTLY ASKED QUESTIONS</span>
+          </div>
+
+          <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', lineHeight: 1.15, fontWeight: 900, color: '#0f172a', margin: '0 auto 1rem', letterSpacing: '-0.03em' }}>
+            Frequently Asked <br />
+            <span className="cursive" style={{ color: 'var(--accent-primary)', fontSize: '1.05em' }}>Questions &amp; Guides</span>
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: '620px', margin: '0 auto', lineHeight: 1.6 }}>
-            Everything you need to know about creating, personalizing, and sharing interactive digital gift links on LovelyCrafts.
+
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.12rem)', color: '#475569', maxWidth: '640px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+            Everything you need to know about creating, personalizing, locking, and sharing interactive digital gift links on WhatsApp.
           </p>
-        </div>
+
+          <div className="hero-social-proof" style={{ marginTop: '0.5rem', paddingTop: '1rem' }}>
+            <span className="hero-social-proof-item">
+              <span>📱</span>
+              <span>No app install needed</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>🔒</span>
+              <span>Secret passcode lock supported</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>⚡</span>
+              <span>Ready in under 3 minutes</span>
+            </span>
+          </div>
+        </section>
 
         {/* Categories */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -154,33 +189,27 @@ export default function FAQPage() {
               key={idx}
               style={{
                 background: '#ffffff',
-                borderRadius: '20px',
-                padding: '2rem',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
+                borderRadius: '24px',
+                padding: '2.25rem 2rem',
+                border: '1.5px solid rgba(244,63,94,0.12)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
               }}
             >
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.25rem' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {cat.category}
               </h2>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="faq-accordion-list">
                 {cat.faqs.map((faq, fIdx) => (
                   <details
                     key={fIdx}
-                    style={{
-                      background: '#f8fafc',
-                      borderRadius: '12px',
-                      padding: '1rem 1.25rem',
-                      border: '1px solid #f1f5f9',
-                      cursor: 'pointer',
-                    }}
+                    className="faq-item"
                   >
-                    <summary style={{ fontWeight: 700, fontSize: '0.98rem', color: '#1e293b', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <summary className="faq-summary">
                       <span>{faq.q}</span>
-                      <span style={{ color: '#e11d48', fontSize: '1.2rem', marginLeft: '12px' }}>+</span>
+                      <span className="faq-toggle-icon" aria-hidden="true">+</span>
                     </summary>
-                    <p style={{ fontSize: '0.92rem', color: '#475569', lineHeight: 1.6, margin: '0.75rem 0 0', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
+                    <p className="faq-content">
                       {faq.a}
                     </p>
                   </details>
@@ -192,26 +221,47 @@ export default function FAQPage() {
 
         {/* Contact CTA Banner */}
         <div
+          className="bottom-cta-section-enhanced"
           style={{
             marginTop: '3.5rem',
-            background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
-            borderRadius: '20px',
             padding: '2.5rem 2rem',
             textAlign: 'center',
-            border: '1.5px solid #fecdd3',
+            boxShadow: '0 16px 36px rgba(244,63,94,0.12)',
           }}
         >
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#881337', margin: '0 0 0.5rem' }}>
-            Still have questions?
+          <span style={{ fontSize: '2.8rem', display: 'block', marginBottom: '0.5rem' }}>💬 ✉️ 🚀</span>
+          <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)', fontWeight: 900, color: '#881337', marginBottom: '0.5rem' }}>
+            Still Have Questions?
           </h2>
-          <p style={{ fontSize: '0.95rem', color: '#9f1239', maxWidth: '500px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
-            Our customer support desk is ready to help you craft the perfect surprise link.
+          <p style={{ color: '#9f1239', fontSize: '0.98rem', maxWidth: '520px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+            Our customer support desk is ready to help you craft the perfect interactive surprise.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/contact" className="btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
+            <Link
+              href="/contact"
+              className="btn-primary"
+              style={{
+                padding: '0.85rem 2.2rem',
+                fontSize: '1rem',
+                fontWeight: 800,
+                borderRadius: '999px',
+                background: 'linear-gradient(135deg, #f43f5e, #be185d)',
+                boxShadow: '0 8px 24px rgba(244,63,94,0.35)',
+              }}
+            >
               💬 Contact Support Desk
             </Link>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="btn-secondary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem', fontWeight: 700 }}>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="btn-secondary"
+              style={{
+                padding: '0.85rem 2rem',
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                borderRadius: '999px',
+                background: '#ffffff',
+              }}
+            >
               ✉️ Email Us Directly
             </a>
           </div>

@@ -148,57 +148,132 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="shell">
+    <main className="shell" style={{ padding: '2rem 1rem 5rem' }}>
       <div className="bg-glow bg-glow--top" aria-hidden="true" />
 
-      <div className="main-content" style={{ marginTop: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '0.5rem' }}>Your Notes & Reactions</h1>
-            <p className="text-muted">Track recipient views, replies, and manage your moments.</p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href="/create" className="btn-primary" style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}>
-              + Create New
-            </Link>
-            {user ? (
-              <button className="btn-secondary" onClick={logout} style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}>
-                Sign Out
-              </button>
-            ) : (
-              <button
-                className="btn-secondary"
-                onClick={login}
-                style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+      <div className="main-content" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        {/* Profile Header Card */}
+        <section
+          className="hero-section hero-enhanced mb-8"
+          style={{
+            borderRadius: '24px',
+            padding: '2rem 2rem',
+            textAlign: 'left',
+          }}
+        >
+          <div className="hero-glow-orb" aria-hidden="true" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div
+                className="testimonial-avatar-monogram"
+                style={{ width: '56px', height: '56px', fontSize: '1.4rem' }}
               >
-                <span>🔑</span> Sign in to Sync Across Devices
-              </button>
-            )}
+                {user?.displayName ? user.displayName.charAt(0).toUpperCase() : '👤'}
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.85rem)', fontWeight: 900, color: '#0f172a', margin: 0 }}>
+                    {user?.displayName ? `Hello, ${user.displayName}` : 'Your Moments & Notes'}
+                  </h1>
+                  {user && (
+                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '2px 8px', borderRadius: '999px', border: '1px solid #bbf7d0' }}>
+                      ✓ Synced
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '4px 0 0' }}>
+                  {user?.email || 'Track recipient views, replies, and manage your moments.'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link
+                href="/templates"
+                className="btn-primary"
+                style={{
+                  padding: '0.65rem 1.4rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 800,
+                  borderRadius: '999px',
+                  background: 'linear-gradient(135deg, #f43f5e, #be185d)',
+                  boxShadow: '0 4px 14px rgba(244,63,94,0.3)',
+                }}
+              >
+                + Craft a Surprise
+              </Link>
+              {user ? (
+                <button
+                  className="btn-secondary"
+                  onClick={logout}
+                  style={{
+                    padding: '0.65rem 1.25rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    borderRadius: '999px',
+                    background: '#ffffff',
+                  }}
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <button
+                  className="btn-secondary"
+                  onClick={login}
+                  style={{
+                    padding: '0.65rem 1.25rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    borderRadius: '999px',
+                    background: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <span>🔑</span> Sign in to Sync
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </section>
 
         {fetching ? (
-          <div className="center-screen" style={{ minHeight: '40vh' }}>
+          <div className="center-screen" style={{ minHeight: '35vh' }}>
             <div className="spinner" />
           </div>
         ) : notes.length === 0 ? (
-          <div className="glass-card text-center" style={{ padding: '4rem 2rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>No notes found on this device</h3>
-            <p className="text-muted" style={{ marginBottom: '2rem' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              padding: '4rem 2rem',
+              textAlign: 'center',
+              border: '1.5px dashed #fecdd3',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.02)',
+            }}
+          >
+            <div style={{ fontSize: '3.2rem', marginBottom: '0.75rem' }}>💌 ✨</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>No surprises created yet</h3>
+            <p style={{ color: '#64748b', fontSize: '0.98rem', maxWidth: '440px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
               {user
-                ? "You haven't created any notes yet with this account."
-                : "Create a note to track it here, or sign in to sync notes from other devices."}
+                ? "You haven't crafted any surprise links yet with this account. Choose a template to get started!"
+                : "Create an interactive digital surprise to track views and recipient reactions here."}
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/create" className="btn-primary">
-                Create your first note
+              <Link
+                href="/templates"
+                className="btn-primary"
+                style={{
+                  padding: '0.8rem 2rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 800,
+                  borderRadius: '999px',
+                  background: 'linear-gradient(135deg, #f43f5e, #be185d)',
+                }}
+              >
+                ✨ Choose an Experience &amp; Start
               </Link>
-              {!user && (
-                <button onClick={login} className="btn-secondary">
-                  Sign in with Google
-                </button>
-              )}
             </div>
           </div>
         ) : (

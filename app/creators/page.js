@@ -245,35 +245,61 @@ export default function CreatorsLandingPage() {
         {/* =========================================================================
             PRIORITY 2: HERO SECTION
         ========================================================================= */}
-        <section style={{ textAlign: 'center', padding: '30px 0 50px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', background: '#ffe4e6', borderRadius: '999px', color: '#e11d48', fontWeight: 700, fontSize: '0.85rem', marginBottom: '20px', border: '1px solid #fecdd3' }}>
-            ✨ LovelyCrafts Creator Club ❤️
+        <section
+          className="hero-section hero-enhanced text-center mb-12"
+          style={{
+            borderRadius: 'clamp(20px, 4vw, 28px)',
+            padding: 'clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 2.25rem)',
+          }}
+        >
+          <div className="hero-glow-orb" aria-hidden="true" />
+          <span className="hero-floating-decor d1" aria-hidden="true">👑</span>
+          <span className="hero-floating-decor d2" aria-hidden="true">💸</span>
+          <span className="hero-floating-decor d3" aria-hidden="true">✨</span>
+          <span className="hero-floating-decor d4" aria-hidden="true">💌</span>
+
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.32rem 0.95rem',
+              borderRadius: '99px',
+              fontSize: 'clamp(0.72rem, 1.6vw, 0.78rem)',
+              color: '#be185d',
+              fontWeight: 800,
+              marginBottom: '1rem',
+              boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
+            }}
+          >
+            <span className="live-pulse-dot" aria-hidden="true" />
+            <span>👑 LOVELYCRAFTS CREATOR CLUB &bull; EARN UP TO 18%</span>
           </div>
 
-          <h1 style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)', fontWeight: 800, color: '#111827', lineHeight: 1.18, margin: '0 auto 18px', maxWidth: '880px', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)', fontWeight: 900, color: '#111827', lineHeight: 1.15, margin: '0 auto 18px', maxWidth: '880px', letterSpacing: '-0.03em' }}>
             Share Something They&apos;ll Love.{' '}
-            <span style={{ color: '#e11d48', background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <br />
+            <span className="cursive" style={{ color: 'var(--accent-primary)', fontSize: '1.05em' }}>
               Earn When They Do. ❤️
             </span>
           </h1>
 
-          <p style={{ fontSize: 'clamp(1.05rem, 2.2vw, 1.25rem)', color: '#4b5563', maxWidth: '720px', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Join the LovelyCrafts Creator Club. Give your audience <strong>10% OFF</strong> personalized digital surprises and earn <strong>10% to 18% commission</strong> on successful referrals.
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: '#4b5563', maxWidth: '720px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+            Join the LovelyCrafts Creator Club. Give your audience <strong>10% OFF</strong> personalized digital surprises and earn <strong>10% to 18% recurring commission</strong> on successful referrals.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '28px' }}>
             <a
               href="#apply"
+              className="btn-primary"
               style={{
-                background: '#e11d48',
-                color: '#fff',
-                padding: '16px 32px',
-                borderRadius: '14px',
-                fontWeight: 700,
-                fontSize: '1.05rem',
-                textDecoration: 'none',
-                boxShadow: '0 8px 24px rgba(225,29,72,0.28)',
-                transition: 'all 0.2s',
+                padding: '14px 32px',
+                borderRadius: '999px',
+                fontWeight: 800,
+                fontSize: '1.02rem',
+                boxShadow: '0 8px 24px rgba(225,29,72,0.3)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -283,16 +309,12 @@ export default function CreatorsLandingPage() {
             </a>
             <Link
               href="/creator/login"
+              className="btn-secondary"
               style={{
-                background: '#fff',
-                color: '#374151',
-                padding: '16px 28px',
-                borderRadius: '14px',
+                padding: '14px 28px',
+                borderRadius: '999px',
                 fontWeight: 700,
-                fontSize: '1.05rem',
-                textDecoration: 'none',
-                border: '1px solid #e5e7eb',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                fontSize: '1rem',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -302,18 +324,35 @@ export default function CreatorsLandingPage() {
             </Link>
           </div>
 
+          <div className="hero-social-proof" style={{ marginTop: '0.5rem', paddingTop: '1rem' }}>
+            <span className="hero-social-proof-item">
+              <span>⚡</span>
+              <span>Direct weekly UPI payouts</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>🎟️</span>
+              <span>Custom creator coupon &amp; page</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>🎁</span>
+              <span>Complimentary VIP experience passes</span>
+            </span>
+          </div>
+
           {/* Value Pillars Quick Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', maxWidth: '880px', margin: '0 auto' }}>
-            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', maxWidth: '880px', margin: '1.75rem auto 0' }}>
+            <div style={{ background: '#fff', padding: '14px 16px', borderRadius: '16px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(225,29,72,0.04)' }}>
               <span>🎁</span> Free experiences
             </div>
-            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+            <div style={{ background: '#fff', padding: '14px 16px', borderRadius: '16px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(225,29,72,0.04)' }}>
               <span>🎟️</span> Your own discount code
             </div>
-            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+            <div style={{ background: '#fff', padding: '14px 16px', borderRadius: '16px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(225,29,72,0.04)' }}>
               <span>💰</span> 10–18% commission
             </div>
-            <div style={{ background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(225,29,72,0.04)' }}>
+            <div style={{ background: '#fff', padding: '14px 16px', borderRadius: '16px', border: '1px solid #fecdd3', fontSize: '0.92rem', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(225,29,72,0.04)' }}>
               <span>🌐</span> Your own creator page
             </div>
           </div>

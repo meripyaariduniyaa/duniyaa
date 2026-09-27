@@ -94,15 +94,39 @@ export default async function BlogPage() {
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #fff7ed 0%, #fff1f2 15%, #ffffff 40%)', color: '#0f172a', paddingBottom: '90px' }}>
       
       {/* HERO SECTION */}
-      <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '56px 24px 32px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#ffe4e6', color: '#e11d48', padding: '6px 16px', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 800, marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          <span>✨</span> The LovelyCrafts Journal
+      <section className="hero-section hero-enhanced text-center mb-10" style={{ maxWidth: '1200px', margin: '0 auto 40px', padding: 'clamp(2rem, 4vw, 3.2rem) 24px', borderRadius: 'clamp(20px, 4vw, 28px)' }}>
+        <div className="hero-glow-orb" aria-hidden="true" />
+        <span className="hero-floating-decor d1" aria-hidden="true">📝</span>
+        <span className="hero-floating-decor d2" aria-hidden="true">💖</span>
+        <span className="hero-floating-decor d3" aria-hidden="true">✨</span>
+        <span className="hero-floating-decor d4" aria-hidden="true">💌</span>
+
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
+            padding: '0.32rem 0.95rem',
+            borderRadius: '99px',
+            fontSize: 'clamp(0.72rem, 1.6vw, 0.78rem)',
+            color: '#be185d',
+            fontWeight: 800,
+            marginBottom: '1rem',
+            boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
+          }}
+        >
+          <span className="live-pulse-dot" aria-hidden="true" />
+          <span>✨ THE LOVELYCRAFTS JOURNAL &bull; SURPRISE GUIDES</span>
         </div>
+
         <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', margin: '0 0 16px', lineHeight: 1.15 }}>
-          Ideas, Stories &amp; Gifting Guides
+          Ideas, Stories &amp; <br />
+          <span className="cursive" style={{ color: 'var(--accent-primary)', fontSize: '1.05em' }}>Gifting Inspiration</span>
         </h1>
-        <p style={{ fontSize: '1.15rem', color: '#64748b', maxWidth: '640px', margin: '0 auto 28px', lineHeight: 1.6 }}>
-          Discover creative ways to say what’s on your heart, celebrate birthdays across distances, and craft unforgettable interactive surprises.
+        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.12rem)', color: '#64748b', maxWidth: '660px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+          Discover creative ways to say what’s on your heart, celebrate birthdays across distances, and craft unforgettable interactive surprises on WhatsApp.
         </p>
 
         {/* POPULAR TOPICS PILLS */}

@@ -70,67 +70,109 @@ export default function ArcadeLobby() {
   }, []);
 
   return (
-    <main className="shell" style={{ padding: '2.5rem 1rem' }}>
+    <main className="shell" style={{ padding: '2rem 1rem 4rem' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
         
         {/* Arcade Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <span style={{
-            background: 'linear-gradient(135deg, #ec4899, #be185d)',
-            color: '#ffffff',
-            padding: '0.4rem 1.2rem',
-            borderRadius: '999px',
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            boxShadow: '0 4px 12px rgba(190, 24, 93, 0.2)'
-          }}>
-            🎮 COUPLES &amp; BESTIES ARCADE
-          </span>
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginTop: '0.85rem', marginBottom: '0.5rem', color: '#1f2937', fontWeight: 800 }}>
-            Play, Compete &amp; Challenge!
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-            Set a new high score in our romantic &amp; fun mini-games, then send a 1-click WhatsApp challenge link to your partner to see who wins!
-          </p>
+        <section
+          className="hero-section hero-enhanced text-center mb-10"
+          style={{
+            borderRadius: 'clamp(20px, 4vw, 28px)',
+            padding: 'clamp(1.75rem, 3.5vw, 2.75rem) clamp(1rem, 3vw, 2rem)',
+            marginBottom: '2.5rem',
+          }}
+        >
+          <div className="hero-glow-orb" aria-hidden="true" />
+          <span className="hero-floating-decor d1" aria-hidden="true">🎮</span>
+          <span className="hero-floating-decor d2" aria-hidden="true">💖</span>
+          <span className="hero-floating-decor d3" aria-hidden="true">⚡</span>
+          <span className="hero-floating-decor d4" aria-hidden="true">🏆</span>
 
-          {!user && (
-            <div style={{
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               background: '#fff1f2',
               border: '1px solid #fecdd3',
-              borderRadius: '16px',
-              padding: '0.85rem 1.25rem',
-              maxWidth: '460px',
-              margin: '1.25rem auto 0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem'
-            }}>
-              <span style={{ fontSize: '0.85rem', color: '#9f1239', fontWeight: 600, textAlign: 'left' }}>
-                💡 Sign in with Google to save your high scores permanently across devices!
+              padding: '0.32rem 0.95rem',
+              borderRadius: '99px',
+              fontSize: 'clamp(0.72rem, 1.6vw, 0.78rem)',
+              color: '#be185d',
+              fontWeight: 800,
+              marginBottom: '0.85rem',
+              boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
+            }}
+          >
+            <span className="live-pulse-dot" aria-hidden="true" />
+            <span>🎮 COUPLES &amp; BESTIES ARCADE DUEL</span>
+          </div>
+
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', lineHeight: 1.15, marginTop: '0.5rem', marginBottom: '0.75rem', color: '#1f2937', fontWeight: 900, letterSpacing: '-0.03em' }}>
+            Play, Compete &amp; <br />
+            <span className="cursive" style={{ color: 'var(--accent-primary)', fontSize: '1.05em' }}>Challenge Your Favorite Person</span>
+          </h1>
+          <p style={{ color: '#64748b', fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', maxWidth: '620px', margin: '0 auto 1rem', lineHeight: 1.6 }}>
+            Set a new high score in our romantic &amp; fun mini-games, then send a 1-click WhatsApp challenge link to see who takes the crown!
+          </p>
+
+          <div className="hero-social-proof" style={{ marginTop: '0.5rem', paddingTop: '0.85rem' }}>
+            <span className="hero-social-proof-item">
+              <span>⚡</span>
+              <span>30-Second quick rounds</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>📱</span>
+              <span>1-Click WhatsApp duel share</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>👑</span>
+              <span>Zero download required</span>
+            </span>
+          </div>
+
+          {!user && (
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1.5px solid #fecdd3',
+                borderRadius: '16px',
+                padding: '0.85rem 1.25rem',
+                maxWidth: '480px',
+                margin: '1.5rem auto 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                boxShadow: '0 4px 14px rgba(244,63,94,0.08)',
+              }}
+            >
+              <span style={{ fontSize: '0.85rem', color: '#9f1239', fontWeight: 700, textAlign: 'left' }}>
+                💡 Sign in to save your personal high scores permanently!
               </span>
               <button
                 type="button"
                 onClick={login}
                 style={{
-                  background: '#be185d',
+                  background: 'linear-gradient(135deg, #f43f5e, #be185d)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '999px',
-                  padding: '0.4rem 0.9rem',
-                  fontSize: '0.75rem',
+                  padding: '0.45rem 1.1rem',
+                  fontSize: '0.8rem',
                   fontWeight: 800,
                   cursor: 'pointer',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 10px rgba(190, 24, 93, 0.25)',
                 }}
               >
                 Sign In
               </button>
             </div>
           )}
-        </div>
+        </section>
 
         {/* Games Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -139,10 +181,11 @@ export default function ArcadeLobby() {
             return (
               <div
                 key={game.id}
+                className="bestseller-card"
                 style={{
-                  background: '#ffffff',
+                  background: `linear-gradient(165deg, #ffffff 68%, ${game.color}15 100%)`,
                   borderRadius: '24px',
-                  border: '1px solid rgba(0,0,0,0.06)',
+                  border: `1.5px solid ${game.color}40`,
                   boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
                   padding: '1.75rem',
                   display: 'flex',
@@ -150,16 +193,16 @@ export default function ArcadeLobby() {
                   justifyContent: 'space-between',
                   position: 'relative',
                   overflow: 'hidden',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                  '--card-glow': `${game.color}40`,
                 }}
               >
                 {/* Top Badge */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: game.color, background: game.bg, padding: '0.25rem 0.65rem', borderRadius: '999px' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: game.color, background: game.bg, padding: '0.25rem 0.65rem', borderRadius: '999px', border: `1px solid ${game.color}30` }}>
                     {game.badge}
                   </span>
                   {best > 0 && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '0.2rem 0.55rem', borderRadius: '999px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '0.2rem 0.55rem', borderRadius: '999px', border: '1px solid #bbf7d0' }}>
                       🏆 Best: {best} pts
                     </span>
                   )}
@@ -187,7 +230,10 @@ export default function ArcadeLobby() {
                       textAlign: 'center',
                       padding: '0.75rem',
                       fontSize: '0.95rem',
-                      background: `linear-gradient(135deg, ${game.color}, #be185d)`
+                      fontWeight: 800,
+                      background: `linear-gradient(135deg, ${game.color}, #be185d)`,
+                      boxShadow: `0 6px 18px ${game.color}35`,
+                      borderRadius: '14px',
                     }}
                   >
                     🎮 Play &amp; Duel ➔
@@ -202,28 +248,30 @@ export default function ArcadeLobby() {
         <ArcadeAdBanner slot="arcade-lobby-middle" />
 
         {/* How Duels Work Card */}
-        <div style={{
-          background: 'linear-gradient(135deg, #fff1f2, #fdf4ff)',
-          borderRadius: '24px',
-          border: '1.5px dashed #f43f5e',
-          padding: '2rem',
-          textAlign: 'center'
-        }}>
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>⚔️💌</span>
-          <h2 style={{ fontSize: '1.5rem', color: '#881337', fontWeight: 800, margin: '0 0 0.5rem' }}>
+        <div
+          className="bottom-cta-section-enhanced"
+          style={{
+            padding: '2.5rem 2rem',
+            textAlign: 'center',
+            boxShadow: '0 16px 36px rgba(244,63,94,0.12)',
+            marginTop: '2rem',
+          }}
+        >
+          <span style={{ fontSize: '2.8rem', display: 'block', marginBottom: '0.5rem' }}>⚔️ 💌 👑</span>
+          <h2 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2rem)', color: '#881337', fontWeight: 900, margin: '0 0 0.75rem' }}>
             How Partner Duels Work
           </h2>
-          <p style={{ color: '#9f1239', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-            1. Play any 30s game to set your high score.<br />
-            2. Click &ldquo;Challenge Your Partner&rdquo; to create a custom WhatsApp link.<br />
-            3. Your partner taps the link, plays to beat your score, and the winner takes the crown! 👑
+          <p style={{ color: '#9f1239', fontSize: '0.98rem', maxWidth: '540px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+            <b>1.</b> Play any 30s game to set your high score.<br />
+            <b>2.</b> Click &ldquo;Challenge Your Partner&rdquo; to generate a private WhatsApp duel link.<br />
+            <b>3.</b> Your partner taps the link, tries to beat your score, and the winner claims the bragging rights! 🏆
           </p>
           <Link
             href="/arcade/heart-rush"
             className="btn-primary"
-            style={{ padding: '0.8rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #ec4899, #be185d)' }}
+            style={{ padding: '0.85rem 2.2rem', fontSize: '1rem', fontWeight: 800, background: 'linear-gradient(135deg, #ec4899, #be185d)', borderRadius: '999px', boxShadow: '0 8px 24px rgba(236,72,153,0.35)' }}
           >
-            🔥 Start a Quick Game
+            🔥 Start a Quick Game Now
           </Link>
         </div>
 

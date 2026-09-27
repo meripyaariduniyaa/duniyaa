@@ -78,19 +78,56 @@ export default function TemplatesPage() {
       />
 
       <div className="main-content">
-        <section className="hero-section text-center mt-8 mb-8">
-          <div className="hero-sale-banner">🎁 Explore All Interactive Templates</div>
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>
+        <section className="hero-section hero-enhanced text-center mt-6 mb-8" style={{ borderRadius: 'clamp(20px, 4vw, 28px)', padding: 'clamp(1.75rem, 3.5vw, 2.75rem) clamp(1rem, 3vw, 2rem)' }}>
+          <div className="hero-glow-orb" aria-hidden="true" />
+          <span className="hero-floating-decor d1" aria-hidden="true">🎁</span>
+          <span className="hero-floating-decor d2" aria-hidden="true">💖</span>
+          <span className="hero-floating-decor d3" aria-hidden="true">✨</span>
+          <span className="hero-floating-decor d4" aria-hidden="true">💌</span>
+
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.32rem 0.95rem',
+              borderRadius: '99px',
+              fontSize: 'clamp(0.72rem, 1.6vw, 0.78rem)',
+              color: '#be185d',
+              fontWeight: 800,
+              marginBottom: '0.85rem',
+              boxShadow: '0 2px 8px rgba(244,63,94,0.08)',
+            }}
+          >
+            <span className="live-pulse-dot" aria-hidden="true" />
+            <span>🎁 EXPLORE ALL 10+ INTERACTIVE TEMPLATES</span>
+          </div>
+
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', lineHeight: 1.15, fontWeight: 900, color: '#1c1917', margin: '0 auto 0.75rem', letterSpacing: '-0.03em' }}>
             Choose the Perfect <br />
-            <span className="text-gradient cursive">Digital Gift Experience</span>
+            <span className="cursive" style={{ color: 'var(--accent-primary)', fontSize: '1.05em' }}>Digital Gift Experience</span>
           </h1>
-          <p className="hero-copy text-muted" style={{ maxWidth: '680px', margin: '1rem auto' }}>
-            Turn your favorite memories, photos, and heartfelt words into stunning, interactive animated web cards for every special occasion.
+          <p className="hero-copy text-muted" style={{ maxWidth: '660px', margin: '0.75rem auto 1.25rem', fontSize: 'clamp(0.95rem, 2vw, 1.05rem)', lineHeight: 1.6 }}>
+            Turn your favorite memories, photos, letters, and songs into stunning interactive web cards they open directly on WhatsApp in under 3 minutes.
           </p>
-          <div className="templates-proof-row" aria-label="What every experience includes">
-            <span>📱 Opens on any phone</span>
-            <span>🔗 Private shareable link</span>
-            <span>✨ Live preview before you create</span>
+
+          <div className="hero-social-proof" style={{ marginTop: '0.5rem', paddingTop: '0.85rem' }}>
+            <span className="hero-social-proof-item">
+              <span>📱</span>
+              <span>Opens in any phone browser</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>🔒</span>
+              <span>Private 1-click WhatsApp link</span>
+            </span>
+            <span>•</span>
+            <span className="hero-social-proof-item">
+              <span>✨</span>
+              <span>100% Free interactive demo preview</span>
+            </span>
           </div>
         </section>
 
@@ -113,23 +150,24 @@ export default function TemplatesPage() {
             </div>
             <p className="templates-subtitle">No design skills or app download needed. Your words and memories become the experience.</p>
           </div>
-          <div className="templates-process-grid">
+          <div className="how-it-works-grid-enhanced" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
             {[
               ['01', 'Pick an experience', 'Choose the feeling you want to send: celebration, romance, or a heartfelt second chance.', '🎁'],
               ['02', 'Add your magic', 'Tell us their name, add your photos, and write the words only you can say.', '💌'],
               ['03', 'Preview the moment', 'Open the live demo to see how the interactive story feels before you share it.', '👁️'],
               ['04', 'Share the private link', 'Send the finished experience on WhatsApp, Instagram, or wherever you talk.', '🔗'],
             ].map(([number, title, copy, icon]) => (
-              <div key={number} className="templates-process-step">
-                <div className="templates-process-topline"><span>{number}</span><b>{icon}</b></div>
-                <h3>{title}</h3>
-                <p>{copy}</p>
+              <div key={number} className="how-card-enhanced">
+                <div className="how-step-icon">{icon}</div>
+                <div className="how-step-badge">{number}</div>
+                <h3 className="how-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1f2937', marginBottom: '0.35rem' }}>{title}</h3>
+                <p className="how-desc" style={{ fontSize: '0.88rem', color: '#6b7280', lineHeight: 1.5, margin: 0 }}>{copy}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="templates-faq" aria-labelledby="templates-faq-title">
+        <section className="templates-faq" aria-labelledby="templates-faq-title" style={{ marginTop: '2.5rem' }}>
           <div className="templates-section-heading templates-section-heading--centered">
             <div>
               <span className="templates-section-label">Before you create</span>
@@ -137,22 +175,34 @@ export default function TemplatesPage() {
             </div>
             <p className="templates-subtitle">Everything you need to know before turning a feeling into a private digital surprise.</p>
           </div>
-          <div className="templates-faq-list">
-            <details>
-              <summary>How will they open my experience?</summary>
-              <p>You receive a private link after creating your note. Send it through WhatsApp, Instagram DM, SMS, or any app that supports links. They open it in their phone browser.</p>
+          <div className="faq-accordion-list">
+            <details className="faq-item">
+              <summary className="faq-summary">
+                <span>❓ How will they open my experience?</span>
+                <span className="faq-toggle-icon" aria-hidden="true">+</span>
+              </summary>
+              <p className="faq-content">You receive a private link after creating your note. Send it through WhatsApp, Instagram DM, SMS, or any app that supports links. They open it in their phone browser without installing any app.</p>
             </details>
-            <details>
-              <summary>Can I add my own photos and message?</summary>
-              <p>Yes. Each template asks for the details it needs, such as names, photos, dates, balloon messages, reasons, or a personal letter.</p>
+            <details className="faq-item">
+              <summary>
+                <span className="faq-summary" style={{ padding: 0 }}>❓ Can I add my own photos and message?</span>
+                <span className="faq-toggle-icon" aria-hidden="true">+</span>
+              </summary>
+              <p className="faq-content">Yes! Each template lets you upload your favorite memories, add custom photos, write heartfelt letters, select romantic background music, and even seal with a passcode.</p>
             </details>
-            <details>
-              <summary>Can I see the experience before sharing it?</summary>
-              <p>Yes. Use Live Demo on any template to open its interactive preview. Your final experience uses the same kind of recipient-facing interactions.</p>
+            <details className="faq-item">
+              <summary className="faq-summary">
+                <span>❓ Can I see the experience before sharing it?</span>
+                <span className="faq-toggle-icon" aria-hidden="true">+</span>
+              </summary>
+              <p className="faq-content">Yes. Click "👁️ Live Demo" on any template to test the interactive preview. The recipient will experience the same interactive animations, sounds, and surprises.</p>
             </details>
-            <details>
-              <summary>How long does it take to make?</summary>
-              <p>Most templates take around three to four minutes to fill in. The time depends on how many photos and memories you choose to add.</p>
+            <details className="faq-item">
+              <summary className="faq-summary">
+                <span>❓ How long does it take to make?</span>
+                <span className="faq-toggle-icon" aria-hidden="true">+</span>
+              </summary>
+              <p className="faq-content">Most templates take under 2 to 3 minutes to fill in. Just select your photos, write your message, and your live shareable link is generated instantly.</p>
             </details>
           </div>
         </section>
