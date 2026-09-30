@@ -81,11 +81,21 @@ export default function WaxSealLetter({
 
           <div style={{ position: 'relative', zIndex: 2 }}>
             <motion.div
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{ scale: [1, 1.08, 1], rotate: [0, -2, 2, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               style={{ display: 'inline-block', marginBottom: '1.25rem' }}
             >
-              <GoldBadge name="waxSeal" size={76} />
+              <img
+                src="/elements/wax-seal-red.jpg"
+                alt="Red wax seal"
+                style={{
+                  width: 90,
+                  height: 90,
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  boxShadow: '0 8px 28px rgba(180,30,30,0.45), 0 0 0 3px rgba(255,255,255,0.25)',
+                }}
+              />
             </motion.div>
 
             <h3
@@ -118,6 +128,16 @@ export default function WaxSealLetter({
               Break Royal Wax Seal
             </span>
           </div>
+
+          {/* Decorative flower accents — rose left, lavender right */}
+          <img
+            src="/flowers/rose.jpg" alt="" aria-hidden="true"
+            style={{ position: 'absolute', bottom: 14, left: 18, width: 52, height: 52, objectFit: 'cover', borderRadius: '50%', opacity: 0.5, filter: 'blur(0.5px)' }}
+          />
+          <img
+            src="/flowers/lavender.jpg" alt="" aria-hidden="true"
+            style={{ position: 'absolute', bottom: 14, right: 18, width: 52, height: 52, objectFit: 'cover', borderRadius: '50%', opacity: 0.5, filter: 'blur(0.5px)', transform: 'scaleX(-1)' }}
+          />
         </motion.div>
       ) : (
         /* Unfolded Letter Content */

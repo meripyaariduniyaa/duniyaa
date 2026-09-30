@@ -5,14 +5,16 @@ import BirthdayExperience from './birthday/BirthdayExperience';
 import ProposalExperience from './proposal/ProposalExperience';
 import AnniversaryExperience from './anniversary/AnniversaryExperience';
 import ApologyExperience from './apology/ApologyExperience';
+import IMissYouExperience from './missyou/IMissYouExperience';
 
 /**
- * Clean 4-Template Experience Dispatcher
+ * 5-Template Experience Dispatcher
  * Templates:
  * - 'proposal'           -> ProposalExperience
  * - 'birthday'           -> BirthdayExperience
  * - 'anniversary'        -> AnniversaryExperience
  * - 'emotional-apology'  -> ApologyExperience
+ * - 'i-miss-you'         -> IMissYouExperience
  */
 export default function TemplateRenderer({ note, isPreview = false, onReachEnd }) {
   if (!note) return null;
@@ -32,6 +34,9 @@ export default function TemplateRenderer({ note, isPreview = false, onReachEnd }
       break;
     case 'birthday':
       experience = <BirthdayExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />;
+      break;
+    case 'i-miss-you':
+      experience = <IMissYouExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />;
       break;
     default:
       experience = <ProposalExperience note={note} isPreview={isPreview} onReachEnd={onReachEnd} />;

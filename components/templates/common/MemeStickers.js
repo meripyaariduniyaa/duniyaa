@@ -29,6 +29,24 @@ export const BUBU_MEMES = {
   forgivenHug: 'https://media.tenor.com/Ki7itoAmuSwAAAAm/mybuni.webp',
 };
 
+/** Self-hosted SVG stickers from /elements/ — no CDN dependency */
+export const LOCAL_STICKERS = {
+  heart:        '/elements/sticker-heart.svg',
+  sparkle:      '/elements/sticker-sparkle.svg',
+  ribbon:       '/elements/sticker-ribbon.svg',
+  envelope:     '/elements/sticker-envelope.svg',
+  shootingStar: '/elements/sticker-shooting-star.svg',
+};
+
+/** Self-hosted flower photos from /flowers/ */
+export const FLOWER_IMAGES = {
+  rose:      '/flowers/rose.jpg',
+  tulip:     '/flowers/tulip.jpg',
+  sunflower: '/flowers/sunflower.jpg',
+  bouquet:   '/flowers/bouquet.jpg',
+  lavender:  '/flowers/lavender.jpg',
+};
+
 /**
  * Animated Bubu Dudu Meme Sticker component
  */
@@ -85,6 +103,53 @@ export function BubuSticker({ src, caption, size = 110, className = '', animate 
             backdropFilter: 'blur(8px)',
           }}
         >
+          {caption}
+        </span>
+      )}
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   Self-hosted SVG Sticker (from /elements/)
+───────────────────────────────────────────────────────── */
+
+/**
+ * Renders a local SVG sticker from /elements/sticker-*.svg
+ * Usage: <SvgSticker name="heart" size={64} />
+ *        <SvgSticker src="/elements/sticker-ribbon.svg" size={80} />
+ */
+export function SvgSticker({ name, src, size = 64, caption, animate = true, className = '' }) {
+  const imgSrc = src || LOCAL_STICKERS[name];
+  return (
+    <motion.div
+      initial={animate ? { scale: 0.7, opacity: 0 } : false}
+      animate={animate ? { scale: 1, opacity: 1 } : false}
+      whileHover={{ scale: 1.15, rotate: [-2, 2, -2, 0] }}
+      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+      style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}
+      className={className}
+    >
+      <img
+        src={imgSrc}
+        alt={caption || name || 'sticker'}
+        style={{
+          width: size,
+          height: size,
+          objectFit: 'contain',
+          filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.3))',
+        }}
+      />
+      {caption && (
+        <span style={{
+          marginTop: '6px',
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          color: '#fde68a',
+          background: 'rgba(0,0,0,0.45)',
+          padding: '2px 8px',
+          borderRadius: '999px',
+        }}>
           {caption}
         </span>
       )}

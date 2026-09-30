@@ -14,6 +14,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 ───────────────────────────────────────────────────────── */
 export default function ApologyExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return;
+    if (isAudioPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+    setIsAudioPlaying((p) => !p);
+  };
 
 
   const recipientName = note?.recipient_name || 'My Love';
@@ -44,6 +56,9 @@ export default function ApologyExperience({ note, isPreview = false, onReachEnd 
         color: '#f1f5f9',
       }}
     >
+      {/* ponytail: no audio src wired — swap the src for a real hosted track */}
+      <audio ref={audioRef} loop src="/audio/apology-bg.mp3" preload="none" />
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Caveat:wght@500;600;700&display=swap');
         @keyframes softRain {

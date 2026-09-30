@@ -218,7 +218,7 @@ function Scene2Confetti({ recipientName, onNext }) {
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 18 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
         <div style={{ fontSize: '5rem', marginBottom: '1rem', animation: 'pulse-soft 1.5s ease-in-out infinite' }}>🎉</div>
         <h1 style={{ fontFamily: "'Dancing Script', cursive", fontSize: 'clamp(2rem, 7vw, 3rem)', color: '#fff', margin: '0 0 0.5rem' }}>
-          She said YES! 💕
+          They said YES! 💕
         </h1>
         <p style={{ color: '#fda4af', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
           Your love story just got even more beautiful, {recipientName}...

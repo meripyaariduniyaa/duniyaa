@@ -77,19 +77,19 @@ export default function PolaroidStack({
           }}
           onClick={nextPhoto}
         >
-          {/* Subtle tape texture at top */}
-          <div
+          {/* Polaroid SVG Frame overlay — tape strip + border from real asset */}
+          <img
+            src="/frames/polaroid.svg"
+            alt=""
+            aria-hidden="true"
             style={{
               position: 'absolute',
-              top: '-8px',
-              left: '50%',
-              transform: 'translateX(-50%) rotate(-2deg)',
-              width: '90px',
-              height: '24px',
-              background: 'rgba(254, 240, 138, 0.65)',
-              backdropFilter: 'blur(4px)',
-              border: '1px dashed rgba(202, 138, 4, 0.3)',
-              borderRadius: '2px',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'fill',
+              pointerEvents: 'none',
               zIndex: 3,
             }}
           />

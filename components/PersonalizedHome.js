@@ -13,8 +13,8 @@ import FeaturedCreatorsSection from '@/components/FeaturedCreatorsSection';
 import { getUserContext, trackUserSignal } from '@/lib/personalization';
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-// Paste your Cloudinary video URL here once uploaded (e.g. 'https://res.cloudinary.com/.../video.mp4')
-const HERO_CLOUDINARY_VIDEO_URL = '';
+// Paste your Cloudinary video URL here or set NEXT_PUBLIC_HERO_VIDEO_URL (falls back to local HappyBirthday.mp4)
+const HERO_CLOUDINARY_VIDEO_URL = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || '/HappyBirthday.mp4';
 
 // ─── Static data ────────────────────────────────────────────────────────────
 

@@ -112,6 +112,17 @@ function CreatePageContent() {
     reasons: ['', '', '', '', ''],
     // Apology
     whatHappenedType: '',
+    // I Miss You
+    originCity: '',
+    destinationCity: '',
+    distanceKm: '',
+    cassettes: [
+      { id: 1, title: 'Tape 01: That First Drive', track: 'Night Memories', note: '' },
+      { id: 2, title: 'Tape 02: 3 AM Whispers', track: 'Late Night Calls', note: '' },
+      { id: 3, title: 'Tape 03: The Rainy Day', track: 'Raindrops & Chai', note: '' },
+      { id: 4, title: 'Tape 04: The Counting Down', track: 'Airport Reunion', note: '' },
+      { id: 5, title: 'Tape 05: Unconditional', track: 'Always My Person', note: '' },
+    ],
     // Shared
     letter: '',
     images: [],
@@ -168,6 +179,10 @@ function CreatePageContent() {
     }
     if (stepId === 'who_are_they' && !form.relationshipType) return 'Please pick who they are to you.';
     if (stepId === 'what_happened' && !form.whatHappenedType) return 'Please select what happened.';
+    if (stepId === 'distance_radar') {
+      if (!form.originCity?.trim()) return 'Please enter your origin city.';
+      if (!form.destinationCity?.trim()) return 'Please enter their destination city.';
+    }
     if (stepId === 'letter' && !form.letter.trim()) return 'Please write your heartfelt message.';
     return null;
   };
@@ -216,6 +231,20 @@ function CreatePageContent() {
         customDetails = {
           sender_name: form.senderName.trim(),
           what_happened_type: form.whatHappenedType,
+          letter: form.letter.trim(),
+        };
+      } else if (selectedId === 'i-miss-you') {
+        customDetails = {
+          sender_name: form.senderName.trim(),
+          origin_city: form.originCity.trim(),
+          destination_city: form.destinationCity.trim(),
+          distance_km: form.distanceKm.trim() || '7,192 km',
+          cassettes: form.cassettes.map((c, i) => ({
+            id: c.id,
+            title: c.title,
+            track: c.track,
+            note: c.note.trim() || `Thinking of you every time this comes to mind.`,
+          })),
           letter: form.letter.trim(),
         };
       }
@@ -745,6 +774,10 @@ function StepContent({ stepId, templateId, form, setField, accent, setError }) {
       return <StepWhatHappened form={form} setField={setField} accent={accent} />;
     case 'memories':
       return <StepMemories form={form} setField={setField} accent={accent} templateId={templateId} />;
+    case 'distance_radar':
+      return <StepDistanceRadar form={form} setField={setField} accent={accent} />;
+    case 'cassettes':
+      return <StepCassettes form={form} setField={setField} accent={accent} />;
     case 'letter':
       return <StepLetter templateId={templateId} form={form} setField={setField} accent={accent} />;
     default:
@@ -1438,4 +1471,100 @@ function CraftingScreen({ template, recipientName, noteId, router }) {
     </motion.div>
   );
 }
+
+/* ─────────────────────────────────────────────────────────
+   STEP: Distance Radar (I Miss You)
+───────────────────────────────────────────────────────── */
+function StepDistanceRadar({ form, setField, accent }) {
+  return (
+    <div>
+      <StepHeader
+        icon="📍"
+        title="Orbital Distance Radar"
+        subtitle="Connect your two cities across the celestial map."
+      />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div>
+          <FieldLabel>Where are you right now? (Origin City)</FieldLabel>
+          <TextInput
+            value={form.originCity}
+            onChange={(val) => setField('originCity', val)}
+            placeholder="e.g. Mumbai, India"
+          />
+        </div>
+
+        <div>
+          <FieldLabel>Where are they? (Destination City)</FieldLabel>
+          <TextInput
+            value={form.destinationCity}
+            onChange={(val) => setField('destinationCity', val)}
+            placeholder="e.g. London, UK"
+          />
+        </div>
+
+        <div>
+          <FieldLabel>Approximate Distance (Optional)</FieldLabel>
+          <TextInput
+            value={form.distanceKm}
+            onChange={(val) => setField('distanceKm', val)}
+            placeholder="e.g. 7,192 km (leave blank to calculate)"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP: Cassette Tapes (I Miss You)
+───────────────────────────────────────────────────────── */
+function StepCassettes({ form, setField, accent }) {
+  const cassettes = form.cassettes || [];
+
+  const updateCassette = (index, field, value) => {
+    const updated = [...cassettes];
+    updated[index] = { ...updated[index], [field]: value };
+    setField('cassettes', updated);
+  };
+
+  return (
+    <div>
+      <StepHeader
+        icon="📼"
+        title="5 Cassette Memory Tapes"
+        subtitle="Add a short memory note or song idea for each tape."
+      />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        {cassettes.map((c, i) => (
+          <div
+            key={c.id || i}
+            style={{
+              padding: '16px',
+              borderRadius: '16px',
+              border: '1.5px solid #e2e8f0',
+              background: '#f8fafc',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: accent }}>
+                TAPE 0{i + 1}
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                {c.track}
+              </span>
+            </div>
+            <TextInput
+              value={c.note}
+              onChange={(val) => updateCassette(i, 'note', val)}
+              placeholder={`Memory note for ${c.track}...`}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
