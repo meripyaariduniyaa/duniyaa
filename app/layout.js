@@ -15,8 +15,8 @@ import { siteMetadata, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, CONTACT_EMAIL, 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX';
 
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-bold', display: 'swap' });
-const caveat = Caveat({ subsets: ['latin'], weight: ['700'], variable: '--font-cursive', display: 'swap' });
-const dancing = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-dancing', display: 'swap' });
+const caveat = Caveat({ subsets: ['latin'], variable: '--font-cursive', display: 'swap' });
+const dancing = Dancing_Script({ subsets: ['latin'], variable: '--font-dancing', display: 'swap' });
 
 export const metadata = siteMetadata;
 
