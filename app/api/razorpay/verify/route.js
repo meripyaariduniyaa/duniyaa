@@ -148,13 +148,17 @@ export async function POST(request) {
       console.error('Failed to auto-generate finance invoice:', invoiceErr);
     }
 
-    // 4. Atomically increment coupon usage
+    // 4. Atomically increment coupon usage & deactivate single-use/retention coupons
     if (resolvedCouponDoc) {
       try {
-        await adminDb.collection('coupons').doc(resolvedCouponDoc.id).update({
+        const couponUpdates = {
           usage_count: FieldValue.increment(1),
           updated_at: FieldValue.serverTimestamp(),
-        });
+        };
+        if (resolvedCouponDoc.type === 'organic_retention' || resolvedCouponDoc.max_uses === 1) {
+          couponUpdates.active = false;
+        }
+        await adminDb.collection('coupons').doc(resolvedCouponDoc.id).update(couponUpdates);
       } catch (err) {
         console.error('Coupon usage increment error:', err);
       }

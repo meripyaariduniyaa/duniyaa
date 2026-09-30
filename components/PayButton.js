@@ -1,9 +1,9 @@
 'use client';
 
 import Script from 'next/script';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-export default function PayButton({ apologyId, onPaid, displayAmount }) {
+export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferRetention = true }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [couponCode, setCouponCode] = useState('');
@@ -12,11 +12,81 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
   // After coupon is applied, we store the resolved order details here
   const [resolvedOrder, setResolvedOrder] = useState(null);
 
+  // Organic customer 10% retention coupon state
+  const [retentionCoupon, setRetentionCoupon] = useState(null);
+  const [retentionSeconds, setRetentionSeconds] = useState(0);
+  const [retentionDismissed, setRetentionDismissed] = useState(false);
+  const timerRef = useRef(null);
+
   const basePrice = displayAmount || 219;
 
+  /* ── Check & Fetch Organic Retention 10% Discount ── */
+  useEffect(() => {
+    if (!autoOfferRetention || !apologyId) return;
+
+    let mounted = true;
+    async function checkOrganicRetention() {
+      try {
+        const res = await fetch('/api/coupons/organic-retention', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ noteId: apologyId, action: 'get_or_create' })
+        });
+        const data = await res.json();
+        if (mounted && data.ok && data.eligible && data.coupon) {
+          setRetentionCoupon(data.coupon);
+          setRetentionSeconds(data.coupon.remaining_seconds || 900);
+        }
+      } catch (err) {
+        console.error('Failed to load retention offer:', err);
+      }
+    }
+
+    checkOrganicRetention();
+    return () => { mounted = false; };
+  }, [apologyId, autoOfferRetention]);
+
+  /* ── Countdown Timer for Retention Offer ── */
+  useEffect(() => {
+    if (!retentionCoupon || retentionSeconds <= 0 || retentionDismissed) return;
+
+    timerRef.current = setInterval(() => {
+      setRetentionSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          // Disable coupon on backend once expired
+          fetch('/api/coupons/organic-retention', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ noteId: apologyId, code: retentionCoupon.code, action: 'disable' })
+          }).catch(() => {});
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [retentionCoupon, retentionSeconds, retentionDismissed, apologyId]);
+
+  /* ── Dismiss retention offer & disable single-use code ── */
+  const handleDismissRetention = async () => {
+    setRetentionDismissed(true);
+    if (retentionCoupon?.code) {
+      try {
+        await fetch('/api/coupons/organic-retention', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ noteId: apologyId, code: retentionCoupon.code, action: 'disable' })
+        });
+      } catch {}
+    }
+  };
+
   /* ── Step 1: Validate coupon & preview final price ── */
-  async function applyCoupon() {
-    if (!couponCode.trim()) return;
+  async function applyCoupon(codeOverride) {
+    const code = (typeof codeOverride === 'string' ? codeOverride : couponCode).trim();
+    if (!code) return;
     setBusy(true);
     setError('');
     setFeedback('');
@@ -26,13 +96,18 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
       const res = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apologyId, couponCode: couponCode.trim() })
+        body: JSON.stringify({ apologyId, couponCode: code })
       });
       const order = await res.json();
 
       if (!res.ok || order.invalidCoupon) {
         setError(order.error || 'Could not validate coupon.');
         return;
+      }
+
+      // Update coupon code input if override was used
+      if (typeof codeOverride === 'string') {
+        setCouponCode(codeOverride);
       }
 
       // Store the full order so Step 2 can use it
@@ -191,11 +266,94 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
     return `Pay ₹${amount} & unlock link`;
   })();
 
+  const formatTimer = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '16px' }}>
+
+        {/* Organic Retention 10% Special Offer Banner */}
+        {retentionCoupon && !resolvedOrder && !retentionDismissed && retentionSeconds > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(244, 63, 94, 0.15))',
+            border: '1px solid rgba(244, 63, 94, 0.35)',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            boxShadow: '0 4px 14px rgba(244, 63, 94, 0.12)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1.05rem' }}>🎁</span>
+                <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f43f5e' }}>
+                  Special 10% Organic Discount Available!
+                </span>
+              </div>
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#e11d48',
+                background: 'rgba(244,63,94,0.18)',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '0.02em',
+              }}>
+                ⏱️ {formatTimer(retentionSeconds)}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                Code: <strong style={{ color: '#fff', letterSpacing: '0.05em', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>{retentionCoupon.code}</strong> (Save 10% now)
+              </span>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => applyCoupon(retentionCoupon.code)}
+                  disabled={busy}
+                  style={{
+                    background: 'linear-gradient(135deg, #f43f5e, #e11d48)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '6px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 8px rgba(244, 63, 94, 0.3)',
+                  }}
+                >
+                  {busy ? 'Applying…' : 'Claim 10% OFF'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDismissRetention}
+                  title="Dismiss and disable offer"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    padding: '2px 6px',
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Coupon row */}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -210,7 +368,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount }) {
           {couponCode.trim() && !resolvedOrder && (
             <button
               className="btn-secondary"
-              onClick={applyCoupon}
+              onClick={() => applyCoupon()}
               disabled={busy}
               style={{ whiteSpace: 'nowrap', padding: '0 1rem' }}
             >

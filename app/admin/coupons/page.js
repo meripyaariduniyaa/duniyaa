@@ -246,12 +246,26 @@ export default function AdminCouponsPage() {
 
                         {/* TYPE & CREATOR */}
                         <td style={{ padding: '16px 20px' }}>
-                          <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 700, color: c.type === 'creator' ? '#7c3aed' : c.type === 'gift' ? '#ea580c' : '#0284c7', background: c.type === 'creator' ? '#f5f3ff' : c.type === 'gift' ? '#fff7ed' : '#f0f9ff', padding: '2px 6px', borderRadius: '4px' }}>
-                            {c.type || 'campaign'}
+                          <span style={{
+                            fontSize: '0.72rem',
+                            textTransform: 'uppercase',
+                            fontWeight: 700,
+                            color: c.type === 'creator' ? '#7c3aed' : c.type === 'gift' ? '#ea580c' : c.type === 'organic_retention' ? '#059669' : '#0284c7',
+                            background: c.type === 'creator' ? '#f5f3ff' : c.type === 'gift' ? '#fff7ed' : c.type === 'organic_retention' ? '#ecfdf5' : '#f0f9ff',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            border: c.type === 'organic_retention' ? '1px solid #a7f3d0' : 'none',
+                          }}>
+                            {c.type === 'organic_retention' ? 'Organic Retention' : (c.type || 'campaign')}
                           </span>
                           {matchedCreator && (
                             <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a', marginTop: '4px' }}>
                               {matchedCreator.name}
+                            </div>
+                          )}
+                          {c.note_id && (
+                            <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px', fontFamily: 'monospace' }}>
+                              Note: {c.note_id.slice(0, 8)}…
                             </div>
                           )}
                         </td>

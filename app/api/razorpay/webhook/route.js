@@ -114,22 +114,33 @@ export async function POST(request) {
           console.error('Failed to write to admin_payment_ledger vault from webhook:', vaultErr);
         }
 
-        // Increment coupon usage
+        // Increment coupon usage & deactivate single-use/retention coupons
         if (couponId) {
           try {
-            await adminDb.collection('coupons').doc(couponId).update({
+            const cDoc = await adminDb.collection('coupons').doc(couponId).get();
+            const cData = cDoc.exists ? cDoc.data() : null;
+            const updatePayload = {
               usage_count: FieldValue.increment(1),
               updated_at: FieldValue.serverTimestamp(),
-            });
+            };
+            if (cData && (cData.type === 'organic_retention' || cData.max_uses === 1)) {
+              updatePayload.active = false;
+            }
+            await adminDb.collection('coupons').doc(couponId).update(updatePayload);
           } catch {}
         } else if (couponCode) {
           try {
             const cSnap = await adminDb.collection('coupons').where('code', '==', couponCode).limit(1).get();
             if (!cSnap.empty) {
-              await cSnap.docs[0].ref.update({
+              const cData = cSnap.docs[0].data();
+              const updatePayload = {
                 usage_count: FieldValue.increment(1),
                 updated_at: FieldValue.serverTimestamp(),
-              });
+              };
+              if (cData && (cData.type === 'organic_retention' || cData.max_uses === 1)) {
+                updatePayload.active = false;
+              }
+              await cSnap.docs[0].ref.update(updatePayload);
             }
           } catch {}
         }

@@ -555,6 +555,17 @@ function UnlockedPanel({ note, accent, getShareUrl, getWhatsAppUrl, copyLink, co
    PLEASE MODAL (Exit Intent — unpaid)
 ───────────────────────────────────────────────────────── */
 function PleaseModal({ note, accent, totalAmount, onClose, onPaid }) {
+  const handleClose = () => {
+    if (note?.id) {
+      fetch('/api/coupons/organic-retention', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ noteId: note.id, action: 'disable' })
+      }).catch(() => {});
+    }
+    onClose();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -568,7 +579,7 @@ function PleaseModal({ note, accent, totalAmount, onClose, onPaid }) {
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
         padding: '0 0 0',
       }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <motion.div
         initial={{ y: '100%' }}
@@ -634,7 +645,7 @@ function PleaseModal({ note, accent, totalAmount, onClose, onPaid }) {
 
         {/* Dismiss */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           style={{
             width: '100%',
             marginTop: '0.75rem',
