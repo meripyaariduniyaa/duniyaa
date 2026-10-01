@@ -779,6 +779,7 @@ function StepContent({ stepId, templateId, form, setField, accent, setError }) {
       return <StepReasons form={form} setField={setField} accent={accent} />;
     case 'what_happened':
       return <StepWhatHappened form={form} setField={setField} accent={accent} />;
+    case 'photos':
     case 'memories':
       return <StepMemories form={form} setField={setField} accent={accent} templateId={templateId} />;
     case 'distance_radar':
