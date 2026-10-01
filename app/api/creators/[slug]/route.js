@@ -47,13 +47,33 @@ export async function GET(request, { params }) {
       };
     }
 
+    // Calculate current month tier dynamically (resets monthly)
+    let activeTier = data.tier_override || data.tier || 'starter';
+    if (!data.tier_override) {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const ordersSnap = await db.collection('orders')
+        .where('creator_id', 'in', [doc.id, data.uid || doc.id])
+        .where('payment_status', '==', 'paid')
+        .get()
+        .catch(() => ({ docs: [] }));
+
+      const monthOrdersCount = ordersSnap.docs.filter((d) => {
+        const paidAt = d.data().paid_at?.toDate?.() || d.data().created_at?.toDate?.();
+        return paidAt && paidAt >= startOfMonth;
+      }).length;
+
+      const { tierForOrders } = await import('@/lib/creator-club');
+      activeTier = tierForOrders(monthOrdersCount).id;
+    }
+
     const creator = {
       id: doc.id,
       name: data.name,
       slug: data.slug,
       bio: data.bio || '',
       profile_image: data.profile_image || null,
-      tier: data.tier || 'starter',
+      tier: activeTier,
       featured: Boolean(data.featured),
       instagram_url: data.instagram_url || null,
       youtube_url: data.youtube_url || null,

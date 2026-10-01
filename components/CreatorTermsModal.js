@@ -291,18 +291,19 @@ export default function CreatorTermsModal({ creatorName, creatorEmail, onAccept 
                   applicable taxes and platform gateway charges) of each qualifying completed purchase
                   attributed to your referral link or coupon code within the attribution window.
                 </Clause>
-                <Clause>The current commission tiers are as follows (subject to revision per Section 11):</Clause>
+                <Clause>The current commission tiers and progressive brackets are as follows (subject to revision per Section 11):</Clause>
                 <SubList items={[
-                  'Starter Tier — 10% commission per qualifying order (0–99 orders milestone)',
-                  'Rising Tier — 15% commission per qualifying order (upon reaching 100 orders milestone)',
-                  'Creator Tier — 16% commission per qualifying order (upon reaching 200 orders milestone)',
-                  'Partner Tier — 17% commission per qualifying order (upon reaching 300 orders milestone)',
-                  'Elite Tier — 18% commission per qualifying order (upon reaching 400 orders milestone)',
+                  'Starter Tier — 10% commission on orders 1 to 100 in the calendar month (0–99 monthly orders)',
+                  'Rising Tier — 15% commission on orders 101 to 300 in the calendar month (100–299 monthly orders)',
+                  'Creator Tier — 16% commission on orders 301 to 700 in the calendar month (300–699 monthly orders)',
+                  'Partner Tier — 17% commission on orders 701 to 1,500 in the calendar month (700–1,499 monthly orders)',
+                  'Elite Tier — 18% commission on orders 1,501+ in the calendar month (1,500+ monthly orders)',
                 ]} />
                 <Clause>
-                  Tier upgrades are determined solely by the Company based on verified order counts
-                  and content quality. No tier is guaranteed and the Company may adjust tier thresholds
-                  with 7 (seven) calendar days&apos; notice.
+                  <strong>Monthly Volume Maintenance &amp; Tier Consistency:</strong> Tier rank and active commission brackets are evaluated dynamically based on order volume in each active calendar month. Creators must maintain qualifying monthly purchase volume to sustain higher tiers. If monthly order volume drops below a tier threshold in any subsequent month, the account&apos;s active tier adjusts down accordingly for that month.
+                </Clause>
+                <Clause>
+                  <strong>Tier-Wise (Graduated) Commission Calculation:</strong> Commissions are paid on a progressive bracket basis. When an account advances to a higher tier within a month, purchases in each bracket are compensated at that bracket&apos;s designated rate (e.g. the first 100 orders earn 10%, orders 101–300 earn 15%, etc.), rather than applying a higher tier rate retroactively to lower-tier purchases.
                 </Clause>
                 <Clause>
                   Commissions are earned only on <strong>paid and completed</strong> orders. Refunded,

@@ -99,7 +99,7 @@ export default async function TemplateDetailPage({ params }) {
     },
     offers: {
       '@type': 'Offer',
-      price: template.price || 219,
+      price: template.price || 199,
       priceCurrency: 'INR',
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,

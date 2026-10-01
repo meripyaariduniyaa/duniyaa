@@ -25,6 +25,10 @@ export default function PublicCreatorPage() {
       .then((data) => {
         if (data.creator) {
           setCreator(data.creator);
+          const code = data.creator.primaryCoupon?.code || data.creator.coupon_code || '';
+          if (code && typeof window !== 'undefined') {
+            localStorage.setItem('lc_saved_coupon', code);
+          }
         } else {
           setError('Creator profile not found.');
         }

@@ -27,8 +27,30 @@ export default function CreatorDashboardPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+
+  // Bank & Payout Details Update Request State
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    account_holder_name: '',
+    bank_name: '',
+    account_number: '',
+    ifsc_code: '',
+    upi_id: '',
+    pan_number: '',
+    document_url: '',
+    request_note: '',
+  });
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docUploadError, setDocUploadError] = useState('');
+  const [savingBank, setSavingBank] = useState(false);
+  const [bankSuccessMsg, setBankSuccessMsg] = useState('');
+
+  // QR Code Toolkit Modal State
+  const [showQrModal, setShowQrModal] = useState(false);
+
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState(false);
+  const [copiedInvite, setCopiedInvite] = useState(false);
   const [copiedDisclosure, setCopiedDisclosure] = useState(false);
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true); // optimistic default until data loads
@@ -71,6 +93,18 @@ export default function CreatorDashboardPage() {
           youtube_url: result.creator.youtube_url || '',
           profile_image: result.creator.profile_image || '',
         });
+        if (result.creator.payout_details) {
+          setBankForm({
+            account_holder_name: result.creator.payout_details.account_holder_name || '',
+            bank_name: result.creator.payout_details.bank_name || '',
+            account_number: result.creator.payout_details.account_number || '',
+            ifsc_code: result.creator.payout_details.ifsc_code || '',
+            upi_id: result.creator.payout_details.upi_id || '',
+            pan_number: result.creator.payout_details.pan_number || '',
+            document_url: result.creator.payout_details.document_url || '',
+            request_note: result.creator.payout_details.request_note || '',
+          });
+        }
         // Check if this creator has accepted the current T&C version
         const hasAccepted =
           result.creator.terms_accepted_at &&
@@ -154,6 +188,79 @@ export default function CreatorDashboardPage() {
       alert(err.message);
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleDocUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 12 * 1024 * 1024) {
+      setDocUploadError('Document file must be under 12MB.');
+      return;
+    }
+
+    setUploadingDoc(true);
+    setDocUploadError('');
+    try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'vkcgnlm1';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'apology_images';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+      formData.append('folder', 'creator-payout-docs');
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const uploadData = await res.json();
+      if (uploadData.secure_url) {
+        setBankForm((prev) => ({ ...prev, document_url: uploadData.secure_url }));
+      } else {
+        setDocUploadError(uploadData?.error?.message || 'Failed to upload document.');
+      }
+    } catch (err) {
+      setDocUploadError('Upload failed. Please check your internet connection.');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const handleSaveBankDetails = async (e) => {
+    e.preventDefault();
+    if (!bankForm.upi_id && !bankForm.account_number) {
+      alert('Please provide at least a UPI ID or Bank Account Number for commission payouts.');
+      return;
+    }
+
+    setSavingBank(true);
+    setBankSuccessMsg('');
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/creator/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          payout_details: bankForm,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to submit bank details.');
+      
+      setBankSuccessMsg('✓ Your bank & payout details request was successfully submitted for admin verification!');
+      setTimeout(() => {
+        setShowBankModal(false);
+        setBankSuccessMsg('');
+        loadDashboard();
+      }, 2500);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSavingBank(false);
     }
   };
 
@@ -246,7 +353,7 @@ export default function CreatorDashboardPage() {
     );
   }
 
-  const { creator, summary, coupons = [], gifts = [] } = data;
+  const { creator, summary, coupons = [], gifts = [], commissions = [], invitedCreators = [] } = data;
 
   if (creator.status === 'pending') {
     return (
@@ -280,8 +387,8 @@ export default function CreatorDashboardPage() {
   const referralUrl = typeof window !== 'undefined' ? `${window.location.origin}/c/${creator.slug}` : `https://lovelycrafts.in/c/${creator.slug}`;
   const primaryCouponCode = creator.coupon_code || coupons[0]?.code || creator.slug?.toUpperCase();
 
-  // Tier progress calculations
-  const currentOrders = summary?.totalOrders || 0;
+  // Tier progress calculations (Evaluated on monthly orders, resets on 1st of every month)
+  const currentOrders = summary?.monthOrders || 0;
   const currentTier = summary?.tier || { name: 'Starter', minOrders: 0, commissionRate: 10, emoji: '🌱' };
   const nextTier = summary?.nextTier;
   const currentRate = summary?.rate || 10;
@@ -297,7 +404,25 @@ export default function CreatorDashboardPage() {
     ordersToNextTier = nextMin - currentOrders;
   }
 
-  const avgOrderValue = 499; // Average order price in INR
+  const avgOrderValue = 199; // Standard order price in INR
+
+  // Calculate days remaining until monthly reset
+  const now = new Date();
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeftInMonth = Math.max(1, lastDayOfMonth - now.getDate());
+
+  // Conversion rate calculation
+  const totalClicks = summary?.clicks || 0;
+  const totalOrders = summary?.totalOrders || 0;
+  const convRate = totalClicks > 0 ? ((totalOrders / totalClicks) * 100).toFixed(1) : '0.0';
+
+  // Bank payout details status
+  const payoutDetails = creator?.payout_details || {};
+  const hasBankData = Boolean(payoutDetails.upi_id || payoutDetails.account_number);
+  const bankVerificationStatus = payoutDetails.verification_status || (hasBankData ? 'pending_verification' : 'not_submitted');
+
+  // QR Code URL
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(referralUrl)}&color=e11d48&bgcolor=ffffff&margin=10`;
 
   // WhatsApp share builder
   const waText = encodeURIComponent(
@@ -319,7 +444,7 @@ export default function CreatorDashboardPage() {
       
       {/* CREATOR PORTAL TOPBAR */}
       <nav style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 40, marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ maxWidth: '1140px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
               <span style={{ fontSize: '1.3rem' }}>❤️</span> Lovely<span style={{ color: '#e11d48' }}>Crafts</span>
@@ -329,16 +454,80 @@ export default function CreatorDashboardPage() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'none', minWidth: '0' }} className="mobile-email-hide">
-              {user?.email}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* CONTENT IDEAS BUTTON */}
+            <Link
+              href="/content-ideas"
+              style={{
+                fontSize: '0.82rem',
+                color: '#fff',
+                textDecoration: 'none',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
+                padding: '7px 14px',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(225,29,72,0.3)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <span>💡</span> Viral Content Ideas
+              <span style={{ background: '#fef08a', color: '#854d0e', fontSize: '0.65rem', padding: '1px 6px', borderRadius: '999px', fontWeight: 800 }}>
+                HOT 🔥
+              </span>
+            </Link>
+
+            {/* QR TOOLKIT BUTTON */}
+            <button
+              type="button"
+              onClick={() => setShowQrModal(true)}
+              style={{
+                fontSize: '0.8rem',
+                color: '#0f172a',
+                fontWeight: 700,
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              📱 QR Code
+            </button>
+
+            {/* BANK & DOCUMENTS BUTTON */}
+            <button
+              type="button"
+              onClick={() => setShowBankModal(true)}
+              style={{
+                fontSize: '0.8rem',
+                color: bankVerificationStatus === 'verified' ? '#15803d' : '#854d0e',
+                fontWeight: 700,
+                background: bankVerificationStatus === 'verified' ? '#dcfce7' : '#fef3c7',
+                border: bankVerificationStatus === 'verified' ? '1px solid #bbf7d0' : '1px solid #fde68a',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              💳 {bankVerificationStatus === 'verified' ? 'Bank ✓' : 'Bank Payout ⚠️'}
+            </button>
+
             <Link href={`/creators/${creator.slug}`} target="_blank" style={{ fontSize: '0.8rem', color: '#e11d48', textDecoration: 'none', fontWeight: 700, background: '#fff1f2', padding: '6px 12px', borderRadius: '8px', border: '1px solid #fecdd3' }}>
               👁️ Storefront
             </Link>
+            
             <Link href="/creator/change-password" style={{ fontSize: '0.8rem', color: '#475569', textDecoration: 'none', fontWeight: 600, background: '#f1f5f9', padding: '6px 12px', borderRadius: '8px' }}>
               🔒 Password
             </Link>
+
             <button
               type="button"
               onClick={async () => {
@@ -365,12 +554,12 @@ export default function CreatorDashboardPage() {
         </div>
       </nav>
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 16px' }}>
 
         {/* PROFILE HEADER CARD */}
         <div style={{ background: '#fff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: '240px' }}>
-            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', border: '3px solid #fda4af', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: '76px', height: '76px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', border: '3px solid #fda4af', overflow: 'hidden', flexShrink: 0 }}>
               {creator.profile_image ? <img src={creator.profile_image} alt={creator.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '💖'}
             </div>
             <div>
@@ -381,11 +570,18 @@ export default function CreatorDashboardPage() {
                 <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '0.72rem', fontWeight: 800, padding: '3px 10px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   ✓ Verified Creator
                 </span>
+                {bankVerificationStatus === 'verified' && (
+                  <span style={{ background: '#eff6ff', color: '#1d4ed8', fontSize: '0.72rem', fontWeight: 800, padding: '3px 10px', borderRadius: '999px' }}>
+                    🏦 KYC &amp; Bank Verified
+                  </span>
+                )}
               </div>
               <div style={{ color: '#64748b', fontSize: '0.88rem', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span>Tier: <strong style={{ color: '#e11d48' }}>{currentTier.emoji} {currentTier.name}</strong></span>
                 <span>•</span>
                 <span>Commission: <strong style={{ color: '#059669' }}>{currentRate}%</strong></span>
+                <span>•</span>
+                <span>Store: <code style={{ color: '#0f172a', fontWeight: 600 }}>/c/{creator.slug}</code></span>
               </div>
             </div>
           </div>
@@ -394,18 +590,91 @@ export default function CreatorDashboardPage() {
             <button
               type="button"
               onClick={() => setEditingProfile(!editingProfile)}
-              style={{ background: '#ffe4e6', color: '#be123c', border: '1px solid #fecdd3', padding: '10px 18px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', flex: 1, minWidth: '130px', minHeight: '44px' }}
+              style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', flex: 1, minWidth: '120px', minHeight: '42px' }}
             >
               ✏️ {editingProfile ? 'Close Editor' : 'Edit Profile'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBankModal(true)}
+              style={{ background: '#ffe4e6', color: '#be123c', border: '1px solid #fecdd3', padding: '10px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', flex: 1, minWidth: '140px', minHeight: '42px' }}
+            >
+              💳 Bank &amp; KYC
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowQrModal(true)}
+              style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', flex: 1, minWidth: '120px', minHeight: '42px' }}
+            >
+              📱 QR Toolkit
             </button>
             <a
               href={waShareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ background: '#25D366', color: '#fff', padding: '10px 18px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flex: 1, minWidth: '140px', minHeight: '44px' }}
+              style={{ background: '#25D366', color: '#fff', padding: '10px 18px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flex: 1, minWidth: '140px', minHeight: '42px' }}
             >
-              💬 WhatsApp Share
+              💬 WhatsApp
             </a>
+          </div>
+        </div>
+
+        {/* VIRAL CONTENT PLAYBOOK HERO BANNER */}
+        <div style={{ background: 'linear-gradient(135deg, #be123c 0%, #e11d48 50%, #9013fe 100%)', borderRadius: '24px', padding: '24px 28px', color: '#fff', marginBottom: '24px', boxShadow: '0 10px 30px rgba(225,29,72,0.2)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '220px', height: '220px', background: 'rgba(255,255,255,0.15)', borderRadius: '50%', filter: 'blur(40px)', pointerEvents: 'none' }} />
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', position: 'relative', zIndex: 2 }}>
+            <div style={{ maxWidth: '640px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                <span>🔥</span> Creator Growth Engine &amp; Marketing Hub
+              </div>
+              <h2 style={{ fontSize: '1.45rem', fontWeight: 900, margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+                Never Wonder What To Post Again! 💡
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: '#ffe4e6', margin: 0, lineHeight: 1.5 }}>
+                Access proven 20-second Reel &amp; TikTok blueprints, high-converting emotional hooks, 1-click captions, and trending audio ideas for all 5 digital gift templates.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '220px' }}>
+              <Link
+                href="/content-ideas"
+                style={{
+                  background: '#fff',
+                  color: '#be123c',
+                  padding: '12px 22px',
+                  borderRadius: '14px',
+                  fontSize: '0.92rem',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                  transition: 'transform 0.2s ease',
+                }}
+              >
+                <span>🚀</span> Explore Content Ideas &rarr;
+              </Link>
+              <div style={{ fontSize: '0.75rem', color: '#fecdd3', textAlign: 'center' }}>
+                5 Plug &amp; Play Campaign Blueprints
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+            {[
+              { label: '💍 Proposal Love Stories', tag: 'High Virality' },
+              { label: '🎂 Birthday Midnight Surprise', tag: 'Daily Demand' },
+              { label: '✨ Anniversary Flipbook', tag: 'High Conversion' },
+              { label: '🕊️ Heartfelt Apology Card', tag: 'Emotional Hook' },
+              { label: '💌 Long-Distance Miss You', tag: 'Relatable Audio' },
+            ].map((item, idx) => (
+              <span key={idx} style={{ background: 'rgba(255,255,255,0.12)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {item.label} <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>({item.tag})</span>
+              </span>
+            ))}
           </div>
         </div>
 
@@ -416,28 +685,34 @@ export default function CreatorDashboardPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
             <div>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f43f5e', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                🏆 CREATOR TIER ROADMAP
+                🏆 CREATOR TIER ROADMAP (2X EXPONENTIAL TIERS)
               </span>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>{currentTier.emoji}</span> {currentTier.name} Tier ({currentRate}% Commission)
               </h2>
             </div>
-            {nextTier ? (
-              <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)', fontSize: '0.82rem', color: '#f1f5f9', fontWeight: 600 }}>
-                Next Level: <strong>{nextTier.emoji} {nextTier.name} ({nextTier.commissionRate}%)</strong>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ background: 'rgba(234,179,8,0.15)', color: '#fef08a', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(234,179,8,0.25)', fontSize: '0.78rem', fontWeight: 700 }}>
+                ⏳ {daysLeftInMonth} Days Left in Month
               </div>
-            ) : (
-              <div style={{ background: 'rgba(234,179,8,0.2)', color: '#fef08a', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(234,179,8,0.3)', fontSize: '0.82rem', fontWeight: 700 }}>
-                👑 TOP TIER ACHIEVED!
-              </div>
-            )}
+              {nextTier ? (
+                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)', fontSize: '0.82rem', color: '#f1f5f9', fontWeight: 600 }}>
+                  Next Level: <strong>{nextTier.emoji} {nextTier.name} ({nextTier.commissionRate}%)</strong>
+                </div>
+              ) : (
+                <div style={{ background: 'rgba(234,179,8,0.2)', color: '#fef08a', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(234,179,8,0.3)', fontSize: '0.82rem', fontWeight: 700 }}>
+                  👑 TOP TIER ACHIEVED!
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Progress Bar Container */}
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 600 }}>
-              <span>{currentOrders} Paid Referral Orders</span>
-              <span>{nextTier ? `${ordersToNextTier} orders until next tier` : 'Maximum Tier Unlocked'}</span>
+              <span>{currentOrders} Paid Orders This Month (Resets on 1st to maintain activity)</span>
+              <span>{nextTier ? `${ordersToNextTier} orders until ${nextTier.name}` : 'Maximum Tier Unlocked'}</span>
             </div>
             <div style={{ width: '100%', height: '12px', background: 'rgba(255,255,255,0.12)', borderRadius: '999px', overflow: 'hidden', padding: '2px', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div
@@ -456,11 +731,11 @@ export default function CreatorDashboardPage() {
           {/* Tier levels badges */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
             {[
-              { name: 'Starter', min: 0, rate: '10%', emoji: '🌱' },
-              { name: 'Rising', min: 100, rate: '15%', emoji: '💚' },
-              { name: 'Creator', min: 200, rate: '16%', emoji: '💙' },
-              { name: 'Partner', min: 300, rate: '17%', emoji: '💜' },
-              { name: 'Elite', min: 400, rate: '18%', emoji: '👑' },
+              { name: 'Starter', min: 0, range: '0–100', rate: '10%', emoji: '🌱' },
+              { name: 'Rising', min: 100, range: '100–300', rate: '15%', emoji: '💚' },
+              { name: 'Creator', min: 300, range: '300–700', rate: '16%', emoji: '💙' },
+              { name: 'Partner', min: 700, range: '700–1500', rate: '17%', emoji: '💜' },
+              { name: 'Elite', min: 1500, range: '1500+', rate: '18%', emoji: '👑' },
             ].map((t) => {
               const isUnlocked = currentOrders >= t.min;
               const isCurrent = currentTier.name?.toLowerCase() === t.name.toLowerCase();
@@ -480,7 +755,7 @@ export default function CreatorDashboardPage() {
                     {t.emoji} {t.name}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}>
-                    {t.min}+ orders • <strong style={{ color: '#38bdf8' }}>{t.rate}</strong>
+                    {t.range} orders • <strong style={{ color: '#38bdf8' }}>{t.rate}</strong>
                   </div>
                 </div>
               );
@@ -530,14 +805,14 @@ export default function CreatorDashboardPage() {
 
               <div style={{ background: '#fff', padding: '14px', borderRadius: '14px', border: '1px solid #ffe4e6' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 4</div>
-                <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block', marginBottom: '2px' }}>Share Creator Link</strong>
-                <small style={{ color: '#64748b', fontSize: '0.78rem', lineHeight: 1.4, display: 'block' }}>Place your 30-day link in your YouTube/Instagram bio.</small>
+                <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block', marginBottom: '2px' }}>Submit Bank Payout</strong>
+                <small style={{ color: '#64748b', fontSize: '0.78rem', lineHeight: 1.4, display: 'block' }}>Provide UPI / Bank IFSC &amp; doc for fast payouts.</small>
               </div>
 
               <div style={{ background: '#fff', padding: '14px', borderRadius: '14px', border: '1px solid #ffe4e6' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', marginBottom: '4px' }}>STEP 5</div>
-                <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block', marginBottom: '2px' }}>Track Earnings</strong>
-                <small style={{ color: '#64748b', fontSize: '0.78rem', lineHeight: 1.4, display: 'block' }}>Watch clicks &amp; commissions update in real-time.</small>
+                <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block', marginBottom: '2px' }}>Viral Content Ideas</strong>
+                <small style={{ color: '#64748b', fontSize: '0.78rem', lineHeight: 1.4, display: 'block' }}>Use our 20-second script templates to post Reels.</small>
               </div>
 
               <div style={{ background: '#fff', padding: '14px', borderRadius: '14px', border: '1px solid #ffe4e6' }}>
@@ -681,7 +956,7 @@ export default function CreatorDashboardPage() {
         )}
 
         {/* METRICS OVERVIEW CARDS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ background: '#fff', borderRadius: '20px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>⏳ Pending Commission</span>
             <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#e11d48', marginTop: '4px' }}>
@@ -691,7 +966,7 @@ export default function CreatorDashboardPage() {
               {(summary?.pending || 0) >= 50000 ? (
                 '✓ Reached ₹500 payout threshold'
               ) : (
-                `Min payout: ₹500 (₹${(500 - (summary?.pending || 0) / 100).toFixed(2)} remaining)`
+                `Min payout: ₹500 (₹${(500 - (summary?.pending || 0) / 100).toFixed(2)} left)`
               )}
             </div>
           </div>
@@ -717,7 +992,147 @@ export default function CreatorDashboardPage() {
             <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
               {summary?.clicks || 0}
             </div>
-            <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Unique 30-day link hits</small>
+            <small style={{ color: '#059669', fontSize: '0.75rem', fontWeight: 700 }}>{convRate}% conversion rate</small>
+          </div>
+        </div>
+
+        {/* PENDING EARNINGS BREAKDOWN */}
+        {commissions.filter(c => c.status === 'pending').length > 0 && (
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>⏳ Pending Earnings Breakdown</h3>
+              <span style={{ fontSize: '0.8rem', color: '#64748b', background: '#f1f5f9', padding: '4px 10px', borderRadius: '20px', fontWeight: 600 }}>
+                {commissions.filter(c => c.status === 'pending').length} entries · ₹{(commissions.filter(c => c.status === 'pending').reduce((s,c) => s + (Number(c.commission_amount)||0),0)/100).toFixed(2)} total
+              </span>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '480px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#64748b', fontWeight: 700 }}>Date</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', color: '#64748b', fontWeight: 700 }}>Type</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right', color: '#64748b', fontWeight: 700 }}>Amount</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'center', color: '#64748b', fontWeight: 700 }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {commissions
+                    .filter(c => c.status === 'pending')
+                    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                    .map((c) => {
+                      const isReferralBounty = c.type === 'creator_referral_bounty';
+                      return (
+                        <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc', background: isReferralBounty ? '#fdf4ff' : 'transparent' }}>
+                          <td style={{ padding: '10px 12px', color: '#475569' }}>
+                            {c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
+                          </td>
+                          <td style={{ padding: '10px 12px' }}>
+                            {isReferralBounty ? (
+                              <span style={{ background: '#f3e8ff', color: '#7e22ce', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>🎁 Referral Bounty</span>
+                            ) : (
+                              <span style={{ background: '#f0fdf4', color: '#15803d', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>🛒 Sale Commission</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: isReferralBounty ? '#7e22ce' : '#059669', fontFamily: 'monospace' }}>
+                            ₹{((Number(c.commission_amount)||0)/100).toFixed(2)}
+                          </td>
+                          <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                            <span style={{ background: '#fef9c3', color: '#854d0e', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Pending</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* BANK & PAYOUT VERIFICATION DETAILS CARD */}
+        <div style={{ background: '#fff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '1.5rem' }}>🏦</span>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Bank &amp; Payout Coordinates
+                </h3>
+                <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                  Commission earnings are transferred automatically via UPI / NEFT
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {bankVerificationStatus === 'verified' ? (
+                <span style={{ background: '#dcfce7', color: '#15803d', padding: '6px 12px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 800 }}>
+                  ✓ Bank Verified
+                </span>
+              ) : bankVerificationStatus === 'pending_verification' ? (
+                <span style={{ background: '#fef3c7', color: '#b45309', padding: '6px 12px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 800 }}>
+                  ⏳ Verification In Progress
+                </span>
+              ) : (
+                <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '6px 12px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 800 }}>
+                  ⚠️ Bank Details Missing
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowBankModal(true)}
+                style={{ background: '#e11d48', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                {hasBankData ? '✏️ Update Bank & Docs' : '➕ Add Bank Details'}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '16px 20px', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>Account Holder</span>
+              <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>
+                {payoutDetails.account_holder_name || creator.name || '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>UPI ID (VPA)</span>
+              <strong style={{ fontSize: '0.95rem', color: '#0f172a', fontFamily: 'monospace' }}>
+                {payoutDetails.upi_id || '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>Bank Name &amp; IFSC</span>
+              <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>
+                {payoutDetails.bank_name || 'Bank'} {payoutDetails.ifsc_code ? `(${payoutDetails.ifsc_code})` : ''}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>Account Number</span>
+              <strong style={{ fontSize: '0.95rem', color: '#0f172a', fontFamily: 'monospace' }}>
+                {payoutDetails.account_number ? `••••••••${payoutDetails.account_number.slice(-4)}` : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>PAN Card</span>
+              <strong style={{ fontSize: '0.95rem', color: '#0f172a', fontFamily: 'monospace' }}>
+                {payoutDetails.pan_number || '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>Uploaded Proof</span>
+              {payoutDetails.document_url ? (
+                <a href={payoutDetails.document_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: '#e11d48', fontWeight: 700, textDecoration: 'underline' }}>
+                  📄 View Uploaded Document &rarr;
+                </a>
+              ) : (
+                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>No doc uploaded</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -884,7 +1299,7 @@ export default function CreatorDashboardPage() {
                 <input
                   type="range"
                   min="5"
-                  max="300"
+                  max="500"
                   step="5"
                   value={estimatedMonthlyOrders}
                   onChange={(e) => setEstimatedMonthlyOrders(Number(e.target.value))}
@@ -892,8 +1307,8 @@ export default function CreatorDashboardPage() {
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
                   <span>5 orders</span>
-                  <span>150 orders</span>
-                  <span>300 orders</span>
+                  <span>250 orders</span>
+                  <span>500 orders</span>
                 </div>
               </div>
 
@@ -950,6 +1365,97 @@ export default function CreatorDashboardPage() {
           </div>
         )}
 
+        {/* CREATOR REFERRAL PROGRAM */}
+        <div style={{ background: 'linear-gradient(135deg, #fdf4ff 0%, #fce7f3 100%)', borderRadius: '24px', padding: '28px', border: '1px solid #e879f9', marginBottom: '32px', boxShadow: '0 4px 20px rgba(232,121,249,0.10)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#7e22ce', margin: 0 }}>🤝 Invite Creators &amp; Earn ₹150</h3>
+              <p style={{ fontSize: '0.85rem', color: '#a21caf', margin: '4px 0 0' }}>For every friend you bring who gets approved &amp; makes their first sale, you earn a ₹150 bounty.</p>
+            </div>
+            <div style={{ background: '#f3e8ff', border: '1px solid #d8b4fe', borderRadius: '12px', padding: '8px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#7e22ce' }}>{invitedCreators.filter(c => c.referral_bounty_awarded).length}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', textTransform: 'uppercase' }}>Bounties Earned</div>
+            </div>
+          </div>
+
+          {/* Invite Link Box */}
+          <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #e9d5ff', marginBottom: '20px' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.06em' }}>Your Creator Invite Link</div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <code style={{ flex: 1, background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '10px 14px', fontSize: '0.82rem', color: '#581c87', fontFamily: 'monospace', wordBreak: 'break-all', minWidth: 0 }}>
+                {`${typeof window !== 'undefined' ? window.location.origin : 'https://lovelycrafts.in'}/creators?ref=${creator.slug}`}
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/creators?ref=${creator.slug}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    setCopiedInvite(true);
+                    setTimeout(() => setCopiedInvite(false), 2000);
+                  });
+                }}
+                style={{ background: copiedInvite ? '#16a34a' : '#7e22ce', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 18px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.2s', minHeight: '44px' }}
+              >
+                {copiedInvite ? '✅ Copied!' : '📋 Copy Link'}
+              </button>
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '8px' }}>Share this link with creator friends. Bounty credited after their first successful paid order.</div>
+          </div>
+
+          {/* Invited Creators Table */}
+          {invitedCreators.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ background: '#f3e8ff' }}>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 800, color: '#7e22ce', borderRadius: '8px 0 0 8px' }}>Creator</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 800, color: '#7e22ce' }}>Status</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 800, color: '#7e22ce' }}>Joined</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#7e22ce', borderRadius: '0 8px 8px 0' }}>₹150 Bounty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invitedCreators.map((ic) => (
+                    <tr key={ic.id} style={{ borderBottom: '1px solid #f3e8ff' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#1e1b4b' }}>
+                        {ic.name}
+                        <div style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 500 }}>/{ic.slug}</div>
+                      </td>
+                      <td style={{ padding: '12px 14px' }}>
+                        <span style={{
+                          background: ic.status === 'approved' ? '#dcfce7' : ic.status === 'pending' ? '#fef9c3' : '#fee2e2',
+                          color: ic.status === 'approved' ? '#15803d' : ic.status === 'pending' ? '#854d0e' : '#b91c1c',
+                          padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase'
+                        }}>
+                          {ic.status === 'approved' ? '✅ Active' : ic.status === 'pending' ? '⏳ Pending' : ic.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 14px', color: '#6b7280', fontSize: '0.8rem' }}>
+                        {ic.joined_at ? new Date(ic.joined_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
+                      </td>
+                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        {ic.referral_bounty_awarded ? (
+                          <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>🏆 Earned!</span>
+                        ) : ic.status === 'approved' ? (
+                          <span style={{ background: '#fef9c3', color: '#92400e', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>⏳ Awaiting Sale</span>
+                        ) : (
+                          <span style={{ background: '#f1f5f9', color: '#94a3b8', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '32px 20px', background: '#fff', borderRadius: '14px', border: '1px dashed #d8b4fe' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>💌</div>
+              <div style={{ fontWeight: 700, color: '#7e22ce', fontSize: '1rem', marginBottom: '6px' }}>No invites yet — be the first!</div>
+              <div style={{ fontSize: '0.85rem', color: '#a21caf' }}>Copy your invite link above and share it with creator friends. Each successful referral = ₹150 for you.</div>
+            </div>
+          )}
+        </div>
+
         {/* PAYOUT HISTORY */}
         <div style={{ background: '#fff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
@@ -990,13 +1496,269 @@ export default function CreatorDashboardPage() {
             </div>
           ) : (
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center', margin: '20px 0' }}>
-              No payout batches processed yet. Pending commissions are batched and paid to your UPI/Bank.
+              No payout batches processed yet. Pending commissions are batched and paid to your UPI/Bank once threshold is met.
             </p>
           )}
         </div>
 
       </div>
+
+      {/* BANK / PAYOUT DETAILS UPDATE REQUEST MODAL */}
+      {showBankModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100 }}>
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '28px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  KYC &amp; BANK COORDINATES
+                </span>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 0' }}>
+                  Update Bank &amp; Payout Documents
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBankModal(false)}
+                style={{ background: '#f1f5f9', border: 'none', color: '#64748b', width: '36px', height: '36px', borderRadius: '50%', fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '20px', lineHeight: 1.4 }}>
+              Submit your bank details or UPI ID along with proof (Cancelled Cheque, Bank Passbook, or PAN card) so our finance team can verify and release your commissions without delay.
+            </p>
+
+            {bankSuccessMsg && (
+              <div style={{ background: '#dcfce7', color: '#15803d', padding: '14px 16px', borderRadius: '12px', fontSize: '0.88rem', fontWeight: 700, marginBottom: '16px', border: '1px solid #bbf7d0' }}>
+                {bankSuccessMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveBankDetails} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+              
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  Account Holder Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="As per Bank / PAN records"
+                  value={bankForm.account_holder_name}
+                  onChange={(e) => setBankForm({ ...bankForm, account_holder_name: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  UPI ID (Fastest Transfer) ⚡
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. yourname@okaxis or mobile@upi"
+                  value={bankForm.upi_id}
+                  onChange={(e) => setBankForm({ ...bankForm, upi_id: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  Bank Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. HDFC Bank, SBI, ICICI"
+                  value={bankForm.bank_name}
+                  onChange={(e) => setBankForm({ ...bankForm, bank_name: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  Bank Account Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="Account Number"
+                  value={bankForm.account_number}
+                  onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  IFSC Code
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. HDFC0001234"
+                  value={bankForm.ifsc_code}
+                  onChange={(e) => setBankForm({ ...bankForm, ifsc_code: e.target.value.toUpperCase() })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem', textTransform: 'uppercase' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  PAN Card Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. ABCDE1234F"
+                  value={bankForm.pan_number}
+                  onChange={(e) => setBankForm({ ...bankForm, pan_number: e.target.value.toUpperCase() })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem', textTransform: 'uppercase' }}
+                />
+              </div>
+
+              {/* DOCUMENT UPLOAD */}
+              <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                  Upload Bank Proof / Cancelled Cheque / PAN Photo 📄
+                </label>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '10px' }}>
+                  Supported formats: JPG, PNG, WEBP, PDF (Max 12MB). Clear photo of passbook front page or cancelled cheque.
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <label style={{ background: '#0f172a', color: '#fff', padding: '8px 16px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, cursor: uploadingDoc ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      disabled={uploadingDoc}
+                      onChange={handleDocUpload}
+                      style={{ display: 'none' }}
+                    />
+                    {uploadingDoc ? '⏳ Uploading...' : bankForm.document_url ? '🔄 Replace Document' : '📤 Choose Document File'}
+                  </label>
+
+                  {bankForm.document_url && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#059669', fontSize: '0.82rem', fontWeight: 700 }}>
+                        ✓ Document Attached
+                      </span>
+                      <a href={bankForm.document_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#e11d48', textDecoration: 'underline' }}>
+                        Preview
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {docUploadError && (
+                  <div style={{ color: '#dc2626', fontSize: '0.78rem', marginTop: '6px', fontWeight: 600 }}>
+                    ⚠️ {docUploadError}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                  Additional Notes for Admin Review (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Account name matches PAN. Please verify for weekly payout batch."
+                  value={bankForm.request_note}
+                  onChange={(e) => setBankForm({ ...bankForm, request_note: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', gridColumn: '1 / -1', marginTop: '8px' }}>
+                <button
+                  type="submit"
+                  disabled={savingBank || uploadingDoc}
+                  style={{ background: '#e11d48', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', flex: 1, minHeight: '44px' }}
+                >
+                  {savingBank ? 'Submitting Request...' : 'Submit Payout Details for Verification 🚀'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBankModal(false)}
+                  style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '12px 18px', borderRadius: '12px', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', minHeight: '44px' }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATOR QR CODE TOOLKIT MODAL */}
+      {showQrModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100 }}>
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '28px', maxWidth: '440px', width: '100%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ textAlign: 'left' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  PROMO TOOLKIT
+                </span>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 0' }}>
+                  Your Custom QR Code
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                style={{ background: '#f1f5f9', border: 'none', color: '#64748b', width: '36px', height: '36px', borderRadius: '50%', fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px', lineHeight: 1.4 }}>
+              Add this QR code to your YouTube video outro, Instagram story stickers, or WhatsApp flyers so fans scan directly into your storefront!
+            </p>
+
+            <div style={{ background: '#fff1f2', border: '2px solid #fecdd3', borderRadius: '20px', padding: '20px', display: 'inline-block', marginBottom: '16px', boxShadow: '0 8px 24px rgba(225,29,72,0.08)' }}>
+              <img
+                src={qrImageUrl}
+                alt="Creator Storefront QR Code"
+                style={{ width: '220px', height: '220px', display: 'block', borderRadius: '12px' }}
+              />
+              <div style={{ marginTop: '10px', fontSize: '0.82rem', fontWeight: 800, color: '#be123c' }}>
+                lovelycrafts.in/c/{creator.slug}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <a
+                href={qrImageUrl}
+                download={`${creator.slug}-lovelycrafts-qr.png`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ background: '#e11d48', color: '#fff', padding: '12px 18px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, textDecoration: 'none', display: 'block' }}
+              >
+                📥 Download High-Res QR Image
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(referralUrl);
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}
+                style={{ background: '#f1f5f9', color: '#334155', border: 'none', padding: '10px 18px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                {copiedLink ? '✓ Copied Link' : '🔗 Copy Direct URL'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
+
 

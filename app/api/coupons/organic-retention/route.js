@@ -19,13 +19,52 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, disabled: true, ...disableResult });
     }
 
-    // If customer already has creator referral link, mark creator prioritized
+    // If customer has creator referral link, resolve and return creator's coupon
     if (hasCreatorReferral) {
+      let referralCoupon = null;
+      try {
+        const creatorSnap = await adminDb.collection('creators').doc(refData.creatorId).get();
+        if (creatorSnap.exists) {
+          const creatorData = creatorSnap.data();
+          let code = creatorData.coupon_code || null;
+          let percent = 10;
+          let label = `${creatorData.name || 'Creator'}'s Special Discount`;
+
+          // Check for active creator coupon in coupons collection
+          const cpSnap = await adminDb.collection('coupons')
+            .where('creator_id', '==', refData.creatorId)
+            .where('active', '==', true)
+            .limit(1)
+            .get();
+
+          if (!cpSnap.empty) {
+            const cpDoc = cpSnap.docs[0].data();
+            code = cpDoc.code || code;
+            percent = cpDoc.discount_percent || percent;
+            label = cpDoc.label || label;
+          }
+
+          if (code) {
+            referralCoupon = {
+              code,
+              percent,
+              label,
+              creator_id: refData.creatorId,
+              creator_name: creatorData.name || 'Creator Partner',
+            };
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching creator referral coupon:', err);
+      }
+
       return NextResponse.json({
         ok: true,
         eligible: false,
+        hasReferral: true,
         reason: 'creator_referral_active',
         creatorId: refData.creatorId,
+        referralCoupon,
       });
     }
 

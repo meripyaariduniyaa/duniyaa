@@ -17,11 +17,45 @@ export async function POST(request) {
     const ref = db.collection('creators').doc(user.uid);
     const existing = await ref.get();
     if (existing.exists && ['active', 'approved'].includes(existing.data().status)) return NextResponse.json({ error: 'Your Creator Club account is already active.' }, { status: 409 });
-    await ref.set({
-      user_id: user.uid, name, email: user.email || '', slug, phone: String(body.phone || '').trim(), bio: String(body.bio || '').trim(),
-      instagram_url: String(body.instagram_url || '').trim(), youtube_url: String(body.youtube_url || '').trim(), profile_image: body.profile_image || user.picture || null,
-      status: 'pending', tier: 'starter', joined_at: existing.exists ? existing.data().joined_at : FieldValue.serverTimestamp(), updated_at: FieldValue.serverTimestamp(),
-    }, { merge: true });
+    
+    // Look up referring creator if an invite slug was passed
+    let referredByCreatorId = null;
+    let referredByCreatorSlug = null;
+    const incomingRefSlug = String(body.referred_by_creator_slug || '').trim().toLowerCase();
+    if (incomingRefSlug && incomingRefSlug !== slug) {
+      try {
+        const refCreatorSnap = await db.collection('creators').where('slug', '==', incomingRefSlug).limit(1).get();
+        if (!refCreatorSnap.empty) {
+          referredByCreatorId = refCreatorSnap.docs[0].id;
+          referredByCreatorSlug = refCreatorSnap.docs[0].data().slug;
+        }
+      } catch (err) {
+        console.error('Error looking up referring creator:', err);
+      }
+    }
+
+    const payload = {
+      user_id: user.uid,
+      name,
+      email: user.email || '',
+      slug,
+      phone: String(body.phone || '').trim(),
+      bio: String(body.bio || '').trim(),
+      instagram_url: String(body.instagram_url || '').trim(),
+      youtube_url: String(body.youtube_url || '').trim(),
+      profile_image: body.profile_image || user.picture || null,
+      status: 'pending',
+      tier: 'starter',
+      joined_at: existing.exists ? existing.data().joined_at : FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
+    };
+
+    if (referredByCreatorId && !existing.data()?.referred_by_creator_id) {
+      payload.referred_by_creator_id = referredByCreatorId;
+      payload.referred_by_creator_slug = referredByCreatorSlug;
+    }
+
+    await ref.set(payload, { merge: true });
     return NextResponse.json({ ok: true, status: 'pending' });
   } catch (error) { return NextResponse.json({ error: error.message || 'Could not submit application.' }, { status: 401 }); }
 }

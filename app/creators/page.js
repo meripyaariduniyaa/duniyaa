@@ -113,9 +113,25 @@ export default function CreatorsLandingPage() {
   const [appStatus, setAppStatus] = useState(null); // null | 'pending' | 'active' | 'error'
   const [errorMessage, setErrorMessage] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [invitedBy, setInvitedBy] = useState('');
 
   // FAQ open/close state
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
+  // Read invite query param & localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refParam = urlParams.get('ref') || urlParams.get('invitedBy') || urlParams.get('referrer');
+      if (refParam) {
+        setInvitedBy(refParam.toLowerCase().trim());
+        localStorage.setItem('lc_invited_by_creator', refParam.toLowerCase().trim());
+      } else {
+        const stored = localStorage.getItem('lc_invited_by_creator');
+        if (stored) setInvitedBy(stored);
+      }
+    }
+  }, []);
 
   // Load public creators
   useEffect(() => {
@@ -222,7 +238,10 @@ export default function CreatorsLandingPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          referred_by_creator_slug: invitedBy || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -575,30 +594,30 @@ export default function CreatorsLandingPage() {
               <div style={{ background: '#f9fafb', borderRadius: '16px', padding: '18px', border: '1px solid #f3f4f6', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#4b5563' }}>
                   <span>Original Experience Price:</span>
-                  <strong>₹219.00</strong>
+                  <strong>₹199.00</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#e11d48' }}>
                   <span>With Your 10% Discount:</span>
-                  <strong>Viewer pays ₹197.10</strong>
+                  <strong>Viewer pays ₹179.10</strong>
                 </div>
                 <div style={{ height: '1px', background: '#e5e7eb', margin: '10px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 10% Starter Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹19.71</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹17.91</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 15% Rising Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹29.57</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹26.87</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#111827' }}>
                   <span>At 18% Elite Tier:</span>
-                  <strong style={{ color: '#059669' }}>You earn ≈ ₹35.48</strong>
+                  <strong style={{ color: '#059669' }}>You earn ≈ ₹32.24</strong>
                 </div>
               </div>
             </div>
 
             <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
-              * Illustrative calculation based on standard ₹219 experience with a 10% coupon applied. Actual earnings depend on qualifying order value, applicable tier, and terms.
+              * Illustrative calculation based on standard ₹199 experience with a 10% coupon applied. Actual earnings depend on qualifying order value, applicable tier, and terms.
             </p>
           </div>
 

@@ -16,16 +16,24 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
   const [retentionCoupon, setRetentionCoupon] = useState(null);
   const [retentionSeconds, setRetentionSeconds] = useState(0);
   const [retentionDismissed, setRetentionDismissed] = useState(false);
+  const [creatorReferral, setCreatorReferral] = useState(null);
   const timerRef = useRef(null);
 
-  const basePrice = displayAmount || 219;
+  const basePrice = displayAmount || 199;
 
-  /* ── Check & Fetch Organic Retention 10% Discount ── */
+  /* ── Check & Fetch Organic Retention 10% Discount OR Auto-Apply Creator Referral ── */
   useEffect(() => {
-    if (!autoOfferRetention || !apologyId) return;
+    if (!apologyId) return;
 
     let mounted = true;
-    async function checkOrganicRetention() {
+    async function checkRetentionOrReferral() {
+      let localCode = null;
+      if (typeof window !== 'undefined') {
+        const urlParam = new URLSearchParams(window.location.search).get('coupon');
+        const savedCode = localStorage.getItem('lc_saved_coupon');
+        localCode = (urlParam || savedCode || '').trim();
+      }
+
       try {
         const res = await fetch('/api/coupons/organic-retention', {
           method: 'POST',
@@ -33,16 +41,38 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
           body: JSON.stringify({ noteId: apologyId, action: 'get_or_create' })
         });
         const data = await res.json();
-        if (mounted && data.ok && data.eligible && data.coupon) {
+        if (!mounted) return;
+
+        // Auto-apply creator referral coupon if user arrived via creator referral
+        if (data.hasReferral && data.referralCoupon?.code) {
+          setCreatorReferral(data.referralCoupon);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('lc_saved_coupon', data.referralCoupon.code);
+          }
+          applyCoupon(data.referralCoupon.code);
+          return;
+        }
+
+        // Auto-apply previously saved coupon (e.g. from /create?coupon= or storefront)
+        if (localCode) {
+          applyCoupon(localCode);
+          return;
+        }
+
+        // Otherwise offer standard organic retention discount if eligible
+        if (autoOfferRetention && data.ok && data.eligible && data.coupon) {
           setRetentionCoupon(data.coupon);
           setRetentionSeconds(data.coupon.remaining_seconds || 900);
         }
       } catch (err) {
-        console.error('Failed to load retention offer:', err);
+        console.error('Failed to load retention/referral offer:', err);
+        if (localCode && mounted) {
+          applyCoupon(localCode);
+        }
       }
     }
 
-    checkOrganicRetention();
+    checkRetentionOrReferral();
     return () => { mounted = false; };
   }, [apologyId, autoOfferRetention]);
 
@@ -277,6 +307,41 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '16px' }}>
+
+        {/* Creator Referral Active Badge */}
+        {creatorReferral && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(225, 29, 72, 0.15))',
+            border: '1px solid rgba(244, 63, 94, 0.35)',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            boxShadow: '0 4px 14px rgba(244, 63, 94, 0.08)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.1rem' }}>🎁</span>
+              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f43f5e' }}>
+                Creator Partner Discount: <strong style={{ color: '#fff' }}>{creatorReferral.creator_name || 'Creator'}</strong>
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              color: '#fff',
+              background: 'rgba(244, 63, 94, 0.28)',
+              border: '1px solid rgba(244, 63, 94, 0.45)',
+              padding: '2px 8px',
+              borderRadius: '6px',
+              fontFamily: 'monospace',
+              letterSpacing: '0.04em',
+            }}>
+              {creatorReferral.code}
+            </span>
+          </div>
+        )}
 
         {/* Organic Retention 10% Special Offer Banner */}
         {retentionCoupon && !resolvedOrder && !retentionDismissed && retentionSeconds > 0 && (

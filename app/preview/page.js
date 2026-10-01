@@ -149,7 +149,7 @@ function PreviewContent() {
 
   const accent = ACCENT_MAP[note?.template] || ACCENT_MAP.proposal;
   const selectedTemplate = templates.find((t) => t.id === note?.template);
-  const totalAmount = selectedTemplate?.price || 219;
+  const totalAmount = selectedTemplate?.price || 199;
 
   // ── LOADING ──
   if (loading) {
@@ -392,7 +392,7 @@ function LockedPanel({ note, accent, totalAmount, selectedTemplate, onPaid }) {
         <div style={{ fontWeight: 700, fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.7rem' }}>Order Summary</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.6rem' }}>
           <span>{selectedTemplate?.title || 'Experience'}</span>
-          <span style={{ fontWeight: 700 }}>₹{selectedTemplate?.price || 219}</span>
+          <span style={{ fontWeight: 700 }}>₹{selectedTemplate?.price || 199}</span>
         </div>
         <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0.5rem 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 800, fontSize: '1.05rem' }}>

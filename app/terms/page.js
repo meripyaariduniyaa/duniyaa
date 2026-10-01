@@ -23,7 +23,7 @@ export const metadata = {
 };
 
 const EFFECTIVE_DATE = 'September 8, 2026';
-const PRICE = '₹219';
+const PRICE = '₹199';
 const NOTE_EXPIRY_DAYS = 90;
 
 export default function TermsPage() {

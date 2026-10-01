@@ -9,6 +9,7 @@ import {
   nextTierForOrders,
   calculateEffectiveTierAndRate,
   commissionForAmount,
+  calculateGraduatedCommission,
   isAdminEmail,
 } from '../lib/creator-club.js';
 import { signReferral, verifyReferral } from '../lib/referral-crypto.js';
@@ -27,32 +28,46 @@ test('2. Creator tiers and automatic commission scaling', () => {
   assert.equal(tierForOrders(0).id, 'starter');
   assert.equal(tierForOrders(99).id, 'starter');
   assert.equal(tierForOrders(100).id, 'rising');
-  assert.equal(tierForOrders(199).id, 'rising');
-  assert.equal(tierForOrders(200).id, 'creator');
-  assert.equal(tierForOrders(299).id, 'creator');
-  assert.equal(tierForOrders(300).id, 'partner');
-  assert.equal(tierForOrders(399).id, 'partner');
-  assert.equal(tierForOrders(400).id, 'elite');
-  assert.equal(tierForOrders(500).id, 'elite');
+  assert.equal(tierForOrders(299).id, 'rising');
+  assert.equal(tierForOrders(300).id, 'creator');
+  assert.equal(tierForOrders(699).id, 'creator');
+  assert.equal(tierForOrders(700).id, 'partner');
+  assert.equal(tierForOrders(1499).id, 'partner');
+  assert.equal(tierForOrders(1500).id, 'elite');
+  assert.equal(tierForOrders(2500).id, 'elite');
 
   const next = nextTierForOrders(5);
   assert.equal(next?.id, 'rising');
-  assert.equal(nextTierForOrders(400), null);
+  assert.equal(nextTierForOrders(1500), null);
 });
 
-test('3. Commission calculation on final paid amount', () => {
-  // Amount in paise: ₹219 = 21900 paise
-  // 10% of ₹219 (21900 paise) = 2190 paise (₹21.90)
-  assert.equal(commissionForAmount(21900, 10), 2190);
-  // 15% of ₹219 (21900 paise) = 3285 paise (₹32.85)
-  assert.equal(commissionForAmount(21900, 15), 3285);
-  // 18% of ₹219 (21900 paise) = 3942 paise
-  assert.equal(commissionForAmount(21900, 18), 3942);
+test('3. Commission calculation on final paid amount & progressive tier-wise slices', () => {
+  // Amount in paise: ₹199 = 19900 paise
+  // 10% of ₹199 (19900 paise) = 1990 paise (₹19.90)
+  assert.equal(commissionForAmount(19900, 10), 1990);
+  // 15% of ₹199 (19900 paise) = 2985 paise (₹29.85)
+  assert.equal(commissionForAmount(19900, 15), 2985);
+  // 18% of ₹199 (19900 paise) = 3582 paise (₹35.82)
+  assert.equal(commissionForAmount(19900, 18), 3582);
   // 20% on ₹159 (15900 paise) = 3180 paise
   assert.equal(commissionForAmount(15900, 20), 3180);
   // 0% or negative checks
   assert.equal(commissionForAmount(0, 15), 0);
   assert.equal(commissionForAmount(-100, 15), 0);
+
+  // Progressive graduated tier calculation test:
+  // For 300 orders:
+  // - First 100 orders @ 10% (100 * 1990 = 199000 paise)
+  // - Next 200 orders (101-300) @ 15% (200 * 2985 = 597000 paise)
+  // Total = 796000 paise (₹7,960.00)
+  const grad300 = calculateGraduatedCommission(300, 19900);
+  assert.equal(grad300.totalCommissionPaise, 796000);
+  assert.equal(grad300.totalCommissionRupees, 7960);
+  assert.equal(grad300.breakdown.length, 2);
+  assert.equal(grad300.breakdown[0].tierName, 'Starter');
+  assert.equal(grad300.breakdown[0].orders, 100);
+  assert.equal(grad300.breakdown[1].tierName, 'Rising');
+  assert.equal(grad300.breakdown[1].orders, 200);
 });
 
 test('4. Admin overrides take precedence over calculated tier and rate', () => {

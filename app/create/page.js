@@ -80,6 +80,13 @@ function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateParam = searchParams.get('template');
+  const couponParam = searchParams.get('coupon');
+
+  useEffect(() => {
+    if (couponParam && typeof window !== 'undefined') {
+      localStorage.setItem('lc_saved_coupon', couponParam.trim());
+    }
+  }, [couponParam]);
 
   // Screen: 'select' | 'wizard' | 'crafting'
   const [screen, setScreen] = useState(

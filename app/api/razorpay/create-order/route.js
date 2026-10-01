@@ -13,7 +13,7 @@ export async function POST(request) {
     if (!snap.exists) return NextResponse.json({ error: 'Note not found.' }, { status: 404 });
 
     const raw = snap.data();
-    const baseAmount = 21900; // ₹219 base note price
+    const baseAmount = 19900; // ₹199 base note price
     const totalAmount = baseAmount;
     const templateId = raw.template || null;
 

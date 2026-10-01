@@ -151,13 +151,20 @@ export async function POST(request) {
           const creatorSnap = await creatorRef.get();
           if (creatorSnap.exists) {
             const creatorData = creatorSnap.data();
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
             const allPaidOrdersSnap = await adminDb.collection('orders')
               .where('creator_id', '==', creatorId)
               .where('payment_status', '==', 'paid')
               .get();
-            const totalPaidOrders = allPaidOrdersSnap.size;
 
-            const { tier, commissionRate } = calculateEffectiveTierAndRate(creatorData, totalPaidOrders);
+            const monthPaidOrdersCount = allPaidOrdersSnap.docs.filter((d) => {
+              const paidAt = d.data().paid_at?.toDate?.() || d.data().created_at?.toDate?.();
+              return paidAt && paidAt >= startOfMonth;
+            }).length;
+
+            const { tier, commissionRate } = calculateEffectiveTierAndRate(creatorData, monthPaidOrdersCount);
             const commissionAmount = commissionForAmount(amountPaid, commissionRate);
 
             if (commissionAmount > 0) {
@@ -180,6 +187,38 @@ export async function POST(request) {
                 tier: tier.id,
                 updated_at: FieldValue.serverTimestamp(),
               });
+            }
+
+            // Creator-to-Creator Referral Milestone Bounty (₹150 on 1st paid sale)
+            if (creatorData.referred_by_creator_id && !creatorData.referral_bounty_awarded) {
+              try {
+                const parentCreatorRef = adminDb.collection('creators').doc(creatorData.referred_by_creator_id);
+                const parentSnap = await parentCreatorRef.get();
+                if (parentSnap.exists) {
+                  const bountyCommRef = adminDb.collection('commissions').doc();
+                  await bountyCommRef.set({
+                    type: 'creator_referral_bounty',
+                    order_id: orderId,
+                    creator_id: creatorData.referred_by_creator_id,
+                    referred_creator_id: creatorId,
+                    referred_creator_name: creatorData.name || 'Invited Creator',
+                    referred_creator_slug: creatorData.slug || '',
+                    commission_rate: 0,
+                    order_amount: amountPaid,
+                    commission_amount: 15000, // ₹150 in paise
+                    status: 'pending',
+                    note: `🎉 Creator Referral Bounty: ${creatorData.name || 'Your friend'} made their 1st paid sale!`,
+                    created_at: FieldValue.serverTimestamp(),
+                    updated_at: FieldValue.serverTimestamp(),
+                  });
+                  await creatorRef.update({
+                    referral_bounty_awarded: true,
+                    referral_bounty_awarded_at: FieldValue.serverTimestamp(),
+                  });
+                }
+              } catch (bountyErr) {
+                console.error('Error awarding creator referral bounty in webhook:', bountyErr);
+              }
             }
           }
         }
