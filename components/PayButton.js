@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useState, useEffect, useRef } from 'react';
 
-export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferRetention = true }) {
+export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferRetention = true, recipientName }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [couponCode, setCouponCode] = useState('');
@@ -89,7 +89,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ noteId: apologyId, code: retentionCoupon.code, action: 'disable' })
-          }).catch(() => {});
+          }).catch(() => { });
           return 0;
         }
         return prev - 1;
@@ -109,7 +109,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ noteId: apologyId, code: retentionCoupon.code, action: 'disable' })
         });
-      } catch {}
+      } catch { }
     }
   };
 
@@ -200,7 +200,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
         amount: order.amount,
         currency: order.currency,
         name: 'Lovely Crafts',
-        description: 'A private link',
+        description: recipientName ? `Private Link for ${recipientName}` : 'Private Interactive Link',
         order_id: order.orderId,
         handler: async (response) => {
           const verify = await fetch('/api/razorpay/verify', {
@@ -255,7 +255,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
         amount: order.amount,
         currency: order.currency,
         name: 'Lovely Crafts',
-        description: 'A private link',
+        description: recipientName ? `Private Link for ${recipientName}` : 'Private Interactive Link',
         order_id: order.orderId,
         handler: async (response) => {
           const verify = await fetch('/api/razorpay/verify', {
@@ -290,10 +290,11 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
 
   /* ── Determine what the "Pay Now" button should show ── */
   const payLabel = (() => {
-    if (!resolvedOrder) return `Pay ₹${basePrice} & unlock link`;
-    if (resolvedOrder.free) return 'Unlock for Free 🎉';
+    const target = recipientName ? `${recipientName}'s` : 'Their';
+    if (!resolvedOrder) return `✨ Unlock ${target} Moment • ₹${basePrice}`;
+    if (resolvedOrder.free) return '🎉 Unlock for Free Now';
     const amount = (resolvedOrder.amount / 100).toFixed(0);
-    return `Pay ₹${amount} & unlock link`;
+    return `✨ Unlock ${target} Moment • ₹${amount}`;
   })();
 
   const formatTimer = (secs) => {
@@ -306,7 +307,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '14px' }}>
 
         {/* Creator Referral Active Badge */}
         {creatorReferral && (
@@ -348,8 +349,8 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
           <div style={{
             background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(244, 63, 94, 0.15))',
             border: '1px solid rgba(244, 63, 94, 0.35)',
-            borderRadius: '12px',
-            padding: '10px 14px',
+            borderRadius: '14px',
+            padding: '12px 14px',
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
@@ -359,15 +360,15 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '1.05rem' }}>🎁</span>
                 <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f43f5e' }}>
-                  Special 10% Organic Discount Available!
+                  Special 10% Discount Available!
                 </span>
               </div>
               <span style={{
                 fontSize: '0.75rem',
-                fontWeight: 700,
+                fontWeight: 800,
                 color: '#e11d48',
                 background: 'rgba(244,63,94,0.18)',
-                padding: '2px 8px',
+                padding: '3px 8px',
                 borderRadius: '6px',
                 fontVariantNumeric: 'tabular-nums',
                 letterSpacing: '0.02em',
@@ -378,7 +379,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                Code: <strong style={{ color: '#fff', letterSpacing: '0.05em', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>{retentionCoupon.code}</strong> (Save 10% now)
+                Code: <strong style={{ color: '#fff', letterSpacing: '0.05em', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>{retentionCoupon.code}</strong> (Save 10% instantly)
               </span>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                 <button
@@ -403,7 +404,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
                 <button
                   type="button"
                   onClick={handleDismissRetention}
-                  title="Dismiss and disable offer"
+                  title="Dismiss offer"
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -426,8 +427,8 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
             className="form-input"
             value={couponCode}
             onChange={(e) => { setCouponCode(e.target.value); setResolvedOrder(null); setFeedback(''); setError(''); }}
-            placeholder="Have a coupon? Enter it here"
-            style={{ fontSize: '0.95rem', flex: 1 }}
+            placeholder="Have a coupon code?"
+            style={{ fontSize: '0.9rem', flex: 1, background: 'rgba(0,0,0,0.25)', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
             onKeyDown={(e) => e.key === 'Enter' && couponCode.trim() && applyCoupon()}
           />
           {couponCode.trim() && !resolvedOrder && (
@@ -435,7 +436,7 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
               className="btn-secondary"
               onClick={() => applyCoupon()}
               disabled={busy}
-              style={{ whiteSpace: 'nowrap', padding: '0 1rem' }}
+              style={{ whiteSpace: 'nowrap', padding: '0 1rem', borderRadius: '12px' }}
             >
               {busy ? '…' : 'Apply'}
             </button>
@@ -444,42 +445,87 @@ export default function PayButton({ apologyId, onPaid, displayAmount, autoOfferR
 
         {/* Feedback / price preview */}
         {feedback && (
-          <p style={{ color: '#166534', fontSize: '0.875rem', margin: 0 }}>{feedback}</p>
+          <p style={{ color: '#4ade80', fontSize: '0.85rem', margin: 0, fontWeight: 600, textAlign: 'center' }}>{feedback}</p>
         )}
 
         {/* Final price summary card */}
         {resolvedOrder && !resolvedOrder.free && (
           <div style={{
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '10px',
+            background: 'rgba(74,222,128,0.1)',
+            border: '1px solid rgba(74,222,128,0.3)',
+            borderRadius: '12px',
             padding: '0.75rem 1rem',
-            fontSize: '0.9rem',
-            color: '#14532d',
+            fontSize: '0.88rem',
+            color: '#4ade80',
             display: 'flex',
-            justifyContent: 'space-between',
+            justify: 'space-between',
             alignItems: 'center'
           }}>
             <span>
-              <del style={{ color: '#6b7280', marginRight: '0.4rem' }}>₹{basePrice}</del>
-              After {resolvedOrder.discountPercent || ''}% discount
+              <del style={{ color: '#94a3b8', marginRight: '0.4rem' }}>₹{basePrice}</del>
+              With {resolvedOrder.discountPercent || ''}% discount applied
             </span>
-            <strong style={{ fontSize: '1.1rem' }}>₹{(resolvedOrder.amount / 100).toFixed(0)}</strong>
+            <strong style={{ fontSize: '1.1rem', color: '#fff' }}>₹{(resolvedOrder.amount / 100).toFixed(0)}</strong>
           </div>
         )}
 
-        {/* Pay Now button — always visible */}
+        {/* Pay Now button — sleek gradient & pulse effect */}
         <button
-          className="btn-primary w-full"
           onClick={resolvedOrder ? proceedToPay : directPay}
           disabled={busy}
+          style={{
+            width: '100%',
+            padding: '16px 20px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+            border: 'none',
+            color: '#ffffff',
+            fontSize: '1.02rem',
+            fontWeight: 800,
+            cursor: busy ? 'not-allowed' : 'pointer',
+            opacity: busy ? 0.75 : 1,
+            boxShadow: '0 8px 25px rgba(244,63,94,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
         >
-          {busy ? 'Processing…' : payLabel}
+          {busy ? (
+            <>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #fff', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+              Connecting Secure Checkout...
+            </>
+          ) : (
+            payLabel
+          )}
         </button>
+
+        {/* Sleek UPI & Express Payment Badges */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          padding: '8px 12px',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '12px',
+        }}>
+          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Instant via</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8' }}>
+            <span style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px', color: '#34d399' }}>GPay</span>
+            <span style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px', color: '#a78bfa' }}>PhonePe</span>
+            <span style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px', color: '#38bdf8' }}>Paytm</span>
+            <span style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px', color: '#fbbf24' }}>UPI / Cards</span>
+          </div>
+        </div>
+
       </div>
 
       {error && (
-        <p style={{ color: '#dc2626', marginTop: '0.75rem', fontSize: '0.875rem' }}>{error}</p>
+        <p style={{ color: '#f87171', marginTop: '0.75rem', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600 }}>⚠️ {error}</p>
       )}
     </>
   );
