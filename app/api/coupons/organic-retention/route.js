@@ -73,6 +73,14 @@ export async function POST(request) {
       durationMinutes: 15,
     });
 
+    if (couponResult.eligible === false) {
+      return NextResponse.json({
+        ok: true,
+        eligible: false,
+        reason: couponResult.reason || 'retention_offer_expired',
+      });
+    }
+
     return NextResponse.json({
       ok: true,
       eligible: true,

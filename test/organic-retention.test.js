@@ -4,6 +4,7 @@ import {
   generateOrganicRetentionCoupon,
   disableOrganicRetentionCoupon,
   resolveCoupon,
+  autoDisableExpiredCoupons,
 } from '../lib/coupons.js';
 
 // Mock in-memory Firestore DB for isolated unit testing
@@ -255,4 +256,64 @@ test('6. Disabling all organic retention coupons by note ID', async () => {
   const resolved = await resolveCoupon(created.code, { db: mockDb });
   assert.equal(resolved.valid, false);
   assert.match(resolved.error, /inactive/i);
+});
+
+test('7. autoDisableExpiredCoupons automatically deactivates expired unused coupons', async () => {
+  const mockDb = createMockDb({
+    c_live: {
+      code: 'SAVE10-LIVE1',
+      type: 'organic_retention',
+      active: true,
+      usage_count: 0,
+      expires_at: new Date(Date.now() + 600000), // 10 min left
+    },
+    c_expired_1: {
+      code: 'SAVE10-EXP01',
+      type: 'organic_retention',
+      active: true,
+      usage_count: 0,
+      expires_at: new Date(Date.now() - 30000), // expired 30s ago
+    },
+    c_expired_2: {
+      code: 'SAVE10-EXP02',
+      type: 'organic_retention',
+      active: true,
+      usage_count: 0,
+      expires_at: new Date(Date.now() - 900000), // expired 15m ago
+    },
+  });
+
+  const deactivatedCount = await autoDisableExpiredCoupons(mockDb);
+  assert.equal(deactivatedCount, 2);
+
+  // Expired coupons should now be active === false
+  const expDoc1 = mockDb._getStore().get('c_expired_1');
+  const expDoc2 = mockDb._getStore().get('c_expired_2');
+  assert.equal(expDoc1.active, false);
+  assert.equal(expDoc2.active, false);
+
+  // Active unexpired coupon must remain active
+  const liveDoc = mockDb._getStore().get('c_live');
+  assert.equal(liveDoc.active, true);
+});
+
+test('8. Retention coupon that expired without being used is disabled and not eligible', async () => {
+  const mockDb = createMockDb({
+    c_ret_expired: {
+      code: 'SAVE10-NOTEEX',
+      note_id: 'note_expired_retention',
+      type: 'organic_retention',
+      active: true,
+      usage_count: 0,
+      expires_at: new Date(Date.now() - 60000), // expired 1m ago
+    },
+  });
+
+  const res = await generateOrganicRetentionCoupon(mockDb, { noteId: 'note_expired_retention' });
+  assert.equal(res.eligible, false);
+  assert.equal(res.expired, true);
+
+  // The expired doc in DB should also have been set to active === false
+  const doc = mockDb._getStore().get('c_ret_expired');
+  assert.equal(doc.active, false);
 });

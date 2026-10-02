@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PolaroidStack from '../common/PolaroidStack';
 
 
 
@@ -27,7 +28,8 @@ export default function AnniversaryExperience({ note, isPreview = false, onReach
   const journey = note?.custom_details?.journey || [];
   const reasons = note?.custom_details?.reasons || [];
   const letter = note?.custom_details?.letter || note?.custom_message || '';
-  const photos = note?.image_urls || [];
+  const rawPhotos = note?.image_urls || note?.images || note?.photos || note?.custom_details?.images || note?.custom_details?.photos || [];
+  const photos = (Array.isArray(rawPhotos) ? rawPhotos : []).map((p) => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
   useEffect(() => {
     if (scene === 8) {
@@ -223,6 +225,15 @@ function SceneTimeline({ journey, photos, name, onNext }) {
           </motion.div>
         ))}
       </div>
+
+      {photos && photos.length > 0 && (
+        <div style={{ width: '100%', maxWidth: '380px', marginBottom: '2rem' }}>
+          <p style={{ color: '#fbbf24', fontSize: '0.78rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center' }}>
+            📸 Picture Memories
+          </p>
+          <PolaroidStack photos={photos} accentColor="#fbbf24" />
+        </div>
+      )}
 
       <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
         whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}

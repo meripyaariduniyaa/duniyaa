@@ -276,6 +276,11 @@ export default function AdminCouponsPage() {
                             {c.discount_percent}% OFF
                           </div>
                           {c.max_uses && <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Limit: {c.max_uses} uses</div>}
+                          {c.expires_at && (
+                            <div style={{ fontSize: '0.70rem', color: '#94a3b8', marginTop: '2px' }}>
+                              {new Date(c.expires_at).getTime() <= Date.now() ? 'Expired' : `Exp: ${new Date(c.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                            </div>
+                          )}
                         </td>
 
                         {/* USAGE */}
@@ -285,23 +290,75 @@ export default function AdminCouponsPage() {
 
                         {/* STATUS */}
                         <td style={{ padding: '16px 20px' }}>
-                          <span
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              padding: '2px 8px',
-                              borderRadius: '999px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              background: c.active ? '#dcfce7' : '#f1f5f9',
-                              color: c.active ? '#15803d' : '#64748b',
-                              border: `1px solid ${c.active ? '#bbf7d0' : '#e2e8f0'}`,
-                            }}
-                          >
-                            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: c.active ? '#22c55e' : '#94a3b8' }} />
-                            <span>{c.active ? 'Active' : 'Disabled'}</span>
-                          </span>
+                          {(() => {
+                            const isUsed = Number(c.usage_count || c.used_count || 0) >= Number(c.max_uses || 1);
+                            const isExpired = Boolean(c.is_expired || (c.expires_at && new Date(c.expires_at).getTime() <= Date.now()));
+
+                            if (isUsed) {
+                              return (
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    background: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    border: '1px solid #bfdbfe',
+                                  }}
+                                >
+                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3b82f6' }} />
+                                  <span>Used</span>
+                                </span>
+                              );
+                            }
+
+                            if (isExpired || !c.active) {
+                              return (
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    background: isExpired ? '#fef2f2' : '#f1f5f9',
+                                    color: isExpired ? '#b91c1c' : '#64748b',
+                                    border: `1px solid ${isExpired ? '#fecaca' : '#e2e8f0'}`,
+                                  }}
+                                  title={isExpired ? 'Coupon expired and automatically disabled' : 'Coupon is disabled'}
+                                >
+                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isExpired ? '#ef4444' : '#94a3b8' }} />
+                                  <span>{isExpired ? 'Expired (Disabled)' : 'Disabled'}</span>
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  padding: '2px 8px',
+                                  borderRadius: '999px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  background: '#dcfce7',
+                                  color: '#15803d',
+                                  border: '1px solid #bbf7d0',
+                                }}
+                              >
+                                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e' }} />
+                                <span>Active</span>
+                              </span>
+                            );
+                          })()}
                         </td>
 
                         {/* ACTIONS */}

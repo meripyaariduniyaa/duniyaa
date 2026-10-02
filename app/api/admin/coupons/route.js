@@ -3,29 +3,56 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/creator-auth';
 import { normalizeCode } from '@/lib/creator-club';
+import { autoDisableExpiredCoupons } from '@/lib/coupons';
 
 export async function GET(request) {
   try {
     await requireAdmin(request);
-    const snap = await getAdminDb().collection('coupons').orderBy('created_at', 'desc').get();
+    const adminDb = getAdminDb();
+
+    // Automatically deactivate any expired active coupons (organic retention, promos) in Firestore
+    await autoDisableExpiredCoupons(adminDb).catch((err) => {
+      console.error('Error auto-disabling expired coupons:', err);
+    });
+
+    const snap = await adminDb.collection('coupons').orderBy('created_at', 'desc').get();
+    const now = Date.now();
+
     const coupons = snap.docs.map((d) => {
       const data = d.data();
       let expiresAt = null;
+      let isExpired = false;
+
       if (data.expires_at) {
         try {
+          let expDate = null;
           if (typeof data.expires_at?.toDate === 'function') {
-            expiresAt = data.expires_at.toDate().toISOString();
+            expDate = data.expires_at.toDate();
           } else if (data.expires_at?._seconds) {
-            expiresAt = new Date(data.expires_at._seconds * 1000).toISOString();
+            expDate = new Date(data.expires_at._seconds * 1000);
           } else {
             const parsed = new Date(data.expires_at);
-            expiresAt = isNaN(parsed.getTime()) ? null : parsed.toISOString();
+            if (!isNaN(parsed.getTime())) expDate = parsed;
+          }
+          if (expDate) {
+            expiresAt = expDate.toISOString();
+            if (expDate.getTime() <= now) {
+              isExpired = true;
+            }
           }
         } catch {}
       }
+
+      let active = data.active !== false;
+      if (isExpired && active) {
+        active = false;
+      }
+
       return {
         id: d.id,
         ...data,
+        active,
+        is_expired: isExpired,
         created_at: data.created_at?.toDate?.()?.toISOString() || null,
         updated_at: data.updated_at?.toDate?.()?.toISOString() || null,
         expires_at: expiresAt,

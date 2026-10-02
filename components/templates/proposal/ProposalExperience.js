@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
+import PolaroidStack from '../common/PolaroidStack';
 
 
 
@@ -12,7 +13,7 @@ import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
    2. Confetti Shower → reveal letter button
    3. Envelope open animation
    4. Handwritten letter line-by-line
-   5. Memory photo cards
+   5. Memory photos (interactive PolaroidStack)
 ───────────────────────────────────────────────────────── */
 export default function ProposalExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
@@ -22,15 +23,8 @@ export default function ProposalExperience({ note, isPreview = false, onReachEnd
   const senderName = note?.custom_details?.sender_name || '';
   const quotation = note?.custom_details?.quotation || '';
   const letter = note?.custom_details?.letter || note?.custom_message || '';
-  const photos = note?.image_urls || [];
-
-  useEffect(() => {
-    if (scene === 5) {
-      onReachEnd?.(true, () => setScene(1));
-    }
-  }, [scene, onReachEnd]);
-
-
+  const rawPhotos = note?.image_urls || note?.images || note?.photos || note?.custom_details?.images || note?.custom_details?.photos || [];
+  const photos = (Array.isArray(rawPhotos) ? rawPhotos : []).map((p) => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
   return (
     <div style={{ background: '#0a0510', minHeight: '100vh', fontFamily: "'Inter', sans-serif", overflow: 'hidden', position: 'relative' }}>
@@ -361,7 +355,7 @@ function Scene4Letter({ letter, senderName, recipientName, onNext, photos }) {
             onClick={onNext}
             style={{ width: '100%', marginTop: '1.5rem', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(244,63,94,0.35)' }}
           >
-            {photos.length > 0 ? '📸 See our memories →' : '🌹 Finish'}
+            📸 See our memories →
           </motion.button>
         )}
       </motion.div>
@@ -373,69 +367,101 @@ function Scene4Letter({ letter, senderName, recipientName, onNext, photos }) {
    SCENE 5: MEMORY PHOTOS
 ───────────────────────────────────────────────────────── */
 function Scene5Photos({ photos, recipientName, onEnd }) {
-  const [current, setCurrent] = useState(0);
-
-  if (photos.length === 0) {
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#080810', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ fontSize: '3rem' }}>🌹</div>
-        <p style={{ color: '#fda4af', fontFamily: "'Dancing Script', cursive", fontSize: '1.5rem' }}>With all my love, {recipientName} 💕</p>
-        {onEnd && <button onClick={onEnd} style={{ marginTop: '1rem', padding: '12px 28px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>❤️ Done</button>}
-      </motion.div>
-    );
-  }
+  const proposalDefaultPhotos = [
+    { url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop', caption: 'The smile that changed everything' },
+    { url: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop', caption: 'Our late night talks & warm chai' },
+    { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800&auto=format&fit=crop', caption: 'Every memory feels like home' },
+  ];
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 50%, #1a0d0d 0%, #080810 100%)', padding: '2rem' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'radial-gradient(ellipse at 50% 40%, #1a0812 0%, #080810 100%)',
+        padding: '2rem 1.25rem',
+      }}
     >
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#94a3b8', fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
-        Our Memories 📸
-      </motion.p>
-
-      {/* Photo card */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, x: 80, rotate: 3 }}
-          animate={{ opacity: 1, x: 0, rotate: 0 }}
-          exit={{ opacity: 0, x: -80, rotate: -3 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+      <motion.div
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        style={{ textAlign: 'center', marginBottom: '1.25rem' }}
+      >
+        <span
           style={{
-            width: 280, height: 320,
-            background: '#fff',
-            borderRadius: '4px',
-            padding: '12px 12px 40px',
-            boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
-            position: 'relative',
+            display: 'inline-block',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: '#f43f5e',
+            background: 'rgba(244,63,94,0.12)',
+            border: '1px solid rgba(244,63,94,0.25)',
+            padding: '5px 14px',
+            borderRadius: '999px',
+            marginBottom: '0.6rem',
           }}
         >
-          <div style={{ width: '100%', height: '100%', background: `url(${photos[current]}) center/cover`, borderRadius: '2px' }} />
-          <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, textAlign: 'center', fontFamily: "'Caveat', cursive", fontSize: '0.95rem', color: '#92400e' }}>
-            {current + 1} / {photos.length}
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          📸 Our Love Story
+        </span>
+        <h2
+          style={{
+            fontFamily: "'Dancing Script', cursive",
+            fontSize: 'clamp(2rem, 6vw, 2.8rem)',
+            color: '#fff',
+            margin: '0 0 0.35rem',
+          }}
+        >
+          Memories With You, {recipientName}
+        </h2>
+        <p style={{ color: '#fda4af', fontSize: '0.88rem', margin: 0 }}>
+          {photos && photos.length > 0 ? 'Every photograph is a piece of my heart 💕' : 'Moments that make forever feel right 💕'}
+        </p>
+      </motion.div>
 
-      {/* Navigation */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', alignItems: 'center' }}>
-        {current > 0 && (
-          <button onClick={() => setCurrent((c) => c - 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>←</button>
-        )}
-        {current < photos.length - 1 ? (
-          <button onClick={() => setCurrent((c) => c + 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>Next →</button>
-        ) : (
-          onEnd && <button onClick={onEnd} style={{ padding: '12px 28px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>❤️ Finish</button>
-        )}
+      <div style={{ width: '100%', maxWidth: '380px' }}>
+        <PolaroidStack
+          photos={photos}
+          defaultPhotos={proposalDefaultPhotos}
+          accentColor="#f43f5e"
+        />
       </div>
 
-      {/* Dots */}
-      <div style={{ display: 'flex', gap: '6px', marginTop: '1rem' }}>
-        {photos.map((_, i) => (
-          <div key={i} style={{ width: i === current ? 20 : 6, height: 6, borderRadius: 3, background: i === current ? '#f43f5e' : 'rgba(255,255,255,0.15)', transition: 'all 0.3s' }} />
-        ))}
-      </div>
+      {onEnd && (
+        <motion.button
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          whileHover={{ scale: 1.04, boxShadow: '0 8px 30px rgba(244,63,94,0.45)' }}
+          whileTap={{ scale: 0.96 }}
+          onClick={onEnd}
+          style={{
+            marginTop: '2rem',
+            padding: '14px 36px',
+            borderRadius: '50px',
+            background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '1rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 20px rgba(244,63,94,0.3)',
+          }}
+        >
+          <span>🌹 Always & Forever</span>
+          <span>♥</span>
+        </motion.button>
+      )}
     </motion.div>
   );
 }

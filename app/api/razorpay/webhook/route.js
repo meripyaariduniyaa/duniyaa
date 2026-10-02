@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { calculateEffectiveTierAndRate, commissionForAmount, normalizeCode } from '@/lib/creator-club';
+import { disableOrganicRetentionCoupon } from '@/lib/coupons';
 
 export async function POST(request) {
   try {
@@ -143,6 +144,11 @@ export async function POST(request) {
               await cSnap.docs[0].ref.update(updatePayload);
             }
           } catch {}
+        }
+
+        // Deactivate any remaining organic retention coupons for this note since purchase is complete
+        if (apologyId) {
+          await disableOrganicRetentionCoupon(adminDb, { noteId: apologyId }).catch(() => {});
         }
 
         // Creator attribution

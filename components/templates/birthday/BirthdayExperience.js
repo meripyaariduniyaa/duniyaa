@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PolaroidStack from '../common/PolaroidStack';
 
 
 
@@ -15,9 +16,10 @@ import { motion, AnimatePresence } from 'framer-motion';
    5. Cake scene — candle blow + cut
    6. Make a wish (shooting star)
    7. Balloon pop reveals
-   8. Memory photos
-   9. Envelope + handwritten letter
-  10. Final happy birthday again
+   8. Memory photos (interactive PolaroidStack)
+   9. Envelope animation
+  10. Handwritten letter
+  11. Final happy birthday celebration
 ───────────────────────────────────────────────────────── */
 export default function BirthdayExperience({ note, isPreview = false, onReachEnd }) {
   const [scene, setScene] = useState(1);
@@ -29,15 +31,16 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
   const cakeType = note?.custom_details?.cake_type || 'chocolate';
   const balloonMessages = note?.custom_details?.balloon_messages || ['Happy Birthday! 🎂', 'You are amazing!', 'So proud of you!'];
   const letter = note?.custom_details?.letter || note?.custom_message || '';
-  const photos = note?.image_urls || [];
+  const rawPhotos = note?.image_urls || note?.images || note?.photos || note?.custom_details?.images || note?.custom_details?.photos || [];
+  const photos = (Array.isArray(rawPhotos) ? rawPhotos : []).map((p) => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
-  const finalSceneIndex = photos.length > 0 ? 11 : 10;
+  const finalSceneIndex = 11;
 
   useEffect(() => {
     if (scene === finalSceneIndex) {
       onReachEnd?.(true, () => setScene(1));
     }
-  }, [scene, finalSceneIndex, onReachEnd]);
+  }, [scene, onReachEnd]);
 
 
 
@@ -65,12 +68,9 @@ export default function BirthdayExperience({ note, isPreview = false, onReachEnd
         {scene === 5 && <SceneCake key="s5" cakeType={cakeType} name={name} onNext={goNext} />}
         {scene === 6 && <SceneWish key="s6" name={name} onNext={goNext} />}
         {scene === 7 && <SceneBalloons key="s7" messages={balloonMessages} onNext={goNext} />}
-        {scene === 8 && photos.length > 0 && <SceneMemories key="s8" photos={photos} onNext={goNext} />}
-        {scene === 8 && photos.length === 0 && <SceneEnvelope key="s8b" onOpen={goNext} />}
-        {scene === 9 && photos.length > 0 && <SceneEnvelope key="s9" onOpen={goNext} />}
-        {scene === 9 && photos.length === 0 && <SceneLetter key="s9b" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
-        {scene === 10 && photos.length > 0 && <SceneLetter key="s10" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
-        {scene === 10 && photos.length === 0 && <SceneFinal key="s10b" name={name} turningAge={turningAge} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
+        {scene === 8 && <SceneMemories key="s8" photos={photos} name={name} onNext={goNext} />}
+        {scene === 9 && <SceneEnvelope key="s9" onOpen={goNext} />}
+        {scene === 10 && <SceneLetter key="s10" letter={letter} senderName={senderName} name={name} onNext={goNext} />}
         {scene === 11 && <SceneFinal key="s11" name={name} turningAge={turningAge} onEnd={() => onReachEnd?.(true, () => setScene(1))} />}
       </AnimatePresence>
     </div>
@@ -1055,33 +1055,100 @@ function SceneBalloons({ messages, onNext }) {
 }
 
 /* ── SCENE 8: Memories ── */
-function SceneMemories({ photos, onNext }) {
-  const [current, setCurrent] = useState(0);
-  if (!photos || photos.length === 0) { onNext(); return null; }
+function SceneMemories({ photos, name, onNext }) {
+  const birthdayDefaultPhotos = [
+    { url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop', caption: 'Celebrating your brightest smiles ✨' },
+    { url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=800&auto=format&fit=crop', caption: 'Another year of laughs & memories 🎂' },
+    { url: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=800&auto=format&fit=crop', caption: 'So grateful to celebrate you! 🥳' },
+  ];
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#080810', padding: '2rem' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'radial-gradient(ellipse at 50% 35%, #1a1005 0%, #080810 100%)',
+        padding: '2rem 1.25rem',
+      }}
     >
-      <p style={{ color: '#64748b', fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>📸 Our Memories</p>
+      <motion.div
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        style={{ textAlign: 'center', marginBottom: '1.25rem' }}
+      >
+        <span
+          style={{
+            display: 'inline-block',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: '#fbbf24',
+            background: 'rgba(251,191,36,0.12)',
+            border: '1px solid rgba(251,191,36,0.25)',
+            padding: '5px 14px',
+            borderRadius: '999px',
+            marginBottom: '0.6rem',
+          }}
+        >
+          📸 Birthday Memories
+        </span>
+        <h2
+          style={{
+            fontFamily: "'Dancing Script', cursive",
+            fontSize: 'clamp(2rem, 6vw, 2.8rem)',
+            color: '#fff',
+            margin: '0 0 0.35rem',
+          }}
+        >
+          Moments With You, {name}
+        </h2>
+        <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: 0 }}>
+          {photos && photos.length > 0 ? 'Cherished snaps collected with love 💫' : 'Memories that make every year brighter 💫'}
+        </p>
+      </motion.div>
 
-      <AnimatePresence mode="wait">
-        <motion.div key={current} initial={{ opacity: 0, x: 60, rotate: 3 }} animate={{ opacity: 1, x: 0, rotate: 0 }} exit={{ opacity: 0, x: -60 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-          style={{ width: 260, background: '#fff', padding: '10px 10px 36px', borderRadius: '3px', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }}>
-          <div style={{ width: '100%', height: 240, background: `url(${photos[current]}) center/cover`, borderRadius: '1px' }} />
-          <p style={{ textAlign: 'center', fontFamily: "'Caveat', cursive", color: '#92400e', fontSize: '0.9rem', margin: '8px 0 0' }}>{current + 1} / {photos.length}</p>
-        </motion.div>
-      </AnimatePresence>
-
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-        {current > 0 && <button onClick={() => setCurrent((c) => c - 1)} style={{ padding: '10px 20px', borderRadius: '50px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer' }}>←</button>}
-        {current < photos.length - 1
-          ? <button onClick={() => setCurrent((c) => c + 1)} style={{ padding: '10px 24px', borderRadius: '50px', background: 'linear-gradient(135deg,#f59e0b,#b45309)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>Next →</button>
-          : <button onClick={onNext} style={{ padding: '10px 24px', borderRadius: '50px', background: 'linear-gradient(135deg,#f43f5e,#be123c)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>💌 Open Letter</button>
-        }
+      <div style={{ width: '100%', maxWidth: '380px' }}>
+        <PolaroidStack
+          photos={photos}
+          defaultPhotos={birthdayDefaultPhotos}
+          accentColor="#f59e0b"
+        />
       </div>
+
+      <motion.button
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        whileHover={{ scale: 1.04, boxShadow: '0 8px 30px rgba(245,158,11,0.4)' }}
+        whileTap={{ scale: 0.96 }}
+        onClick={onNext}
+        style={{
+          marginTop: '2rem',
+          padding: '14px 32px',
+          borderRadius: '50px',
+          background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+          border: 'none',
+          color: '#fff',
+          fontSize: '1rem',
+          fontWeight: 800,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 4px 20px rgba(245,158,11,0.3)',
+        }}
+      >
+        <span>💌 Open Birthday Letter</span>
+        <span>→</span>
+      </motion.button>
     </motion.div>
   );
 }

@@ -5,6 +5,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { calculateEffectiveTierAndRate, commissionForAmount, normalizeCode } from '@/lib/creator-club';
 import { verifyReferral } from '@/lib/referral-crypto';
 import { createAutoInvoice } from '@/lib/finance';
+import { disableOrganicRetentionCoupon } from '@/lib/coupons';
 
 export async function POST(request) {
   try {
@@ -162,6 +163,11 @@ export async function POST(request) {
       } catch (err) {
         console.error('Coupon usage increment error:', err);
       }
+    }
+
+    // Deactivate any remaining organic retention coupons for this note since purchase is complete
+    if (apologyId) {
+      await disableOrganicRetentionCoupon(adminDb, { noteId: apologyId }).catch(() => {});
     }
 
     // 5. Mark Creator Gift claimed & deactivate if coupon was a gift pass

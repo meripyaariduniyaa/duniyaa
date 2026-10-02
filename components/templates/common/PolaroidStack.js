@@ -11,18 +11,20 @@ export default function PolaroidStack({
   photos = [],
   caption = '',
   maxDisplay = 4,
+  accentColor = '#f43f5e',
+  defaultPhotos: customDefaultPhotos,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const defaultPhotos = [
+  const fallbackPhotos = customDefaultPhotos || [
     { url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop', caption: 'The smile that changed everything' },
     { url: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop', caption: 'Our late night talks & warm chai' },
     { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800&auto=format&fit=crop', caption: 'Every memory feels like home' }
   ];
 
-  const photoList = photos.length > 0
+  const photoList = (photos && photos.length > 0)
     ? photos.map((p, idx) => (typeof p === 'string' ? { url: p, caption: `Memory #${idx + 1}` } : p))
-    : defaultPhotos;
+    : fallbackPhotos;
 
   const currentPhoto = photoList[activeIndex % photoList.length];
 
@@ -108,6 +110,9 @@ export default function PolaroidStack({
             <img
               src={currentPhoto.url}
               alt={currentPhoto.caption || 'Polaroid moment'}
+              onError={(e) => {
+                e.currentTarget.src = fallbackPhotos[0]?.url || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop';
+              }}
               style={{
                 width: '100%',
                 height: '100%',
@@ -157,26 +162,70 @@ export default function PolaroidStack({
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation Thumb Dots */}
+      {/* Navigation Controls: Arrows & Thumb Dots */}
       {photoList.length > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
-          {photoList.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setActiveIndex(i)}
-              style={{
-                width: activeIndex === i ? '24px' : '8px',
-                height: '8px',
-                borderRadius: '99px',
-                background: activeIndex === i ? '#e11d48' : 'rgba(225, 29, 72, 0.25)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              }}
-              aria-label={`View photo ${i + 1}`}
-            />
-          ))}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '16px' }}>
+          <button
+            type="button"
+            onClick={prevPhoto}
+            aria-label="Previous memory"
+            style={{
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '13px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            ←
+          </button>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {photoList.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActiveIndex(i)}
+                style={{
+                  width: activeIndex === i ? '22px' : '8px',
+                  height: '8px',
+                  borderRadius: '99px',
+                  background: activeIndex === i ? accentColor : 'rgba(255, 255, 255, 0.35)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                }}
+                aria-label={`View photo ${i + 1}`}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={nextPhoto}
+            aria-label="Next memory"
+            style={{
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '13px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            →
+          </button>
         </div>
       )}
     </div>
