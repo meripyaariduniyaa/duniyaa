@@ -988,6 +988,14 @@ function SceneWish({ name, onNext }) {
 }
 
 /* ── SCENE 7: Balloon Pop ── */
+const BALLOON_IMGS = [
+  '/balloons/balloon-red.jpg',
+  '/balloons/balloon-yellow.jpg',
+  '/balloons/balloon-purple.jpg',
+  '/balloons/balloon-blue.jpg',
+  '/balloons/balloon-green.jpg',
+];
+
 function SceneBalloons({ messages, onNext }) {
   const [popped, setPopped] = useState(new Set());
   const colors = ['#f43f5e', '#f59e0b', '#a855f7', '#38bdf8', '#4ade80'];
@@ -1003,8 +1011,8 @@ function SceneBalloons({ messages, onNext }) {
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at 50% 40%, #0d051a 0%, #080810 100%)', padding: '2rem' }}
     >
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#94a3b8', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-        🎈 Pop the Balloons!
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#94a3b8', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+        <img src="/balloons/balloon-red.jpg" alt="balloon" style={{ width: 22, height: 22, objectFit: 'contain' }} /> Pop the Balloons!
       </motion.p>
       <p style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '2rem' }}>Each balloon has a hidden message inside</p>
 
@@ -1015,12 +1023,17 @@ function SceneBalloons({ messages, onNext }) {
               {!popped.has(i) ? (
                 <motion.button
                   key="balloon"
-                  whileHover={{ y: -8, scale: 1.08 }}
-                  whileTap={{ scale: 1.3 }}
+                  whileHover={{ y: -10, scale: 1.1, rotate: [-3, 3, -3] }}
+                  whileTap={{ scale: 1.25, rotate: 10 }}
                   onClick={() => handlePop(i)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '3.5rem', display: 'block', margin: '0 auto', filter: `drop-shadow(0 4px 12px ${colors[i % 5]}66)` }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'block', margin: '0 auto', filter: `drop-shadow(0 6px 16px ${colors[i % 5]}88)` }}
                 >
-                  🎈
+                  <img
+                    src={BALLOON_IMGS[i % 5]}
+                    alt={`balloon ${i + 1}`}
+                    style={{ width: 80, height: 80, objectFit: 'contain', display: 'block' }}
+                    draggable={false}
+                  />
                 </motion.button>
               ) : (
                 <motion.div

@@ -283,7 +283,12 @@ export default function ProfilePage() {
               const url = typeof window !== 'undefined' ? `${window.location.origin}/p/${shareSlug}` : '';
 
               return (
-                <div key={note.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                <div key={note.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+                  {/* Reaction glow if replied */}
+                  {note.recipient_reaction && (
+                    <div style={{ position:'absolute', top:-40, right:-40, width:140, height:140, borderRadius:'50%', background:'radial-gradient(circle, rgba(244,63,94,0.18) 0%, transparent 70%)', pointerEvents:'none' }} />
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '1.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, margin: 0 }}>
                       To: {note.recipient_name}
@@ -303,17 +308,45 @@ export default function ProfilePage() {
                     </span>
                   </div>
 
-                  {/* Recipient Reaction & View Indicator */}
+                  {/* Reaction & View tracker */}
                   {note.is_paid && (
-                    <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '10px', padding: '8px 12px', marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#be185d' }}>
-                        <span>👀</span>
-                        <span>{note.view_count > 0 ? `Opened ${note.view_count} time(s)` : 'Not opened yet'}</span>
-                      </div>
-                      {note.recipient_reaction && (
-                        <div style={{ marginTop: '6px', fontSize: '12.5px', color: '#1f2937', fontWeight: 600 }}>
-                          <span>💌 Replied: {note.recipient_reaction.emoji} </span>
-                          <span style={{ fontStyle: 'italic' }}>&ldquo;{note.recipient_reaction.message || note.recipient_reaction.label}&rdquo;</span>
+                    <div style={{
+                      borderRadius: '12px',
+                      marginBottom: '1rem',
+                      overflow: 'hidden',
+                      border: note.recipient_reaction ? '1px solid rgba(244,63,94,0.3)' : '1px solid #e5e7eb',
+                    }}>
+                      {note.recipient_reaction ? (
+                        /* ── Has replied ── */
+                        <div style={{ background: 'linear-gradient(135deg, #fff1f2, #ffe4e6)', padding: '10px 14px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                          <span style={{ fontSize: '2rem', lineHeight: 1, flexShrink: 0 }}>{note.recipient_reaction.emoji}</span>
+                          <div>
+                            <div style={{ fontSize: '11px', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>
+                              💌 {note.recipient_name} replied
+                            </div>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#1f2937' }}>
+                              {note.recipient_reaction.label}
+                            </div>
+                            {note.recipient_reaction.message && (
+                              <div style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic', marginTop: '3px', lineHeight: 1.4 }}>
+                                &ldquo;{note.recipient_reaction.message}&rdquo;
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── No reply yet ── */
+                        <div style={{ background: '#f8fafc', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{
+                            width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                            background: note.view_count > 0 ? '#22c55e' : '#cbd5e1',
+                            boxShadow: note.view_count > 0 ? '0 0 6px #22c55e' : 'none',
+                          }} />
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: note.view_count > 0 ? '#15803d' : '#94a3b8' }}>
+                            {note.view_count > 0
+                              ? `👀 Opened ${note.view_count} time${note.view_count > 1 ? 's' : ''} · Waiting for reply…`
+                              : 'Not opened yet'}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -329,7 +362,7 @@ export default function ProfilePage() {
                       className="btn-secondary"
                       style={{ flex: 1, textAlign: 'center', fontSize: '0.85rem', textDecoration: 'none', padding: '0.5rem' }}
                     >
-                      {note.is_paid ? 'View Live Tracker' : 'Finish & Pay'}
+                      {note.is_paid ? 'View & Share' : 'Finish & Pay'}
                     </Link>
                     {note.is_paid && (
                       <button
@@ -349,6 +382,7 @@ export default function ProfilePage() {
             })}
           </div>
         )}
+
 
         {/* ── Couple Arcade & High Score Dashboard ── */}
         <div style={{
